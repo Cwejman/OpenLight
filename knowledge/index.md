@@ -24,8 +24,10 @@ Run `node .claude/generate-index.js` after any entry change.
 | markdown-phase | Markdown Phase — Structure and Rules | knowledge-system | markdown, structure, rules, phase-1 | 2026-03-08 |
 | mcp-as-integration-boundary | MCP as Integration Boundary — Not Sole Gateway | knowledge-system | architecture, mcp, design, hybrid-access, model-agnostic | 2026-03-12 |
 | mcp-self-hosting | MCP Self-Hosting — The Server Is Its Own Knowledge | knowledge-system | mcp, architecture, self-hosting, introspectability, design | 2026-03-08 |
+| meaning-exploration-2026-03-12 | Meaning Exploration — What This System IS (2026-03-12) | knowledge-system | culture, meaning, philosophy, identity, communication, exploration | 2026-03-12 |
 | multi-layer-embedding | Multi-Layer Embedding Architecture | knowledge-system | architecture, embedding, layers, design | 2026-03-08 |
 | multi-project-architecture | Multi-Project Architecture — Silos, Core, and Boundaries | knowledge-system | architecture, projects, silos, compliance, privacy, mcp, design | 2026-03-12 |
+| naming-exploration-2026-03-12 | Naming Exploration — Five-Agent Parallel Search (2026-03-12) | knowledge-system | naming, culture, identity, exploration, agents, ecosystem | 2026-03-12 |
 | parallel-agent-journeys | Parallel Agent Deep Journeys — Power Pattern | knowledge-system | agents, parallel, architecture, embedding, cognition | 2026-03-08 |
 | parse-agent-0 | Knowledge Parse — Agent 0 (primary) | knowledge-system | parse, synthesis, experiment | 2026-03-08 |
 | parse-agent-1 | Knowledge Parse — Agent 1 | knowledge-system | parse, synthesis, experiment | 2026-03-08 |
