@@ -241,6 +241,35 @@ Now ultimately I prefer the website to be in many ways like the browser. That wo
 
 ---
 
+## Exchange 25-27 (Integrations Deep Dive)
+
+Extended exploration of integrations, atomic history, branching, and ecosystem boundaries. Multiple rounds of correction and refinement. Key outcomes:
+
+- **Integrations use existing primitives.** No new primitive. Reference = chunk with key/value fields containing resolution parameters. Contract = chunk that is `instance` of "integration-contract" dimension. The contract body tells agents how to execute.
+- **Branching is a hard requirement.** Like git — branches for parallel exploration by agents, merge to main.
+- **Caching/staleness is agent concern.** The DB stores commits. The agent checks if external content is ahead.
+- **The primitives compose.** Instance/relates + key/value + dimensions + peers = sufficient to build integrations, contracts, collections, trees. Systems can be built on this DB. Other systems and agents can depend on the structure.
+- **The browser depends on this structure.** It has UI implementations per integration type. Views and view enforcement are the contracts. If structure changes, the browser breaks — but that's visible.
+- **A reference chunk doesn't need to declare its type** — it just needs the parameters the contract expects. The contract defines what's needed; the chunk provides it.
+
+---
+
+## Exchange 28
+
+**Human:** Time to refresh the directory. The key insight — primitives compose to build large-scale systems — means we may have reached the necessary fundamentals. The intent was the simplest elements possible to build everything from. Asked for full rewrite of all files with current knowledge.
+
+**Agent:** Rewrote all files in the directory:
+- `exploration.md` — complete rewrite. Primitives at the top, requirements, key insight about composability, settled model, remaining open questions (mostly agent/tooling, not DB).
+- `integrations-and-history.md` — rewritten. Reference chunks have resolution parameters, not type declarations. Contracts are knowledge. Browser depends on structure.
+- `views-and-external-world.md` — updated. External content resolved via integrations. Views still explored.
+- `agentic-integration.md` — slimmed. Agent is the actor. DB is information. Culture informs the agent.
+- `entities-and-siblings.md` — slimmed to resolution summary. Instance/relates + key/value = solved.
+- `browser-user-story.md` — unchanged, still current.
+- `research-map.md` — unchanged, reference material.
+- `agent-stress-test-synthesis.md` — unchanged, reference material.
+
+---
+
 ## Exchange 25
 
 **Human:** Extended exploration of integrations and atomic history. Key points:

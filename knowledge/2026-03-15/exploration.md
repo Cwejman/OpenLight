@@ -1,169 +1,113 @@
 # Knowledge System Exploration — 2026-03-15
 
+## The Primitives (Settled)
+
+Five primitives. Everything else composes from these.
+
+**Chunks.** A unit of meaning. Text content + optional key/value pairs. A chunk must be broken when separate parts have different dimensional weights.
+
+**Dimensions.** A named phenomenon. No rigid schema — just a name and whatever chunks have weight on it. Anchored by meta-chunks (chunks with weight on exactly one dimension). Dimensions connect through shared chunks.
+
+**Weights.** A number (0.0–1.0) plus a binary quality: `instance` (this chunk IS a member of the dimension) or `relates` (this chunk is ABOUT the dimension). Instance/relates enables collections, trees, and contracts to emerge without imposing hierarchy.
+
+**Commits.** Every mutation is atomic and recorded. The system is a chain of commits, like git. HEAD is always browsable. Any historical state is reconstructable. Branching is supported — run parallel explorations, review, merge to main.
+
+**Peers.** Knowledge systems can read from each other. A consuming system reads a peer but doesn't mutate it. This decouples concerns — integrations, culture, contracts can each be their own peer.
+
 ## Hard Requirements (Settled)
 
 1. **General-purpose substrate.** Not for agents specifically. Content goes in; what comes out depends on the reader. An agent bootstraps, a website generates UI, a TUI browses. The system is one thing; the interfaces are many.
 2. **Lossless.** Nothing is destroyed. Knowledge evolves through addition and re-weighting, not deletion or overwriting. Any historical state is recoverable.
 3. **Transparent relationships.** The system knows and expresses WHY things relate, not just THAT they are related. No opaque similarity scores. The intelligence is in the relationship, visible to the reader.
-4. **No imposed hierarchy.** Structure is relative to the reader's focus point. Hierarchy can emerge from reading, but is not baked into storage.
-5. **Atomic history.** Every mutation is an event. The full event stream is preserved. Any point in time can be reconstructed.
+4. **No imposed hierarchy.** Structure is relative to the reader's focus point. Hierarchy can emerge from reading (via instance/relates), but is not baked into storage.
+5. **Atomic history.** Every mutation is a commit. Full history preserved. Branching required.
 6. **The system is the identity.** For agents: the knowledge is the agent, the LLM is interchangeable. For other consumers: the system is the source of truth, interfaces are projections.
 
 ## Settled — Approach
 
-7. **Deliberate writes initially, no low-level cycle.** The completion-model-level integration is deferred. Claude's existing capability suffices for exploration with deliberate writes to the system.
-8. **Knowledge system is the source of truth.** Code is material molded against knowledge. Requirements first, then code. Filesystem is the world's interface; truth resides in the system.
-9. **Three software pieces.** CLI (primary interface, Claude uses this), browser (TUI first, then web), Claude plugin (later, when model is proven). All git-based.
+7. **Deliberate writes initially.** The low-level completion-model cycle is deferred. Claude's existing capability suffices for exploration with deliberate writes to the system.
+8. **Knowledge system is the source of truth.** Code is material molded against knowledge. Filesystem is the world's interface; truth resides in the system.
+9. **Three software pieces.** CLI (primary, agents use this), browser (TUI first, then web), Claude plugin (later). All git-based.
 
-## Likely Requirements (Strong But Not Fully Settled)
+## Key Insight: The Primitives Compose
 
-- **Collaboration.** Multiple writers eventually. A server will be needed.
-- **Branching (hard requirement).** Like git — branches for parallel exploration, merge into main. 10 agents on 10 branches, review, merge. Exact mechanics open.
-- **Git integration or parallel.** Atomic history has deep parallels with git. Relationship TBD.
-- **External content integration.** Meeting transcripts, source code, designs, multimedia — the system needs to handle content from the outer world.
-- **Views as projections.** A view is a scope + settings that produces a result. Views can be saved, approved, and serve as dependency tracking when the system connects to external artifacts.
-- **Multiple knowledge bases as peers.** Ingest a knowledge base (e.g. culture) while working on something decoupled. Session bubbles later.
+The intent was to find the simplest possible elements that can build everything. The five primitives — chunks, dimensions, weights (with instance/relates), commits, and peers — appear sufficient.
 
-## Progressed — The Dimensional Model
+**Instance/relates builds tree-like structures.** A "git-integration" dimension collects all git references (each is an `instance`). An "integration-contract" dimension collects all contracts. A contract chunk's body tells an agent how to execute the resolution. Trees emerge from instance/relates without imposing hierarchy.
 
-Explored in this session and gaining shape (see `browser-user-story.md` for full walkthrough):
+**Key/value pairs on chunks make them records.** A person chunk has `{name: "Alice", phone: "..."}`. A reference chunk has the parameters a contract needs to execute. The browser can recognize chunk types from their fields.
 
-- **Primitives:** Chunks (units of meaning) and dimensions (named phenomena). Chunks relate to dimensions with weights — not to other chunks directly.
-- **Dimensions connect through shared chunks.** No chunk-to-chunk relations without a dimension.
-- **Meta-chunks:** Chunks with weight on exactly one dimension. Stable anchors — not pulled by other relationships.
-- **Scope as query:** The reader's scope is a set of dimensions. Add a dimension → narrows. Remove → widens. Scope IS the query — no separate query language.
-- **Navigation:** Primarily dimension-to-dimension with generated summaries. Chunks are read when scope is narrow enough. Empty scopes show adjacency — what you'd gain by relaxing a dimension.
-- **No ownership/contracts on dimensions.** A dimension has no rigid schema or parameters. This prevents lock-in and allows evolution.
-- **TUI approach:** List-based, colored sub-dimensions for cross-connection visibility, outliers for edges to outside space. (Details deferred — many more ideas coming.)
+**Peers decouple systems built on the same primitives.** An integration module is its own peer knowledge system. A culture module is another. A project reads from both but doesn't mutate them. Systems can depend on each other — as long as decoupled and touched with care.
 
-## Validated by Stress Testing (8 agents, 4 domains — see `agent-stress-test-synthesis.md`)
+**The browser depends on this structure.** The browser relates to each integration type and has its own UI implementation for it — taking the payload and knowing how to view it. Views and view testing/enforcing are the contracts between the browser and the knowledge system. If the structure changes, the browser breaks — but as long as that is clear, it's manageable.
 
-- **Core model works.** Chunks, dimensions, weights, scope-as-query — validated across culture, organization, software, and website domains.
-- **Instance/relates quality on weights — settled.** A binary marker on each weight: `instance` (this chunk IS a member) or `relates` (this chunk is ABOUT the dimension). Resolves the primary tension unanimously identified by all agents. Multiple collections handled by multiple dimensions grouped under a "group dimension."
-- **Structured key/value pairs on chunks — settled.** Chunks can carry optional key/value metadata alongside text content. Needed for operational domains (names, emails, dates, paths). The hard requirement: a chunk must be broken when separate parts have different weights. Key/value pairs can be nested records within a chunk as long as this splitting rule holds.
-- **Dimension properties NOT needed.** Collection vs topic emerges from instance/relates usage patterns.
+**Agents can now depend on the structure too.** An integration contract is readable by the agent — it contains the body to execute the tool call. The relationships make enough for the agent to act. This structure IS the contract, for both browser and agent.
 
-## Open Design Questions
+## The Scope Model (Settled)
 
-- **Integrations — resolved using existing primitives.** No new primitive needed. A reference is a chunk with key/value fields (`ref_service`, `ref_path`, etc.). Multiple chunks per reference: the reference becomes a dimension, reference chunk is `instance`, describing chunks `relate`. Integration contracts are themselves chunks — `instance` of an "integration-contract" dimension. Peer connection decouples the integration module. See `integrations-and-history.md`.
-- **How does knowledge get IN?** When content is written, how does it become chunks with dimensional weights? Author-assigned? System-suggested? Auto-decomposed?
-- **How do dimensions come into existence?** Explicitly created? Emergent from chunk clustering? System-proposed?
-- **How do weights change over time?** What triggers a weight shift? Who/what has authority?
-- **What role do embeddings play?** Internal use for suggesting weights/discovery while the transparent model is the interface? Or avoided entirely?
-- **The cycle:** How does a consumer write back? At what granularity? Who decides? (See `agentic-integration.md`.)
-- **Storage:** What backs this? Existing tech or custom?
-- **Views and dependency tracking:** How does an approved view detect drift? See `views-and-external-world.md`.
-- **Weight assignment:** Subjective. Auto-suggestion from embeddings? Qualitative levels? Calibration?
-- **Dimension lifecycle:** When does a chunk earn its own dimension? Threshold felt but unprincipled.
-- **Temporal ordering:** Content-level dates (meeting minutes, blog posts) aren't dimensional weights. Atomic history provides mutation time, not content time.
-- **Causality:** "This decision caused this bug" is directed. The model has undirected co-occurrence only.
-- **Prescriptive authority:** Some chunks are rules that override. No authority hierarchy in the model.
-- **Scope union and negation:** Scope-as-AND works for narrowing. Union (A OR B) and negation (A NOT B) not supported.
+Scope is a set of dimensions. Add a dimension → narrows. Remove → widens. Scope IS the query.
 
----
+- Navigation is free. Add or remove any dimension at any point.
+- You primarily see dimensions with generated summaries. Chunks are read when scope is narrow enough.
+- Empty scopes show adjacency — what you'd gain by relaxing a dimension.
+- Pre-scoped entry: an agent bootstraps with a specific scope; a website page is a fixed scope.
 
-## The Core Insight
+See `browser-user-story.md` for the full walkthrough.
 
-The knowledge system should not be purpose-specific. It is not "for agents" or "for websites" or "for projects." It is a general knowledge substrate — content goes in, and what comes out depends on who's reading and why. An agent bootstraps from it. A website generates UI from it. A TUI/GUI lets a human browse relations. The system is one thing; the interfaces are many.
+## Integrations (Settled — Uses Existing Primitives)
 
-## What L1/L2 Gets Wrong
+No new primitive needed. See `integrations-and-history.md`.
 
-The two-layer model imposes hierarchy: summary over detail. But in a relational space, hierarchy doesn't exist — it is relative to the reader's focus point. A chunk that is "summary-level" for one query is "detail-level" for another. The layer distinction is an artifact of file-based storage, not a property of knowledge.
+- A reference is a chunk with key/value fields containing the parameters a contract needs to resolve it.
+- Multiple chunks per reference: the reference becomes a dimension. The reference chunk is `instance`; describing chunks `relate`.
+- Integration contracts are themselves chunks — `instance` of an "integration-contract" dimension. The body tells the agent how to execute.
+- The integration module is a peer knowledge system — decoupled, read-only from the consumer.
+- Caching and staleness detection are agent concerns, not DB concerns.
 
-## The Relational Model Being Explored
+## Views (Explored, Not Fully Settled)
 
-### Chunks, Not Files
+See `views-and-external-world.md`.
 
-A chunk is a unit of meaning — could be a sentence, a paragraph, a decision. Size determined by semantic coherence.
+- A view is a scope + display settings → produces a result.
+- Views can be ephemeral, saved, or approved (creating a dependency).
+- Approved views enable drift detection — if knowledge changes, the system flags that the view's output has changed.
+- The website-as-browser concept: each page is a saved view with specific scope + display.
+- Views are also the contract between the browser and the knowledge system — view testing/enforcing.
 
-### Relationships Are Weighted and Named
+## Agentic Integration (Explored, Partially Settled)
 
-Not opaque vector proximity (a single similarity number). Not flat labels ("supersedes", "related-to"). Each chunk has explicit, weighted connections to other chunks along named dimensions. The dimensions themselves are phenomena — described by their own chunks, self-explaining.
+See `agentic-integration.md`.
 
-Example: a chunk about the breathing metaphor has weight 0.9 on "culture," 0.4 on "architecture," 0.2 on "implementation." Query along "culture" and it surfaces strongly. Query along "implementation" and it barely appears. The same chunk, different perspective.
+- The agent/human is the actor. They write chunks, create dimensions, assign weights, manage references.
+- The DB doesn't ingest, discover, suggest, or resolve. It stores what was put in.
+- The breathing metaphor (inhale knowledge, exhale understanding) and identity equation (knowledge IS the agent) are settled.
+- The low-level completion-model cycle is deferred. Deliberate writes for now.
 
-### Intelligence in the Relationship
+## Validated by Stress Testing
 
-Current systems have dumb relationships. Vector DBs: cosine similarity (one number, no meaning). Knowledge graphs: typed labels (structured but rigid, pre-defined). What's being explored here: relationships that carry their own knowledge — the system understands WHY two chunks relate, along WHAT dimension, and that understanding can evolve.
+8 agents tested the model across 4 domains (culture, organization, software, website). See `agent-stress-test-synthesis.md`.
 
-### Tags as Phenomena, Not Categories
+- Core model validated across all domains.
+- Instance/relates resolved the primary tension unanimously.
+- Key/value pairs essential for operational domains.
+- Dimension properties not needed — collection vs topic emerges from usage.
 
-A tag is not a folder label. It is a cluster of meaning with its own self-description. Chunks tagged "culture" don't just share a label — there are meta-chunks describing what "culture" means, its boundaries, why it exists. The tag is self-explaining. A new reader querying "culture" gets both the content AND the meaning of the phenomenon.
+## Research Grounding
 
-### The "Main" Entry Point Pattern
+See `research-map.md` for the full ecosystem research: RAG limitations, SAEs, Conceptual Spaces, vector DB mechanics, alternative query paradigms, agent memory systems.
 
-Not hierarchical but can become so by the reader. A dimension (tag/phenomenon) can have a designated "main" chunk that orients reading. The system doesn't know "main" is special — it's just a chunk that says "start here." Follow it and you get a hierarchical reading experience. Ignore it and you get the full relational space. Hierarchy emerges from intent, not storage.
+## Remaining Open Questions
 
-### Lossless Through Structure, Not Convention
+These are mostly agent/tooling concerns, not DB model questions
 
-Knowledge doesn't change by overwriting or deleting. It changes by weight shifts. A chunk about an old decision doesn't get removed — its weight on "current" decreases, its weight on "historical" increases. The chunk persists. Its position in the multi-dimensional space shifts. The lossless property is a structural guarantee of the model, not a rule the agent has to remember.
+Comments by Claude:
 
-### Atomic History
+- **Weight assignment.** Subjective. Agent tooling could suggest weights (embeddings, calibration). Not a DB primitive.
+- **Dimension lifecycle.** When does a chunk earn its own dimension? Practical question for agents/humans, not structural.
+- **Temporal ordering.** Content-level dates aren't dimensional weights. Key/value pairs (e.g., `{date: "2026-03-15"}`) handle this for records. The commit history handles mutation time.
+- **Causality / prescriptive authority / scope union-negation.** Strains identified by the stress test. May be addressable through conventions (causality as a dimension, prescriptive weight, umbrella dimensions for union) rather than new primitives. To be explored when practical needs arise.
 
-Every mutation is an event: chunk added, weight shifted, tag applied. The full event stream is preserved. Any point in time can be reconstructed. This is git for semantic content — but the "diff" is a weight shift, not a text change.
+Next up:
 
-## The Transparency Requirement
-
-Nothing should be lost in the embedding. The reason something is embedded in a particular way should be inherently transparent to the reader. This is the hard requirement from the philosophy of pureness. Opaque 1024-float vectors violate this — they work but have no self-understanding. The system must know and express WHY two things are related, not just THAT they are.
-
-## What Existing Tech Offers
-
-### Sparse Autoencoders (SAEs) — The Closest Match
-
-SAEs decompose opaque embeddings into ~65,000 named, meaningful features. Each feature has a human-readable label. A chunk's representation becomes: which named features are active, and how strongly.
-
-The paper "Interpretable Embeddings with Sparse Autoencoders" (Dec 2025) used this for retrieval and outperformed dense embedding search for property-based queries.
-
-Gap: SAE features are static, per-chunk, extracted once. They don't evolve. They don't describe relationships BETWEEN chunks. They describe each chunk independently.
-
-### Gardenfors Conceptual Spaces — The Theory
-
-Concepts live in spaces with meaningful, named dimensions (quality dimensions). A concept's position along each dimension is interpretable. This is the theoretical framework for what's being explored — but nobody has implemented it as a knowledge system.
-
-### Vector DBs (Qdrant) — The Mechanics
-
-A point = id + vector (list of floats) + payload (JSON metadata). Search = find nearest vectors, optionally filtered by payload. Tags would be payload fields with keyword indexes.
-
-Not append-only. Supports upsert, delete, payload-only updates. No native versioning — you'd build that in application layer.
-
-Filtering is powerful: must/should/must_not boolean logic, ranges, exact matches, full-text search. Can combine with vector similarity or use without it (scroll API).
-
-### Knowledge Graphs (Graphiti/Zep) — Temporal Relations
-
-Bi-temporal model: every fact has "when it happened" and "when the system learned it." Old facts never deleted — marked with validity windows. This aligns with the lossless requirement. But relationships are typed labels, not weighted multi-dimensional connections.
-
-### RAG Limitations — Why Skepticism Is Warranted
-
-RAG was designed for heterogeneous document corpora. Agent memory (and knowledge systems generally) are bounded, correlated streams. Top-k vector search wastes context on near-duplicates and destroys temporal/relational structure. xMemory (Feb 2026) makes this case explicitly.
-
-### Alternative Query Paradigms
-
-- HippoRAG: PageRank traversal on a knowledge graph
-- RAPTOR: Multi-level tree, retrieve at different abstraction levels
-- Prompt-RAG: No embeddings — LLM reads an index and picks what's relevant
-- Self-RAG: Model decides when/whether to retrieve
-- xMemory: Top-down hierarchy over disentangled semantic components
-- NTMs/DNCs: The query itself is learned, not explicitly written
-
-## The Open Space
-
-Nobody has built a system where:
-- Relationships between knowledge chunks are first-class intelligent objects
-- Dimensions are named, meaningful, and self-describing
-- Weights are explicit, evolvable, and queryable
-- The system is inherently transparent about WHY things relate
-- History is atomic and fully traversable
-- The same substrate serves agents, UIs, browsers, and generators
-
-The pieces exist in separate research communities. The synthesis does not.
-
-## What This Means for the PoC
-
-The markdown PoC (culture + claude plugin) was designed before this exploration. The question now: does the L1/L2 markdown system even approximate the relational model well enough to be useful? Or does it train wrong patterns — hierarchical thinking when the real system is relational?
-
-Options:
-1. Go straight to a minimal implementation of the relational model (SAE features + weighted relations + atomic history)
-2. Build the markdown PoC knowing its limitations, use it to accumulate requirements
-3. Explore further before building anything
-
-Not settled.
+- **Views mechanics.** Approved views, drift detection, view testing — the concept is there, exact mechanics not settled.
+- **Storage technology.** What backs this? The commit model + dimensional weights + key/value pairs could map to various backends. Not yet chosen.

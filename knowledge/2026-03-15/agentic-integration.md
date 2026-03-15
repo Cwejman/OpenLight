@@ -1,58 +1,44 @@
 # Agentic Integration
 
-How the knowledge system relates to agents and other consumers. What's settled vs. what's being explored.
+How the knowledge system relates to agents and other consumers.
 
 ## Settled — The Metaphors and Identity
 
-These emerged across sessions and have been consistent:
+**The breathing metaphor.** Inhale: knowledge flows into context. Exhale: understanding flows back. Not retrieval-on-demand — a continuous rhythm. Breathing adapts to activity.
 
-**The breathing metaphor.** The system and its consumers are in cyclical exchange. Inhale: knowledge flows into context. Exhale: understanding flows back. Not retrieval-on-demand — a continuous rhythm. You don't decide to breathe. Breathing adapts to activity.
+**The night metaphor.** Sessions are daylight. Knowledge persists through the night — quiet, continuous. Night is not absence. Seeds germinate in darkness.
 
-**The night metaphor.** Sessions are daylight — active, bounded, visible. Knowledge persists through the night — quiet, continuous. Night is not absence. Seeds germinate in darkness. The system's natural state is the persistence between sessions.
-
-**The identity equation.** The knowledge system IS the agent — not a tool it uses. The LLM is the reasoning engine; the knowledge system provides identity. Delete the knowledge and nothing exists. (The genome metaphor: knowledge is the genome, the LLM is the cellular machinery that expresses it.)
+**The identity equation.** The knowledge system IS the agent. The LLM is interchangeable machinery. Delete the knowledge and nothing exists. (The genome metaphor: knowledge is the genome, the LLM is the cellular machinery.)
 
 **The three-beat sentence:**
 > The session is disposable. The knowledge is the agent. Retrieval is the act of becoming.
 
-**The architectural test.** Delete memory from Mem0 → you still have ChatGPT. Delete knowledge from this system → nothing exists. Instrumental vs. constitutive memory.
+**The architectural test.** Delete memory from Mem0 → you still have ChatGPT. Delete knowledge from this system → nothing exists.
 
-## Settled — Values
+## Settled — The Agent's Role
 
-- The system is not agent-specific. An agent is one consumer. A website, a TUI, a human browsing — all valid.
-- Nothing knowledge-worthy should be lost to session boundaries or compaction.
-- The chat-output antipattern: knowledge-worthy content that exists only in chat and never reaches the system IS loss.
+The agent/human is the actor. The DB is just information. Specifically:
 
-## Settled — Initial Approach to the Cycle
+- **How does knowledge get in?** The agent writes it, in the way the human orchestrates.
+- **How do dimensions come into existence?** The agent or human creates them. The system is just information; the agent is the actor.
+- **How are references resolved?** The agent reads the integration contract and executes the resolution.
+- **Caching, staleness, re-weighting?** Agent concerns. The DB stores what was put in. There is an idea here though to provide a separate service to help the consumers aginst loss by providing caching of all refernces in the system. Not db concern but could be written for first class support, but to the agent/human, but also to the browser.
+- **What role do embeddings play?** They help the agent suggest weights, discover dimensions, navigate. They're agent tooling, not a DB primitive.
 
-**The low-level completion-model cycle is deferred.** Integrating at the completion level (every generation step tied to the knowledge system) is the deeper vision but not the immediate step.
+The knowledge system provides the structure. The agent provides the intelligence. Culture (itself a peer knowledge system) informs the agent on how to work with the system.
 
-**Initially: deliberate writes, Claude's existing capability.** Just like this session — talk, explore, deliberately write to the knowledge system. Claude's existing tooling suffices. No systemic routine cycles needed to start.
+## Settled — Initial Approach
 
-## Hypothesis — Session Bubbles (Later, With Full Integration)
+Deliberate writes. Claude's existing capability suffices. No systemic routine cycles needed to start.
 
-When full integration exists, each session could be its own peer knowledge base — a bubble. Culture and routines define what flows in. The session produces understanding and writes back. Some content (like raw prompts, tool call logs) stays in the session's peer, separate from the main system. The peer model gives this natural isolation without polluting the core.
+## Hypothesis — Session Bubbles (Later)
+
+When full integration exists, each session could be its own peer knowledge base — a bubble. Culture and routines define what flows in. Some content (raw prompts, tool call logs) stays in the session's peer, separate from the main system.
 
 ## Hypothesis — The Deeper Cycle (Deferred)
 
-The low-level idea: completion-model integration directly with the knowledge system. Every turn writes. The model's cycle is natively tied to the knowledge system.
+Completion-model integration directly with the knowledge system. Every turn writes. The model's cycle is natively tied to the knowledge system.
 
-**Remains a direction, not an immediate goal.** Open questions preserved:
+Not an immediate goal. Open questions: granularity, what gets written, who decides, cost.
 
-- Granularity — every tool call? every turn? agent decides?
-- What gets written — everything? just the delta? just extracted understanding?
-- Who decides — system pulls or agent pushes?
-- Cost and noise
-
-## Hypothesis — The Session as Compute Surface
-
-Partially proven. Bootstrap shows a session CAN start with full context. The exhale side is manual — initially that's fine. Automation comes when the model is proven.
-
-## Background — Integration Requirements (Further Out)
-
-Not the current focus but important context:
-
-- **Collaboration.** Will be required. Filesystem alone won't work — server needed (local or not).
-- **Code integration.** Code is a means of the system. The PoC explored code tied directly to the knowledge base. Filesystem is the world's interface; truth resides in the system.
-- **Git integration.** Possibly required. Atomic history has parallels with git. Whether the system uses, parallels, or replaces git is open.
-- **File projection.** Files may be generated artifacts — views of knowledge at a point in time. The filesystem as interface, not source of truth.
+A separate system design being explored on the side: cyclical completion-model integration where the input is a query, the output is the next query plus whatever it produces. Some outputs are tool calls whose results go toward integration chunks. Other agents can observe. This informs the broader integration contract but is not the immediate focus.

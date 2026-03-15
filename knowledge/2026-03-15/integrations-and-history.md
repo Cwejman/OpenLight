@@ -2,75 +2,65 @@
 
 ## Atomic History — The Commit Model (Settled)
 
-- Every change is a commit. You can always browse HEAD.
-- HEAD is built from the chain of commits that produced it.
-- Any historical state is reconstructable.
+- Every change is a commit. HEAD is always browsable.
+- Any historical state is reconstructable by replaying commits.
 - **Branching is a hard requirement.** Run agents on branches, review, merge to main. Exact mechanics open.
-- Time navigation in the browser/CLI — open for later.
+- Time navigation in the browser/CLI — open for later. As the system grows and archetypal agents govern it (reverse prompting, reviewing, enforcing against views), the time depth becomes valuable.
 
 ## Integrations — Built From Existing Primitives
 
-### The Realization
+### No New Primitives Needed
 
-Integrations do not need new primitives. The existing model — chunks with key/value pairs, instance/relates weights, dimensions, peer connection — composes to handle external references naturally.
+A reference is just a chunk with key/value fields. The fields contain whatever parameters the integration contract needs to execute resolution. The chunk doesn't need to declare what type of integration it is — the contract defines the expected parameters, and the chunk provides them.
 
 ### How It Works
 
-**A reference is just a chunk.** It has key/value fields that make it recognizable — e.g., `{ref_service: "git", ref_path: "src/storage/index.ts"}`. The browser can recognize this as a reference from the fields. No special chunk type needed. Start open, restrict later if needed.
+**A reference chunk** has key/value pairs with the parameters for resolution (e.g., a file path, an API endpoint, coordinates into an external system). Its text content describes what it is in human/agent-readable form. It has dimensional weights like any chunk.
 
-**Multiple chunks per reference — the reference becomes a dimension.** When a git file accumulates knowledge (API description, implementation notes, test strategy, bugs), the file reference becomes a dimension. Just like any entity that accumulates enough knowledge:
-- The reference chunk has `instance` weight (1.0) on that dimension — it IS the reference.
-- Other chunks describing aspects of the file have `relates` weight on that dimension.
-- The reference chunk's key/value body contains whatever an agent needs to resolve it.
+**Multiple chunks per reference:** When knowledge accumulates around an external reference (API description, implementation notes, test strategy, bugs), the reference becomes a dimension. The reference chunk is `instance` (1.0) on that dimension. Describing chunks `relate`.
 
-**Collections handle integration types.** A git file reference is an `instance` of a "git-integration" dimension. This groups all git references. The "git-integration" dimension has describing chunks — including one that is an `instance` of an "integration-contract" dimension, containing the body an agent needs to execute the resolution (the tool call pattern, the parameters, the expected response).
+**Integration contracts** are themselves knowledge in the system. An integration contract is a chunk that is an `instance` of an "integration-contract" dimension. Its body contains what an agent needs to execute the resolution — the tool call pattern, expected parameters, how to interpret results. Agents read the contract, understand how to resolve references that match it.
 
-**Tree-like structures emerge from instance/relates.** The two weight types build hierarchy without imposing it:
+**Integration types as collections.** All git references are `instance` of a "git-integration" dimension. The contract for git resolution is also `instance` of "integration-contract." Tree-like structures emerge:
+
 ```
 integration-contract (dimension)
-  └── git-contract (instance) — describes how to resolve git references
-  └── image-contract (instance) — describes how to resolve image references
+  └── git-contract (instance) — how to resolve git references
+  └── image-contract (instance) — how to resolve image references
 
 git-integration (dimension)
-  └── src/storage/index.ts (instance) — the reference chunk with key/value fields
+  └── src/storage/index.ts (instance) — reference chunk with resolution parameters
   └── src/scope/index.ts (instance) — another reference
   └── "how git integration works" (relates) — describing chunk
-
-src-storage-index (dimension, created when knowledge accumulates)
-  └── the reference chunk (instance, 1.0)
-  └── "storage module API" (relates, 0.8)
-  └── "performance bug in filterByScope" (relates, 0.6)
 ```
 
-**Peer connection handles decoupling.** The integration aspect (git driver, media service, contracts) can be a separate peer knowledge system. The consuming system reads from it but doesn't mutate it. This is the peer model already established as a requirement.
+**Peer connection decouples.** The integration aspect (contracts, drivers) can be its own peer knowledge system. The consuming system reads it but doesn't mutate it.
 
 ### What The DB Stores vs What The Agent Manages
 
-**The DB stores:**
-- Chunks with key/value pairs (including reference fields)
-- Weights on dimensions (with instance/relates)
-- Commits (atomic history)
+**The DB stores:** chunks, weights, commits. It doesn't know what "git" means. It just holds chunks with fields and weights on dimensions.
 
-**The agent manages:**
-- Resolving references (using the contract from the integration peer)
-- Caching for lossy mediums (agent tooling, not DB concern)
-- Detecting staleness (comparing external state to the commit when weights were last set)
-- Re-ingesting and re-weighting when external content changes
+**The agent manages:** resolving references (using contracts), caching for lossy mediums, detecting staleness, re-ingesting when external content changes. These are agent tooling concerns.
 
-**The DB doesn't need to know what "git" means.** It just stores chunks with fields. The meaning of those fields is in the integration contract chunks — readable by agents and humans.
+**Staleness:** When external content is ahead of the last commit where weights were set, that's an agent concern. The DB knows: these weights were set at this commit. Whether the external world has moved on is for the agent to check and act on.
 
-### Integration Contract Pattern
+### The Browser's Relationship to Integrations
 
-An integration contract is itself knowledge in the system:
-- A dimension "integration-contract" groups all contracts
-- Each contract is a chunk that is an `instance` of this dimension
-- The chunk's body describes: what service, how to resolve, what parameters, what to cache
-- An agent reads the contract, understands how to resolve references of that type
-- Standard contracts can be shared as peer knowledge systems
+The browser depends on the knowledge structure. For each integration type, the browser has its own UI implementation — it takes the payload from the chunk's key/value fields and knows how to present it (render an image, show file contents, display API response). Views and view testing/enforcing are the contracts between the browser and the structure. If the structure changes, the browser may break — but that's visible and manageable through view enforcement.
+
+### Broad Scope of Integrations
+
+The pattern (reference chunk + contract + driver) is intentionally general:
+
+- **Git files** — atomic commits align naturally with the knowledge system's commit model.
+- **Filesystem (non-git)** — the driver must handle snapshotting since the source doesn't have commits.
+- **Images/media** — hosted externally or by the driver. The reference chunk holds the resolution parameters.
+- **REST APIs** — a path is a path. A REST endpoint is similar to a file path but with a payload.
+- **Streams (further out)** — live audio, video. Agents cycle through the buffer. Both live and history available. Large series — different scale than text chunks.
+- **Cyclical agent output (explored on the side)** — when completion models are cyclically integrated, their output is a buffer. Some outputs are tool calls whose results go toward integration chunks. The input is a query; the output is the next query plus whatever it produces. Not the immediate focus but informs the contract's generality.
 
 ### What's Still Open
 
-- **The browser recognizing references** — is it enough for the browser to look for specific key/value patterns (e.g., any chunk with `ref_service` field)? Or does it need more guidance? Probably convention is sufficient.
-- **Staleness signaling** — how does the agent know a reference is ahead? Polling? Git hooks? Manual trigger? Agent-side concern, but the pattern matters.
-- **Large series** (audio, video, streams) — these are a different scale. The commit chain mixing text mutations with media frames needs thought. Further out.
-- **Branching mechanics** — how branches work with references. If a branch re-weights chunks against new file state, merging brings those weights to main. Straightforward conceptually, mechanics TBD.
+- **Browser recognition of references** — probably just convention (look for specific key/value patterns). The integration contract can define what fields to expect.
+- **Large series** (audio, video, streams) — different scale. The commit chain mixing text mutations with media frames needs thought. Further out.
+- **Branching mechanics** with integrations — straightforward conceptually, mechanics TBD.
