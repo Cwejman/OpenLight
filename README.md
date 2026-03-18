@@ -1,4 +1,4 @@
-# night
+# OpenLight
 
 ![banner](.img/banner.png)
 
@@ -15,7 +15,7 @@ Not a research lab. A personal exploration, augmented by the capability of curre
 A knowledge system exploring a fundamentally different relationship between AI and memory. Where existing systems bolt memory onto models as a tool, this explores making knowledge constitutive — the thing that makes an agent *this agent*, not an accessory to it.
 
 The ideas range from the immediate to the visionary:
-- A commit-based knowledge database built from minimal primitives (chunks, dimensions, weighted relationships)
+- A commit-based knowledge database built from minimal primitives (chunks, dimensions, binary membership)
 - Scope-based navigation where structure emerges from the reader's focus, not from imposed hierarchy
 - Integration contracts that let agents and browsers depend on the knowledge structure
 - At the furthest concrete end: integrating completion models directly into the knowledge system's cycle
@@ -24,4 +24,4 @@ All of this grew from earlier, more visionary exploration into the nature of AI 
 
 ## How
 
-Still in ideation. The primitives have been explored and stress-tested across multiple domains. No code yet — more requirements to settle before building. The exploration lives in `knowledge/`, the sub-directory `/legacy` was a premature attempt at working in a lossless, memory based format with claude, the current .md files in knowledge work much better and dont aim to be any kind of embedding system. There are some things left in legacy to bring back out, but not much.
+Approaching implementation. The primitives have been explored and stress-tested across multiple domains. The database architecture (Zig + SQLite) and CLI design (`ol`) are settled. The exploration lives in `knowledge/`. The sub-directory `knowledge/legacy/` contains an earlier attempt at working in a lossless, memory-based format with Claude — superseded by the current exploration.

@@ -210,15 +210,15 @@ The agent builds this JSON in its own context, reasons about it, revises it unti
 
 | Command | Type | Purpose |
 |---------|------|---------|
-| `night init` | Setup | Create a knowledge system |
-| `night apply <json>` | Write | Submit a declarative mutation. One JSON = one commit. |
-| `night scope [dims...]` | Read | Navigate — structure by default, content via `--chunks` |
-| `night dims` | Read | List all dimensions with counts (lightweight, no connectivity) |
-| `night show <commit>` | Read | Show a commit's content (same JSON format) |
-| `night diff <a> <b>` | Read | Composed diff between two points (same format) |
-| `night log` | Read | Commit history (filterable by `--chunk`, `--dim`) |
-| `night branch create/switch/list` | Branch | Branching |
-| `night peer add/scope` | Read | Peer reading |
+| `ol init` | Setup | Create a knowledge system |
+| `ol apply <json>` | Write | Submit a declarative mutation. One JSON = one commit. |
+| `ol scope [dims...]` | Read | Navigate — structure by default, content via `--chunks` |
+| `ol dims` | Read | List all dimensions with counts (lightweight, no connectivity) |
+| `ol show <commit>` | Read | Show a commit's content (same JSON format) |
+| `ol diff <a> <b>` | Read | Composed diff between two points (same format) |
+| `ol log` | Read | Commit history (filterable by `--chunk`, `--dim`) |
+| `ol branch create/switch/list` | Branch | Branching |
+| `ol peer add/scope` | Read | Peer reading |
 
 ~9 commands. One write operation. The rest are reads.
 
@@ -230,7 +230,7 @@ The agent builds this JSON in its own context, reasons about it, revises it unti
 
 One consistent JSON structure regardless of scope depth. The default shows **structure** (dimensions, connectivity, counts). Content is opt-in via `--chunks`. Validated through concrete trace-through with a 12-chunk, 5-dimension example.
 
-**Structural read** (`night scope culture`):
+**Structural read** (`ol scope culture`):
 
 ```json
 {
@@ -272,7 +272,7 @@ One consistent JSON structure regardless of scope depth. The default shows **str
 }
 ```
 
-**With content** (`night scope culture --chunks`): same structure, plus `chunks.items` — a flat list at the top. Each chunk appears once with full membership. Content is flat because chunks don't belong to any single dimension — they live at intersections. The browser may "duplicate" chunks by showing them under multiple dimensions, but that's a rendering decision (the human lens), not a structural one. The JSON is the system's lens — honest and non-hierarchical.
+**With content** (`ol scope culture --chunks`): same structure, plus `chunks.items` — a flat list at the top. Each chunk appears once with full membership. Content is flat because chunks don't belong to any single dimension — they live at intersections. The browser may "duplicate" chunks by showing them under multiple dimensions, but that's a rendering decision (the human lens), not a structural one. The JSON is the system's lens — honest and non-hierarchical.
 
 ```json
 {
@@ -296,7 +296,7 @@ One consistent JSON structure regardless of scope depth. The default shows **str
       },
       {
         "id": "c1",
-        "text": "Maria Chen founded OpenLight in 2019...",
+        "text": "Maria Chen founded Sunward in 2019...",
         "kv": {"name": "Maria Chen", "role": "Executive Director"},
         "instance": ["people"],
         "relates": ["culture", "projects"]
@@ -307,7 +307,7 @@ One consistent JSON structure regardless of scope depth. The default shows **str
 }
 ```
 
-**Empty scope** (`night scope`): same format, `scope: []`, all dimensions listed with top-N connections. The full map.
+**Empty scope** (`ol scope`): same format, `scope: []`, all dimensions listed with top-N connections. The full map.
 
 **Key format decisions:**
 

@@ -10,7 +10,7 @@
 - **A (minimal):** Use only existing primitives (chunks, dimensions, weights, meta-chunks, scope). No extensions.
 - **B (extensions allowed):** Same domain, may propose minimal extensions if primitives feel insufficient.
 
-Domains tested: Culture (night project), Organization (OpenLight non-profit), Software (the CLI tool), Website (OpenLight public site).
+Domains tested: Culture (OpenLight project), Organization (Sunward non-profit), Software (the CLI tool), Website (Sunward public site).
 
 ## Universal Findings (All 8 Agents Agree)
 
@@ -94,7 +94,7 @@ Without structured fields, rendering a team directory requires NLP parsing of pr
 
 ### Website Domain
 
-**Works naturally for:** Pages-as-scopes (genuinely elegant), cross-cutting queries, content evolution with safety, the "Ask OpenLight" visitor query feature, blog posts as dimension clusters.
+**Works naturally for:** Pages-as-scopes (genuinely elegant), cross-cutting queries, content evolution with safety, the "Ask Sunward" visitor query feature, blog posts as dimension clusters.
 
 **Strains at:**
 - **Page ordering/navigation** — views are unordered. Navigation menus need explicit ordering.
@@ -103,7 +103,7 @@ Without structured fields, rendering a team directory requires NLP parsing of pr
 - **Content stability** — published pages need snapshot stability, not live resolution. Solved by static generation pipeline.
 - **Performance** — live knowledge resolution is too slow for public page loads. Pre-rendering needed.
 
-**Website-B's key finding:** The website should be a **pre-rendered browser with cached views**. Static generation from knowledge views (like Next.js/Hugo but with the knowledge system as source instead of markdown files). Most pages static, "Ask OpenLight" live. The model supports this naturally through the view abstraction.
+**Website-B's key finding:** The website should be a **pre-rendered browser with cached views**. Static generation from knowledge views (like Next.js/Hugo but with the knowledge system as source instead of markdown files). Most pages static, "Ask Sunward" live. The model supports this naturally through the view abstraction.
 
 ## The Extensions Worth Keeping
 

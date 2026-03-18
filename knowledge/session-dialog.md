@@ -6,7 +6,7 @@ Session where the knowledge system's relational model was explored in depth. The
 
 **Human:** "Who are you and what are we doing here?"
 
-**Agent:** Introduced self as Claude running in the night project. Described the system, what's working (hooks, scripts, bootstrap), what's ahead (culture + claude plugin PoC, then vector/MCP). Based entirely on L1 summaries injected by bootstrap.
+**Agent:** Introduced self as Claude running in the OpenLight project (then called "night"). Described the system, what's working (hooks, scripts, bootstrap), what's ahead (culture + claude plugin PoC, then vector/MCP). Based entirely on L1 summaries injected by bootstrap.
 
 ---
 
@@ -214,10 +214,10 @@ Now ultimately I prefer the website to be in many ways like the browser. That wo
 ## Exchange 23
 
 **Human:** Launched 8 parallel agents — 2 per domain (A: minimal primitives only, B: may propose extensions):
-1. Culture/craft (night project's own culture)
-2. Organization (OpenLight non-profit — transparency-focused, people, projects, values, website)
+1. Culture/craft (OpenLight project's own culture)
+2. Organization (Sunward non-profit — transparency-focused, people, projects, values, website)
 3. Software (the CLI tool — commands, modules, bugs, design decisions)
-4. Website projection (OpenLight's public site — pages as views, approved content, visitor queries)
+4. Website projection (Sunward's public site — pages as views, approved content, visitor queries)
 
 **Agent results synthesized in `agent-stress-test-synthesis.md`. Key findings:**
 
@@ -400,7 +400,7 @@ Key architectural decisions: event-sourced with materialized state, branches clo
 **Human:** Corrected the JSON format — it should be declarative, not imperative. The agent describes what should be true, not what operations to perform. The system computes the diff. Also: having a commit message is a new primitive for intelligence — is it transparent? The diff itself is the transparency. If an agent needs to record reasoning, it could use its own peer. Open question.
 
 **Key decisions settled:**
-- One write operation: `night apply <json>`. Declarative JSON mutation.
+- One write operation: `ol apply <json>`. Declarative JSON mutation.
 - The JSON format serves as write format, commit content, and diff format — same structure everywhere.
 - Membership fields when provided are the complete set (full replacement). Partial mode deferred.
 - Low-level primitive commands not needed — everything through declarative JSON.
@@ -428,7 +428,7 @@ Bootstrap simulation validated the approach: agent goes from zero to full struct
 
 ## Exchange 38
 
-**Human:** Requested concrete trace-through with real example data to understand the model. Built a 12-chunk, 5-dimension example (OpenLight organization). Traced `night scope` (empty) and `night scope culture` by hand, counting shared chunks between every dimension pair.
+**Human:** Requested concrete trace-through with real example data to understand the model. Built a 12-chunk, 5-dimension example (Sunward organization). Traced `ol scope` (empty) and `ol scope culture` by hand, counting shared chunks between every dimension pair.
 
 Key realizations during the trace-through:
 
