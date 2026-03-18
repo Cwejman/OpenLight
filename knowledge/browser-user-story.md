@@ -2,12 +2,13 @@
 
 ## The Model (Primitives)
 
-- A **chunk** is a unit of meaning with weight on one or more dimensions.
-- A **dimension** is a named phenomenon. No rigid schema — just a name and whatever chunks have weight on it.
-- A **meta-chunk** is a chunk with weight on exactly one dimension. Stable anchor for that dimension's meaning.
+- A **chunk** is a unit of meaning with membership on one or more dimensions.
+- A **dimension** is a named phenomenon. No rigid schema — just a name and whatever chunks belong to it.
+- A **meta-chunk** is a chunk on exactly one dimension. Stable anchor for that dimension's meaning.
 - **Dimensions connect through shared chunks.** No chunk-to-chunk relations without a dimension.
-- **Historical relationships** (chunk splits, weight changes, temporal order) live in the atomic event history, not modeled as dimensions.
+- **Historical relationships** (chunk splits, membership changes, temporal order) live in the atomic event history, not modeled as dimensions.
 - **Generated summaries** are computed for the browser, not stored in the DB. Can be precomputed for static browsing. Not source of truth.
+- **Connection strength** between dimensions at a given scope is computed from shared chunk counts — structural and transparent, not a stored number.
 
 ## Scope
 
@@ -31,10 +32,10 @@ The browser's state is a **scope** — a set of dimensions currently active. The
 **You primarily see dimensions, not chunks.** The browser is a space navigator. At any scope:
 
 1. A generated summary of the current scope
-2. Related dimensions reachable from here — each with summary and connection strength
+2. Related dimensions reachable from here — each with summary and computed connectivity
 3. The ability to peek and ask questions before adding/removing dimensions
 
-**Chunks are what you read when narrowed enough.** Broad scope = navigate by dimensions and summaries. Narrow scope = read actual content. When many chunks exist at a scope, they group by their dimensional weight differences — effectively sub-dimensions to navigate further.
+**Chunks are what you read when narrowed enough.** Broad scope = navigate by dimensions and summaries. Narrow scope = read actual content. When many chunks exist at a scope, they differentiate by which dimensions they belong to — effectively sub-dimensions to navigate further.
 
 ## Walkthrough
 
@@ -53,7 +54,7 @@ All dimensions visible with generated summaries:
 
 ### Add "culture" — Scope `{culture}`
 
-Summary of culture appears. Connected dimensions with strength:
+Summary of culture appears. Connected dimensions shown with computed connectivity (shared chunk count at this scope):
 
 ```
   identity     ●●●●●  — "The system IS the agent..."
@@ -63,6 +64,8 @@ Summary of culture appears. Connected dimensions with strength:
   bootstrap    ●●○○○  — "The act of becoming..."
   write-first  ●●○○○  — "Persist before acknowledging..."
 ```
+
+These indicators are **computed from structure** — how many chunks are shared between the scoped dimension and each connected dimension. Not stored as numbers. The browser derives them transparently.
 
 Hovering any dimension shows a summary *as seen from the current scope*.
 
@@ -95,12 +98,12 @@ At narrow scope, expand to see actual chunks:
 ```
   ▸ [meta] "The approach: unbound by context, replacing the cycle of..."
   ▸ "The session is disposable. The knowledge is the agent."
-      also: identity ●●●●, session ●●●
+      also on: identity, session
   ▸ "The breathing metaphor..."
-      also: breathing ●●●●, agent-cycle ●●●
+      also on: breathing, agent-cycle
 ```
 
-Each chunk's other dimensions are pathways to follow.
+Each chunk's other dimensions are pathways to follow. Membership is binary — a chunk is either on a dimension or not. The reader reads the chunk to understand its meaning.
 
 ### Pre-scoped entry
 
@@ -110,15 +113,16 @@ The system doesn't change. The scope does.
 
 ## TUI Approach (Initial Ideas — Details Deferred)
 
-List-based. Each dimension in scope shown with: name, weight, short summary, primary connected dimensions. Colors denote shared sub-dimensions across list items — visual cross-connection tracking. Strong outliers (connections to outside scope) visually distinct. Many more ideas to explore on TUI — parked for now.
+List-based. Each dimension in scope shown with: name, computed connectivity, short summary, primary connected dimensions. Colors denote shared sub-dimensions across list items — visual cross-connection tracking. Strong outliers (connections to outside scope) visually distinct. Many more ideas to explore on TUI — parked for now.
 
 ## Properties
 
 - No hierarchy in storage. Views are generated from scope.
 - Scope is the query. Multi-dimensional, composable, freely manipulable.
 - Empty scopes show adjacency.
-- Chunks group by weight differentiation.
+- Chunks differentiate by which dimensions they belong to.
 - Meta-chunks anchor dimensions.
 - Summaries are ephemeral. Precomputable, never in the DB.
+- Connection strength is computed from structure, not stored.
 - History is in the event stream.
 - Any reader, any interface.

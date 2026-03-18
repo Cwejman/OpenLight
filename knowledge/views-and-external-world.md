@@ -37,9 +37,9 @@ The knowledge system is the source of truth for meaning and relationships. Exter
 
 ## The Build Sequence (Software)
 
-Three pieces, all git-based:
+Three pieces. CLI is first priority, built in Zig + SQLite (see `exploration.md` — Database Architecture):
 
-1. **CLI** — primary interface. Agents use this. Read, write, query, manage chunks and dimensions. Preferred over MCP.
+1. **CLI** — primary interface. Agents use this programmatically. Read, write, query, manage chunks and dimensions. Single static binary, Zig + SQLite. Preferred over MCP. The CLI's command structure is the next thing to explore and settle.
 2. **Browser** — TUI first, then web. Navigating the dimensional space. Depends on the knowledge structure. Has UI implementations per integration type.
 3. **Claude plugin** — later priority. Initially use Claude's existing session capability with deliberate interactions through the CLI.
 

@@ -22,8 +22,8 @@ The agent/human is the actor. The DB is just information. Specifically:
 - **How does knowledge get in?** The agent writes it, in the way the human orchestrates.
 - **How do dimensions come into existence?** The agent or human creates them. The system is just information; the agent is the actor.
 - **How are references resolved?** The agent reads the integration contract and executes the resolution.
-- **Caching, staleness, re-weighting?** Agent concerns. The DB stores what was put in. There is an idea here though to provide a separate service to help the consumers aginst loss by providing caching of all refernces in the system. Not db concern but could be written for first class support, but to the agent/human, but also to the browser.
-- **What role do embeddings play?** They help the agent suggest weights, discover dimensions, navigate. They're agent tooling, not a DB primitive.
+- **Caching, staleness, re-indexing?** Agent concerns. The DB stores what was put in. There is an idea to provide a separate service to help consumers against loss by caching all references in the system. Not a DB concern but could be written for first-class support — to the agent/human and to the browser.
+- **What role do embeddings play?** They help the agent discover dimensions, understand content, and navigate. They're agent tooling, not a DB primitive. With binary membership, embeddings don't produce stored weights — they inform the agent's judgment about which dimensions a chunk belongs to.
 
 The knowledge system provides the structure. The agent provides the intelligence. Culture (itself a peer knowledge system) informs the agent on how to work with the system.
 

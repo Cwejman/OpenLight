@@ -15,9 +15,9 @@ A reference is just a chunk with key/value fields. The fields contain whatever p
 
 ### How It Works
 
-**A reference chunk** has key/value pairs with the parameters for resolution (e.g., a file path, an API endpoint, coordinates into an external system). Its text content describes what it is in human/agent-readable form. It has dimensional weights like any chunk.
+**A reference chunk** has key/value pairs with the parameters for resolution (e.g., a file path, an API endpoint, coordinates into an external system). Its text content describes what it is in human/agent-readable form. It has dimensional membership like any chunk.
 
-**Multiple chunks per reference:** When knowledge accumulates around an external reference (API description, implementation notes, test strategy, bugs), the reference becomes a dimension. The reference chunk is `instance` (1.0) on that dimension. Describing chunks `relate`.
+**Multiple chunks per reference:** When knowledge accumulates around an external reference (API description, implementation notes, test strategy, bugs), the reference becomes a dimension. The reference chunk is `instance` of that dimension. Describing chunks `relate`.
 
 **Integration contracts** are themselves knowledge in the system. An integration contract is a chunk that is an `instance` of an "integration-contract" dimension. Its body contains what an agent needs to execute the resolution — the tool call pattern, expected parameters, how to interpret results. Agents read the contract, understand how to resolve references that match it.
 
@@ -38,11 +38,11 @@ git-integration (dimension)
 
 ### What The DB Stores vs What The Agent Manages
 
-**The DB stores:** chunks, weights, commits. It doesn't know what "git" means. It just holds chunks with fields and weights on dimensions.
+**The DB stores:** chunks, membership, commits. It doesn't know what "git" means. It just holds chunks with fields and binary membership on dimensions.
 
 **The agent manages:** resolving references (using contracts), caching for lossy mediums, detecting staleness, re-ingesting when external content changes. These are agent tooling concerns.
 
-**Staleness:** When external content is ahead of the last commit where weights were set, that's an agent concern. The DB knows: these weights were set at this commit. Whether the external world has moved on is for the agent to check and act on.
+**Staleness:** When external content is ahead of the last commit where membership was set, that's an agent concern. The DB knows: this membership was established at this commit. Whether the external world has moved on is for the agent to check and act on.
 
 ### The Browser's Relationship to Integrations
 

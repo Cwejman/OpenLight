@@ -1,4 +1,4 @@
-# Session Dialog — 2026-03-15
+# Session Dialog — 2026-03-15 / 2026-03-18
 
 Session where the knowledge system's relational model was explored in depth. The conversation moved from grounding (what's actually built vs. designed) through ecosystem research to original exploration of what the system should inherently be.
 
@@ -304,3 +304,138 @@ Key insight: the two weight types (instance/relates) + key/value pairs + dimensi
 **Human:** "I'd like to explore the main idea of the data structure a bit more... I have one example to test, lets say I have a few projects in the organisation, or a few people, how does that work in this type of system? Because they are 'sibling' and ought to have name, etc... Try this out, time to break and progress."
 
 **Agent:** Worked through the example. Key findings (agent-generated, not yet reviewed): entities start as chunks and can become dimensions as knowledge accumulates around them. Siblings are natural — entities sharing a dimension. Cross-cutting queries work. Questions raised: structured attributes in chunks vs dimensions, text search alongside dimensional navigation, chunk→dimension threshold, whether the model suits pure records vs knowledge, whether dimension "kinds" (phenomena, entities, temporal, categorical) matter. Written to `entities-and-siblings.md` marked as agent-generated exploration needing review.
+
+---
+
+# Session 2 — 2026-03-18 (Ecosystem Check-Up)
+
+Three days after the main exploration session. New session focused on ecosystem research and a key evolution of the weight model.
+
+## Exchange 29
+
+**Human:** Asked for ecosystem research check-up, suspecting the original research missed things. Mentioned "claude-mem" as an example — anything working on memory integration with agents/Claude is relevant territory.
+
+**Agent:** Launched four parallel research sweeps: (1) Claude-specific memory tools, (2) new agent memory systems 2025-2026, (3) SAE and interpretable embedding advances, (4) knowledge substrate and identity systems.
+
+Results: 12 Claude memory tools documented (claude-mem at 37.8k stars, Anthropic's official Memory Tool API, MCP Knowledge Graph, Basic Memory, Cipher, MemoryGraph with 28 relationship types, Ars Contexta, CORE, Engram, memsearch). 13 new agent memory systems found (MAGMA — four orthogonal graphs, MemoriesDB — per-edge metadata, Letta MemFS — git-backed with branching, Hindsight — 91.4% LongMemEval, Cognee — feedback-driven edge weights, Nemori — cognitive science self-organization). Significant SAE advances (CQG-MBQA — each embedding dimension is a question, LDIR — interpretable dimensions, Conceptual Spaces extraction from LLMs at EMNLP 2025, Goodfire at $1.25B). Knowledge substrate systems (Neotoma — truth layer, TerminusDB — git-like versioning, KG-OLAP — multidimensional scope model).
+
+Key finding confirmed: the gap is real. Nobody has built a system with named emergent dimensions, binary instance/relates, scope-as-query, and general-purpose substrate for multiple consumers. Updated `research-map.md` with all findings.
+
+---
+
+## Exchange 30
+
+**Human:** Raised concern about continuous weights (0.0–1.0 for `relates`). Fine-grained weights inject opaque judgment — same problem as embedding-based RAG. If the system claims transparent relationships, storing opaque numbers contradicts that. "The system should contain its own intelligence, but if weights are so fine tuned it is very much controlled by the embedding model."
+
+**Agent:** Explored the tension. Identified that continuous weights make the intelligence live in the assigner (embedding model or human judgment), not in the system. Offered three options: coarse qualitative levels, binary relates, or human-assignable gradient.
+
+---
+
+## Exchange 31
+
+**Human:** Instinct: binary means the reader must read chunks to understand meaning — start there, add low/mid/high later if needed. Also asked: with binary weights, does an existing DB already do this? "If only the weights aspect was missing and isn't the strength of the system anyway."
+
+**Agent:** Acknowledged that binary simplifies storage to tagged documents with two membership types + version control. Existing systems could store this. Clarified that no existing system has this structure — the specific combination of chunks relating to dimensions (not chunks), dimensions connecting through shared chunks, scope as composable dimension set, and all of this versioned — doesn't exist. The pieces (knowledge graphs, faceted search, git-for-data, multidimensional OLAP) have aspects but not the combination.
+
+---
+
+## Exchange 32
+
+**Human:** Asked directly: has someone already implemented something similar for the knowledge system?
+
+**Agent:** No. Closest things: knowledge graphs (nodes + labeled edges, no scope-as-query), tagged document stores (flat tags, no instance/relates), faceted search (fixed metadata filters, not emergent phenomena), KG-OLAP (academic framework, not implemented), MAGMA (four fixed graphs, not arbitrary dimensions). The gap is confirmed real.
+
+---
+
+## Exchange 33
+
+**Human:** Asked to update all knowledge files to align with the new understanding. "Focus on making a strong effort, this knowledge system is not to be simply touched at different points but managed in a manner of purity and perfection."
+
+**Agent:** Began holistic update of all files. Initially framed the binary weight insight as "the intelligence is in the reader, not the storage."
+
+**Human:** Corrected: "I don't get the 'intelligence is in the reader' focus. If an agent is fully cultured from the knowledge system and works within that system, is the intelligence in the reader? The knowledge is certainly in the system, a bare agent is not intelligent, it is a completion model." Also: "The navigation paradigm is inherited from the structure itself, it is the only natural way to navigate. And an agent wouldn't exactly use the browser either."
+
+Key correction: the intelligence is in the knowledge and its structure — this is the identity equation, already settled. The navigation paradigm (scope-as-query) is not a separate design; it is inherent to the structure. The storage model being simple is a practical observation (existing backends can hold it), not a philosophical claim about where intelligence lives. Different consumers (agent via CLI, browser, website) interact with the same structure in their own ways.
+
+---
+
+## Exchange 34
+
+**Human:** Asked to explore building with SQLite + thin layer, or custom DB in Zig.
+
+**Agent:** Launched three parallel agents: (1) SQLite + thin commit layer architecture, (2) custom DB in Zig, (3) Zig + SQLite hybrid. All three converged on the same answer.
+
+**Result:** Full custom DB in Zig is disproportionate (~6-8k lines, 8-13 weeks, must solve crash recovery). Pure SQLite works but scope queries degrade as multi-way self-joins. **Zig + SQLite hybrid** is the proportionate answer: SQLite for durable event storage and indexing, Zig for CLI, commit/branch management, and scope query construction. Single static binary with SQLite compiled in. ~2,000-3,500 lines of Zig, ~2 months.
+
+Key architectural decisions: event-sourced with materialized state, branches clone materialized state, three-way merge at entity/field level, peers via SQLite's ATTACH DATABASE, optional Roaring Bitmaps for fast scope intersection.
+
+**Human:** Agreed. Database solution set. Next to resolve: what is the CLI actually — its commands and structure, from the inherent properties of the knowledge system. Asked to condense research into knowledge files first.
+
+**Agent:** Condensed database architecture into `exploration.md` as a settled section. Removed verbose research files (`db-architecture-research.md`, `zig-sqlite-research.md`). Key references preserved in the condensed section.
+
+---
+
+## Exchange 35
+
+**Human:** Three corrections to the database architecture:
+
+1. **Branching should not copy anything.** History is immutable and does not need replication. Branches are pointers to commits, like git refs. Creating a branch is creating a ref.
+2. **Merge is done by someone with agency, not the system.** The system provides visibility (diffing), not resolution. An agent or human reads both branches, understands the content, and writes the result. Consistent with the settled principle: agent is the actor, DB is information.
+3. **ATTACH DATABASE for peers — open question.** Interesting native approach, but should be tested against Zig-layer abstraction rather than settled.
+
+**Agent:** Agreed on all three. Updated `exploration.md` — architecture simplified: branches as refs, merge removed as system operation (diffing retained), peer mechanism moved to open question.
+
+---
+
+## Exchange 36
+
+**Human:** Asked to deploy agents to explore the CLI structure — from the inherent properties of the knowledge system, from an agent consumer's perspective, and from the browser's perspective.
+
+**Agent:** Launched three parallel agents. All three converged on scope-as-query being the fundamental read operation. Initial synthesis proposed ~22 commands with low-level primitives (`dim create`, `weight set`, etc.).
+
+**Human:** Pushed back on low-level primitives creating too many tool calls. Proposed: the agent should be able to submit one JSON containing all updates. Raised safety questions — should agents always work on branches? Is a write session the same as a branch? Is a transaction the same as a branch?
+
+**Agent:** Explored the distinctions. Transaction = one atomic commit. Branch = sustained exploration with multiple commits. Session = transaction (no need to separate). The agent builds one JSON, that IS the transaction.
+
+**Human:** Corrected the JSON format — it should be declarative, not imperative. The agent describes what should be true, not what operations to perform. The system computes the diff. Also: having a commit message is a new primitive for intelligence — is it transparent? The diff itself is the transparency. If an agent needs to record reasoning, it could use its own peer. Open question.
+
+**Key decisions settled:**
+- One write operation: `night apply <json>`. Declarative JSON mutation.
+- The JSON format serves as write format, commit content, and diff format — same structure everywhere.
+- Membership fields when provided are the complete set (full replacement). Partial mode deferred.
+- Low-level primitive commands not needed — everything through declarative JSON.
+- ~9 CLI commands total. One write, rest are reads and branch management.
+- Commit messages: open question — the diff is inherently transparent, messages may not be needed.
+
+---
+
+## Exchange 37
+
+**Human:** Raised concern about scope reads being too limited. The browser doesn't look at chunks directly — it starts by seeing relationships between dimensions. Should there be depth control? A way to see dimensions and connectivity without chunk content? "If you do a read with an empty scope and just limit whether or not you see chunk content or limit depth, you'd still get an understanding of the dimensions but in a more intelligent manner."
+
+**Agent:** Agreed — the default read should be structural (dimensions + connectivity + counts), not content. Content is opt-in via `--chunks`. This mirrors the browser user story ("you primarily see dimensions, not chunks"). Launched three agents to concretize the format.
+
+**Result:** All three converged. One consistent JSON format regardless of scope depth:
+- `scope` — always present, array of dimension names
+- `chunks` — always present with counts (`total`, `in_scope`, `instance`, `relates`). `items` array appears only with `--chunks`.
+- `dimensions` — always present. Each dimension has `instance`/`relates` counts, `shared` (connection to scope, absent at empty scope), and `connections` (adjacency list, top-N links to other dimensions with shared chunk counts).
+
+Connections embedded per dimension (adjacency list) won over separate edge lists (require cross-referencing). Duplication accepted and bounded by top-N.
+
+Bootstrap simulation validated the approach: agent goes from zero to full structural understanding in ~3,200 tokens (6.4% of full system). Selective content reads bring total to ~9,200 tokens (18.4%) with better understanding than reading everything blindly. The structure IS the index.
+
+---
+
+## Exchange 38
+
+**Human:** Requested concrete trace-through with real example data to understand the model. Built a 12-chunk, 5-dimension example (OpenLight organization). Traced `night scope` (empty) and `night scope culture` by hand, counting shared chunks between every dimension pair.
+
+Key realizations during the trace-through:
+
+1. **Instance/relates must be visible at every level.** Not just on each dimension's shared counts, but also on connections between dimensions. `projects → people(3i 1r)` tells you there are 3 actual people entities along that path. Withholding instance/relates on connections is withholding core transparency.
+
+2. **Edges belong inside each dimension.** Dimensions beyond the scope's reach (connected to a visible dimension but not to the scope itself) should be shown inside the dimension that bridges to them, not as a separate top-level section. Different dimensions bridge to different edges — the information is local.
+
+3. **Chunks are flat at the top, not nested inside dimensions.** A chunk lives at an intersection of multiple dimensions — it doesn't "belong" to any single one. Nesting would impose a false hierarchy. The flat list with full membership (instance and relates on all dimensions) is the honest, non-hierarchical representation.
+
+4. **The browser vs system lens distinction.** The JSON is the system's lens — flat, honest, non-hierarchical. The browser is the human's lens — it may "duplicate" chunks by showing them under multiple dimensions. That's a rendering decision, not a structural one. This is the general-purpose substrate principle: the system is one thing, the interfaces are many.

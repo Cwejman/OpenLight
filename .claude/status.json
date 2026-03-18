@@ -11,19 +11,19 @@
   "context": {
     "risk": "low",
     "note": "",
-    "lastCtxPct": 73,
+    "lastCtxPct": 98,
     "window": {
-      "total_input_tokens": 600579,
-      "total_output_tokens": 259501,
+      "total_input_tokens": 9,
+      "total_output_tokens": 688,
       "context_window_size": 1000000,
       "current_usage": {
         "input_tokens": 3,
-        "output_tokens": 63,
-        "cache_creation_input_tokens": 122,
-        "cache_read_input_tokens": 267546
+        "output_tokens": 9,
+        "cache_creation_input_tokens": 140,
+        "cache_read_input_tokens": 19103
       },
-      "used_percentage": 27,
-      "remaining_percentage": 73
+      "used_percentage": 2,
+      "remaining_percentage": 98
     }
   },
   "lossless": {
