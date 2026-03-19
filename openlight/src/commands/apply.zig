@@ -388,7 +388,7 @@ test "apply reuses existing dimensions" {
     defer r2.deinit(std.testing.allocator);
 
     // dims should show one dimension with count 2
-    const dim_list = try dims_mod.run(&db, std.testing.allocator, "main");
+    const dim_list = try dims_mod.run(&db, std.testing.allocator, &(try db.getHead("main")));
     defer dims_mod.freeDimInfos(std.testing.allocator, dim_list);
 
     try std.testing.expectEqual(@as(usize, 1), dim_list.len);
@@ -451,7 +451,7 @@ test "apply update changes membership" {
 
     // verify via scope
     const scope_dims = [_][]const u8{"people"};
-    var sr = try scope_mod.run(&db, std.testing.allocator, "main", &scope_dims, true);
+    var sr = try scope_mod.run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, true);
     defer sr.deinit(std.testing.allocator);
 
     try std.testing.expectEqual(@as(i32, 1), sr.in_scope);
@@ -478,7 +478,7 @@ test "apply remove marks chunk as removed" {
 
     // verify not in scope
     const scope_dims = [_][]const u8{"temp"};
-    var sr = try scope_mod.run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var sr = try scope_mod.run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer sr.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(i32, 0), sr.in_scope);
 

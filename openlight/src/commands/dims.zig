@@ -3,9 +3,8 @@ const Db = @import("../db.zig");
 const Error = Db.Error;
 
 /// List all dimensions with instance/relates/total counts on the current branch.
-pub fn run(db: *Db, allocator: std.mem.Allocator, branch: []const u8) Error![]DimInfo {
-    const head = try db.getHead(branch);
-    try db.materializeCurrentState(&head);
+pub fn run(db: *Db, allocator: std.mem.Allocator, head: []const u8) Error![]DimInfo {
+    try db.materializeCurrentState(head);
     defer db.dropCurrentState();
 
     var stmt = try db.prepare(
@@ -71,7 +70,7 @@ test "dims returns correct counts" {
     var r = try apply.run(&db, std.testing.allocator, "main", json);
     defer r.deinit(std.testing.allocator);
 
-    const dim_list = try run(&db, std.testing.allocator, "main");
+    const dim_list = try run(&db, std.testing.allocator, &(try db.getHead("main")));
     defer freeDimInfos(std.testing.allocator, dim_list);
 
     // sorted: alpha, beta, gamma
@@ -108,7 +107,7 @@ test "dims across multiple applies" {
     var r2 = try apply.run(&db, std.testing.allocator, "main", json2);
     defer r2.deinit(std.testing.allocator);
 
-    const dim_list = try run(&db, std.testing.allocator, "main");
+    const dim_list = try run(&db, std.testing.allocator, &(try db.getHead("main")));
     defer freeDimInfos(std.testing.allocator, dim_list);
 
     // 3 dims: alpha(inst=2), beta(rel=1), gamma(inst=1)

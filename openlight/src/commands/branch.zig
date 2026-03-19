@@ -89,12 +89,12 @@ test "branch isolates state between branches" {
     defer r2.deinit(std.testing.allocator);
 
     // feature should see both dimensions
-    const dims_feature = try dims_mod.run(&db, std.testing.allocator, "feature");
+    const dims_feature = try dims_mod.run(&db, std.testing.allocator, &(try db.getHead("feature")));
     defer dims_mod.freeDimInfos(std.testing.allocator, dims_feature);
     try std.testing.expectEqual(dims_feature.len, 2);
 
     // main should only see alpha
-    const dims_main = try dims_mod.run(&db, std.testing.allocator, "main");
+    const dims_main = try dims_mod.run(&db, std.testing.allocator, &(try db.getHead("main")));
     defer dims_mod.freeDimInfos(std.testing.allocator, dims_main);
     try std.testing.expectEqual(dims_main.len, 1);
     try std.testing.expectEqualStrings("alpha", dims_main[0].name);

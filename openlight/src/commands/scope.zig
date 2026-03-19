@@ -6,11 +6,10 @@ const Statement = Db.Statement;
 /// Navigate the dimensional space.
 /// Given scope dimensions, finds in-scope chunks, connected dimensions, and connections between them.
 /// Empty scope returns all dimensions with connections.
-pub fn run(db: *Db, allocator: std.mem.Allocator, branch: []const u8, scope_dims: []const []const u8, include_chunks: bool) Error!ScopeResult {
+pub fn run(db: *Db, allocator: std.mem.Allocator, head: []const u8, scope_dims: []const []const u8, include_chunks: bool) Error!ScopeResult {
 
     // resolve current state
-    const head = try db.getHead(branch);
-    try db.materializeCurrentState(&head);
+    try db.materializeCurrentState(head);
     defer db.dropCurrentState();
 
     // total chunks
@@ -33,6 +32,9 @@ pub fn run(db: *Db, allocator: std.mem.Allocator, branch: []const u8, scope_dims
         var connections = try queryConnections(db, allocator);
         defer freeConnectionMap(allocator, &connections);
 
+        var edges = try queryEdges(db, allocator, &dim_counts);
+        defer freeConnectionMap(allocator, &edges);
+
         return buildResult(allocator, .{
             .scope_dims = scope_dims,
             .total = total_chunks,
@@ -41,6 +43,7 @@ pub fn run(db: *Db, allocator: std.mem.Allocator, branch: []const u8, scope_dims
             .relates = ir.relates,
             .dim_counts = &dim_counts,
             .connections = &connections,
+            .edges = &edges,
             .items = if (include_chunks) try fetchChunkItems(db, allocator, "SELECT chunk_id FROM in_scope") else null,
         });
     }
@@ -169,6 +172,48 @@ fn queryAllConnections(db: *Db, allocator: std.mem.Allocator) Error!ConnMap {
     return collectConnections(allocator, &stmt);
 }
 
+// -- Edge queries --
+
+/// Edges: for each connected dim, find dimensions that in-scope chunks on that
+/// connected dim also touch, but that are NOT in scope and NOT already connected.
+fn queryEdges(db: *Db, allocator: std.mem.Allocator, connected_dims: *std.StringHashMap(DimCounts)) Error!ConnMap {
+
+    // populate temp table with connected dim names
+    try db.exec("CREATE TEMP TABLE connected_dims (name TEXT)");
+    {
+        var ins = try db.prepare("INSERT INTO connected_dims VALUES (?1)");
+        defer ins.finalize();
+
+        var it = connected_dims.keyIterator();
+        while (it.next()) |key| {
+            try ins.bindSlice(1, key.*);
+            _ = try ins.step();
+            try ins.reset();
+        }
+    }
+
+    // query: for each connected dim (cm1), find dims (cm2) reached through
+    // ALL chunks on that connected dim (not just in-scope), where cm2 is
+    // NOT in scope and NOT already connected
+    var stmt = try db.prepare(
+        \\SELECT cm1.dimension, cm2.dimension, cm2.type, COUNT(DISTINCT cm1.chunk_id)
+        \\FROM cur_memberships cm1
+        \\JOIN cur_memberships cm2 ON cm1.chunk_id = cm2.chunk_id
+        \\WHERE cm1.dimension IN (SELECT name FROM connected_dims)
+        \\AND cm2.dimension NOT IN (SELECT name FROM scope_filter)
+        \\AND cm2.dimension NOT IN (SELECT name FROM connected_dims)
+        \\AND cm1.dimension != cm2.dimension
+        \\GROUP BY cm1.dimension, cm2.dimension, cm2.type
+    );
+    defer stmt.finalize();
+
+    const result = try collectConnections(allocator, &stmt);
+
+    db.exec("DROP TABLE IF EXISTS connected_dims") catch {};
+
+    return result;
+}
+
 // -- Result assembly --
 
 fn buildResult(allocator: std.mem.Allocator, p: struct {
@@ -179,9 +224,10 @@ fn buildResult(allocator: std.mem.Allocator, p: struct {
     relates: i32,
     dim_counts: *std.StringHashMap(DimCounts),
     connections: *ConnMap,
+    edges: ?*ConnMap = null,
     items: ?[]ScopeResult.ChunkItem,
 }) Error!ScopeResult {
-    const dimensions = try buildScopeDims(allocator, p.dim_counts, p.connections);
+    const dimensions = try buildScopeDims(allocator, p.dim_counts, p.connections, p.edges);
 
     const scope_copy = allocator.alloc([]const u8, p.scope_dims.len) catch return error.OutOfMemory;
     for (p.scope_dims, 0..) |dim, i| {
@@ -260,6 +306,7 @@ fn buildScopeDims(
     allocator: std.mem.Allocator,
     dim_counts: *std.StringHashMap(DimCounts),
     connections: *ConnMap,
+    edges: ?*ConnMap,
 ) Error![]ScopeResult.ScopeDim {
     var dimensions: std.ArrayListAligned(ScopeResult.ScopeDim, null) = .{};
     defer dimensions.deinit(allocator);
@@ -269,30 +316,38 @@ fn buildScopeDims(
         const name = entry.key_ptr.*;
         const counts = entry.value_ptr.*;
 
-        var conns: std.ArrayListAligned(ScopeResult.Connection, null) = .{};
-        defer conns.deinit(allocator);
-
-        if (connections.get(name)) |*inner| {
-            var ci = inner.iterator();
-            while (ci.next()) |ce| {
-                conns.append(allocator, .{
-                    .dim = allocator.dupe(u8, ce.key_ptr.*) catch return error.OutOfMemory,
-                    .instance = ce.value_ptr.instance,
-                    .relates = ce.value_ptr.relates,
-                }) catch return error.OutOfMemory;
-            }
-        }
+        const conns = try collectFromConnMap(allocator, connections, name);
+        const edge_conns: []ScopeResult.Connection = if (edges) |e| try collectFromConnMap(allocator, e, name) else try allocator.alloc(ScopeResult.Connection, 0);
 
         dimensions.append(allocator, .{
             .name = allocator.dupe(u8, name) catch return error.OutOfMemory,
             .shared = counts.instance + counts.relates,
             .instance = counts.instance,
             .relates = counts.relates,
-            .connections = conns.toOwnedSlice(allocator) catch return error.OutOfMemory,
+            .connections = conns,
+            .edges = edge_conns,
         }) catch return error.OutOfMemory;
     }
 
     return dimensions.toOwnedSlice(allocator) catch return error.OutOfMemory;
+}
+
+fn collectFromConnMap(allocator: std.mem.Allocator, map: *ConnMap, name: []const u8) Error![]ScopeResult.Connection {
+    var conns: std.ArrayListAligned(ScopeResult.Connection, null) = .{};
+    defer conns.deinit(allocator);
+
+    if (map.get(name)) |*inner| {
+        var ci = inner.iterator();
+        while (ci.next()) |ce| {
+            conns.append(allocator, .{
+                .dim = allocator.dupe(u8, ce.key_ptr.*) catch return error.OutOfMemory,
+                .instance = ce.value_ptr.instance,
+                .relates = ce.value_ptr.relates,
+            }) catch return error.OutOfMemory;
+        }
+    }
+
+    return conns.toOwnedSlice(allocator) catch return error.OutOfMemory;
 }
 
 // -- Chunk items --
@@ -387,6 +442,7 @@ pub const ScopeResult = struct {
         instance: i32,
         relates: i32,
         connections: []Connection,
+        edges: []Connection = &.{},
     };
 
     pub const Connection = struct {
@@ -458,6 +514,8 @@ pub const ScopeResult = struct {
         for (self.dimensions) |*dim| {
             for (dim.connections) |conn| allocator.free(conn.dim);
             allocator.free(dim.connections);
+            for (dim.edges) |edge| allocator.free(edge.dim);
+            allocator.free(dim.edges);
             allocator.free(dim.name);
         }
         allocator.free(self.dimensions);
@@ -515,7 +573,7 @@ test "scope returns connected dimensions with counts" {
     try setupScopeTestData(&db);
 
     const scope_dims = [_][]const u8{"culture"};
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expectEqual(@as(i32, 3), result.total_chunks);
@@ -547,7 +605,7 @@ test "scope connections between connected dimensions" {
     defer r2.deinit(std.testing.allocator);
 
     const scope_dims = [_][]const u8{"culture"};
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer result.deinit(std.testing.allocator);
 
     // projects should have a connection to people
@@ -564,7 +622,7 @@ test "scope with narrow intersection" {
 
     // scope to culture+projects: only chunks that have both
     const scope_dims = [_][]const u8{ "culture", "projects" };
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer result.deinit(std.testing.allocator);
 
     // chunk1 and chunk3 have both culture+projects; chunk2 only has culture
@@ -577,7 +635,7 @@ test "scope with --chunks returns chunk items" {
     try setupScopeTestData(&db);
 
     const scope_dims = [_][]const u8{"culture"};
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, true);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, true);
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expect(result.items != null);
@@ -596,7 +654,7 @@ test "scope without --chunks has no items" {
     try setupScopeTestData(&db);
 
     const scope_dims = [_][]const u8{"culture"};
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expect(result.items == null);
@@ -608,7 +666,7 @@ test "empty scope returns all dimensions with connections" {
     try setupScopeTestData(&db);
 
     const scope_dims = [_][]const u8{};
-    var result = try run(&db, std.testing.allocator, "main", &scope_dims, false);
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
     defer result.deinit(std.testing.allocator);
 
     // all 4 dimensions: culture, projects, people, education
