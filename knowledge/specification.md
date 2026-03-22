@@ -257,7 +257,7 @@ Creates `.openlight/` directory in the current working directory containing:
 
 **JSON for writes** (`ol apply` input). Agents generate JSON most reliably. Constrained decoding guarantees validity.
 
-**JSON for reads** (default machine format). The ecosystem standard — every provider (Anthropic, OpenAI, Google), every protocol (MCP), every agent-native CLI converges on JSON for structured tool output. Benchmarked: YAML is 23% more token-efficient and scores higher on LLM comprehension, but JSON's universality and generation reliability outweigh the savings.
+**JSON for reads** (default machine format). JSON is the ecosystem standard for structured tool output across providers and protocols. YAML may be more token-efficient but JSON's universality and generation reliability are more important here.
 
 **Format detection:** `--format json` if piped, `--format human` if TTY. Follows the `gh` CLI pattern — the established agent-native CLI convention.
 

@@ -14,6 +14,6 @@ How the model handles structured entities. Explored and resolved using instance/
 
 **Tree-like structures emerge.** Instance/relates builds hierarchy without imposing it. A git file reference is `instance` of "git-integration." The git contract is `instance` of "integration-contract." Navigation follows: integration-contract → git-contract → specific file references.
 
-## Validated
+## Agent Exploration
 
-Stress-tested across 4 domains (see `agent-stress-test-synthesis.md`). Instance/relates was unanimously identified as essential by all 8 agents. Key/value pairs essential for operational domains. Dimension properties not needed — collection vs topic emerges from instance/relates usage.
+8 agents explored this across 4 domains (see `in-depth/agent-stress-test-synthesis.md`). All converged on instance/relates as essential. Key/value pairs needed for operational domains. Dimension properties not needed — collection vs topic emerges from usage. These are agent-generated findings. Real-world validation through use is the next step.
