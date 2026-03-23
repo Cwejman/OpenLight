@@ -37,6 +37,7 @@ pub fn run(db: *Db, allocator: std.mem.Allocator, head: []const u8, scope_dims: 
 
         return buildResult(allocator, .{
             .scope_dims = scope_dims,
+            .head = head,
             .total = total_chunks,
             .in_scope = in_scope_count,
             .instance = ir.instance,
@@ -57,6 +58,7 @@ pub fn run(db: *Db, allocator: std.mem.Allocator, head: []const u8, scope_dims: 
 
     return buildResult(allocator, .{
         .scope_dims = &.{},
+        .head = head,
         .total = total_chunks,
         .in_scope = total_chunks,
         .instance = 0,
@@ -218,6 +220,7 @@ fn queryEdges(db: *Db, allocator: std.mem.Allocator, connected_dims: *std.String
 
 fn buildResult(allocator: std.mem.Allocator, p: struct {
     scope_dims: []const []const u8,
+    head: []const u8,
     total: i32,
     in_scope: i32,
     instance: i32,
@@ -229,6 +232,13 @@ fn buildResult(allocator: std.mem.Allocator, p: struct {
 }) Error!ScopeResult {
     const dimensions = try buildScopeDims(allocator, p.dim_counts, p.connections, p.edges);
 
+    // Sort dimensions by shared count descending (most connected first)
+    std.mem.sortUnstable(ScopeResult.ScopeDim, dimensions, {}, struct {
+        fn lessThan(_: void, a: ScopeResult.ScopeDim, b: ScopeResult.ScopeDim) bool {
+            return a.shared > b.shared;
+        }
+    }.lessThan);
+
     const scope_copy = allocator.alloc([]const u8, p.scope_dims.len) catch return error.OutOfMemory;
     for (p.scope_dims, 0..) |dim, i| {
         scope_copy[i] = allocator.dupe(u8, dim) catch return error.OutOfMemory;
@@ -236,6 +246,7 @@ fn buildResult(allocator: std.mem.Allocator, p: struct {
 
     return .{
         .scope = scope_copy,
+        .head = allocator.dupe(u8, p.head) catch return error.OutOfMemory,
         .total_chunks = p.total,
         .in_scope = p.in_scope,
         .in_scope_instance = p.instance,
@@ -429,6 +440,7 @@ fn freeConnectionMap(allocator: std.mem.Allocator, map: *ConnMap) void {
 
 pub const ScopeResult = struct {
     scope: []const []const u8,
+    head: []const u8,
     total_chunks: i32,
     in_scope: i32,
     in_scope_instance: i32,
@@ -478,6 +490,8 @@ pub const ScopeResult = struct {
         try jw.beginObject();
         try jw.objectField("scope");
         try jw.write(self.scope);
+        try jw.objectField("head");
+        try jw.write(self.head);
         try jw.objectField("chunks");
         try jw.beginObject();
         try jw.objectField("total");
@@ -521,6 +535,7 @@ pub const ScopeResult = struct {
         allocator.free(self.dimensions);
         for (self.scope) |s| allocator.free(s);
         allocator.free(self.scope);
+        allocator.free(self.head);
     }
 };
 
@@ -529,6 +544,7 @@ pub const ScopeResult = struct {
 // ============================================================
 
 const apply = @import("apply.zig");
+const serial = @import("../serial.zig");
 
 fn findDim(dims: []ScopeResult.ScopeDim, name: []const u8) ?ScopeResult.ScopeDim {
     for (dims) |d| {
@@ -676,5 +692,78 @@ test "empty scope returns all dimensions with connections" {
     for (result.dimensions) |dim| {
         try std.testing.expect(dim.connections.len > 0);
     }
+}
+
+test "scoped dimensions sorted by shared count descending" {
+    var db = try Db.initTestDb();
+    defer db.close();
+    try setupScopeTestData(&db);
+
+    // scope culture: connected dims are projects (shared=2), people (shared=1), education (shared=1)
+    const scope_dims = [_][]const u8{"culture"};
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
+    defer result.deinit(std.testing.allocator);
+
+    try std.testing.expectEqual(@as(usize, 3), result.dimensions.len);
+
+    // first dimension should have highest shared count
+    try std.testing.expect(result.dimensions[0].shared >= result.dimensions[1].shared);
+    try std.testing.expect(result.dimensions[1].shared >= result.dimensions[2].shared);
+
+    // projects has shared=2 (chunks 1 and 3), so it should be first
+    try std.testing.expectEqualStrings("projects", result.dimensions[0].name);
+    try std.testing.expectEqual(@as(i32, 2), result.dimensions[0].shared);
+}
+
+test "empty scope dimensions sorted by total count descending" {
+    var db = try Db.initTestDb();
+    defer db.close();
+    try setupScopeTestData(&db);
+
+    const scope_dims = [_][]const u8{};
+    var result = try run(&db, std.testing.allocator, &(try db.getHead("main")), &scope_dims, false);
+    defer result.deinit(std.testing.allocator);
+
+    try std.testing.expectEqual(@as(usize, 4), result.dimensions.len);
+
+    // dimensions should be sorted by shared (= total) descending
+    for (result.dimensions[0 .. result.dimensions.len - 1], result.dimensions[1..]) |a, b| {
+        try std.testing.expect(a.shared >= b.shared);
+    }
+
+    // culture has 3 chunks, projects has 2 — culture should be first
+    try std.testing.expectEqualStrings("culture", result.dimensions[0].name);
+    try std.testing.expectEqual(@as(i32, 3), result.dimensions[0].shared);
+}
+
+test "scope result includes head commit id" {
+    var db = try Db.initTestDb();
+    defer db.close();
+    try setupScopeTestData(&db);
+
+    const head = try db.getHead("main");
+    const scope_dims = [_][]const u8{"culture"};
+    var result = try run(&db, std.testing.allocator, &head, &scope_dims, false);
+    defer result.deinit(std.testing.allocator);
+
+    // head field should match the branch HEAD we passed in
+    try std.testing.expectEqualStrings(&head, result.head);
+}
+
+test "scope JSON output contains head field" {
+    var db = try Db.initTestDb();
+    defer db.close();
+    try setupScopeTestData(&db);
+
+    const head = try db.getHead("main");
+    const scope_dims = [_][]const u8{"culture"};
+    var result = try run(&db, std.testing.allocator, &head, &scope_dims, false);
+    defer result.deinit(std.testing.allocator);
+
+    const json = try serial.serialize(std.testing.allocator, result);
+    defer std.testing.allocator.free(json);
+
+    // verify "head" field is present in the JSON
+    try std.testing.expect(std.mem.indexOf(u8, json, "\"head\":\"") != null);
 }
 
