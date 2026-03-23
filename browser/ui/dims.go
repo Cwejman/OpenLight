@@ -16,17 +16,15 @@ type InsideState struct {
 }
 
 // RenderDimEntry renders a single dimension entry for the dims panel.
-func RenderDimEntry(dim ol.ScopeDim, colorMap map[string]int, selected bool, inside InsideState) string {
+func RenderDimEntry(dim ol.ScopeDim, selected bool, inside InsideState, maxWidth int) string {
 	var lines []string
-
-	idx := colorMap[dim.Name]
 
 	// Name line with cursor indicator
 	var nameLine string
 	if selected {
-		nameLine = " " + Bold.Render("▸") + " " + BoldDimName(dim.Name, idx) + "  " + Light.Render(fmt.Sprintf("%d", dim.Shared))
+		nameLine = " " + Bold.Render("▸") + " " + BoldDimName(dim.Name) + "  " + Light.Render(fmt.Sprintf("%d", dim.Shared))
 	} else {
-		nameLine = "   " + DimName(dim.Name, idx) + "  " + Light.Render(fmt.Sprintf("%d", dim.Shared))
+		nameLine = "   " + DimName(dim.Name) + "  " + Light.Render(fmt.Sprintf("%d", dim.Shared))
 	}
 	lines = append(lines, nameLine)
 
@@ -41,35 +39,23 @@ func RenderDimEntry(dim ol.ScopeDim, colorMap map[string]int, selected bool, ins
 		lines = append(lines, "     "+instLabel+"  "+relLabel)
 	}
 
+	indent := "     "
+
 	// Sub-connections
 	if len(dim.Connections) > 0 {
 		lines = append(lines, "")
-		for ci, c := range dim.Connections {
-			cIdx := colorMap[c.Dim]
-			total := c.Instance + c.Relates
-			entry := DimName(c.Dim, cIdx) + " " + Dim.Render(fmt.Sprintf("%d", total))
-			if inside.Active && inside.SubCursor == ci {
-				entry = "   ▸ " + entry
-			} else if inside.Active {
-				entry = "     " + entry
-			} else {
-				// At entry level, show inline
-				if ci == 0 {
-					// Will be joined below
+		if inside.Active {
+			for ci, c := range dim.Connections {
+				total := c.Instance + c.Relates
+				entry := DimName(c.Dim) + " " + Dim.Render(fmt.Sprintf("%d", total))
+				if inside.SubCursor == ci {
+					lines = append(lines, "   ▸ "+entry)
+				} else {
+					lines = append(lines, indent+entry)
 				}
 			}
-			if inside.Active {
-				lines = append(lines, entry)
-			}
-		}
-		if !inside.Active {
-			var conns []string
-			for _, c := range dim.Connections {
-				cIdx := colorMap[c.Dim]
-				total := c.Instance + c.Relates
-				conns = append(conns, DimName(c.Dim, cIdx)+" "+Dim.Render(fmt.Sprintf("%d", total)))
-			}
-			lines = append(lines, "     "+strings.Join(conns, "  "+Separator+"  "))
+		} else {
+			lines = append(lines, wrapConnections(dim.Connections, indent, maxWidth)...)
 		}
 	}
 
@@ -78,46 +64,139 @@ func RenderDimEntry(dim ol.ScopeDim, colorMap map[string]int, selected bool, ins
 		edgeOffset := len(dim.Connections)
 		if inside.Active {
 			lines = append(lines, "")
-		}
-		for ei, e := range dim.Edges {
-			eIdx := colorMap[e.Dim]
-			total := e.Instance + e.Relates
-			edge := lipgloss.NewStyle().Faint(true).Render(DimName(e.Dim, eIdx)) +
-				" " + Dim.Render(fmt.Sprintf("%d", total))
-			if inside.Active && inside.SubCursor == edgeOffset+ei {
-				edge = "   ▸ " + edge
-			} else if inside.Active {
-				edge = "     " + edge
-			}
-			if inside.Active {
-				lines = append(lines, edge)
-			}
-		}
-		if !inside.Active {
-			var edges []string
-			for _, e := range dim.Edges {
-				eIdx := colorMap[e.Dim]
+			for ei, e := range dim.Edges {
 				total := e.Instance + e.Relates
-				edge := lipgloss.NewStyle().Faint(true).Render(DimName(e.Dim, eIdx)) +
+				edge := lipgloss.NewStyle().Faint(true).Render(DimName(e.Dim)) +
 					" " + Dim.Render(fmt.Sprintf("%d", total))
-				edges = append(edges, edge)
+				if inside.SubCursor == edgeOffset+ei {
+					lines = append(lines, "   ▸ "+edge)
+				} else {
+					lines = append(lines, indent+edge)
+				}
 			}
-			lines = append(lines, "     "+strings.Join(edges, "  "+Separator+"  "))
+		} else {
+			lines = append(lines, wrapEdges(dim.Edges, indent, maxWidth)...)
 		}
 	}
 
 	return strings.Join(lines, "\n")
 }
 
-// RenderDimsList renders the full dimensions panel.
-func RenderDimsList(dims []ol.ScopeDim, colorMap map[string]int, cursor int, inside *InsideState) string {
-	var sections []string
+// wrapConnections renders connections wrapping to fit within maxWidth.
+func wrapConnections(conns []ol.Connection, indent string, maxWidth int) []string {
+	var result []string
+	sep := "  " + Separator + "  "
+	sepVis := 5 // "  ·  "
+	indentVis := VisLen(indent)
+
+	currentLine := indent
+	currentVis := indentVis
+
+	for i, c := range conns {
+		total := c.Instance + c.Relates
+		item := DimName(c.Dim) + " " + Dim.Render(fmt.Sprintf("%d", total))
+		itemVis := len(c.Dim) + 1 + len(fmt.Sprintf("%d", total))
+
+		addSep := i > 0
+		needed := itemVis
+		if addSep {
+			needed += sepVis
+		}
+
+		if currentVis+needed > maxWidth && currentVis > indentVis {
+			result = append(result, currentLine)
+			currentLine = indent + item
+			currentVis = indentVis + itemVis
+		} else {
+			if addSep {
+				currentLine += sep
+				currentVis += sepVis
+			}
+			currentLine += item
+			currentVis += itemVis
+		}
+	}
+	if currentVis > indentVis {
+		result = append(result, currentLine)
+	}
+	return result
+}
+
+// wrapEdges renders edges wrapping to fit within maxWidth.
+func wrapEdges(edges []ol.Connection, indent string, maxWidth int) []string {
+	var result []string
+	sep := "  " + Separator + "  "
+	sepVis := 5
+	indentVis := VisLen(indent)
+
+	currentLine := indent
+	currentVis := indentVis
+
+	for i, e := range edges {
+		total := e.Instance + e.Relates
+		item := lipgloss.NewStyle().Faint(true).Render(DimName(e.Dim)) +
+			" " + Dim.Render(fmt.Sprintf("%d", total))
+		itemVis := len(e.Dim) + 1 + len(fmt.Sprintf("%d", total))
+
+		addSep := i > 0
+		needed := itemVis
+		if addSep {
+			needed += sepVis
+		}
+
+		if currentVis+needed > maxWidth && currentVis > indentVis {
+			result = append(result, currentLine)
+			currentLine = indent + item
+			currentVis = indentVis + itemVis
+		} else {
+			if addSep {
+				currentLine += sep
+				currentVis += sepVis
+			}
+			currentLine += item
+			currentVis += itemVis
+		}
+	}
+	if currentVis > indentVis {
+		result = append(result, currentLine)
+	}
+	return result
+}
+
+// DimsListResult holds rendered dims and their line offsets.
+type DimsListResult struct {
+	Content    string
+	EntryStart []int // start line index for each entry
+	EntryEnd   []int // end line index (inclusive) for each entry
+	TotalLines int
+}
+
+// RenderDimsList renders the full dimensions panel with entry position tracking.
+func RenderDimsList(dims []ol.ScopeDim, cursor int, inside *InsideState, maxWidth int) DimsListResult {
+	var result DimsListResult
+	var allLines []string
+
 	for i, dim := range dims {
+		if i > 0 {
+			// 2 blank lines between entries
+			allLines = append(allLines, "", "")
+		}
 		var is InsideState
 		if inside != nil && i == cursor {
 			is = *inside
 		}
-		sections = append(sections, RenderDimEntry(dim, colorMap, i == cursor, is))
+		entry := RenderDimEntry(dim, i == cursor, is, maxWidth)
+		entryLines := strings.Split(entry, "\n")
+
+		start := len(allLines)
+		allLines = append(allLines, entryLines...)
+		end := len(allLines) - 1
+
+		result.EntryStart = append(result.EntryStart, start)
+		result.EntryEnd = append(result.EntryEnd, end)
 	}
-	return strings.Join(sections, "\n\n\n")
+
+	result.Content = strings.Join(allLines, "\n")
+	result.TotalLines = len(allLines)
+	return result
 }

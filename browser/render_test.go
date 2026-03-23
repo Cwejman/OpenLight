@@ -50,7 +50,7 @@ func TestRenderView(t *testing.T) {
 			},
 		},
 	}
-	m.rebuildColorMap()
+
 
 	view := m.View()
 	fmt.Println(view)
@@ -94,7 +94,7 @@ func TestRenderInsideDim(t *testing.T) {
 			},
 		},
 	}
-	m.rebuildColorMap()
+
 	m.navLevel = levelInsideDim
 	m.side = sideInstance
 	m.subCursor = 0 // education selected
@@ -167,7 +167,7 @@ func TestRenderSplitView(t *testing.T) {
 		},
 	}
 	m.chunkCounts = ol.ChunkCounts{InScope: 5, Instance: 3, Relates: 2}
-	m.rebuildColorMap()
+
 
 	view := m.View()
 	fmt.Println(view)

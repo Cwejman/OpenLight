@@ -29,7 +29,6 @@ func testModel() model {
 			{Name: "education", Shared: 1},
 		},
 	}
-	m.rebuildColorMap()
 	return m
 }
 

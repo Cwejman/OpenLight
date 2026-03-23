@@ -1,20 +1,16 @@
 package ui
 
 import (
-	"regexp"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
-const (
-	LeftWidth = 48
-	Gap       = 5
-)
+const Gap = 4
 
-var ansiRE = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-
-// VisLen returns the visible length of a string (stripping ANSI codes).
+// VisLen returns the visible (printed) width of a string, handling ANSI and unicode.
 func VisLen(s string) int {
-	return len(ansiRE.ReplaceAllString(s, ""))
+	return lipgloss.Width(s)
 }
 
 // Pad pads a string to the given visible width.
@@ -26,8 +22,28 @@ func Pad(s string, width int) string {
 	return s
 }
 
+// TruncateToWidth truncates a line to fit within maxWidth visible characters.
+func TruncateToWidth(s string, maxWidth int) string {
+	if VisLen(s) <= maxWidth {
+		return s
+	}
+	runes := []rune(s)
+	for i := len(runes); i > 0; i-- {
+		candidate := string(runes[:i])
+		if VisLen(candidate) <= maxWidth {
+			return candidate
+		}
+	}
+	return ""
+}
+
+// PanelWidth returns the width for each panel given terminal width.
+func PanelWidth(termWidth int) int {
+	return (termWidth - Gap) / 2
+}
+
 // MergePanels merges left and right panel lines side by side.
-func MergePanels(left, right string) string {
+func MergePanels(left, right string, leftWidth int) string {
 	leftLines := strings.Split(left, "\n")
 	rightLines := strings.Split(right, "\n")
 
@@ -47,7 +63,10 @@ func MergePanels(left, right string) string {
 		if i < len(rightLines) {
 			r = rightLines[i]
 		}
-		lines = append(lines, Pad(l, LeftWidth)+gap+r)
+		if VisLen(l) > leftWidth {
+			l = TruncateToWidth(l, leftWidth)
+		}
+		lines = append(lines, Pad(l, leftWidth)+gap+r)
 	}
 
 	return strings.Join(lines, "\n")

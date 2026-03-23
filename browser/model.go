@@ -15,6 +15,7 @@ const (
 	modeNormal mode = iota
 	modeDrop
 	modePull
+	modeBranch
 )
 
 type panel int
@@ -46,7 +47,6 @@ type model struct {
 	scope      *ol.ScopeResponse
 	err        error
 	cursor     int
-	colorMap   map[string]int // dimension name → color index
 	mode       mode
 	pullInput  string // text input for pull mode
 	loading    bool
@@ -59,6 +59,12 @@ type model struct {
 	navLevel    navLevel
 	side        memberSide // instance or relates when inside an element
 	subCursor   int        // cursor for sub-items inside an element
+	scrollOff   int   // line offset for scrolling the dims panel
+	entryStart  []int // line offsets per dim entry (computed in Update)
+	entryEnd    []int
+	totalLines  int
+	branch      string       // current active branch
+	branches    []ol.Branch  // cached branch list for picker
 }
 
 // scopeMsg carries the result of an async scope fetch.
@@ -74,17 +80,29 @@ type chunksMsg struct {
 	err    error
 }
 
+// branchListMsg carries the result of an async branch list fetch.
+type branchListMsg struct {
+	branches []ol.Branch
+	err      error
+}
+
+// branchSwitchedMsg signals a branch switch completed.
+type branchSwitchedMsg struct {
+	err error
+}
+
 // clientReadyMsg is sent once the system is discovered.
 type clientReadyMsg struct {
 	client *ol.Client
 	resp   *ol.ScopeResponse
 	err    error
+	branch string
 }
 
 func newModel() model {
 	return model{
-		colorMap: make(map[string]int),
-		showDims: true,
+		showDims:   true,
+		showChunks: true,
 	}
 }
 
@@ -96,7 +114,7 @@ func (m model) Init() tea.Cmd {
 		}
 		client := &ol.Client{DBPath: dbPath(systemDir)}
 		resp, err := client.Scope()
-		return clientReadyMsg{client: client, resp: resp, err: err}
+		return clientReadyMsg{client: client, resp: resp, err: err, branch: activeBranch(systemDir)}
 	}
 }
 
@@ -105,6 +123,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.adjustScroll()
 
 	case clientReadyMsg:
 		m.loading = false
@@ -113,10 +132,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.client = msg.client
+		m.branch = msg.branch
 		m.scope = msg.resp
 		m.cursor = 0
+		m.scrollOff = 0
 		m.history = nav.NewHistory(msg.resp.Scope)
-		m.rebuildColorMap()
+		m.adjustScroll()
+		if m.showChunks {
+			return m, m.fetchChunksCmd()
+		}
 
 	case scopeMsg:
 		m.loading = false
@@ -126,8 +150,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.scope = msg.resp
 		m.cursor = 0
+		m.scrollOff = 0
 		m.chunks = nil
-		m.rebuildColorMap()
+		m.adjustScroll()
 		// If chunks panel is visible, fetch chunks
 		if m.showChunks {
 			return m, m.fetchChunksCmd()
@@ -137,6 +162,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.err == nil {
 			m.chunks = msg.items
 			m.chunkCounts = msg.counts
+		}
+
+	case branchListMsg:
+		if msg.err == nil {
+			m.branches = msg.branches
+			m.mode = modeBranch
+		}
+
+	case branchSwitchedMsg:
+		if msg.err == nil {
+			// Reload scope on new branch
+			return m, func() tea.Msg {
+				resp, err := m.client.Scope()
+				return scopeMsg{resp: resp, err: err}
+			}
 		}
 
 	case tea.KeyMsg:
@@ -149,6 +189,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateDrop(msg)
 		case modePull:
 			return m.updatePull(msg)
+		case modeBranch:
+			return m.updateBranch(msg)
 		default:
 			return m.updateNormal(msg)
 		}
@@ -173,6 +215,7 @@ func (m model) updateEntryLevel(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "j", "down":
 		if m.scope != nil && m.cursor < len(m.scope.Dimensions)-1 {
 			m.cursor++
+			m.adjustScroll()
 			if m.showChunks {
 				return m, m.fetchChunksCmd()
 			}
@@ -180,6 +223,7 @@ func (m model) updateEntryLevel(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "k", "up":
 		if m.cursor > 0 {
 			m.cursor--
+			m.adjustScroll()
 			if m.showChunks {
 				return m, m.fetchChunksCmd()
 			}
@@ -206,6 +250,15 @@ func (m model) updateEntryLevel(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.focus = panelChunks
 			} else {
 				m.focus = panelDims
+			}
+		}
+	case "b":
+		// Fetch branch list, then enter branch picker
+		client := m.client
+		if client != nil {
+			return m, func() tea.Msg {
+				branches, err := client.BranchList()
+				return branchListMsg{branches: branches, err: err}
 			}
 		}
 	case "u":
@@ -401,6 +454,31 @@ func (m model) updatePull(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 }
 
+func (m model) updateBranch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	key := msg.String()
+	if len(key) == 1 && key[0] >= '1' && key[0] <= '9' {
+		idx := int(key[0]-'1')
+		if idx < len(m.branches) {
+			target := m.branches[idx].Name
+			if target == m.branch {
+				m.mode = modeNormal
+				return m, nil
+			}
+			m.mode = modeNormal
+			m.branch = target
+			client := m.client
+			return m, func() tea.Msg {
+				if err := client.BranchSwitch(target); err != nil {
+					return branchSwitchedMsg{err: err}
+				}
+				return branchSwitchedMsg{}
+			}
+		}
+	}
+	m.mode = modeNormal
+	return m, nil
+}
+
 func (m model) addFocusedDim() (tea.Model, tea.Cmd) {
 	if m.scope == nil || m.cursor >= len(m.scope.Dimensions) {
 		return m, nil
@@ -463,32 +541,44 @@ func (m model) fetchChunksCmd() tea.Cmd {
 	}
 }
 
-func (m *model) rebuildColorMap() {
-	m.colorMap = make(map[string]int)
-	idx := 0
-	for _, name := range m.scope.Scope {
-		m.colorMap[name] = idx
-		idx++
+// adjustScroll recomputes entry positions and adjusts scrollOff
+// so the cursor entry is visible. Must be called after any cursor change.
+func (m *model) adjustScroll() {
+	if m.scope == nil || m.width == 0 {
+		return
 	}
-	for _, dim := range m.scope.Dimensions {
-		if _, exists := m.colorMap[dim.Name]; !exists {
-			m.colorMap[dim.Name] = idx
-			idx++
-		}
-		for _, c := range dim.Connections {
-			if _, exists := m.colorMap[c.Dim]; !exists {
-				m.colorMap[c.Dim] = idx
-				idx++
-			}
-		}
-		for _, e := range dim.Edges {
-			if _, exists := m.colorMap[e.Dim]; !exists {
-				m.colorMap[e.Dim] = idx
-				idx++
-			}
-		}
+	r := ui.RenderDimsList(m.scope.Dimensions, m.cursor, m.insideState(), m.dimsMaxWidth())
+	m.entryStart = r.EntryStart
+	m.entryEnd = r.EntryEnd
+	m.totalLines = r.TotalLines
+
+	viewH := m.contentHeight()
+	if viewH <= 0 || m.totalLines <= viewH {
+		m.scrollOff = 0
+		return
+	}
+
+	start := 0
+	end := m.totalLines - 1
+	if m.cursor < len(m.entryStart) {
+		start = m.entryStart[m.cursor]
+		end = m.entryEnd[m.cursor]
+	}
+
+	if start < m.scrollOff {
+		m.scrollOff = start
+	} else if end >= m.scrollOff+viewH {
+		m.scrollOff = end - viewH + 1
+	}
+
+	if m.scrollOff < 0 {
+		m.scrollOff = 0
+	}
+	if max := m.totalLines - viewH; m.scrollOff > max {
+		m.scrollOff = max
 	}
 }
+
 
 func (m model) View() string {
 	if m.width == 0 {
@@ -503,14 +593,15 @@ func (m model) View() string {
 		return "\n " + ui.Dim.Render("loading...") + "\n"
 	}
 
-	// Neither panel visible
-	if !m.showDims && !m.showChunks {
-		return m.viewNoPanels()
-	}
+	// Fixed top bar
+	top := ui.TopBar(m.scope, m.branch) + "\n\n"
 
+	// Scrollable content
 	var content string
-	if m.loading {
-		content = " " + ui.Dim.Render("loading...")
+	if !m.showDims && !m.showChunks {
+		content = "\n " + ui.Dim.Render("Press t to toggle a panel.")
+	} else if m.loading {
+		content = "\n " + ui.Dim.Render("loading...")
 	} else if m.showDims && m.showChunks {
 		content = m.viewSplit()
 	} else if m.showChunks {
@@ -519,60 +610,96 @@ func (m model) View() string {
 		content = m.viewDimsOnly()
 	}
 
-	// Top bar + content + bottom bar
-	var b strings.Builder
-	b.WriteString(ui.TopBar(m.scope, m.colorMap))
-	b.WriteString("\n\n\n")
-	b.WriteString(content)
-
-	rendered := b.String()
-	lines := strings.Count(rendered, "\n") + 1
-	if m.height > lines+3 {
-		rendered += strings.Repeat("\n", m.height-lines-3)
+	// Pad content to fill between top and bottom
+	contentLines := strings.Count(content, "\n") + 1
+	viewH := m.contentHeight()
+	if contentLines < viewH {
+		content += strings.Repeat("\n", viewH-contentLines)
 	}
-	rendered += "\n" + m.bottomBar() + "\n"
 
-	return rendered
+	// Fixed bottom bar
+	bottom := m.bottomBar()
+
+	return top + content + "\n" + bottom + "\n"
+}
+
+// panelWidth returns the width for each panel (equal split).
+func (m model) panelWidth() int {
+	return ui.PanelWidth(m.width)
+}
+
+// dimsMaxWidth returns the max visible width for the dims panel.
+func (m model) dimsMaxWidth() int {
+	return m.panelWidth()
+}
+
+// contentHeight returns the available lines between top bar and bottom bar.
+func (m model) contentHeight() int {
+	// top bar (1 line) + 2 blank lines + bottom bar (2 lines)
+	return m.height - 5
 }
 
 func (m model) viewDimsOnly() string {
-	return ui.RenderDimsList(m.scope.Dimensions, m.colorMap, m.cursor, m.insideState())
+	r := ui.RenderDimsList(m.scope.Dimensions, m.cursor, m.insideState(), m.dimsMaxWidth())
+	return m.clipToViewport(r.Content)
+}
+
+// chunksMaxWidth returns the available width for the chunks panel.
+func (m model) chunksMaxWidth() int {
+	if m.showDims {
+		return m.panelWidth()
+	}
+	return m.width
 }
 
 func (m model) viewChunksOnly() string {
 	if m.chunks == nil {
 		return ui.Dim.Render(" loading chunks...")
 	}
-	return ui.RenderChunksList(m.chunks, m.colorMap, m.chunkCounts)
+	return ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth())
 }
 
 func (m model) viewSplit() string {
-	left := ui.RenderDimsList(m.scope.Dimensions, m.colorMap, m.cursor, m.insideState())
+	r := ui.RenderDimsList(m.scope.Dimensions, m.cursor, m.insideState(), m.dimsMaxWidth())
+	left := m.clipToViewport(r.Content)
 	var right string
 	if m.chunks == nil {
 		right = ui.Dim.Render("loading chunks...")
 	} else {
-		right = ui.RenderChunksList(m.chunks, m.colorMap, m.chunkCounts)
+		right = ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth())
 	}
-	return ui.MergePanels(left, right)
+	right = clipLines(right, m.contentHeight())
+	return ui.MergePanels(left, right, m.panelWidth())
 }
 
-func (m model) viewNoPanels() string {
-	var b strings.Builder
-	b.WriteString(ui.TopBar(m.scope, m.colorMap))
-	b.WriteString("\n\n")
-
-	// Center message
-	msg := ui.Dim.Render("Press t to toggle a panel.")
-	b.WriteString("\n " + msg)
-
-	rendered := b.String()
-	lines := strings.Count(rendered, "\n") + 1
-	if m.height > lines+3 {
-		rendered += strings.Repeat("\n", m.height-lines-3)
+// clipLines truncates content to maxLines.
+func clipLines(content string, maxLines int) string {
+	if maxLines <= 0 {
+		return ""
 	}
-	rendered += "\n" + m.bottomBar() + "\n"
-	return rendered
+	lines := strings.Split(content, "\n")
+	if len(lines) <= maxLines {
+		return content
+	}
+	return strings.Join(lines[:maxLines], "\n")
+}
+
+
+// clipToViewport clips rendered content to the visible area using pre-computed scrollOff.
+func (m model) clipToViewport(content string) string {
+	lines := strings.Split(content, "\n")
+	viewH := m.contentHeight()
+	if viewH <= 0 || len(lines) <= viewH {
+		return content
+	}
+	off := m.scrollOff
+	if off+viewH > len(lines) {
+		off = len(lines) - viewH
+	}
+	if off < 0 {
+		off = 0
+	}
+	return strings.Join(lines[off:off+viewH], "\n")
 }
 
 func (m model) insideState() *ui.InsideState {
@@ -589,9 +716,11 @@ func (m model) insideState() *ui.InsideState {
 func (m model) bottomBar() string {
 	switch m.mode {
 	case modeDrop:
-		return ui.DropBar(m.scope.Scope, m.colorMap)
+		return ui.DropBar(m.scope.Scope)
 	case modePull:
 		return ui.PullBar(m.pullInput)
+	case modeBranch:
+		return ui.BranchBar(m.branches, m.branch)
 	default:
 		return ui.BottomBar()
 	}
