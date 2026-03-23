@@ -31,6 +31,16 @@ type Connection struct {
 	Relates  int    `json:"relates"`
 }
 
+// Branch is a branch entry from `ol branch list`.
+type Branch struct {
+	Name string `json:"name"`
+	Head string `json:"head"`
+}
+
+type BranchListResponse struct {
+	Branches []Branch `json:"branches"`
+}
+
 // ChunkItem is a chunk returned with --chunks.
 type ChunkItem struct {
 	ID       string            `json:"id"`

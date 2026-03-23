@@ -7,23 +7,22 @@ import (
 	"github.com/openlight/browser/ol"
 )
 
-// TopBar renders the scope bar with scope dims and aggregate counts.
-func TopBar(resp *ol.ScopeResponse, colorMap map[string]int) string {
-	if len(resp.Scope) == 0 {
-		return " " + Dim.Render("{}")
-	}
+// TopBar renders the scope bar with branch, scope dims and aggregate counts.
+func TopBar(resp *ol.ScopeResponse, branch string) string {
+	branchLabel := Dim.Render(branch)
 
-	var parts []string
-	for _, name := range resp.Scope {
-		idx, ok := colorMap[name]
-		if !ok {
-			idx = 0
+	var scopeLabel string
+	if len(resp.Scope) == 0 {
+		scopeLabel = Dim.Render("{}")
+	} else {
+		var parts []string
+		for _, name := range resp.Scope {
+			parts = append(parts, BoldDimName(name))
 		}
-		parts = append(parts, BoldDimName(name, idx))
+		scopeLabel = strings.Join(parts, Dim.Render(", "))
 	}
-	scope := strings.Join(parts, Dim.Render(", "))
 
 	counts := fmt.Sprintf("%d", resp.Chunks.InScope)
 
-	return " " + scope + "  " + Light.Render(counts)
+	return " " + branchLabel + "  " + scopeLabel + "  " + Light.Render(counts)
 }

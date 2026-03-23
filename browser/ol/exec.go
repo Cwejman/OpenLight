@@ -53,3 +53,28 @@ func (c *Client) ScopeWithChunks(dims ...string) (*ScopeResponse, error) {
 	}
 	return &resp, nil
 }
+
+// BranchList runs `ol branch list --format json`.
+func (c *Client) BranchList() ([]Branch, error) {
+	out, err := exec.Command("ol", "branch", "list", "--db", c.DBPath, "--format", "json").Output()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return nil, fmt.Errorf("ol branch list: %s", strings.TrimSpace(string(exitErr.Stderr)))
+		}
+		return nil, fmt.Errorf("ol branch list: %w", err)
+	}
+	var resp BranchListResponse
+	if err := json.Unmarshal(out, &resp); err != nil {
+		return nil, fmt.Errorf("ol branch list: parse error: %w", err)
+	}
+	return resp.Branches, nil
+}
+
+// BranchSwitch runs `ol branch switch <name>`.
+func (c *Client) BranchSwitch(name string) error {
+	out, err := exec.Command("ol", "branch", "switch", name, "--db", c.DBPath).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ol branch switch: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
+}

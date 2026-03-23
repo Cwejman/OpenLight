@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,4 +33,19 @@ func findSystem(startDir string) (string, error) {
 // dbPath returns the path to system.db within the .openlight/ directory.
 func dbPath(systemDir string) string {
 	return filepath.Join(systemDir, "system.db")
+}
+
+// activeBranch reads the current branch from .openlight/config.json.
+func activeBranch(systemDir string) string {
+	data, err := os.ReadFile(filepath.Join(systemDir, "config.json"))
+	if err != nil {
+		return "main"
+	}
+	var cfg struct {
+		Branch string `json:"branch"`
+	}
+	if json.Unmarshal(data, &cfg) != nil || cfg.Branch == "" {
+		return "main"
+	}
+	return cfg.Branch
 }
