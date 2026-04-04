@@ -2,6 +2,8 @@
 
 An OS shell where the substrate is the foundation. Scope replaces the working directory. Programs take typed interfaces. The file system and knowledge system are unified.
 
+The shell is an engine. It is TTY-able — works in a terminal. It is also usable as an API — GUIs and richer interfaces sit on top of the same engine. The interaction model (scope, invoke, navigate) is independent of rendering. See `interface.md` for the visual layer.
+
 This is an active exploration. Concepts range from settled to speculative.
 
 ## What It Is
@@ -98,55 +100,52 @@ Cached summaries (keyed to scope + commit_id + model) support this — the subst
 
 ## Two Filesystems, One Shell
 
-### The substrate filesystem (FUSE-mounted)
+### The substrate and the real filesystem
 
-The substrate's database presented as a filesystem via FUSE.
+The shell works with two systems:
 
-- **Not a tree — dimensional.** `cd values` scopes to a chunk named `values`. You see everything placed on it. `cd values/engineering` narrows further. Teleportation, not hierarchy.
-- **Atomic.** Every mutation is a database transaction.
-- **Versioned.** Every state is in the commit log.
-- **Branchable.** Fork the database.
-- **Lossless.** Nothing deleted, only retracted.
+- **The substrate** — knowledge, culture, identity, sessions, agent state. Relational, dimensional. Scope-navigable. Versioned through substrate commits and branches.
+- **The real filesystem** — source code, binaries, media. Hierarchical, tree-structured. Git-tracked. POSIX.
 
-### The real filesystem
+Git and the substrate don't conflict — they serve different things. Git tracks source code. The substrate tracks knowledge structure. Integration chunks bridge them.
 
-Normal Linux filesystem for source code, binaries, installed packages, media, the FUSE binary itself. Git-tracked normally. Tree-structured, POSIX.
+### Integration: file references
 
-### The bridge: integration chunks
+A file reference is a chunk placed on the scopes where it's relevant. Its body contains resolution parameters — at minimum a path, plus anchoring information.
 
-A chunk in the substrate with body fields containing resolution parameters (path, repo, etc.) points to a real file. The substrate doesn't know what "git" means — it holds chunks with fields. The shell or an agent resolves the reference.
+**Git as first integration driver.** If the referenced file is git-tracked, the substrate commit and the git commit together pin the reference in time. An agent or caretaker can later reconcile: what git commits have touched this file since the reference was made? If the file changed, is the surrounding knowledge still aligned? The substrate stores the fact; the intelligence evaluates it.
 
-Git and the substrate don't conflict — they serve different things:
-- Git tracks source code (real files, real filesystem)
-- The substrate tracks knowledge structure (chunks, placements, versions, branches)
-- Integration chunks in the substrate reference git-tracked files
+Multiple integration types exist — files, API endpoints, audio, video. Each has its own archetype defining required fields (path + commit for git, endpoint + method for REST, etc.). Each has its own resolution logic. The pattern is uniform: a chunk whose body contains resolution parameters, whose archetype defines the contract.
 
-### In the shell, they coexist
+File references don't mirror filesystem hierarchy. The substrate's placement structure reflects knowledge relationships. The file sits where it sits on disk. The reference chunk sits where it's meaningful in the substrate.
 
-| Substrate (FUSE) | Real filesystem |
-|---|---|
-| Knowledge, culture, identity, sessions, agent state | Source code, binaries, media |
-| Relational, dimensional | Hierarchical, tree |
-| Substrate versioning (commits, branches) | Git versioning |
-| Atomic (transactions) | Non-atomic (POSIX) |
-| Scope-navigable | Path-navigable |
-| Chunks with placements | Files in directories |
+**Filesystem paths in scope.** When a filesystem path is added to knowledge scope, and reference chunks connect that path to substrate chunks, the path functions as a placement — not in the database, but in the shell's scope resolution. The reference chunk is the hinge, placed on substrate scopes and pointing to a filesystem path. The shell resolves the bridge transparently.
+
+### FUSE — deprioritized
+
+FUSE would present the substrate as a filesystem, bridging to Unix tools that only understand files. Inside the shell, this bridge isn't needed — the shell already speaks substrate natively. Programs use the shell language or an SDK. `ol` works directly on the host without FUSE.
+
+FUSE may have value for tools that fundamentally expect file paths (editors, compilers, linters). This will become clearer as the system develops. Not needed to start.
 
 ## Invocables and Type Contracts — Emerging
 
-The substrate's spec system enables typed invocation. An invocable declares what it needs:
+The substrate's spec system enables typed invocation. An invocable declares what it needs through its type contract. The shell resolves contracts at invocation time: matching what the invocable needs against what's in scope.
 
-```sh
-# agents/claude/invoke.cv
-@type adapter
-@needs instance-of:session
-@package claude-code
+### Shell language for invocables
 
-context=$(scope . --format md)
-claude -p "$@" --bare --system-prompt-file <(echo "$context") --output-format json
-```
+`sh` is the only scripting language guaranteed on Unix without installing packages. But our shell has more power than `sh` for this domain — it speaks the substrate natively. Invocables for the shell can be written in the shell language itself, with no need for external languages or SDKs.
 
-The shell parses `@` declarations and resolves them before running the body. `@needs instance-of:session` means: the current knowledge scope must contain a chunk that is an instance of the `session` archetype. The substrate's spec enforcement validates conformance.
+Services (long-running processes) are different — they may need real languages with proper concurrency and error handling. But shell invocables cover the invocation surface.
+
+### Type resolution
+
+The shell resolves invocations by type, not by explicit naming. `tell "question"` works when a session is in knowledge scope and an adapter is in invocable scope — the shell resolves both. No need to specify `tell claude "question"` if there's only one adapter in scope. The contract lives in the substrate (archetypes, specs). The shell matches supply to demand.
+
+### Contract resolution
+
+- **The substrate** holds archetypes, specs, what exists and where it's placed
+- **The shell** matches invocable requirements against what's in scope at invocation time
+- **The invocable** receives resolved inputs and does its work
 
 ### The agents example — emerging
 
@@ -155,26 +154,23 @@ The shell parses `@` declarations and resolves them before running the body. `@n
 - **adapter** — an archetype for invocables that map a general agent interface to a specific CLI.
 
 `agents/claude` is a concrete adapter:
-- Declares `@type adapter` and `@needs instance-of:session`
-- Declares `@package claude-code` with config
-- Assembles context from knowledge scope into a system prompt
+- Instance of the `adapter` archetype
+- Depends on `claude-code` package with config
+- Assembles context from knowledge scope
 - Invokes `claude -p --bare --system-prompt-file <context>` — bare mode means Claude CLI is just a completion engine, the shell controls all context
 - Stores prompt and response as chunks placed on the session with seq ordering
 
 `agents/codex` would be the same adapter type with different CLI mapping. The archetype is the abstraction; the CLI mapping is the implementation.
 
-**What's NOT yet specified:** How session creation works as a shell command. How the adapter concretely receives and returns data. These operational mechanics need grounding through implementation.
+### Code as derivation — foundational
 
-### Contract resolution
+The substrate holds knowledge and contracts. Code is derived from that knowledge — generated by agents of the system. This is foundational to why this project exists: knowledge first, code derived. The code is a mirror of understanding, never the source of truth. Reverse testing verifies purity: regenerate the code from knowledge alone — if it still works, the knowledge is complete. If not, something was in the code that wasn't captured in knowledge.
 
-The contract is split across three places:
-- **The invocable** (source code / definition) declares what it needs: "I need an instance-of session in scope"
-- **The substrate** holds what exists, what's placed where, and validates spec conformance
-- **The shell** matches demand against supply at invocation time
+This dissolves the friction between specs in the substrate and types in code. If agents generate the invocable code from substrate knowledge, the types in the generated code come from the same substrate the agent read. There's no sync problem, no codegen machinery, no two sources of truth.
 
-### Invocable scripts — thought, not settled
+The boundary between substrate and code exists — languages need types at development time, not just at runtime. But this boundary is naturally addressed when the authoring happens in the substrate and the code is the output.
 
-Invocables could be shell scripts (`.cv` files) declaring their typed interface inline. The shell parses `@` declarations and resolves them before running the body. Each language may have its own SDK for querying the substrate, or invocables can work directly in the shell language. The `scope` command would be the primary interface for invocables to read their context.
+**What's NOT yet specified:** How session creation works as a shell command. How the adapter concretely receives and returns data. The exact invocable script format.
 
 ## Peers and Spawn — Settled Concepts
 
@@ -221,33 +217,11 @@ The spawner (on the host) resolves peer names to paths. Inside the VM, peers are
 
 Each directory can declare packages it needs (`packages.edn`) with configuration. An invocable carries its own dependencies — adding `agents/claude` to your invocable scope makes claude-code available with its default config. You can override per-invocation.
 
-## FUSE Layer — Emerging
+## FUSE Layer — Deprioritized
 
-Path segments are scopes. The path IS the query.
+If FUSE becomes relevant, the design concept: path segments are scopes, the path IS the query. `/cv/culture/values/` lists chunks placed on `values`. Adding segments narrows by intersection. Same chunk through different paths = same inode. POSIX operations map to substrate operations (readdir → list placements, read → return body, create → place chunk, unlink → remove placement, etc.).
 
-- `/cv/culture/values/` → chunks placed on `values`
-- `/cv/culture/values/engineering/` → chunks placed on both (intersection)
-- Path order doesn't matter: same chunks regardless of segment order
-- Same chunk through different paths = same inode
-- Chunks have optional names — these become filenames in FUSE. Unnamed chunks use their ID.
-
-### Filesystem scope vs substrate scope
-
-Both are scope but behave differently:
-- **Filesystem scope** is hierarchical. `/code/my/package` is narrower than `/code`.
-- **Substrate scope** is set intersection. `values ∩ engineering` — no inherent hierarchy (though the placement graph can encode hierarchy).
-- The shell unifies both in `()`. `(code/my/package values)` — the intersection crosses both worlds.
-
-### POSIX operations map to substrate operations
-
-| FUSE operation | Substrate meaning |
-|---|---|
-| `readdir` on a chunk | List chunks placed on it |
-| `read` on a chunk | Return chunk body content |
-| `create` + `release` | Create chunk with placement inferred from path scope (atomic commit) |
-| `unlink` at scoped path | Remove placement from that scope |
-| `link` | Add placement in destination scope |
-| `rename` | Move placement from source to destination scope |
+Filesystem scope is hierarchical, substrate scope is set intersection. The shell could unify both in `()`. This remains valid design thinking but is not on the critical path.
 
 ## Declarative Model — Research Findings
 
@@ -297,33 +271,41 @@ FUSE makes substrate chunks readable by all Unix tools. Pipes are kernel buffers
 
 Key insight: don't maintain global consistency. Local consistency, global coherence emerges. Each agent maintains its own scope.
 
+## Agent Case — Emerging
+
+The founding case for the shell. An agent session grounded in substrate primitives.
+
+**Session flow:**
+1. Start the shell: `shell my-project` — project is rw, declared peers (culture, agents/core, agents/claude) mount ro
+2. Create a session: `new session "debugging scope query"` — a chunk placed on the `session` archetype
+3. Invoke: `tell "why is the scope query returning duplicates?"` — shell resolves adapter from invocable scope, assembles context (culture + session history + knowledge scope + prompt), invokes
+4. Each turn becomes chunks: prompt placed on session (seq: N) and on `prompt` (instance), response placed on session (seq: N+1) and on `answer` (instance). Tool calls, knowledge updates — same pattern.
+
+**Agent scope vs visual scope.** What the agent receives as context and what the user sees are distinct. The user controls both but they can differ. The user might be viewing tool calls while the agent's context includes the full session plus knowledge scope.
+
+**Scope pinning.** Pinned scopes are fixed in the agent's context — culture, core knowledge. The agent reads them but can't remove them. Changing a pinned scope requires approval (like a tool call). Unpinned scopes the agent manages freely — dropping what's irrelevant, adding what it discovers.
+
 ## What Is Forming — Thoughts, Not Settled
 
 - `[]` as PATH (invocable findability), `()` as PWD (knowledge context) — the Unix analogy
 - `.` as "current knowledge scope content" — implicit context passing
 - `sum` as primary navigation — summarizes ALL chunks in scope, not just listing
-- `.cv` shell scripts as invocable entry points with typed declarations
-- Scope as boundary (restricting what invocable sees) vs pointer (directing attention) — abstract, may matter
 - Scope modifiers (`:fuzzy` for neighbouring scopes, `. - scope-name` for exclusion, session filtering)
 - Whether invocables are greedy (take all scope) or require explicit `.`
 - Per-invocation config override (invocable carries defaults, you override)
-- CLI/TUI/UI merge — navigable/clickable output, live views. Traditional shell call-and-response may be too archaic for what this explores. The tension: richer interaction vs real shell where Unix tools work.
 - Whether the shell can be used without a VM (just shell + FUSE on host, or just `ol`)
 - Multiple scope targets showing merged views
 - Services (daemons) — side-effect/purity implications
-- Shell language — bridges to any language, or has a preferred one
-- SDK for languages that want native substrate access vs shell command interop
+- Shell language design — the language needs to be expressive enough for real invocable logic
 - Scope-dependent package installation (scoping a sub-module installs only its packages)
 
 ## What Is Open — Genuinely Unknown
 
-- How FUSE coexists with real files in the same peer directory (overlay vs subdirectory mount)
-- How `cd` works — scope change, filesystem navigation, or both depending on target
 - Exact scope query syntax (characters, modifiers, composition)
+- How `cd` works — scope change, filesystem navigation, or both depending on target
 - How temporal depth (lookback) is presented to the user
-- How external tool edits (vim on a FUSE file) propagate back to the database
-- The naming of the shell and the overall project
-- Whether scope-dependent package installation is on-demand or at VM start
+- The exact invocable script format and how invocables are structured in peer directories
+- Package mechanism details — how configuration works, resolution, installation timing
 - Export/import format for git-tracking substrate databases
 
 ## Culture

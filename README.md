@@ -49,9 +49,15 @@ Intelligence is continuous, not a single point in time. These are threads being 
 
 ## The Shell `🐚`
 
-The substrate powers an OS shell where scope replaces the working directory. Two filesystems — the substrate (FUSE-mounted) and a normal filesystem for code — unified in one shell. Programs take typed scope interfaces instead of string arguments.
+The substrate powers an OS shell where scope replaces the working directory. Two filesystems — the substrate and a normal filesystem for code — unified in one shell. Programs take typed scope interfaces instead of string arguments. The shell is an engine — TTY-able, but also an API for richer interfaces.
 
 See `shell.md` for the exploration.
+
+## The Interface `🪟`
+
+A scope-based window manager and first-class UI layer. Windows are scopes — deterministic views into the substrate, filesystem, or any program that exposes structure. Programs expose their innards as scope; the manager navigates everything uniformly. The shell's own UI is windows in this manager, not a custom-built application.
+
+See `interface.md` for the exploration.
 
 ## Culture `🌱`
 
@@ -75,7 +81,8 @@ See `shell.md` for the exploration.
 ## Files `📄`
 
 - `substrate.md` — the spec: chunk primitive, placement, schema, archetypes
-- `shell.md` — shell exploration: scope channels, typed invocables, FUSE
+- `shell.md` — shell exploration: scope channels, typed invocables, integration, agent case
+- `interface.md` — interface layer: scope-based window manager, UI from type contracts
 - `landscape.md` — ecosystem research: what other systems do, what's unique here
 
 ![footer](.img/footer.png)
