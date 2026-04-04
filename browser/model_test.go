@@ -65,11 +65,12 @@ func TestNavigation_JK(t *testing.T) {
 		t.Fatalf("after k: got %d, want 1", m.cursor)
 	}
 
-	// Back to top
+	// Back to scope level (-1)
 	m = sendKey(m, "k")
 	m = sendKey(m, "k")
-	if m.cursor != 0 {
-		t.Fatalf("after kkk (clamp): got %d, want 0", m.cursor)
+	m = sendKey(m, "k")
+	if m.cursor != -1 {
+		t.Fatalf("clamp at scope: got %d, want -1", m.cursor)
 	}
 }
 

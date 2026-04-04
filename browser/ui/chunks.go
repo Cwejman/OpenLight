@@ -9,12 +9,24 @@ import (
 )
 
 // RenderChunkEntry renders a single chunk, wrapping text to maxWidth.
-func RenderChunkEntry(chunk ol.ChunkItem, maxWidth int) string {
+func RenderChunkEntry(chunk ol.ChunkItem, maxWidth int, selected bool) string {
 	var lines []string
 
 	// Text content — wrap to width
-	for _, wl := range WrapText(chunk.Text, maxWidth) {
-		lines = append(lines, Light.Render(wl))
+	prefix := "  "
+	style := Light
+	if selected {
+		prefix = Bold.Render("▸") + " "
+		style = BoldWhite
+	}
+	first := true
+	for _, wl := range WrapText(chunk.Text, maxWidth-2) {
+		if first {
+			lines = append(lines, prefix+style.Render(wl))
+			first = false
+		} else {
+			lines = append(lines, "  "+style.Render(wl))
+		}
 	}
 
 	// Key/value pairs
@@ -61,8 +73,8 @@ func RenderChunkEntry(chunk ol.ChunkItem, maxWidth int) string {
 	return strings.Join(lines, "\n")
 }
 
-// RenderChunksList renders all chunks.
-func RenderChunksList(chunks []ol.ChunkItem, counts ol.ChunkCounts, maxWidth int) string {
+// RenderChunksList renders all chunks. cursor < 0 means no selection.
+func RenderChunksList(chunks []ol.ChunkItem, counts ol.ChunkCounts, maxWidth int, cursor int) string {
 	var b strings.Builder
 
 	header := Light.Render(fmt.Sprintf("%d", counts.InScope)) + " " +
@@ -73,7 +85,7 @@ func RenderChunksList(chunks []ol.ChunkItem, counts ol.ChunkCounts, maxWidth int
 	b.WriteString("\n\n\n")
 
 	for i, chunk := range chunks {
-		b.WriteString(RenderChunkEntry(chunk, maxWidth))
+		b.WriteString(RenderChunkEntry(chunk, maxWidth, i == cursor))
 		if i < len(chunks)-1 {
 			b.WriteString("\n\n\n")
 		}

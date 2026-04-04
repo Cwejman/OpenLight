@@ -198,6 +198,7 @@ type ScopeSummaryOpts struct {
 	Long     string
 	ShowLong bool
 	Loading  bool
+	Selected bool // cursor is on the scope level
 }
 
 // RenderDimsList renders the full dimensions panel with entry position tracking.
@@ -205,21 +206,45 @@ func RenderDimsList(dims []ol.ScopeDim, cursor int, inside *InsideState, maxWidt
 	var result DimsListResult
 	var allLines []string
 
-	// Scope summary at top of dims panel
+	// Scope summary at top of dims panel (cursor -1 = selected)
+	scopeStart := len(allLines)
 	if scopeSummary.Loading {
-		allLines = append(allLines, " "+Dim.Render("summarizing..."), "")
+		prefix := "   "
+		if scopeSummary.Selected {
+			prefix = " " + Bold.Render("▸") + " "
+		}
+		allLines = append(allLines, prefix+Dim.Render("summarizing..."), "")
 	} else if scopeSummary.Short != "" {
-		for _, wl := range WrapText(scopeSummary.Short, maxWidth-1) {
-			allLines = append(allLines, " "+Light.Render(wl))
+		style := Light
+		prefix := "   "
+		if scopeSummary.Selected {
+			prefix = " " + Bold.Render("▸") + " "
+			style = BoldWhite
+		}
+		first := true
+		for _, wl := range WrapText(scopeSummary.Short, maxWidth-4) {
+			if first {
+				allLines = append(allLines, prefix+style.Render(wl))
+				first = false
+			} else {
+				allLines = append(allLines, "     "+style.Render(wl))
+			}
 		}
 		if scopeSummary.ShowLong && scopeSummary.Long != "" {
 			allLines = append(allLines, "")
-			for _, wl := range WrapText(scopeSummary.Long, maxWidth-1) {
-				allLines = append(allLines, " "+Dim.Render(wl))
+			for _, wl := range WrapText(scopeSummary.Long, maxWidth-5) {
+				allLines = append(allLines, "     "+Dim.Render(wl))
 			}
 		}
 		allLines = append(allLines, "", "")
 	}
+	scopeEnd := len(allLines) - 1
+	if scopeEnd < scopeStart {
+		scopeEnd = scopeStart
+	}
+	// Entry -1 is the scope summary block
+	result.EntryStart = append(result.EntryStart, scopeStart)
+	result.EntryEnd = append(result.EntryEnd, scopeEnd)
 
 	for i, dim := range dims {
 		if i > 0 {

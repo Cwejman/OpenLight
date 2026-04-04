@@ -61,10 +61,11 @@ type model struct {
 	navLevel    navLevel
 	side        memberSide // instance or relates when inside an element
 	subCursor   int        // cursor for sub-items inside an element
-	scrollOff   int   // line offset for scrolling the dims panel
-	entryStart  []int // line offsets per dim entry (computed in Update)
-	entryEnd    []int
-	totalLines  int
+	scrollOff    int   // line offset for scrolling the dims panel
+	entryStart   []int // line offsets per dim entry (computed in Update)
+	entryEnd     []int
+	totalLines   int
+	chunkCursor  int   // cursor within chunks panel
 	branch      string       // current active branch
 	branches    []ol.Branch  // cached branch list for picker
 	dimSums      *summary.DimSummaries // cached dim summaries (scope-independent)
@@ -158,7 +159,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.branch = msg.branch
 		m.summaryCache = summary.NewCache(msg.systemDir)
 		m.scope = msg.resp
-		m.cursor = 0
+		m.cursor = -1
 		m.scrollOff = 0
 		m.history = nav.NewHistory(msg.resp.Scope)
 		m.adjustScroll()
@@ -183,7 +184,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.scope = msg.resp
-		m.cursor = 0
+		m.cursor = -1
 		m.scrollOff = 0
 		m.chunks = nil
 		m.adjustScroll()
@@ -207,6 +208,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.err == nil {
 			m.chunks = msg.items
 			m.chunkCounts = msg.counts
+			m.chunkCursor = 0
 		}
 
 	case dimSumsMsg:
@@ -260,6 +262,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// Tab switches focus between panels
+	if msg.String() == "tab" && m.showDims && m.showChunks {
+		if m.focus == panelDims {
+			m.focus = panelChunks
+			m.chunkCursor = 0
+		} else {
+			m.focus = panelDims
+		}
+		return m, nil
+	}
+
+	// When chunks panel has focus, handle j/k there
+	if m.focus == panelChunks {
+		return m.updateChunksFocus(msg)
+	}
+
 	switch m.navLevel {
 	case levelInsideDim:
 		return m.updateInsideDim(msg)
@@ -282,16 +300,19 @@ func (m model) updateEntryLevel(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case "k", "up":
-		if m.cursor > 0 {
+		if m.cursor >= -1 {
 			m.cursor--
+			if m.cursor < -1 {
+				m.cursor = -1
+			}
 			m.adjustScroll()
 			if m.showChunks {
 				return m, m.fetchChunksCmd()
 			}
 		}
 	case "l", "right":
-		// Enter the focused element
-		if m.focus == panelDims && m.scope != nil && m.cursor < len(m.scope.Dimensions) {
+		// Enter the focused element (only when on a dim, not scope level)
+		if m.focus == panelDims && m.scope != nil && m.cursor >= 0 && m.cursor < len(m.scope.Dimensions) {
 			m.navLevel = levelInsideDim
 			m.side = sideInstance
 			m.subCursor = 0
@@ -305,14 +326,6 @@ func (m model) updateEntryLevel(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "p":
 		m.mode = modePull
 		m.pullInput = ""
-	case "tab":
-		if m.showDims && m.showChunks {
-			if m.focus == panelDims {
-				m.focus = panelChunks
-			} else {
-				m.focus = panelDims
-			}
-		}
 	case "b":
 		// Fetch branch list, then enter branch picker
 		client := m.client
@@ -526,6 +539,22 @@ func (m model) updateToggle(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m model) updateChunksFocus(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "q", "ctrl+c":
+		return m, tea.Quit
+	case "j", "down":
+		if m.chunks != nil && m.chunkCursor < len(m.chunks)-1 {
+			m.chunkCursor++
+		}
+	case "k", "up":
+		if m.chunkCursor > 0 {
+			m.chunkCursor--
+		}
+	}
+	return m, nil
+}
+
 func (m model) updateBranch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 	if len(key) == 1 && key[0] >= '1' && key[0] <= '9' {
@@ -552,7 +581,7 @@ func (m model) updateBranch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) addFocusedDim() (tea.Model, tea.Cmd) {
-	if m.scope == nil || m.cursor >= len(m.scope.Dimensions) {
+	if m.scope == nil || m.cursor < 0 || m.cursor >= len(m.scope.Dimensions) {
 		return m, nil
 	}
 	dimName := m.scope.Dimensions[m.cursor].Name
@@ -594,14 +623,15 @@ func (m model) fetchScopeNoHistory(dims []string) (tea.Model, tea.Cmd) {
 }
 
 // fetchChunksCmd returns a command that fetches chunks for the current view.
-// If a dim is focused, fetches scope ∩ that dim. Otherwise, fetches all in-scope chunks.
+// At scope level (cursor -1): all in-scope chunks.
+// On a dim (cursor >= 0): scope ∩ that dim.
 func (m model) fetchChunksCmd() tea.Cmd {
 	client := m.client
 	if client == nil {
 		return nil
 	}
 	dims := append([]string{}, m.scope.Scope...)
-	if m.cursor < len(m.scope.Dimensions) {
+	if m.cursor >= 0 && m.cursor < len(m.scope.Dimensions) {
 		dims = append(dims, m.scope.Dimensions[m.cursor].Name)
 	}
 	return func() tea.Msg {
@@ -681,9 +711,11 @@ func (m *model) adjustScroll() {
 
 	start := 0
 	end := m.totalLines - 1
-	if m.cursor < len(m.entryStart) {
-		start = m.entryStart[m.cursor]
-		end = m.entryEnd[m.cursor]
+	// Entry 0 = scope summary, entry 1+ = dims. cursor -1 maps to entry 0.
+	idx := m.cursor + 1
+	if idx >= 0 && idx < len(m.entryStart) {
+		start = m.entryStart[idx]
+		end = m.entryEnd[idx]
 	}
 
 	if start < m.scrollOff {
@@ -780,7 +812,7 @@ func (m model) viewChunksOnly() string {
 	if m.chunks == nil {
 		return ui.Dim.Render(" loading chunks...")
 	}
-	return ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth())
+	return ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth(), m.activeChunkCursor())
 }
 
 func (m model) viewSplit() string {
@@ -790,7 +822,7 @@ func (m model) viewSplit() string {
 	if m.chunks == nil {
 		right = ui.Dim.Render("loading chunks...")
 	} else {
-		right = ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth())
+		right = ui.RenderChunksList(m.chunks, m.chunkCounts, m.chunksMaxWidth(), m.activeChunkCursor())
 	}
 	right = clipLines(right, m.contentHeight())
 	return ui.MergePanels(left, right, m.panelWidth())
@@ -828,13 +860,21 @@ func (m model) clipToViewport(content string) string {
 
 func (m model) scopeSummaryOpts() ui.ScopeSummaryOpts {
 	if m.scopeLoading {
-		return ui.ScopeSummaryOpts{Loading: true}
+		return ui.ScopeSummaryOpts{Loading: true, Selected: m.cursor == -1}
 	}
 	return ui.ScopeSummaryOpts{
 		Short:    m.scopeSum.Short,
 		Long:     m.scopeSum.Long,
 		ShowLong: m.longSummary,
+		Selected: m.cursor == -1,
 	}
+}
+
+func (m model) activeChunkCursor() int {
+	if m.focus == panelChunks {
+		return m.chunkCursor
+	}
+	return -1
 }
 
 func (m model) dimSummaries() map[string]string {
