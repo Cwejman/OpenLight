@@ -2,52 +2,80 @@
 
 ![header](.img/header.png)
 
-A knowledge system where structure replaces search, relationships are transparent, and knowledge is identity.
+A substrate for knowledge, computation, and navigation. One primitive — the chunk — with placement, atomic history, and spec enforcement. Any reader (human, agent, browser, shell, website) navigates the same structure.
 
-## Why
+## Why `💡`
 
-The context window is the foundation of how a completion model integrates with everything else. Today, you can manage your filesystem, define agents, write knowledge into documents — but you cannot navigate or reshape what fills the context. When you have discussed five things and want to focus on one, there is no mechanism. You are left with forgetting, or starting over.
+Context is the portal to the raw power of LLMs. The quality of what goes into the context window determines the quality of what comes out. Existing tools are monolithic — you don't control what fills the context. OpenLight is about structuring knowledge so that queries produce the right context, declaratively and composably.
 
-Memory systems aim to help but do not change the relationship. Most retrieve by vector similarity — opaque scores with no transparency about why something was surfaced. Some use knowledge graphs with typed labels, some use temporal ordering or keyword matching. A few combine several strategies. But across the landscape — from RAG pipelines to agent memory frameworks — the relationships between knowledge are either opaque or shallow. No system carries the intelligence of *why* things relate, along *what* dimension, or how that understanding evolves. See [`knowledge/research-map.md`](knowledge/research-map.md) for the full ecosystem grounding.
+The knowledge persists. Models can be swapped. The structure is what endures.
 
-What changes when context is built from knowledge primitives? Scope replaces forgetting. You navigate what fills the context — narrowing dimensions, widening others. The knowledge system bridges the gap between the model's internal world (where everything is relations between vectors) and the external environment (where everything is files and tools with no relational awareness). Both sides speak structure. This system makes that structure explicit, navigable, and shared.
+## The Design `🧱`
 
-## What
+**One primitive: Chunk.** Spec (structural contract, system-enforced) + body (JSON object, reader-interpreted). A chunk can serve as content, identity, archetype, or connection — the role emerges from how it's placed.
 
-Five primitives. Everything composes from these.
+**One mechanism: Placement.** A chunk placed on another chunk. Type is instance (IS a member) or relates (is ABOUT). Optional seq for ordering. Placement creates scopes, hierarchy, and connections.
 
-**Chunks** — units of meaning with optional key/value pairs. **Dimensions** — named phenomena, not rigid categories. **Membership** — binary instance/relates between chunk and dimension (structural, not scored). **Commits** — atomic, lossless history with branching. **Peers** — decoupled knowledge systems that read from each other.
+**Spec enforcement.** Archetypes define structural contracts. The system rejects non-conforming instances. Meaning is reader-determined. Shape is system-enforced.
 
-From these: collections, trees, contracts, integrations, and scope-based navigation all emerge without imposed hierarchy. Scope is a set of dimensions — add one to narrow, remove one to widen. Navigation is not a designed paradigm; it is the natural consequence of the structure. An agent bootstraps with a specific scope. A website page is a fixed scope. A browser navigates freely. The system is one thing; the interfaces are many.
+**Atomic history.** Every mutation is a commit. Full history, branching, lossless. Git's model applied to knowledge.
 
-Validated by stress-testing across four domains — culture, organization (Sunward, a non-profit), software, and website projection — with 30 agents probing the model's limits. Grounded against 30+ existing systems. The specific combination — named emergent dimensions, binary instance/relates, scope-as-query, commit-based history, general-purpose substrate — does not exist in the current ecosystem. The pieces live in separate research communities that have not been unified.
+See `substrate.md` for the full specification.
 
-### How it grows
+## Hard Requirements `⚡`
 
-It starts with a tool. The CLI — `ol` — is a Zig + SQLite binary, and it is the first thing that exists.
+1. **General-purpose.** Not for agents only. Content goes in; what comes out depends on the reader.
+2. **Lossless.** Nothing is destroyed. Knowledge evolves through addition.
+3. **Transparent relationships.** No opaque scores. The meaning is in the content and its structure.
+4. **No imposed hierarchy.** Structure depends on the reader's focus point.
+5. **Atomic history.** Every mutation is a commit. Full history. Branching required.
+6. **The system is the identity.** The knowledge is what persists. Models can be swapped — the knowledge cannot.
 
-Once the tool exists, the first content is the system's own knowledge: its primitives, its design principles, the culture of how one works with it. This is the root — the first real content — and also the proof. If the knowledge system cannot hold its own knowledge transparently, it cannot hold anyone else's.
+## The Living Cycle `🔄`
 
-The CLI's implementation lives alongside this knowledge in the same peer. Not a separate system — different dimensions within the same structure. Scope to design philosophy and you see values. Scope to implementation and you see code-level architecture. Widen and you see how they inform each other.
+Intelligence is continuous, not a single point in time. These are threads being explored.
 
-Then: a browser. A new peer, reading from the root. It inherits the culture and adds its own knowledge — what non-hierarchical browsing means, how scope navigation becomes visual, what each view requires. As the knowledge matures, dimensions of implementation appear — requirements precise enough that an agent can generate code from them. The knowledge is primary; the code is material molded against it.
+**Culture orients.** The agent starts from culture — core values, how the system works, what matters. Relatively stable, changes deliberately.
 
-A Claude plugin follows the same pattern. Its own peer, inheriting culture, adding knowledge about agent lifecycle and integration. Each new tool is a peer, each inherits from the root, each grows implementation from understanding.
+**Continuous grounding.** Whatever the agent works on lives in the system, structurally connected to culture. The agent doesn't bootstrap once and drift — the culture is reachable through the scope of the work itself.
 
-Each peer integrates with the outside world through the same primitives. A git file is a chunk with key/value fields referencing a path. A contract chunk tells the agent how to resolve it. No special mechanism — chunks, dimensions, and membership, all the way down.
+**Lossless records.** Agents store everything — tool calls, sessions, reasoning. Scope structures this so it's approachable without reading everything. You scope into what matters.
 
-This plan's peers are more like parents in this cade but the core primitive of peers mean any system can be connected to any other and not limited to one, there are various ideas on how this can be used to compare and merge various knowledge bases... more to come.
+**Caretakers.** Archetypal agents whose role is to tend the system. They ingest what other agents produced, compare against culture, check integrity. Different archetypes for different kinds of care — contradiction detection, culture evolution, reverse testing.
 
-## How
+**Purification through reversal.** Fresh agents as mirrors. Embed knowledge, then give a fresh agent only the system and ask questions. If it can't reconstruct the right understanding, the embedding is impure. Asking is verifying.
 
-**CLI** — `ol`. Zig + SQLite, single static binary. Install: `cd openlight && make install`. One write operation (`ol apply`): a declarative JSON mutation that is simultaneously the write format, the commit content, and the diff format. Reads are structural by default — dimensions, connectivity, counts — with content opt-in. `ol init` creates `.openlight/` in the current directory. 10 commands, all implemented. See [`openlight/README.md`](openlight/README.md) for usage and [`knowledge/specification.md`](knowledge/specification.md) for the full spec.
+**Culture evolves.** Not by drifting but through deliberate integration of what's been learned.
 
-**TUI Browser** — `olb`. Go + bubbletea. Install: `cd browser && make install`. Scope navigation with split panels (dims + chunks), AI-generated summaries seeded from culture (haiku), branch switching, undo/redo history. Dims and chunks update live as you navigate. See [`knowledge/tui-specification.md`](knowledge/tui-specification.md) for the spec.
+## The Shell `🐚`
 
-**What's next:** Culture articulation in the author's own voice. Organic use with real content. Claude plugin (custom, not built-in memory). Deeper integration where the context lifecycle is first-class.
+The substrate powers an OS shell where scope replaces the working directory. Two filesystems — the substrate (FUSE-mounted) and a normal filesystem for code — unified in one shell. Programs take typed scope interfaces instead of string arguments.
 
-**What is explored but not yet built:** integration contracts, session bubbles as ephemeral peer knowledge bases. **What is visionary:** first-class context lifecycle, the boundary between model and environment dissolving, natural evolution of the system from within. These inform the design but do not drive the immediate steps.
+See `shell.md` for the exploration.
 
-The exploration lives in [`knowledge/`](knowledge/README.md). Inspired by long late night sessions plunging the depths of AI: [the-strange-of-agi](https://github.com/Cwejman/the-strange-of-agi). The subdirectory `knowledge/legacy/` contains a superseded entry system that prematurely attempted to build relational knowledge in markdown files, with Claude hooks for bootstrapping. Especially with the release of Claude Opus 4.6 and a 1M context window, keeping to a few markdown files without frontmatter has worked better.
+## Culture `🌱`
+
+> Agent-interpreted values, observed through collaboration. To be refined by the author.
+
+- **Discovery over invention.** The system already exists. We uncover it.
+- **Exploration before building.** Understand before you act. Requirements before code.
+- **Distinguish thought from truth.** Whether something is explored or settled matters.
+- **Simplicity and naturalness.** If it feels forced, it's wrong.
+- **Proportionate effort.** Build what's needed, not what's impressive.
+- **Transparency.** The system should express why things relate, not hide behind stored numbers.
+
+## Implementation `🔧`
+
+**CLI (`ol`)** — Zig + SQLite, single static binary. `cd openlight && make install`. Implements the original five-primitive model. The substrate spec (`substrate.md`) describes the evolution.
+
+**TUI Browser (`olb`)** — Go + bubbletea. `cd browser && make install`. Scope navigation, split panels, AI summaries, branch switching. Built for the original model.
+
+**Shell** — not yet implemented. See `shell.md`.
+
+## Files `📄`
+
+- `substrate.md` — the spec: chunk primitive, placement, schema, archetypes
+- `shell.md` — shell exploration: scope channels, typed invocables, FUSE
+- `landscape.md` — ecosystem research: what other systems do, what's unique here
 
 ![footer](.img/footer.png)
