@@ -45,7 +45,7 @@ This simulates the peer model from the start. When peering arrives, these natura
 
 ### `ol` — Substrate Bin
 
-Full implementation of `substrate.md`. Bun CLI + SQLite.
+Full implementation of the substrate contract (`pilot/substrate.md`). Bun CLI + SQLite.
 
 **Schema:** `chunk_versions`, `placement_versions`, `current_chunks`, `current_placements`, `commits`, `branches`, `chunk_fts`. Current-state tables updated in the same transaction as version writes. No special tables for summaries or embeddings — derived data is just chunks placed on derivation scopes.
 
