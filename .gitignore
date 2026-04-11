@@ -20,3 +20,6 @@ openlight/zig-cache/
 
 # Emacs
 .#*
+
+# Wiki build output
+_site/

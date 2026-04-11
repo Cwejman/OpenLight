@@ -1,0 +1,318 @@
+/* night wiki — Ghostty + Emacs modus-vivendi port
+ * Faithful to ~/.config/ghostty/themes/dark.conf + ~/.emacs.d/init.el jw/colors.
+ * Everything monospace, everything at one size — headings distinguished by
+ * color, weight, and (for H1) underline. No size hierarchy, because terminals
+ * do not have one.
+ */
+
+:root {
+  --bg:            #0f1010;
+  --fg:            #cbcbcb;
+  --fg-dim:        #767676;
+  --heading:       #ffaf5f;
+  --bold:          #ff5f87;
+  --italic:        #d75f87;
+  --quote:         #87d7ff;
+  --code:          #ff5f5f;
+  --link:          #afd75f;
+  --selection-bg:  #214283;
+  --selection-fg:  #ffffff;
+  --hl-line:       #1a1a1a;
+  --rule:          #444444;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11pt;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+-webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 22rem;
+  flex-shrink: 0;
+  padding: 2rem 1rem 2rem 2rem;
+  border-right: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar .brand {
+  color: var(--heading);
+  font-weight: bold;
+  text-decoration: underline;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar .brand a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---- Sidebar tree ---------------------------------------------------------
+ * One unified row metric for both dir labels and file links. Every nesting
+ * level indents by exactly one "rail" (1.4em). The rail is where the chevron
+ * sits — file rows use the rail as empty space so their text aligns with dir
+ * text at the same level.
+ */
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin: 0;
+}
+
+/* One level of indent = one rail. Nested uls get the rail indent. */
+.sidebar li.dir > ul {
+  display: none;
+  padding-left: 1.4em;
+}
+
+.sidebar li.dir.open > ul {
+  display: block;
+}
+
+/* Shared row: dir label or file link. Same vertical rhythm, same left rail. */
+.sidebar .dir-label,
+.sidebar li.file > a {
+  display: block;
+  padding: 0.28em 0.5em 0.28em 1.4em;
+  line-height: 1.35;
+  text-decoration: none;
+  border-radius: 2px;
+  position: relative;
+}
+
+.sidebar li.file > a {
+  color: var(--fg-dim);
+}
+
+.sidebar .dir-label {
+  color: var(--heading);
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Chevron sits inside the rail (the 1.4em left padding), absolutely positioned
+ * so it always stays aligned regardless of glyph width. */
+.sidebar .dir-label::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  top: 0.28em;
+  width: 1.4em;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 0.85em;
+  line-height: 1.55;
+}
+
+.sidebar li.dir.open > .dir-label::before {
+  content: "▾";
+}
+
+.sidebar .dir-label:hover,
+.sidebar li.file > a:hover {
+  background: var(--hl-line);
+  color: var(--fg);
+}
+
+.sidebar .dir-label:hover::before {
+  color: var(--heading);
+}
+
+.sidebar li.file > a.current {
+  color: var(--link);
+  background: var(--hl-line);
+}
+
+.sidebar li.file > a.current:hover {
+  color: var(--link);
+}
+
+.content {
+  flex: 1;
+  padding: 2rem 3rem 4rem 3rem;
+  max-width: 111ch;
+  min-width: 0;
+}
+
+/* Headings: orange, bold, modest size hierarchy for web readability.
+ * Emacs-in-terminal shows these all at the same size; the scale here is a
+ * concession to browser width while keeping the feel of the terminal. */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading);
+  font-weight: bold;
+  font-family: inherit;
+  margin: 1.6em 0 0.5em 0;
+  line-height: 1.3;
+}
+
+h1 { font-size: 1.4em;  text-decoration: underline; margin-top: 0; }
+h2 { font-size: 1.25em; }
+h3 { font-size: 1.125em; }
+h4 { font-size: 1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 1em; }
+
+h1:first-child {
+  margin-top: 0;
+}
+
+p {
+  margin: 0.7em 0;
+}
+
+strong, b {
+  color: var(--bold);
+  font-weight: bold;
+}
+
+em, i {
+  color: var(--italic);
+  font-style: italic;
+}
+
+strong em, em strong, b i, i b {
+  color: var(--bold);
+  font-weight: bold;
+  font-style: italic;
+}
+
+blockquote {
+  border-left: 2px solid var(--quote);
+  padding-left: 1em;
+  margin: 0.7em 0;
+  color: var(--quote);
+  font-style: italic;
+}
+
+blockquote p {
+  margin: 0.3em 0;
+}
+
+code {
+  color: var(--code);
+  background: transparent;
+  font-family: inherit;
+  font-size: 1em;
+}
+
+pre {
+  background: transparent;
+  color: var(--code);
+  padding: 0;
+  margin: 0.7em 0;
+  overflow-x: auto;
+}
+
+pre code {
+  color: inherit;
+  background: transparent;
+  white-space: pre;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--link);
+  background: var(--hl-line);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 1.5em 0;
+}
+
+ul, ol {
+  padding-left: 2ch;
+  margin: 0.5em 0;
+}
+
+.content ul { list-style: none; }
+.content ul > li { position: relative; }
+.content ul > li::before {
+  content: "- ";
+  color: var(--fg-dim);
+}
+
+.content ol {
+  list-style: decimal outside;
+  padding-left: 3ch;
+}
+.content ol > li::marker {
+  color: var(--fg-dim);
+}
+
+li > ul, li > ol {
+  margin: 0.2em 0;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0.7em 0;
+}
+
+th, td {
+  border: 1px solid var(--rule);
+  padding: 0.3em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--heading);
+  font-weight: bold;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mobile */
+@media (max-width: 860px) {
+  .layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 1.5rem;
+  }
+  .content {
+    padding: 1.5rem;
+  }
+}

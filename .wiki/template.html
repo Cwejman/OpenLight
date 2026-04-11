@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$if(title)$$title$ — $endif$night</title>
+<link rel="stylesheet" href="$root$style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+$sidebar$
+</nav>
+<main class="content">
+$body$
+</main>
+</div>
+<script>
+(function () {
+  document.addEventListener('click', function (e) {
+    var label = e.target.closest && e.target.closest('.dir-label');
+    if (!label) return;
+    var li = label.parentElement;
+    if (li && li.classList.contains('dir')) li.classList.toggle('open');
+  });
+})();
+</script>
+</body>
+</html>
