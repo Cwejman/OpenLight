@@ -1,4 +1,6 @@
 
+> Raw notes from the author, like post-its
+
 ---
 
 One substantial vision is to go back the history path, specifically the context at certain point back in time and run that session point against the current one, if one agent archetype, essentially a dispatch with an archetype role, we could have a set of arhcetypes, spawn a sub agent for each different point back in time (possible forks as well or other dimensional relationships) and then take the result of their reaction or result of a specific inquery even, summarise the complete result into a chunk/chunks.

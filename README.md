@@ -68,6 +68,7 @@ The substrate spec has evolved from five primitives to the current one-primitive
 
 ## Files `📄`
 
+- `inside.md` — values and visions, inside-out. The load-bearing orientation layer: mechanism is checked against this. Read this first.
 - `substrate.md` — the spec: chunk primitive, placement, schema, archetypes, peers
 - `interface.md` — interface layer: scope-based window manager, UI from type contracts
 - `pilot.md` — pilot spec: substrate + UI + invocables, end-to-end proof
@@ -80,6 +81,8 @@ The substrate spec has evolved from five primitives to the current one-primitive
   - `agent-research.md` — agent architecture, API formats, tools, containment
   - `icm-clief-notes.md` — Jake Van Clief's Interpretable Context Methodology
   - `shell-research.md` — declarative model, atomic filesystems, stress tests, biology mapping
+  - `inventors/` — portraits of software inventors whose work mirrors the values in `inside.md`
+  - `inside-findings.md` — audit trail for `inside.md`: git history mining, lineage to the-strange-of-agi. Scaffolding, not primary reading.
 - `archive/` — previous work: Zig CLI, Go TUI browser, shell exploration. Preserved for reference.
 
 ![footer](.img/footer.png)
