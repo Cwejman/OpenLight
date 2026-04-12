@@ -22,7 +22,9 @@ This is not a knowledge base an agent queries. It is a computing environment —
 
 [`inside.md`](inside.md) — the values and visions, inside-out.
 
-[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract, the interface exploration, and the first end-to-end proof. The substrate library and CLI live under [`pilot/ol/`](pilot/ol/).
+[`interface.md`](interface.md) — the interface vision. Scope-based navigation, the broader horizon beyond the pilot.
+
+[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate library and CLI live under [`pilot/ol/`](pilot/ol/).
 
 [`research/`](research/) — ecosystem reading, a portrait gallery of software inventors whose work mirrors and pushes back on the values, and the audit trail behind `inside.md`.
 
