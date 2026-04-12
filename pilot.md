@@ -58,9 +58,9 @@ The substrate contract lives in [`substrate.md`](pilot/substrate.md). This docum
 ```
 pilot/
   ol/              — substrate library + CLI
-  engine/          — dispatch, boundaries, VM, invocable protocol
+  engine/          — dispatch, boundaries, VM, protocol (host side) + client (invocable side)
   ui/              — SvelteKit app
-  invocables/      — claude invocable (runs in VM)
+  invocables/      — claude, filesystem, shell, web (run in VM)
 ```
 
 **VM packaging.** The VM is stateless — invocable code is mounted read-only via virtio-fs. `.env` for configuration (API keys). A setup script installs runtime dependencies. Reproducible environments come later.
@@ -157,6 +157,10 @@ OrbStack equivalent: `orb exec <machine> ./invocables/claude <dispatchId>`. Both
 Synchronous from the invocable's perspective — write request, read response. The latency (1-3ms via Lima, sub-ms via OrbStack) is negligible next to API call latency.
 
 The invocable receives its dispatch ID as a command-line argument.
+
+**Client library.** The engine exports a client module (`engine/client.ts`) that wraps the protocol — typed functions (scope, search, apply, dispatch, scopeChange) over stdin/stdout serialization. Invocables import the client, not raw IO. Same types as the substrate lib, same API shape. The engine and client are two halves of one contract.
+
+**Testing without VM.** The protocol is stdin/stdout — the VM adds containment, not functionality. For development and TDD, the engine spawns invocables as local subprocesses on the host. Same pipe, same protocol, no VM overhead. The full cycle (dispatch creation → invocable spawn → protocol communication → boundary enforcement → completion) is testable entirely on the host.
 
 ---
 
