@@ -6,16 +6,14 @@ Current state and what comes next. Updated as things move.
 
 ## In progress
 
-**Inside purification.** The values and visions in `inside.md` have been through a deep refinement pass. The inside is now held well enough to orient the pilot and the InsideOut work. Further refinement will happen as the pilot and the VP work test it — but the inside is has found a coherent body.
+**Inside purification.** The values and visions in `inside.md` have been through a deep refinement pass. The inside is held well enough to orient the pilot and the InsideOut work.
 
 ---
 
 ## Next — in priority order
 
-**1. InsideOut VP — the author's place, then a crystal-clear update.**
-Map the grant landscape. Refine how the research project lives inside InsideOut's verksamhetsplan. The gut feeling in `insideout/place.md` is held as hypothesis; it needs to be tested against real grant shapes and board capacity. The deliverable is a VP update that names the author's role concretely. This is the highest priority — the inside is what was most needed, and now that it exists, the VP can be grounded in it.
-
-If the pilot needs to advance first to resolve specific questions for the VP (e.g. what the substrate can concretely deliver for InsideOut's programs), that work is pulled forward as needed — but the VP is the goal, not the pilot.
+**1. InsideOut VP — one addition, then done.**
+The grant landscape has been mapped (`insideout/grant-landscape.md`). The author's place has been explored (`insideout/place.md`). What settled: the author builds InsideOut's website and digital presence using AI tools that are part of the research. The VP needs one line about developing digital presence and communications capacity — a normal operational addition. The author's broader research does not need to be named in the VP; it is the author's own work. See `place.md` for the full record of what moved and what stayed open.
 
 **2. Pilot requirements — resolve before building.**
 The pilot spec (`pilot.md`) has been reordered but not yet reconciled with the purified inside. Open questions flagged by the stress test:
@@ -24,7 +22,7 @@ The pilot spec (`pilot.md`) has been reordered but not yet reconciled with the p
 - Current state: `ol` is listed as "Done" but what actually runs is not documented. A sentence on current state would help any session calibrate.
 
 **3. Pilot implementation.**
-Comes after the VP is settled and the pilot requirements are resolved. The build order in `pilot.md` is the starting point.
+Comes after the pilot requirements are resolved. The build order in `pilot.md` is the starting point.
 
 ---
 
