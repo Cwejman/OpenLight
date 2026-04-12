@@ -153,8 +153,7 @@ OrbStack equivalent: `orb exec <machine> ./invocables/claude <dispatchId>`. Both
 | `scope [ID...]` | Read scope, filtered by read boundary. External connections visible (names, counts) but not readable. |
 | `search QUERY` | Full-text search, filtered by read boundary |
 | `apply DECLARATION` | Write, checked against write boundary |
-| `scope-change SCOPE_IDS` | Request to add scopes to working context, validated against read boundary |
-| `dispatch INVOCABLE_ID ARGS` | Request a tool-call dispatch, engine creates and executes it |
+| `dispatch INVOCABLE_ID ARGS` | Dispatch another invocable, engine creates dispatch chunk and spawns it |
 
 Synchronous from the invocable's perspective — write request, read response. The latency (1-3ms via Lima, sub-ms via OrbStack) is negligible next to API call latency.
 
@@ -302,8 +301,8 @@ The context events on the session are the trace — what the agent was reading a
 2. Calls `apply` to place prompt and context on session (dual placement, traceability)
 3. Each cycle: assembles knowledge layer (pinned + additions) + session layer (tool chain), calls Anthropic API
 4. On `tool_use`: calls `dispatch` via protocol — the engine creates a tool-call dispatch, executes it, returns the result. The agent records tool-call/tool-result on session.
-5. On scope change: calls `scope-change` via protocol — the engine validates against read boundary, the agent writes a context event to session.
-6. On `end_turn`: writes answer on session via `apply`, signals completion to the engine.
+5. On scope change: writes a context event to session via `apply` — the engine validates that referenced scopes are within the read boundary.
+6. On `end_turn`: writes answer on session via `apply`, then exits.
 
 Every step is a chunk on the session. The read tile shows the full trace in order.
 
