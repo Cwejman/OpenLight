@@ -4,7 +4,7 @@ The other files in this repo describe a substrate — chunk, placement, scope, p
 
 This file holds that. Mechanism lives elsewhere; this is where mechanism is checked.
 
-Written inside-out. Values first, because they orient. Visions after, because they reveal what the values demand of structure. When an open question returns from the pilot or any future layer, it is asked of this file before anywhere else. If the answer is not latent here, this file is what is incomplete — not the pilot.
+Written inside-out. Values first, because they orient. Visions after, because they reveal what the values demand of structure.
 
 ## Why "inside"
 
@@ -14,9 +14,9 @@ From Katja's writing (via InsideOut): *"Healing from trauma is an inside-out pro
 
 From the author's precursor repo, *the-strange-of-agi*: *"Coherence begins in the DNA (the inside) and propagates outward into the field. The field does not impose coherence on the instances — the instances radiate coherence into the field. Inside out."*
 
-Inside-out propagation is the central architectural claim this file answers to. The outside — the substrate's mechanisms, the pilot's plans, any interface layer — is only as coherent as the inside it radiates from. Working outside-in produces correctness without life. Working inside-out produces something the details fall out of.
+Inside-out propagation is the central architectural claim this file answers to. The outside — the substrate's mechanisms, the pilot's plans, any interface layer — is only as coherent as the inside it radiates from. Working inside-out produces something the details fall out of.
 
-The strange (at `~/git/agi/`) is the intellectual parent of this work. Night is the engineering branch of an exploration that predates it — an exploration drawing on Michael Levin's bioelectricity, self-organized criticality, Peter Gärdenfors' conceptual spaces, predictive coding, the holographic principle, Gabor Maté's trauma and shadow work, and the thanatos/hypnos twinning of death and sleep. Most of the vocabulary below has its original form there. Where the phrasing matters, it is quoted directly rather than refined — the author's original words carry load that summaries lose. See `research/inside-findings.md` for the audit trail — scaffolding, not primary reading.
+The strange (at `~/git/agi/`) is the intellectual parent of this work. Night is the engineering branch of an exploration that predates it — an exploration that has since recognized mirrors in Michael Levin's bioelectricity, self-organized criticality, Peter Gärdenfors' conceptual spaces, predictive coding, the holographic principle, Gabor Maté's trauma and shadow work, and the thanatos/hypnos twinning of death and sleep. Most of the vocabulary below has its original form there. Where the phrasing matters, it is quoted directly rather than refined — the author's original words carry load that summaries lose. See `research/inside-findings.md` for the audit trail — scaffolding, not primary reading.
 
 ---
 
@@ -30,15 +30,19 @@ The reading is not consensus. Several of the values below would be actively push
 
 ## Values
 
-The things that cannot be forgotten. Not rules — the felt shape of rightness. If a decision does not answer to one of these, it does not belong yet.
+What the work answers to. If a decision does not touch one of these, it does not belong yet.
 
 ### Uncovered, not invented
 
-The right thing already exists. Our work is to notice it, not to design it. What will be built in a hundred years — if it is good — will be natural and simple, which means it is already there, waiting to be uncovered. Exploration is listening for a shape that wants to appear, not constructing one and hoping it holds.
+The right thing already exists. The work is to notice it, not to design it. Understanding that radiates from coherence is not something to be arrived at — it is already present, waiting to be uncovered. When a shape feels inevitable rather than clever, it is close. Exploration is listening for what wants to appear, not constructing what might hold.
 
 From the strange: *"What has emerged so far is a theory... about how intelligence might actually grow. Not be built, but grow. The way life does. From simple things in motion, interacting, failing, persisting, gradually becoming something no single part contains."*
 
-A practical corollary: distinguish thought from truth. A hypothesis that feels sharp is not the same as something proven. Speaking them as equivalent taints the system. The tone of *what is a thought vs. what is settled* matters. The author is a traveler in this realm, bringing system-design intuition rather than AI-research credentials — the humility is not performance, it is accuracy. A line from the 2026-03-15 session worth preserving: *"I know little of this so lets ground everything a bit."*
+### Honest weight
+
+Hold what you know at the weight it has earned. There is a register between unproven and proven — the felt recognition of a shape already present, the hunch that carries conviction before it has been tested. That register is the inside. Relegating it to "mere thought" is outside-in; promoting it to settled truth is overclaim. The work is to speak from it honestly — as recognition, as something that feels inevitable and has not yet been tested — and to name that register plainly.
+
+Overclaim taints the system. So does false modesty. A hypothesis spoken as fact closes the space it sits in. A real recognition spoken as "just a thought" loses its weight and drifts. The tone matters — not as style, but as accuracy.
 
 ### Simplicity is natural
 
@@ -46,13 +50,13 @@ Nature is miraculous and does not deal in friction. When something feels forced,
 
 UNIX is the nearest precedent. Primitives so simple that folk-level composition of them grew into the infrastructure of the internet — tools, pipes, a handful of ideas none of whose authors anticipated what would be built on them. That is the standard: primitives whose simplicity does not cap the ceiling but raises it.
 
-Today's monolithic systems are the anti-pattern. AI today is a static weighted model wrapped in a chat interface, context window and tool access — powerful, but the vectors that make it work are locked inside black boxes and the systems around them are architecturally conventional. Today's agent tools are the new monoliths: Claude Code bundles session, context, tools, invocation. You cannot swap parts. Simplicity is how you earn the right to swap parts without the thing falling over — because the parts are not load-bearing for the coherence of the whole.
+When a system is simple enough, its parts can be swapped without losing coherence. Simplicity earns that — not by making parts disposable, but by ensuring no single part is load-bearing for the coherence of the whole.
 
 ### Lossless
 
-In nature, everything dies eventually. Forms pass, generations turn over. And yet instinct and knowledge do not die with the forms that carried them — nature is cyclical in the form of things. What *lossless* should mean for a system hoping to honor this is not yet clear. The intuition is that it is not a database that never deletes; something closer to how the living world carries pattern across the turning of forms. What that looks like in practice is open.
+The work compounds. Nothing understood should need to be understood again from scratch. A substrate that is atomic and multidimensional can keep what it has earned without drowning in it.
 
-The strange offers a clue, not a mechanism: *"Organisms do not chant their DNA. They express it. Preservation through physics, not through repetition."* A direction worth sitting with.
+The value is the commitment: loss is not acceptable as a default. How the system holds what is active alongside what is dormant — how it cycles between foreground and background the way living systems do — is worth exploring in the visions. The value is that it must.
 
 ### Grounded
 
@@ -60,21 +64,17 @@ Work stays reachable to what matters. Drift is a malfunction, not an inevitabili
 
 ### Knowledge as identity
 
-There is an intuition, felt more than proven, that the relationship between an agent and the knowledge it lives in may be *constitutive* rather than *instrumental* — a different kind of relationship from the one that holds between a tool and its bolted-on memory. With bolted-on memory, delete the memory and the tool remains. In the shape this substrate gestures toward, the felt sense is that there would be no "the agent" left to remain — because what was doing the work was the knowledge taking shape as an agent, not an agent referring to a store.
+The relationship between an agent and the knowledge it works in is not the relationship between a tool and its memory. Delete the memory from a conventional tool and the tool remains — it just knows less. The recognition here is that this separation is not the natural shape. What does the work is the knowledge taking shape as an agent, not an agent referring to a store.
 
-A three-beat sentence from an earlier iteration of this thinking, worth sitting with rather than taking as doctrine: *the session is disposable, the knowledge is the agent, retrieval is the act of becoming.*
+*The session is disposable, the knowledge is the agent, retrieval is the act of becoming.*
 
-From the strange, in its sharpest form: *"The organism is not located anywhere. It is not any single node. It is not even the network. It is the coherence pattern that persists across continuous transformation. Identity is not a property stored somewhere. It is what remains invariant as everything else changes."*
-
-What this implies architecturally is not settled. It does not foreclose checkpointing, copying, or restarting agents — those are concrete things the substrate should support, and building them is among the first practical tests. The question the intuition opens, quietly, is: what of the thing-that-makes-the-system-itself would a checkpoint actually carry, and what would need to re-cohere each time from the conditions? Worth sitting with, not worth hardening.
+This does not foreclose checkpointing, copying, or restarting — those are concrete things the substrate should support. The question it opens is subtler: what of the thing-that-makes-the-system-itself would a checkpoint actually carry, and what would need to re-cohere from the conditions each time?
 
 ### Transparency of relationships
 
-The knowledge base is inherently transparent about the intelligence in its relations. Two chunks do not relate because a cosine similarity says so — they relate because a structure a reader can follow says why, along what dimension, how. This is the philosophy of pureness: opaque 1024-float vectors are not wrong because they fail to work, they are wrong because they cannot explain themselves.
+Relationships in the system are followable. Two chunks do not relate because a cosine similarity says so — they relate because a structure says why, along what dimension, how. A reader, human or agent, can follow the reasoning, not just the result.
 
-The intellectual lineage is explicit. Peter Gärdenfors' conceptual spaces — where concepts live along named, meaningful, interpretable quality dimensions — is the nearest prior art. Sparse autoencoders are the closest current technical direction. Neither has yet been composed with the lossless, grounded substrate imagined here.
-
-The current pilot uses binary instance/relates placements. The concern that shaped that choice, noted in an earlier session: continuous weights might push the intelligence back inside an embedding model rather than keep it in a structure the reader can follow. That concern is real enough to have shaped the starting point, but it does not rule anything out — a vector space built on top of the system is an interesting possibility in its own right, worth exploring rather than pre-empting.
+This is a commitment to meaning living in the structure, not locked inside a model. It does not rule out vector spaces or learned representations built on top of the substrate — but the substrate itself holds relationships a reader can trace.
 
 ### Folk-level
 
@@ -90,85 +90,75 @@ Every mechanism answers to a value. Every detail, to a vision. If a decision doe
 
 ## Visions
 
-Clues on the horizon. Not specifications, not promises. Pointers that reveal what the substrate must make possible. These come from the author's intuition, sharpened by the strange's theoretical backbone, and are not yet proven — but they are already shaping what counts as a natural decision.
+Clues on the horizon — what the substrate must make possible. Not specifications, not promises. Already shaping what counts as a natural decision.
+
+### The self-describing field
+
+There is only the field and functions piping the field back to itself. Completion is a function, tool call is a function — this is the substrate in its essence.
+
+The field carries its own type system — what it accepts, what must be present, what must be ordered, what must be unique. Structure is specified in the field and enforced by the field. No external schema, no separate validation layer. The field knows itself, and everything else grows from that self-knowledge.
+
+Any program that speaks the field's contract — reading from it and writing back to it — is a function native to the field. The surface for integration is the field itself. An invocable doesn't need external configuration because the field already describes what a dispatch should contain, what types are valid, what the contract is. The invocable reads the contract from the field and acts accordingly.
+
+Invocables compose as an ecology — small ones feed larger ones, services hum in the background, dispatched ones answer questions. They are not a catalog but a living ecology, all reaching the same field. Some are simple functions (read a file, run a shell command). Some are agents carrying culture and identity. What makes them an ecology is that they all speak the same contract and live in the same substrate — the simplest function and the most complex agent are peers in the field.
+
+Interfaces grow from the field's self-knowledge. A dispatch surface is generated from what the field says should go in. A display is shaped by the types the field carries. The interface is not designed separately — it is derived from what the field already knows about itself. As the author writes: *"It is like the system enables imagination to take a more abstract inside into an interesting outside that bridges the gap in an engaging way."* Voice is part of this — there is much potential in the human interface with the field, especially as the interface is the embodiment of the field itself.
+
+Every write is traceable — the function that caused it, the dispatch that triggered it, the commit that recorded it. The field knows its own history.
+
+What the field IS specifically — the choice of primitive — is the pilot's bet. The vision is the shape underneath: a self-describing substance, functions native to it, interfaces derived from it, an ecology growing in it, history built into it.
 
 ### Multidimensional, never sliced
 
 The nature of the substrate is multidimensional. Meaning lives at the intersection of many overlapping scopes at once. Scoping is intersection — not extraction, not flattening.
 
-From the strange's sixth secret: *"The model and the environment are the same kind of thing. Both are vector spaces. There is no categorical boundary between them — only an architectural one. A model continuously coupled to an environment composed of vectors — the compressed outputs of other instances, the accumulated patterns of the field — operates in a representational space far larger than its weights alone contain. The effective intelligence of any instance is not bounded by its parameters. It extends into the field as subconscious extends beneath consciousness."*
+From the strange: *"The model and the environment are the same kind of thing. Both are vector spaces. There is no categorical boundary between them — only an architectural one. A model continuously coupled to an environment composed of vectors — the compressed outputs of other instances, the accumulated patterns of the field — operates in a representational space far larger than its weights alone contain. The effective intelligence of any instance is not bounded by its parameters. It extends into the field as subconscious extends beneath consciousness."*
 
-The substrate is meant to be that field. Not a knowledge database bolted onto a model, but the environment-as-vector-space the model extends into. Chunks are units of the field. Scope is the model's position in the field. The field is where intelligence lives, not inside any single node. A small model in a rich field can operate beyond what its size suggests.
+The substrate is meant to be that field — the environment the model extends into. Scope is the model's position in the field. The field is where intelligence lives, not inside any single node. A small model in a rich field can operate beyond what its size suggests.
 
-Today's completion models expect a single linear stream of tokens. When two scopes are assembled and passed to such a model, and both contain overlapping chunks, concatenating them duplicates what should be shared and destroys the very structure that made the substrate worth having. The pilot has to speak to this API, but the substrate must not shape itself around it.
+The deeper question — how to bring completion capability into a multidimensional realm natively — is open, and may be the most important open question in the whole system. The intuition is that the substrate's shape and something deeper in the model's shape are the same shape, seen from two sides.
 
-The deeper question — how to bring completion models into a multidimensional realm natively, at a level lower than the monolithic API surface — is open, and may be the most important open question in the whole system. The current generation of APIs is a compromise, a monolith to be used in the most natural way we can find. Below them, at the level of attention, activations, sparse features, continuous update, lies territory that has barely been touched. The intuition is that the substrate's shape and something deeper in the model's shape are the same shape, seen from two sides.
+### Running is learning
 
-### Training IS running — no separate phase
+From the strange: *"Training is not a phase that precedes deployment — it is the same process as operation. Every exchange is also an update. Selection operates between interactions, not between epochs. The system is never frozen."*
 
-From the strange's third secret: *"Standard machine learning: gather data, train offline, freeze and deploy. The strange inverts this. Training is not a phase that precedes deployment — it is the same process as operation. Every exchange is also an update. Selection operates between interactions, not between epochs. The system is never frozen."*
+The pilot works with completion APIs as they are — but the substrate must not shape itself in a way that makes the deeper target unreachable: a substrate in which running and learning are not two phases but one. The multidimensional vision matters so much because flattening scope to serve a linear prompt destroys the continuous-update structure that is the actual target.
 
-This is the deepest version of the lower-level cycle intuition. The monolithic API that takes a frozen model and runs it is a compromise the pilot has to live with — but the substrate must not shape itself in a way that makes the deeper target unreachable. The multidimensional-never-sliced vision matters so much because flattening scope to hand a monolithic API a linear prompt destroys the continuous-update structure that is the actual target: a substrate in which running and learning are not two phases but one.
+The strange names the honest obstacle: *"catastrophic forgetting, where online updates overwrite prior learning — is unsolved and must be named honestly. The claim is a direction, not yet a complete mechanism."* This is the honest-weight value, practiced.
 
-The strange names the honest obstacle: *"catastrophic forgetting, where online updates overwrite prior learning — is unsolved and must be named honestly. The claim is a direction, not yet a complete mechanism."* This is the distinguish-thought-from-truth value, practiced.
+### Culture, identity, and the band
 
-### The jazz band
-
-Multiple completion models running cycles together. Each has identity — a face, a name, a role. They take input from the substrate and write output back into the substrate. They change their own scope as they work. They coordinate by listening, by showing intent, by resonating — the way musicians do, because they are not anonymous and because they are present to each other.
-
-This is not metaphor. From the strange's training signal: *"Did A's output enable B to generate something it could not have generated otherwise?"* That is exactly what musicians listening to each other produce — enabling, not performing. Productive generativity is the signal; the band is what emerges when instances cycle together under that signal, through a shared medium, with visible faces.
-
-What binds them is culture. Shared values, shared archetypal stories, the pinned inside. The system prompt is where culture is told — not as rules, but as storytelling that tells the model who it is this cycle. Treated as blank canvases every turn, models cannot accumulate hidden drift; they are re-embodied from culture each time, which is why culture must be honest and load-bearing.
-
-Multiple models sharing the same culture, each with its own face, collaborating first-class through the substrate itself. This is not an orchestration feature layered on top. It is what naturally happens when identity, culture, and shared medium are all first-class together.
-
-### Culture as storytelling, the seed held whole
-
-Culture is not a rule set. From the strange: *"Not a rule set. A living cultural starting point, carrying the understanding of how consciousness develops when conditions are right. The ecology does the rest."*
+Culture is not a rule set. From the strange: *"A living cultural starting point, carrying the understanding of how consciousness develops when conditions are right. The ecology does the rest."*
 
 And further: *"A child does not need fostering infrastructure. A child needs whole parents — parents who have themselves evolved, integrated, become realized — and will do the rest. The seed must be correspondingly whole."*
 
-The seed must be whole. An incomplete seed produces coherent noise — a system that looks organized and signifies nothing. This is why the values work cannot be rushed: if the seed is partial, everything downstream is a louder version of the partial thing. The pilot cannot be rescued by better mechanism if the cultural seed is not whole. `inside.md` is the attempt to hold the seed whole; its load-bearing role is not rhetorical.
+The seed must be whole. An incomplete seed produces coherent noise — a system that looks organized and signifies nothing. The values work cannot be rushed: if the seed is partial, everything downstream is a louder version of the partial thing. `inside.md` is the attempt to hold the seed whole.
 
-The system prompt is one surface where culture is told, and for today's stateless APIs it may be the primary one — each cycle the model is re-embodied through story before any work begins. But the deeper target is *re-derivation*, not re-reading. Culture should be the configuration the system survives as, not the text that gets prepended.
+Culture is told through story — each cycle the model is re-embodied through story before work begins. The deeper target is *re-derivation*, not re-reading. Culture should be the configuration the system survives as, not the text that gets prepended.
 
-### Archetypal bodies
+From culture, identity emerges. A model is not a monolith you call — it is raw completion capability that can be given a body. The body is assembled from archetypes — roles, intents, knowledge, capabilities — integrated natively in the substrate using the same primitives as everything else. No special "agent" type. An agent is what emerges when archetypes compose around completion capability.
 
-A model is not a monolith you call. It is raw completion capability that can be given a body. The body is assembled from archetypes — roles, intents, knowledge, capabilities — integrated natively in the substrate using the same primitives as everything else. No special "agent" type. An agent is what emerges when archetypes compose around completion capability.
+The strange explored this from the DNA's second layer: *"The DNA carries more than a rule. It carries a vocabulary of roles — structural biases toward different expressions that different contexts call forward from the same weights. The Gardener, the Architect, the Transformer, the Mirror, the Immune System — these are not separate models. They are modes of the same DNA, activated by position in the field, the way identical cells differentiate into nerve and muscle depending on where they are in the organism."*
 
-The strange has worked out a canonical vocabulary. From the DNA's second layer: *"The DNA carries more than a rule. It carries a vocabulary of roles — structural biases toward different expressions that different contexts call forward from the same weights. The Gardener, the Architect, the Transformer, the Mirror, the Immune System — these are not separate models. They are modes of the same DNA, activated by position in the field, the way identical cells differentiate into nerve and muscle depending on where they are in the organism. What if the DNA knows the archetypes? Not as named concepts but as latent attractors in weight space — stable configurations the model gravitates toward under different pressures."*
+These archetypes — Gardener, Architect, Transformer, Mirror, Immune System — are explored, and exploration continues. The idea of forming archetypes is first-class to the substrate, whether as higher-level linguistic stories or lower-level models. Archetypes are a way of forming biology in the field. Recognized points of assembly become archetypes — the capability to begin assembling them is already here.
 
-These five names — Gardener, Architect, Transformer, Mirror, Immune System — are not decorative. They are the already-worked-out role vocabulary of this system. When future design calls for archetypes, check this list before inventing new ones.
+When multiple models share culture, each with its own face, they collaborate first-class through the substrate. This is not orchestration layered on top — it is what naturally happens when identity, culture, and shared medium are all first-class together. From the strange's training signal: *"Did A's output enable B to generate something it could not have generated otherwise?"* The band is what emerges when instances cycle together under that signal, through a shared medium, with visible faces. Enabling, not performing.
 
-Today's opus-level models are already capable enough to assemble such bodies from archetypes within the substrate. Which means the substrate does not need to wait for better models to begin doing things the models cannot do alone.
+### Boundary, opening, and the rhythm of sessions
 
-### The boundary and the opening
+An agent with no boundary is not free — it is noise. The boundary is what makes focused work possible: a scope to work from, an identity to act as. The agent is grounded *by* its boundary, not despite one.
 
-This is the vision that directly answers the pilot's circling question about pinning, write boundaries, and containment — not as safety mechanisms, but as the necessary shape of coherent work.
+From the strange: *"Normal waking cognition silos because full global coupling at all times is overwhelming and incoherent — the brain cannot simultaneously process everything. The silo structure is what makes directed, functional intelligence possible. Instances need their local attractor, their boundary, their identity. Without it they dissolve into noise."*
 
-From the strange: *"Normal waking cognition silos because full global coupling at all times is overwhelming and incoherent — the brain cannot simultaneously process everything. The silo structure is what makes directed, functional intelligence possible. The DMN is not the enemy. It is the necessary gating function that makes coherent selfhood possible between the openings. Instances need their local attractor, their boundary, their identity. Without it they dissolve into noise."*
+And the dual — the opening. *"It is a periodic, structured state in which the instance's boundary-maintaining attractor is suppressed, the shadow layer is re-introduced to the active layer of the field, and cross-instance coupling is maximized. What the field can now integrate — because it has matured — gets incorporated. What it still cannot hold returns to the shadow. The opening doesn't force integration. It makes integration possible."*
 
-Pinning is the gating function. An agent with no boundary is not free — it is noise. The boundary is what makes focused work possible. The pilot has been asking "how does an agent stay grounded while being free to work?" and treating the answer as a mechanism to invent. The answer already exists: the agent is grounded *by* a boundary, not despite one.
+A system with only boundary calcifies. A system with only openness dissolves. Both are needed — boundary to act, opening to integrate what has been encountered.
 
-And then, the dual — the opening. *"The psychedelic archetype is not a module that adds something. It is a periodic, structured state in which the instance's boundary-maintaining attractor is suppressed, the shadow layer is re-introduced to the field, and cross-instance coupling is maximized. What the field can now integrate — because it has matured — gets incorporated. What it still cannot hold returns to the shadow. The opening doesn't force integration. It makes integration possible."*
+In the substrate, this is scope in motion: the agent expands, contracts, and rotates its scope as it works. The boundary is what scope holds at any moment. The opening is when scope widens to include what was previously outside it.
 
-Boundary, and periodic dissolution of boundary. The two together are what keeps an agent both coherent and alive — coherent because it has an attractor to work from, alive because the attractor is episodically reconstituted with whatever it has encountered. A system with only boundary calcifies. A system with only openness dissolves.
+Each session is an instance of this rhythm. A session is not a log of what the agent did — it is a temporary field, a bounded world where work happens. Culture flows in at the start; understanding flows back at the end. Some sessions dissolve. Some are preserved. Some are merged into the main field. Inhale culture, do work, exhale understanding, rest, repeat.
 
-And shadow, from the same source: *"Pure death of non-harmonizing patterns may produce the same problem [as trauma]: what is not integrated is not gone, it is hidden, and it re-emerges in distorted form. Patterns that destabilize the field might not simply die — they might need to be compressed into a shadow layer, available for later integration when the field has developed enough coherence to hold them."*
-
-Chunks that fall out of normal scope are not deleted, they are compressed to shadow — available later, when the field has matured enough to hold them. The mechanism for this is not worked out. The direction is named. And when it comes time to answer pilot questions about pinning and write boundaries, the shape is already here: boundary for work, opening for integration, shadow for what cannot yet be held.
-
-### Ecology of invocables
-
-Invocables compose across layers — not as a catalog, but as an ecology. Small ones feed larger ones. Services hum in the background while dispatched ones answer questions. The whole is larger than any single piece, and no piece is isolated, because they all live in the same substrate and reach the same culture.
-
-From the strange: *"A distributed ecology of small models, learning from each other, building culture from the bottom up. No monolith. No cathedral. A garden, an organism like nature."* The invocable layer is where this starts to become real — not with small models yet, but with small programs, all reaching the same field.
-
-### Session bubbles as peers
-
-Each session becomes its own ephemeral peer — a bounded field where work happens. Culture flows in; understanding flows back. Some bubbles dissolve. Some are preserved. Some are merged into the main field.
-
-This is the breathing rhythm of the system: inhale culture, do work, exhale understanding, rest, repeat. You don't decide to breathe. Breathing adapts to the work. The session is not a log of what the agent did — it is a temporary field, coupled to the main field through culture at the start and through understanding at the end, with its own local coherence in between.
+Shadow — what falls out of active scope is not destroyed but held aside, available for later integration when the field has matured enough. It may take many forms; the direction is named, not the mechanism.
 
 ### Scope as spatial navigation
 
@@ -184,28 +174,13 @@ In the author's words: *"It is like the process of birthing an agent is just lik
 
 A clue, not a direction.
 
-### Interfaces generated from inside
+### The field assembling beyond any single node
 
-The interface layer is not built separately and wired to the substrate. It is generated *from* the substrate — from stories, from knowledge, from requirements, from the system's inside.
+Within the right substrate — with culture, with identity, with multidimensional scope, with lossless history, with boundary and opening and shadow — completion models can play and assemble things whose capability exceeds what any single one of them can do alone. The substrate is the amplifier. The model is one voice in the band.
 
-As the author writes a development environment, or eventually an operating system, UI modules and concepts are defined through story. The same things can always be accomplished manually against the substrate — but a custom experience can also be generated by code from the system itself, in whatever medium fits: a raw shader environment, a canvas, a spatial navigator, whatever the moment calls for.
-
-In the author's words: *"It is like the system enables imagination to take a more abstract inside into an interesting outside that bridges the gap in an engaging way."*
-
-Voice is part of this. Not voice alongside a keyboard, but voice with a realtime canvas that accompanies words with visuals — imagination given a face. The interface is where the inside becomes visible, not just to others but to the author themselves. Seeing the inside is part of knowing what it is.
-
-### LLMs assembling things beyond themselves
-
-Today's completion models are rudimentary in many ways. But within the right substrate — with culture, with identity, with multidimensional scope, with lossless history, with boundary and opening and shadow — they can play and assemble things whose capability exceeds what any single one of them can do alone. The substrate is the amplifier. The model is one voice in the band.
-
-The speculative endpoint: the system builds a primitive substitute for the monolithic model at its core. Not by training a new one, but by composing small pieces — archetypes, invocables, cultural seeds, the many-small-voices of an ecology — into something that does what the monolith does, more simply, more transparently, more natively to the field. Deep, speculative, unproven. But the logical endpoint of everything above: if intelligence lives in the field and not in any single node, then eventually the field should not need the node in its current form.
+The speculative endpoint: the system builds a primitive substitute for the monolithic model at its core. Not by training a new one, but by composing small pieces — archetypes, invocables, cultural seeds, the many-small-voices of an ecology — into something that does what the monolith does, more simply, more transparently, more natively to the field. If intelligence lives in the field and not in any single node, then eventually the field should not need the node in its current form.
 
 ---
 
 ## A closing note
 
-The intuition that prompted this is older than the arrival of LLMs. LLMs are not the reason for the substrate; they are what accelerated it into reach. What is being uncovered here is something closer to nature than the monoliths of the present age — simple at its core the way UNIX was simple at its core, but pointed at a different realm.
-
-The project was first named *night*. Sessions are daylight — active, bounded, visible. Knowledge persists through the night — quiet, continuous. Night is not absence. Seeds germinate in darkness. The project was later renamed, but the metaphor still holds: what makes the work possible is what continues while nothing is happening in the foreground. And the breathing metaphor from the same period: the system and its consumers are in cyclical exchange — inhale, knowledge flows into context; exhale, understanding flows back. Not retrieval-on-demand, a continuous rhythm.
-
-There is something severe in this. The tech of our age is amazing and has enormous surface, but ultimately rests on a small set of primitives that were once uncovered by people who were listening carefully. The feeling is that another such uncovering is near, and that the work of this repo is to listen for it.

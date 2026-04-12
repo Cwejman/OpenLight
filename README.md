@@ -2,11 +2,17 @@
 
 ![header](.img/header.png)
 
-OpenLight listens for a simpler shape of software — one closer to how living systems hold knowledge than to how today's systems do. The values the work listens through, and what it must not lose along the way, live in [`inside.md`](inside.md).
+The art of building software has always been about understanding first. The bottleneck is never typing — it's knowing what to build. Misunderstanding compounds. The best work happens when the understanding is clear enough that implementation feels inevitable rather than forced.
 
-The pilot that follows from those values lives in [`pilot.md`](pilot.md) and the [`pilot/`](pilot/) directory — a substrate library, a UI, and an agent loop, reaching the same database through the same contract.
+Agents now have the capability to participate deeply in that process — reading, reasoning, generating, refactoring. But what makes a session productive is the same thing that has always made software work: the quality of understanding going in. An agent that starts with clear context — structured knowledge, clear types, honest requirements — produces clear work. An agent that starts cold produces plausible noise.
 
-Alongside the research project, the repo also holds [`insideout/`](insideout/) — material for the author's work with InsideOut, a Gothenburg-based organization the author sits on the board of. It shares the repo because the author does both kinds of work, and the two touch at real points.
+The missing piece is not more capability. It's continuity. Understanding built in one session doesn't carry to the next. The work fragments instead of compounding.
+
+OpenLight is a substrate where understanding persists and compounds. You structure what you know — types, contracts, relationships — in a field that carries its own structure and enforces its own integrity. An agent reads the field and knows what to do. An interface is projected from it. The next session stands on the ground the last one built. A type placed today is a contract an agent reads tomorrow, a surface someone interacts with the day after.
+
+The field grows richer by being worked in.
+
+This is not a knowledge base an agent queries. It is a computing environment — the substrate where knowledge, types, agents, interfaces, and invocable programs all live as one integrated system. An invocable that reads the filesystem, an agent loop running a completion model, a UI projecting scope onto tiles — these are all functions native to the same field, reaching the same contracts, writing back to the same history. The full cycle of a computing environment, not a retrieval layer bolted onto one.
 
 ---
 

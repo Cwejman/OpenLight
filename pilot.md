@@ -1,6 +1,45 @@
 # Pilot
 
-End-to-end proof of the system: substrate, interface, invocables. The minimum surface to get chunks in, invoke programs, and view results.
+The pilot is the first end-to-end proof of the values in [`inside.md`](inside.md) — the minimum surface where chunks go in, programs run against them, and a person can see what happened. Three pieces: a substrate library (`ol`), a UI, and an agent loop, all sharing one database through one contract.
+
+---
+
+## What the Pilot Proves
+
+- Chunks go in via `ol`. Spec enforcement works. Scope queries return the right intersections.
+- The UI shows scopes as tiled panels. UI state is substrate state.
+- Dispatch is substrate-native. Tool calls are invocable dispatches with scope.
+- Scope is the read mechanism. Knowledge assembled from scope each cycle.
+- Tool specs derived from the substrate — model's tool surface reflects what's possible.
+- Every mutation traceable: chunk → commit → dispatch → invocable → session.
+- Containment: VM as outer wall, dispatch-scoped apply as inner wall.
+- The full loop: scope, dispatch, agent cycle, answer and trace in the read tile.
+
+## What the Pilot Defers
+
+- **Peering.** Single database.
+- **Services.** The pilot doesn't build services — only request-response invocables.
+- **Summaries.** Derived chunks — pattern exists, generation not in pilot loop.
+- **Temporal queries.** `--at` time travel.
+- **Shell language.** Invocables are executables.
+- **Packages.** No package management.
+- **Native container.** UI runs in a browser tab.
+- **Abstract adapter.** Hardcoded claude invocable.
+- **Streaming.** Agent loop buffers responses.
+- **Retention / deletion.** Pruning deferred — agents should always be able to look back.
+- **Crash recovery.** PID recorded for future monitoring.
+
+## Build Order
+
+1. **`ol`** — substrate library + CLI. Done.
+2. **Bootstrap data** — base archetypes (split, leaf, dispatch, session types, claude invocable registration). Seed script.
+3. **UI scaffold** — SvelteKit app with binary tree tiling.
+4. **Command palette + selector** — the interaction layer. Tested and proven before tiles depend on it.
+5. **Read tile** — chunk rendering (inferred from structure), navigation, scope history.
+6. **Dispatch tile** — contract resolution from dispatch type spec, input modules inferred from accepted types.
+7. **Claude invocable** — the agent loop with tools, sub-agent support, dispatch lifecycle, containment. Full tool-call transparency from the start.
+
+---
 
 ## The Stack
 
@@ -416,39 +455,3 @@ The natural shape likely composes read permissions, write permissions, and order
 
 **Per-dispatch VM isolation.** Interesting direction (Firecracker, ~125ms boot) but not realistic for the pilot given latency. A point of interest, not a requirement.
 
----
-
-## What the Pilot Proves
-
-- Chunks go in via `ol`. Spec enforcement works. Scope queries return the right intersections.
-- The UI shows scopes as tiled panels. UI state is substrate state.
-- Dispatch is substrate-native. Tool calls are invocable dispatches with scope.
-- Scope is the read mechanism. Knowledge assembled from scope each cycle.
-- Tool specs derived from the substrate — model's tool surface reflects what's possible.
-- Every mutation traceable: chunk → commit → dispatch → invocable → session.
-- Containment: VM as outer wall, dispatch-scoped apply as inner wall.
-- The full loop: scope, dispatch, agent cycle, answer and trace in the read tile.
-
-## What the Pilot Defers
-
-- **Peering.** Single database.
-- **Services.** The pilot doesn't build services — only request-response invocables.
-- **Summaries.** Derived chunks — pattern exists, generation not in pilot loop.
-- **Temporal queries.** `--at` time travel.
-- **Shell language.** Invocables are executables.
-- **Packages.** No package management.
-- **Native container.** UI runs in a browser tab.
-- **Abstract adapter.** Hardcoded claude invocable.
-- **Streaming.** Agent loop buffers responses.
-- **Retention / deletion.** Pruning deferred — agents should always be able to look back.
-- **Crash recovery.** PID recorded for future monitoring.
-
-## Build Order
-
-1. **`ol`** — substrate library + CLI. Done.
-2. **Bootstrap data** — base archetypes (split, leaf, dispatch, session types, claude invocable registration). Seed script.
-3. **UI scaffold** — SvelteKit app with binary tree tiling.
-4. **Command palette + selector** — the interaction layer. Tested and proven before tiles depend on it.
-5. **Read tile** — chunk rendering (inferred from structure), navigation, scope history.
-6. **Dispatch tile** — contract resolution from dispatch type spec, input modules inferred from accepted types.
-7. **Claude invocable** — the agent loop with tools, sub-agent support, dispatch lifecycle, containment. Full tool-call transparency from the start.
