@@ -72,7 +72,7 @@ pilot/
 
 ## Specs
 
-[`substrate.md`](pilot/substrate.md) — the substrate contract. Chunk, placement, spec language, history, queries.
+[`substrate.md`](pilot/substrate.md) — the substrate contract. Chunk, placement, spec language, history, queries. Implementation: [`pilot/ol/`](pilot/ol/).
 
 [`engine.md`](pilot/engine.md) — the engine. Dispatch, boundaries, invocable protocol, VM, lifecycle, tool-call dispatch.
 
@@ -81,49 +81,3 @@ pilot/
 [`ui.md`](pilot/ui.md) — the UI. Tiling, read/dispatch tiles, components, command palette, selector.
 
 [`bootstrap.md`](pilot/bootstrap.md) — the seed data. One apply() call.
-
-## `ol` — Substrate Library + CLI
-
-Full implementation of the substrate contract ([`substrate.md`](pilot/substrate.md)). Bun CLI + SQLite.
-
-**Schema.** `chunk_versions`, `placement_versions`, `current_chunks`, `current_placements`, `commits`, `branches`, `chunk_fts`. Current-state tables updated in the same transaction as version writes.
-
-**Commit model.** Auto-commit. Every mutation creates its own commit in a single SQLite transaction. For multi-operation atomicity, `ol apply` takes a declarative JSON payload and commits everything at once.
-
-**Commands:**
-
-| Command | Description |
-|---|---|
-| `ol init` | Create a new database |
-| `ol apply` | Declarative mutation — JSON from stdin or `--input` flag. The sole write path. |
-| `ol scope [ID...]` | Primary read — scope chunks, contents, connected scopes, counts |
-| `ol search QUERY` | Full-text search over name and body string values |
-| `ol log [--limit N]` | Commit history |
-| `ol branch create NAME` | Create branch at current HEAD |
-| `ol branch list` | List branches |
-| `ol branch switch NAME` | Switch active branch |
-
-**Apply payload:**
-
-```json
-{
-  "chunks": [
-    {
-      "name": "my-chunk",
-      "spec": { "ordered": true },
-      "body": { "text": "content" },
-      "placements": [
-        { "scope_id": "existing-chunk-id", "type": "instance", "seq": 1 }
-      ]
-    },
-    { "id": "existing-id", "body": { "text": "updated content" } },
-    { "id": "to-remove", "removed": true }
-  ]
-}
-```
-
-No `id` = create (system-generated ID). With `id` = create with that ID (if new) or update (if exists). `removed: true` = soft remove. Placements are additive — new placements add alongside existing, not replace. Chunks processed sequentially within one transaction — later chunks can reference earlier ones. A chunk ID can appear multiple times to add placements in stages.
-
-**Output.** JSON to stdout. Errors to stderr. Exit codes: 0 success, 1 user error, 2 system error.
-
-**Database location.** `--db PATH` flag, or `OL_DB` env var, or `.openlight/db` in current directory.
