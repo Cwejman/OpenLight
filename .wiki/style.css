@@ -183,27 +183,35 @@ html, body {
 /* Headings: orange, bold, modest size hierarchy for web readability.
  * Emacs-in-terminal shows these all at the same size; the scale here is a
  * concession to browser width while keeping the feel of the terminal. */
+/* ---- Content typography ---------------------------------------------------
+ * Spacing rhythm: 1em is the standard block gap. Headings get 2em above
+ * (section break) and 0.6em below (attach to what they title). Blockquotes,
+ * images, and code blocks get 1.5em (set apart). HRs get 2.5em (major break).
+ */
+
 h1, h2, h3, h4, h5, h6 {
   color: var(--heading);
   font-weight: bold;
   font-family: inherit;
-  margin: 1.6em 0 0.5em 0;
+  margin: 2em 0 0.6em 0;
   line-height: 1.3;
 }
 
-h1 { font-size: 1.4em;  text-decoration: underline; margin-top: 0; }
+h1 { font-size: 1.4em;  text-decoration: underline; }
 h2 { font-size: 1.25em; }
 h3 { font-size: 1.125em; }
 h4 { font-size: 1em; }
 h5 { font-size: 1em; }
 h6 { font-size: 1em; }
 
-h1:first-child {
+h1:first-child,
+h2:first-child,
+h3:first-child {
   margin-top: 0;
 }
 
 p {
-  margin: 0.7em 0;
+  margin: 1em 0;
 }
 
 strong, b {
@@ -231,7 +239,7 @@ blockquote {
 }
 
 blockquote p {
-  margin: 0.3em 0;
+  margin: 0.5em 0;
 }
 
 code {
@@ -245,7 +253,7 @@ pre {
   background: transparent;
   color: var(--code);
   padding: 0;
-  margin: 0.7em 0;
+  margin: 1.5em 0;
   overflow-x: auto;
 }
 
@@ -274,7 +282,7 @@ hr {
 
 ul, ol {
   padding-left: 2ch;
-  margin: 0.5em 0;
+  margin: 1em 0;
 }
 
 .content ul { list-style: none; }
@@ -293,17 +301,17 @@ ul, ol {
 }
 
 li > ul, li > ol {
-  margin: 0.2em 0;
+  margin: 0.3em 0;
 }
 
 table {
   border-collapse: collapse;
-  margin: 0.7em 0;
+  margin: 1.5em 0;
 }
 
 th, td {
   border: 1px solid var(--rule);
-  padding: 0.3em 0.7em;
+  padding: 0.4em 0.8em;
   text-align: left;
   vertical-align: top;
 }
@@ -317,6 +325,7 @@ img {
   max-width: 100%;
   height: auto;
   margin: 1.5em 0;
+  display: block;
 }
 
 /* Mobile */
