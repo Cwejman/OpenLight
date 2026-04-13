@@ -18,6 +18,9 @@ openlight/zig-cache/
 # Playwright
 .playwright-mcp/
 
+# Dependencies
+node_modules/
+
 # Emacs
 .#*
 
