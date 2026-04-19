@@ -26,6 +26,8 @@ This is not a knowledge base an agent queries. It is a computing environment —
 
 [`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate library and CLI live under [`pilot/ol/`](pilot/ol/).
 
+[`horizon.md`](horizon.md) — live ideas being worked on. Not settled into `inside.md`, not committed in `pilot.md`.
+
 [`research/`](research/) — ecosystem reading, a portrait gallery of software inventors whose work mirrors and pushes back on the values, and the audit trail behind `inside.md`.
 
 ![footer](.img/footer.png)
