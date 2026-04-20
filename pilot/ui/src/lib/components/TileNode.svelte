@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TileNode as TileNodeType } from '$lib/tiles'
   import TileNode from './TileNode.svelte'
+  import ReadTile from './ReadTile.svelte'
   import { view } from '$lib/state.svelte'
 
   let { node }: { node: TileNodeType } = $props()
@@ -16,17 +17,21 @@
     </div>
   </div>
 {:else}
-  <button
-    type="button"
+  <div
     class="leaf"
     class:focused={view.focusedId === node.id}
+    role="presentation"
     onclick={() => (view.focusedId = node.id)}
   >
-    <span class="label">
-      {node.scope.length > 0 ? node.scope.join(' / ') : 'empty'}
-    </span>
-    <span class="id">{node.id}</span>
-  </button>
+    {#if node.scope.length > 0}
+      <ReadTile leaf={node} />
+    {:else}
+      <div class="empty">
+        <span class="label">empty</span>
+        <span class="id">{node.id}</span>
+      </div>
+    {/if}
+  </div>
 {/if}
 
 <style>
@@ -56,19 +61,21 @@
     width: 100%;
     height: 100%;
     border: 1px solid #1a1a1a;
+    background: #0a0a0a;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .leaf.focused {
+    border-color: #3a5a8a;
+  }
+  .empty {
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: #0a0a0a;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-    padding: 0;
-  }
-  .leaf.focused {
-    border-color: #3a5a8a;
   }
   .label {
     color: #666;

@@ -2,6 +2,7 @@ export type TileLeaf = {
   type: 'leaf'
   id: string
   scope: string[]
+  history: string[][]
   mode: string
 }
 

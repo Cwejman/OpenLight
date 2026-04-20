@@ -52,14 +52,15 @@ export function handleKey(e: KeyboardEvent) {
     return
   }
 
-  // Escape — close palette or cancel chord.
+  // Escape — close palette/selector or cancel chord.
   if (e.key === 'Escape') {
     if (view.paletteOpen) closePalette()
+    if (view.scopeSelectorOpen) view.scopeSelectorOpen = false
     if (chord.active) resetChord()
     return
   }
 
-  if (view.paletteOpen) return
+  if (view.paletteOpen || view.scopeSelectorOpen) return
 
   // Space — enter chord mode (unless user is typing).
   if (!chord.active && e.key === ' ' && !inTextInput()) {

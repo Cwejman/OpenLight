@@ -1,14 +1,21 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
   import TileNode from '$lib/components/TileNode.svelte'
   import CommandPalette from '$lib/components/CommandPalette.svelte'
-  import { view, hydrate } from '$lib/state.svelte'
+  import ScopeSelector from '$lib/components/ScopeSelector.svelte'
+  import { view, setAllChunks, hydrate } from '$lib/state.svelte'
   import { chord, handleKey } from '$lib/leader.svelte'
   import { findLeaf } from '$lib/tile-ops'
 
   let { data } = $props()
 
   $effect(() => {
-    hydrate(data.tree)
+    const tree = data.tree
+    const all = data.allChunks
+    untrack(() => {
+      hydrate(tree)
+      setAllChunks(all)
+    })
   })
 
   const rendered = $derived(
@@ -33,6 +40,10 @@
 
 {#if view.paletteOpen}
   <CommandPalette />
+{/if}
+
+{#if view.scopeSelectorOpen}
+  <ScopeSelector />
 {/if}
 
 <style>

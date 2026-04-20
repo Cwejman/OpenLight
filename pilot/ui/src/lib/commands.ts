@@ -1,44 +1,51 @@
-import { view, setRoot } from './state.svelte'
-import * as ops from './tile-ops'
+import { view, openScopeSelector } from './state.svelte'
+import { navigate, findLeaf } from './tile-ops'
+import * as mut from './tile-mutations'
+import { applyMutation } from './apply'
 
 export type Command = {
   id: string
   name: string
   hint?: string
   keybind?: string
-  run: () => void
+  run: () => void | Promise<void>
 }
 
-function focused() {
-  return view.focusedId
-}
+const focused = () => view.focusedId
+
+// Layout commands write Declarations to the substrate. Focus/zoom stay
+// client-side (transient UI state).
 
 export const commands: Command[] = [
   {
     id: 'split-h',
     name: 'Split horizontal',
     keybind: 'sh',
-    run: () => {
-      const next = ops.split(view.root, focused(), 'horizontal')
-      setRoot(next.root, next.focusId)
+    run: async () => {
+      const { decl, newLeafId } = mut.splitMutation(view.root, focused(), 'horizontal')
+      view.focusedId = newLeafId
+      await applyMutation(decl)
     },
   },
   {
     id: 'split-v',
     name: 'Split vertical',
     keybind: 'sv',
-    run: () => {
-      const next = ops.split(view.root, focused(), 'vertical')
-      setRoot(next.root, next.focusId)
+    run: async () => {
+      const { decl, newLeafId } = mut.splitMutation(view.root, focused(), 'vertical')
+      view.focusedId = newLeafId
+      await applyMutation(decl)
     },
   },
   {
     id: 'close',
     name: 'Close tile',
     keybind: 'w',
-    run: () => {
-      const next = ops.close(view.root, focused())
-      if (next) setRoot(next.root, next.focusId)
+    run: async () => {
+      const res = mut.closeMutation(view.root, focused())
+      if (!res) return
+      view.focusedId = res.focusId
+      await applyMutation(res.decl)
     },
   },
   {
@@ -46,7 +53,7 @@ export const commands: Command[] = [
     name: 'Navigate left',
     keybind: 'h',
     run: () => {
-      view.focusedId = ops.navigate(view.root, focused(), 'left')
+      view.focusedId = navigate(view.root, focused(), 'left')
     },
   },
   {
@@ -54,7 +61,7 @@ export const commands: Command[] = [
     name: 'Navigate down',
     keybind: 'j',
     run: () => {
-      view.focusedId = ops.navigate(view.root, focused(), 'down')
+      view.focusedId = navigate(view.root, focused(), 'down')
     },
   },
   {
@@ -62,7 +69,7 @@ export const commands: Command[] = [
     name: 'Navigate up',
     keybind: 'k',
     run: () => {
-      view.focusedId = ops.navigate(view.root, focused(), 'up')
+      view.focusedId = navigate(view.root, focused(), 'up')
     },
   },
   {
@@ -70,44 +77,62 @@ export const commands: Command[] = [
     name: 'Navigate right',
     keybind: 'l',
     run: () => {
-      view.focusedId = ops.navigate(view.root, focused(), 'right')
+      view.focusedId = navigate(view.root, focused(), 'right')
     },
   },
   {
     id: 'resize-left',
     name: 'Resize left',
     keybind: 'H',
-    run: () => setRoot(ops.resize(view.root, focused(), 'left')),
+    run: async () => {
+      const decl = mut.resizeMutation(view.root, focused(), 'left')
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'resize-down',
     name: 'Resize down',
     keybind: 'J',
-    run: () => setRoot(ops.resize(view.root, focused(), 'down')),
+    run: async () => {
+      const decl = mut.resizeMutation(view.root, focused(), 'down')
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'resize-up',
     name: 'Resize up',
     keybind: 'K',
-    run: () => setRoot(ops.resize(view.root, focused(), 'up')),
+    run: async () => {
+      const decl = mut.resizeMutation(view.root, focused(), 'up')
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'resize-right',
     name: 'Resize right',
     keybind: 'L',
-    run: () => setRoot(ops.resize(view.root, focused(), 'right')),
+    run: async () => {
+      const decl = mut.resizeMutation(view.root, focused(), 'right')
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'swap',
     name: 'Swap tiles',
     keybind: 'x',
-    run: () => setRoot(ops.swap(view.root, focused())),
+    run: async () => {
+      const decl = mut.swapMutation(view.root, focused())
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'rotate',
     name: 'Rotate split',
     keybind: 'r',
-    run: () => setRoot(ops.rotate(view.root, focused())),
+    run: async () => {
+      const decl = mut.rotateMutation(view.root, focused())
+      if (decl) await applyMutation(decl)
+    },
   },
   {
     id: 'zoom',
@@ -121,6 +146,25 @@ export const commands: Command[] = [
     id: 'equalize',
     name: 'Equalize',
     keybind: '=',
-    run: () => setRoot(ops.equalize(view.root)),
+    run: async () => {
+      await applyMutation(mut.equalizeMutation(view.root))
+    },
+  },
+  {
+    id: 'change-scope',
+    name: 'Change scope',
+    keybind: 'o',
+    run: () => openScopeSelector(),
+  },
+  {
+    id: 'back',
+    name: 'Back',
+    keybind: 'b',
+    run: async () => {
+      const leaf = findLeaf(view.root, focused())
+      if (!leaf) return
+      const decl = mut.backMutation(leaf)
+      if (decl) await applyMutation(decl)
+    },
   },
 ]
