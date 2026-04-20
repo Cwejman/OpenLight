@@ -1,0 +1,19 @@
+{
+  "name": "ui",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^4",
+    "@sveltejs/kit": "^2",
+    "@sveltejs/vite-plugin-svelte": "^5",
+    "svelte": "^5",
+    "svelte-check": "^4",
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

@@ -10,9 +10,9 @@ Current state and what comes next. Updated as things move.
 
 1. ~~`ol` — substrate library + CLI.~~ Done.
 2. ~~**[Bootstrap](pilot/bootstrap.md)** — seed script.~~ Done.
-3. **[Engine](pilot/engine.md)** — dispatch, boundaries, VM, invocable protocol (stdin/stdout pipes).
-4. **[UI](pilot/ui.md) scaffold** — SvelteKit app with binary tree tiling.
-5. **[UI](pilot/ui.md)** command palette + selector
+3. ~~**[Engine](pilot/engine.md)** — dispatch, boundaries, VM, invocable protocol (stdin/stdout pipes).~~ Done.
+4. ~~**[UI](pilot/ui.md) scaffold** — SvelteKit app with binary tree tiling.~~ Done.
+5. ~~**[UI](pilot/ui.md)** command palette + selector~~ Done. Tile state is client-side transient for now; substrate persistence lands with the read tile step when reactivity is wired.
 6. **[UI](pilot/ui.md)** read tile
 7. **[UI](pilot/ui.md)** dispatch tile
 8. **[Agent](pilot/agent.md)** — claude invocable
