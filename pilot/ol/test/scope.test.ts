@@ -68,7 +68,7 @@ describe('scope queries', () => {
     expect(intersection.chunks.items[0]!.name).toBe('ai-ethics')
   })
 
-  test('scope with empty ids returns total count', () => {
+  test('scope with empty ids returns the whole field', () => {
     const db = open()
     apply(db, {
       chunks: [
@@ -80,6 +80,80 @@ describe('scope queries', () => {
     const result = scope(db, [])
     expect(result.chunks.total).toBe(2)
     expect(result.scope).toEqual([])
+    expect(result.chunks.items).toHaveLength(2)
+    expect(result.chunks.items.map((c) => c.name).sort()).toEqual(['a', 'b'])
+  })
+
+  test('scope options: body=false returns empty body on items', () => {
+    const db = open()
+    const parent = apply(db, {
+      chunks: [{ name: 'topic', body: { text: 'a topic' } }],
+    })
+    const topicId = parent.chunks[0]!.id
+    apply(db, {
+      chunks: [
+        {
+          name: 'x',
+          body: { text: 'content' },
+          placements: [{ scope_id: topicId, type: 'instance' }],
+        },
+      ],
+    })
+
+    const result = scope(db, [topicId], { body: false })
+    expect(result.chunks.items[0]!.body).toEqual({})
+    // names and specs still present
+    expect(result.chunks.items[0]!.name).toBe('x')
+  })
+
+  test('scope options: placements=false returns empty placements', () => {
+    const db = open()
+    const parent = apply(db, {
+      chunks: [{ name: 'topic', body: {} }],
+    })
+    const topicId = parent.chunks[0]!.id
+    apply(db, {
+      chunks: [
+        {
+          name: 'x',
+          body: {},
+          placements: [{ scope_id: topicId, type: 'instance' }],
+        },
+      ],
+    })
+
+    const result = scope(db, [topicId], { placements: false })
+    expect(result.chunks.items[0]!.placements).toEqual([])
+  })
+
+  test('scope options: connected=false skips connected computation', () => {
+    const db = open()
+    const scopes = apply(db, {
+      chunks: [
+        { name: 's1', body: {} },
+        { name: 's2', body: {} },
+      ],
+    })
+    const s1 = scopes.chunks[0]!.id
+    const s2 = scopes.chunks[1]!.id
+    apply(db, {
+      chunks: [
+        {
+          name: 'shared',
+          body: {},
+          placements: [
+            { scope_id: s1, type: 'relates' },
+            { scope_id: s2, type: 'relates' },
+          ],
+        },
+      ],
+    })
+
+    const withConn = scope(db, [s1])
+    expect(withConn.connected.length).toBeGreaterThan(0)
+
+    const noConn = scope(db, [s1], { connected: false })
+    expect(noConn.connected).toEqual([])
   })
 
   test('scope returns both instance and relates placements', () => {

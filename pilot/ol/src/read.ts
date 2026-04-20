@@ -9,14 +9,24 @@ import type {
   ScopeResult,
 } from './types.ts'
 
+export type ScopeOptions = {
+  /** Include body on returned chunks. Default true. When false, body is `{}`. */
+  body?: boolean
+  /** Include placements on returned chunks. Default true. When false, placements is `[]`. */
+  placements?: boolean
+  /** Compute connected scopes. Default true. When false, connected is `[]`. */
+  connected?: boolean
+}
+
 const parseChunkRow = (
   row: { chunk_id: string; name: string | null; spec: string; body: string },
   placements: Placement[],
+  includeBody: boolean,
 ): ChunkItem => ({
   id: row.chunk_id,
   name: row.name ?? undefined,
   spec: JSON.parse(row.spec),
-  body: JSON.parse(row.body),
+  body: includeBody ? JSON.parse(row.body) : {},
   placements,
 })
 
@@ -36,7 +46,12 @@ const getPlacementsForChunk = (db: Db, chunkId: string, branch: string): Placeme
       seq: row.seq ?? undefined,
     }))
 
-const getChunkItem = (db: Db, chunkId: string, branch: string): ChunkItem | null => {
+const getChunkItem = (
+  db: Db,
+  chunkId: string,
+  branch: string,
+  opts: { body: boolean; placements: boolean },
+): ChunkItem | null => {
   const row = db
     .query<
       { chunk_id: string; name: string | null; spec: string; body: string },
@@ -44,8 +59,17 @@ const getChunkItem = (db: Db, chunkId: string, branch: string): ChunkItem | null
     >('SELECT chunk_id, name, spec, body FROM current_chunks WHERE chunk_id = ? AND branch = ?')
     .get(chunkId, branch)
   if (!row) return null
-  return parseChunkRow(row, getPlacementsForChunk(db, chunkId, branch))
+  const placements = opts.placements ? getPlacementsForChunk(db, chunkId, branch) : []
+  return parseChunkRow(row, placements, opts.body)
 }
+
+const getAllChunkIds = (db: Db, branch: string): string[] =>
+  db
+    .query<{ chunk_id: string }, [string]>(
+      'SELECT chunk_id FROM current_chunks WHERE branch = ?',
+    )
+    .all(branch)
+    .map((r) => r.chunk_id)
 
 const getInScopeChunkIds = (db: Db, scopeIds: string[], branch: string): string[] => {
   if (scopeIds.length === 1) {
@@ -356,9 +380,18 @@ const handleCommitsScope = (
   }
 }
 
-export const scope = (db: Db, scopeIds: string[]): ScopeResult => {
+export const scope = (
+  db: Db,
+  scopeIds: string[],
+  options: ScopeOptions = {},
+): ScopeResult => {
   const branch = getActiveBranch(db)
   const head = getHead(db, branch) ?? 'root'
+  const opts = {
+    body: options.body ?? true,
+    placements: options.placements ?? true,
+    connected: options.connected ?? true,
+  }
 
   if (scopeIds.includes(COMMITS_SCOPE)) {
     return handleCommitsScope(db, scopeIds, branch, head)
@@ -372,18 +405,23 @@ export const scope = (db: Db, scopeIds: string[]): ScopeResult => {
     .get(branch)
   const total = totalRow?.cnt ?? 0
 
+  // Empty scope = the whole field. Intersection of zero sets is the universe.
   if (scopeIds.length === 0) {
+    const allIds = getAllChunkIds(db, branch)
+    const items = allIds
+      .map((id) => getChunkItem(db, id, branch, opts))
+      .filter((c): c is ChunkItem => c !== null)
     return {
       scope: [],
       head,
-      chunks: { total, in_scope: total, instance: 0, relates: 0, items: [] },
+      chunks: { total, in_scope: total, instance: 0, relates: 0, items },
       connected: [],
     }
   }
 
   // Get the scope chunks themselves
   const scopeChunks = scopeIds
-    .map((id) => getChunkItem(db, id, branch))
+    .map((id) => getChunkItem(db, id, branch, opts))
     .filter((c): c is ChunkItem => c !== null)
 
   // Get in-scope chunk IDs
@@ -392,13 +430,15 @@ export const scope = (db: Db, scopeIds: string[]): ScopeResult => {
   // Count instance vs relates
   const ir = countInstanceRelates(db, inScopeIds, scopeIds, branch)
 
-  // Get full chunk items
+  // Get chunk items per options
   const items = inScopeIds
-    .map((id) => getChunkItem(db, id, branch))
+    .map((id) => getChunkItem(db, id, branch, opts))
     .filter((c): c is ChunkItem => c !== null)
 
   // Get connected scopes
-  const connected = queryConnectedScopes(db, inScopeIds, scopeIds, branch)
+  const connected = opts.connected
+    ? queryConnectedScopes(db, inScopeIds, scopeIds, branch)
+    : []
 
   return {
     scope: scopeChunks,
@@ -425,7 +465,7 @@ export const search = (db: Db, query: string): ChunkItem[] => {
     .all(query)
 
   return rows
-    .map((row) => getChunkItem(db, row.chunk_id, branch))
+    .map((row) => getChunkItem(db, row.chunk_id, branch, { body: true, placements: true }))
     .filter((c): c is ChunkItem => c !== null)
 }
 

@@ -2,6 +2,7 @@ export { open } from './db.ts'
 export type { Db } from './db.ts'
 export { apply } from './apply.ts'
 export { scope, search, log, COMMITS_SCOPE } from './read.ts'
+export type { ScopeOptions } from './read.ts'
 export { SpecViolation } from './spec.ts'
 export type {
   Chunk,
