@@ -4,27 +4,68 @@ Current state and what comes next. Updated as things move.
 
 ---
 
+## Recent
+
+**Architecture reset for the UI layer.** Following extended charting, the pilot direction has shifted:
+
+- **Invocables and views unified as `program`.** A program is a chunk with an executable and an optional `surface` capability declaration. Views are programs with a surface. Tools are programs without.
+- **Host is Rust** — native shell built on tao + wry (not Tauri the framework). Owns window, tile geometry, webview lifecycle, IPC routing. Does not write UI — UI is programs.
+- **Programs in webviews, each isolated.** First-party UI (sidebar, tabs, command palette, read tile, program runner) are TSX + React programs, one webview each.
+- **Engine stays TypeScript subprocess.** Rust migration is a later axis.
+- **UI composition types settled** — `ui/session`, `ui/tab`, `ui/tile`, `ui/overlay`, `ui/recipe`. See [`pilot/host.md`](pilot/host.md).
+- **SvelteKit scaffold removed.** `pilot/ui/` deleted.
+- **`ol` renamed to `db`.** Substrate library at [`pilot/db/`](pilot/db/).
+- **`interface.md` folded into `pilot.md` + `pilot/host.md`.** Pilot is mature enough to hold the interface spec inline.
+
+## What survives the reset
+
+All engine and substrate work:
+
+- **`db`** — substrate library + CLI. Done.
+- **`bootstrap.ts`** — seed script. Functional with existing archetypes; the terminology catch-up (invocable → program, add ui composition archetypes) is in the pending code pass.
+- **Engine** — dispatch, boundaries, containment (VM), invocable protocol (stdio JSON-lines), lifecycle, echo invocable. Done. 66 engine tests + the already-removed 4 UI tests passed before the reset.
+- **Agent design** — spec-level work in `pilot/agent.md` carries forward; the claude program is still the final pilot step.
+
+What doesn't survive: the SvelteKit tile/scope/dispatch UI. The substrate concept of `ui/split` / `ui/leaf` / `ui/view-root` / `ui/scope-history` is replaced by the new `ui/session` / `ui/tab` / `ui/tile` / `ui/overlay` / `ui/recipe` type system.
+
 ## In progress
 
-**Pilot implementation.** The spec is resolved. Build order from `pilot.md`:
+**Spec purification pass.**
 
-1. ~~`ol` — substrate library + CLI.~~ Done.
-2. ~~**[Bootstrap](pilot/bootstrap.md)** — seed script.~~ Done.
-3. ~~**[Engine](pilot/engine.md)** — dispatch, boundaries, VM, invocable protocol (stdin/stdout pipes).~~ Done.
-4. ~~**[UI](pilot/ui.md) scaffold** — SvelteKit app with binary tree tiling.~~ Done.
-5. ~~**[UI](pilot/ui.md)** command palette + selector~~ Done.
-6. ~~**[UI](pilot/ui.md)** read tile~~ Done. Substrate-backed — tile layout, scope, and history all persist via `apply()`. `view.root` is a read-only mirror of server `data.tree`; every layout and scope change is a Declaration. Reload = substrate read = full state.
-7. **[UI](pilot/ui.md)** dispatch tile
-8. **[Agent](pilot/agent.md)** — claude invocable
+- ~~`pilot.md`~~ — rewritten
+- ~~`pilot/host.md`~~ — written (replaces `pilot/ui.md`, absorbs `interface.md`)
+- ~~`README.md`~~ — updated
+- ~~`board.md`~~ — updated (this file)
+- `horizon.md` — additions pending (uniform-VM+DOM-streaming, zoomable canvas, WebGPU views, Rust engine migration)
+- `pilot/engine.md` — terminology pass (invocable → program, containment fork, dispatch-vs-process distinction)
+- `pilot/substrate.md` — minor pass (primitives unchanged; terminology)
+- `pilot/agent.md` — minor pass (agent is a program)
+- `pilot/bootstrap.md` — reflect new archetypes to be seeded
 
-UI interaction details (dispatch tile flow, scope-set builders, context lifecycle display) resolve during UI implementation.
+**Code catch-up to specs.** Engine source and `bootstrap.ts` still use the `invocable` archetype name and the old `ui/split`/`leaf`/`view-root`/`scope-history` types. No persistence concerns — the existing `.ol/db` is overwritten on next bootstrap.
 
-**Substrate lib prerequisites — done.** Two-pass placement enforcement, seq auto-assignment, name uniqueness per scope, accepts ambiguity rejection, dead type-def bypass removed, `dispatch_id` on commits, `apply()` dispatch context parameter, commit projection via virtual `COMMITS_SCOPE` (`'__commits'`). 60 tests pass. See `engine-stress-test.md` for the full list.
+## Open architectural forks
+
+Held in specs rather than closed prematurely:
+
+- **Containment model** — split (tool-VM only; views on host) vs uniform (everything in VM with DOM streaming to host). Affects host implementation scope. See `pilot.md`.
+- **Tabs vs zoomable canvas** — current design assumes tabs; zoomable nested canvas is a substantive alternative direction. Deferred to `horizon.md`.
+
+## Next
+
+1. Finish the spec purification pass (engine, substrate, agent, bootstrap spec files; horizon additions).
+2. Update `pilot/bootstrap.ts` + engine source for `program` archetype and UI composition types; keep tests passing.
+3. Pick a containment model (or spike both briefly).
+4. Scaffold `pilot/host/` (Rust, tao + wry) — minimum: window + one webview + stdio bridge to engine subprocess.
+5. Scaffold `pilot/sdk/` — TS SDK with `mount()` and substrate ops.
+6. First program: read tile as a TSX program, to validate the host↔program↔SDK↔engine loop.
 
 ---
 
 ## Notes
 
-**The strange (`~/git/agi/`).** Referenced in `inside.md` as the intellectual parent. It is loose exploration — night sessions of discussion without ground. The point of `inside.md` is to hold what is true from that exploration; the strange itself is not a source of truth. Sessions should not reach for the strange to resolve questions — if the answer is not in `inside.md`, the inside is what needs work, not the reference.
+**The strange (`~/git/agi/`).** Referenced in `inside.md` as the intellectual parent. Loose exploration — not a source of truth. Sessions should not reach for the strange to resolve questions; if the answer isn't in `inside.md`, the inside is what needs work.
 
-**README hook.** The current README is acceptable but the formulation exercise is not fully crystallized. The thread of observations across the session is preserved in conversation history. A future session may return to it — the specific things that landed: "projected not generated," "the generative process itself is native to the medium," "the cyclical process of understanding → implementing," "one act of structuring knowledge." Not settled, but the material is there.
+**Research informing the reset.** [`research/ui-landscape-draft.md`](research/ui-landscape-draft.md) (wide survey of UI paradigms) and [`research/ui-stacks.md`](research/ui-stacks.md) (technically adoptable shortlist) hold the breadth that informed the current shape. Kept as reference; decisions distilled from them live in `pilot.md` and `pilot/host.md`.
+
+**README hook.** The current README is acceptable but the formulation exercise is not fully crystallized. Preserved threads: "projected not generated," "the generative process itself is native to the medium," "the cyclical process of understanding → implementing," "one act of structuring knowledge." Not settled — material waiting for a future session.

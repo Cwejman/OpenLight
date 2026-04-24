@@ -1,5 +1,5 @@
-import { open, apply } from '../../ol/src/index.ts'
-import type { Db, Declaration } from '../../ol/src/index.ts'
+import { open, apply } from '../../db/src/index.ts'
+import type { Db, Declaration } from '../../db/src/index.ts'
 
 /** Seeds engine + agent archetypes with human-readable IDs, matching bootstrap.ts. */
 export function seedTestDb(): Db {
@@ -18,7 +18,7 @@ export function seedTestDb(): Db {
       {
         id: 'dispatch',
         name: 'dispatch',
-        spec: { propagate: true, accepts: ['read-boundary', 'write-boundary'] },
+        spec: { propagate: true },
         body: { text: 'A dispatch event' },
         placements: [{ scope_id: 'engine', type: 'instance' }],
       },
@@ -61,6 +61,7 @@ export function seedTestDb(): Db {
       {
         id: 'prompt',
         name: 'prompt',
+        spec: { required: ['text'] },
         body: { text: 'A user message to an agent' },
         placements: [
           { scope_id: 'agent', type: 'instance' },
@@ -181,7 +182,6 @@ export function seedTestDb(): Db {
         name: 'claude',
         spec: {
           propagate: true,
-          ordered: true,
           accepts: ['session', 'context', 'prompt'],
         },
         body: {
@@ -200,6 +200,30 @@ export function seedTestDb(): Db {
       { id: 'session', placements: [{ scope_id: 'claude', type: 'relates' }] },
       { id: 'context', placements: [{ scope_id: 'claude', type: 'relates' }] },
       { id: 'prompt', placements: [{ scope_id: 'claude', type: 'relates' }] },
+
+      // echo — minimal test invocable.
+      {
+        id: 'echo',
+        name: 'echo',
+        spec: { propagate: true, accepts: ['message'] },
+        body: {
+          text: 'Echoes the input message back as an answer',
+          executable: './invocables/echo',
+          boundary: 'dispatch',
+          timeout_ms: 30000,
+        },
+        placements: [
+          { scope_id: 'agent', type: 'instance' },
+          { scope_id: 'invocable', type: 'instance' },
+        ],
+      },
+      {
+        id: 'message',
+        name: 'message',
+        spec: { required: ['text'] },
+        body: { text: 'A text message' },
+        placements: [{ scope_id: 'echo', type: 'relates' }],
+      },
     ],
   }
 

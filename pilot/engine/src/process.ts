@@ -1,4 +1,4 @@
-import { apply } from '../../ol/src/index.ts'
+import { apply } from '../../db/src/index.ts'
 import type { Engine, DispatchContext, ProcessHandle } from './types.ts'
 import { parseRequest, handleOp, formatResponse } from './protocol.ts'
 

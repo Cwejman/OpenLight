@@ -1,6 +1,6 @@
-import { apply, scope } from '../../ol/src/index.ts'
-import { generateId } from '../../ol/src/id.ts'
-import type { Db, ChunkDeclaration } from '../../ol/src/types.ts'
+import { apply, scope } from '../../db/src/index.ts'
+import { generateId } from '../../db/src/id.ts'
+import type { Db, ChunkDeclaration } from '../../db/src/types.ts'
 import type { DispatchArgs, DispatchResult } from './types.ts'
 
 /**
@@ -47,31 +47,30 @@ const buildDispatchDeclaration = (
       ],
     },
 
-    // 2. Read-boundary container
+    // 2. Read-boundary container. The container is a chunk-as-connection —
+    //    an instance of the `read-boundary` archetype (type membership),
+    //    related to the dispatch (execution configuration, not structural
+    //    content), and related to each scope it governs.
     {
       id: rbId,
       placements: [
         { scope_id: 'read-boundary', type: 'instance' },
-        { scope_id: dispatchId, type: 'instance' },
+        { scope_id: dispatchId, type: 'relates' },
       ],
     },
-    // Place each read boundary scope reference on the container.
-    // Uses 'relates' — these are references, not typed content items.
     ...args.readBoundary.map((scopeRef) => ({
       id: scopeRef,
       placements: [{ scope_id: rbId, type: 'relates' as const }],
     })),
 
-    // 3. Write-boundary container
+    // 3. Write-boundary container — same shape.
     {
       id: wbId,
       placements: [
         { scope_id: 'write-boundary', type: 'instance' },
-        { scope_id: dispatchId, type: 'instance' },
+        { scope_id: dispatchId, type: 'relates' },
       ],
     },
-    // Place each write boundary scope reference on the container.
-    // Uses 'relates' — these are references, not typed content items.
     ...args.writeBoundary.map((scopeRef) => ({
       id: scopeRef,
       placements: [{ scope_id: wbId, type: 'relates' as const }],

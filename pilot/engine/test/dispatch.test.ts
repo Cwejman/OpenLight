@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { scope, log, COMMITS_SCOPE } from '../../ol/src/index.ts'
+import { scope, log, COMMITS_SCOPE } from '../../db/src/index.ts'
 import { seedTestDb } from './helpers.ts'
 import { createDispatch } from '../src/dispatch.ts'
 
@@ -66,6 +66,27 @@ describe('dispatch creation', () => {
     const agentRef = wbScope.chunks.items.find((c) => c.id === 'agent')
     expect(agentRef).toBeDefined()
     expect(agentRef!.placements.some((p) => p.scope_id === wbContainer!.id && p.type === 'relates')).toBe(true)
+  })
+
+  test('boundary containers relate to the dispatch (not instance)', () => {
+    // Boundaries are execution configuration, not structural content.
+    // They ABOUT the dispatch — relates — not IN it.
+    const db = seedTestDb()
+    const { dispatchId } = createDispatch(db, 'filesystem', {
+      chunks: [],
+      readBoundary: ['agent'],
+      writeBoundary: ['agent'],
+    })
+
+    const result = scope(db, [dispatchId])
+    const rb = result.chunks.items.find((c) =>
+      c.placements.some((p) => p.scope_id === 'read-boundary' && p.type === 'instance'),
+    )
+    const wb = result.chunks.items.find((c) =>
+      c.placements.some((p) => p.scope_id === 'write-boundary' && p.type === 'instance'),
+    )
+    expect(rb!.placements.find((p) => p.scope_id === dispatchId)!.type).toBe('relates')
+    expect(wb!.placements.find((p) => p.scope_id === dispatchId)!.type).toBe('relates')
   })
 
   test('places argument chunks on the dispatch', () => {

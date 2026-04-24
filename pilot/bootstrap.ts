@@ -1,6 +1,6 @@
 import { mkdirSync } from 'fs'
-import { open, apply, scope } from './ol/src/index'
-import type { Declaration } from './ol/src/index'
+import { open, apply, scope } from './db/src/index'
+import type { Declaration } from './db/src/index'
 
 mkdirSync('project/.ol', { recursive: true })
 
@@ -25,7 +25,7 @@ const engine: Declaration = {
     {
       id: 'dispatch',
       name: 'dispatch',
-      spec: { propagate: true, accepts: ['read-boundary', 'write-boundary'] },
+      spec: { propagate: true },
       body: { text: 'A dispatch event' },
       placements: [{ scope_id: 'engine', type: 'instance' }],
     },
@@ -83,7 +83,8 @@ const ui: Declaration = {
     {
       id: 'scope-history',
       name: 'scope-history',
-      body: {},
+      spec: { ordered: true },
+      body: { text: 'Flat ordered log of scope navigations; entries relate to the leaf that did the read' },
       placements: [{ scope_id: 'ui', type: 'instance' }],
     },
   ],
@@ -113,6 +114,7 @@ const agent: Declaration = {
     {
       id: 'prompt',
       name: 'prompt',
+      spec: { required: ['text'] },
       body: { text: 'A user message to an agent' },
       placements: [
         { scope_id: 'agent', type: 'instance' },
@@ -254,7 +256,6 @@ const agent: Declaration = {
       name: 'claude',
       spec: {
         propagate: true,
-        ordered: true,
         accepts: ['session', 'context', 'prompt'],
       },
       body: {
@@ -272,6 +273,31 @@ const agent: Declaration = {
     { id: 'session', placements: [{ scope_id: 'claude', type: 'relates' }] },
     { id: 'context', placements: [{ scope_id: 'claude', type: 'relates' }] },
     { id: 'prompt', placements: [{ scope_id: 'claude', type: 'relates' }] },
+
+    // echo — minimal test invocable. Accepts one message chunk, writes an
+    // answer chunk back to the dispatch scope, exits. Proves the full
+    // dispatch cycle without depending on the model API.
+    {
+      id: 'echo',
+      name: 'echo',
+      spec: { propagate: true, accepts: ['message'] },
+      body: {
+        text: 'Echoes the input message back as an answer',
+        executable: './invocables/echo.ts',
+        boundary: 'dispatch',
+      },
+      placements: [
+        { scope_id: 'agent', type: 'instance' },
+        { scope_id: 'invocable', type: 'instance' },
+      ],
+    },
+    {
+      id: 'message',
+      name: 'message',
+      spec: { required: ['text'] },
+      body: { text: 'A text message' },
+      placements: [{ scope_id: 'echo', type: 'relates' }],
+    },
   ],
 }
 

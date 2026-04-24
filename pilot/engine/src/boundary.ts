@@ -1,5 +1,5 @@
-import { scope } from '../../ol/src/index.ts'
-import type { Db } from '../../ol/src/types.ts'
+import { scope } from '../../db/src/index.ts'
+import type { Db } from '../../db/src/types.ts'
 import type { DispatchContext } from './types.ts'
 
 /**

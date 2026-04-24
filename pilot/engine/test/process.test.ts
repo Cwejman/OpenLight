@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { resolve } from 'path'
-import { scope, apply } from '../../ol/src/index.ts'
+import { scope, apply } from '../../db/src/index.ts'
 import { seedTestDb } from './helpers.ts'
 import { createDispatch } from '../src/dispatch.ts'
 import { buildDispatchContext } from '../src/boundary.ts'

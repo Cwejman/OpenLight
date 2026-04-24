@@ -14,7 +14,7 @@ OpenLight is a substrate where understanding persists and compounds. You structu
 
 The field grows richer by being worked in.
 
-This is not a knowledge base an agent queries. It is a computing environment — the substrate where knowledge, types, agents, interfaces, and invocable programs all live as one integrated system. An invocable that reads the filesystem, an agent loop running a completion model, a UI projecting scope onto tiles — these are all functions native to the same field, reaching the same contracts, writing back to the same history. The full cycle of a computing environment, not a retrieval layer bolted onto one.
+This is not a knowledge base an agent queries. It is a computing environment — the substrate where knowledge, types, agents, interfaces, and programs all live as one integrated system. A program that reads the filesystem, an agent loop running a completion model, a tile projecting scope onto screen — these are all functions native to the same field, reaching the same contracts, writing back to the same history. The full cycle of a computing environment, not a retrieval layer bolted onto one.
 
 ---
 
@@ -22,9 +22,7 @@ This is not a knowledge base an agent queries. It is a computing environment —
 
 [`inside.md`](inside.md) — the values and visions, inside-out.
 
-[`interface.md`](interface.md) — the interface vision. Scope-based navigation, the broader horizon beyond the pilot.
-
-[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate library and CLI live under [`pilot/ol/`](pilot/ol/).
+[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate library lives under [`pilot/db/`](pilot/db/).
 
 [`horizon.md`](horizon.md) — live ideas being worked on. Not settled into `inside.md`, not committed in `pilot.md`.
 

@@ -1,9 +1,15 @@
-import type { Db, ChunkDeclaration } from '../../ol/src/types.ts'
+import type { Db, ChunkDeclaration } from '../../db/src/types.ts'
 
 export type Engine = {
   readonly db: Db
   /** Running dispatches tracked for cancel/shutdown. */
   readonly processes: Map<string, ProcessHandle>
+  /**
+   * Absolute path to the project directory (parent of `.ol/`). Invocable
+   * executable paths from the substrate are resolved relative to this.
+   * Optional — when omitted, executables must be absolute paths.
+   */
+  readonly projectRoot?: string
 }
 
 export type DispatchArgs = {

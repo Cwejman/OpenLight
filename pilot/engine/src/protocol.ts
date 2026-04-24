@@ -1,5 +1,5 @@
-import { apply, scope, search, SpecViolation } from '../../ol/src/index.ts'
-import type { ChunkDeclaration } from '../../ol/src/types.ts'
+import { apply, scope, search, SpecViolation } from '../../db/src/index.ts'
+import type { ChunkDeclaration } from '../../db/src/types.ts'
 import type {
   DispatchContext,
   DispatchArgs,

@@ -1,416 +1,286 @@
 # Engine
 
-The engine sits between the substrate library and everything that dispatches. It is the authority on dispatch creation, boundary enforcement, invocable lifecycle, and VM management. The UI calls the engine. Invocables call the engine. Nothing reaches the database without going through the lib — and nothing dispatches without going through the engine.
+The engine is the authority on running programs against the substrate. A program is a chunk with an executable; to run one is to create a process. The engine creates processes, enforces boundaries, spawns executables, and mediates every substrate operation a running program attempts. Nothing runs without going through the engine, and no program touches the database directly.
 
-The engine is a TypeScript module imported directly by the UI's server functions — the interface is function calls, not a protocol. The JSON lines protocol is only for VM invocables communicating back through the pipe.
+The engine is a TypeScript module. The pilot runs it as a subprocess the host spawns on start. It speaks one protocol — JSON lines over stdio — to the host that routes it to webview-hosted programs, and to programs running directly as subprocesses (such as tools in a containment VM). The shape is identical either way; the SDK hides the transport.
+
+When the engine is eventually rewritten in Rust, the subprocess hop collapses into a function call. The protocol doesn't change and programs don't know the difference.
+
+---
 
 ## What the Engine Owns
 
-- **Dispatch creation.** Creates the dispatch chunk, validates the contract (all accepted types present), records it as instance of the invocable and `dispatch`. One atomic `apply()`. The dispatch chunk is engine-owned — invocables cannot modify it.
-- **Boundary enforcement.** Computes the effective boundary by intersecting the invocable's intrinsic boundaries with the dispatch's boundaries. Filters all scope/search results against the effective read boundary. Rejects any apply that touches a scope outside the effective write boundary.
-- **Invocable protocol.** Exposes an API that invocables in the VM call to interact with the substrate. The invocable sends requests (scope, search, apply, dispatch, await). The engine validates each request against the dispatch's boundaries and executes via the lib.
-- **VM management.** Starts/stops the VM. Mounts invocable code read-only. Manages network policy (public internet allowed, local network blocked).
-- **Process lifecycle.** Spawns invocable processes inside the VM. Tracks PID, status (running/completed/failed), start time. Kills on timeout or user request. Updates the dispatch chunk on completion. The engine owns the status state machine: `pending → running → completed/failed`. The engine sets `pending` on creation, `running` on spawn, and `completed` (exit 0) or `failed` (non-zero exit) on process exit. Status is a body field on the dispatch chunk, updated via `apply()`. The invocable does not set its own status — it simply exits.
-- **Tool-call dispatch.** When an agent invocable requests a tool call, the engine creates a dispatch for the target invocable, spawns it, and returns the dispatch chunk ID. The agent decides when to await. Same dispatch mechanics as any invocation. The tool dispatch's boundaries are the intersection of the parent dispatch's boundaries and the target invocable's intrinsic boundaries — the engine computes this at dispatch creation.
+- **Process creation.** The act of running a program is `dispatch`; the resulting artifact is a `process` chunk. The engine creates the process chunk in one atomic `apply()`, placing it on the program by identity and on its session (or parent process, for tool calls) so it's visible where it belongs. The process chunk is engine-owned — a running program cannot modify its own process chunk or the boundary chunks attached to it.
+- **Boundary enforcement.** Every scope read, every write, every nested program run is checked. The engine computes the effective boundary as the intersection of the program's intrinsic boundary and the boundary the user (or parent process) set at run time. Reads outside the read boundary return `BOUNDARY_VIOLATION`. Writes outside the write boundary are rejected.
+- **Program lifecycle.** The engine spawns the program's executable, tracks its status through `pending → running → completed | failed`, updates the process chunk as state changes, kills on timeout or cancel. The program itself does not set its status — it simply exits.
+- **Protocol mediation.** The engine receives every substrate operation a running program attempts, validates it, executes it via the substrate library, returns the result. Programs do not carry database access; the protocol is the boundary.
+- **Containment.** The engine spawns programs into whatever containment context their capabilities demand. How broad that context is, and whether all programs share one, is the containment fork (see below).
 
-## Engine API
-
-The engine is a TypeScript module imported by the UI's server functions. These are the exported functions — the contract between the engine and the UI.
-
-```typescript
-import type { Db } from '../ol/src/db'
-import type { ChunkDeclaration } from '../ol/src/types'
-
-type Engine = {
-  /** The substrate database. The engine holds the reference. */
-  db: Db
-}
-
-type DispatchArgs = {
-  /** Chunks to place on the dispatch, as assembled by the UI from the dispatch tile.
-      The engine does not interpret these — it places them on the dispatch chunk
-      and the substrate's spec enforcement validates the contract. */
-  chunks: ChunkDeclaration[]
-  /** Scope IDs for the read boundary */
-  readBoundary: string[]
-  /** Scope IDs for the write boundary */
-  writeBoundary: string[]
-  /** Timeout in ms. Defaults to invocable's body.timeout_ms if not provided. */
-  timeout?: number
-}
-
-type DispatchResult = {
-  /** The dispatch chunk ID */
-  dispatchId: string
-}
-
-/**
- * Initialize the engine. Opens the database, starts the VM,
- * reconciles stuck dispatches from a previous session.
- */
-function bootstrap(dbPath: string): Engine
-
-/**
- * Create a dispatch. The engine creates the dispatch chunk (instance of
- * the invocable and dispatch archetype), places the argument chunks and
- * boundary containers on it, validates via apply(), and spawns the
- * invocable in the VM. Returns immediately — the invocable runs
- * asynchronously.
- */
-function dispatch(engine: Engine, invocableId: string, args: DispatchArgs): DispatchResult
-
-/**
- * Cancel a running dispatch. Kills the invocable process,
- * sets status to "failed".
- */
-function cancel(engine: Engine, dispatchId: string): void
-
-/**
- * Shut down the engine. Kills all running invocables, stops the VM.
- */
-function shutdown(engine: Engine): void
-```
-
-The engine is invocable-agnostic. `DispatchArgs.chunks` are the argument chunks the UI assembled from the dispatch tile's input modules — whatever the invocable's composed spec accepts. The engine doesn't interpret them. It creates the dispatch chunk, places the arguments on it, builds boundary containers from `readBoundary`/`writeBoundary` scope IDs, and calls `apply()`. The substrate's spec enforcement validates that the arguments match the invocable's contract.
-
-The UI reads the substrate directly (via the `ol` lib) for all read operations — scope, search, log. The engine is only called for dispatch, cancel, and lifecycle. The UI does not go through the engine for reads.
-
-## Invocable Protocol
-
-The invocable runs in the VM with no direct database access. It communicates with the engine over **stdin/stdout pipes**.
-
-**Transport.** The engine spawns the invocable inside the VM via the VM CLI:
+## Program and Process
 
 ```
-Bun.spawn(['limactl', 'shell', instance, '--', './invocables/claude', dispatchId])
+engine/program
+  spec: { required: ['executable'] }
+  body may carry:
+    executable: path relative to project
+    surface: 'none' | 'dom' | 'wgpu'
+    capabilities: { network?, filesystem?, ... }
+    boundary: reference to intrinsic boundary, or 'open'
+    timeout_ms: default run timeout
 ```
 
-OrbStack equivalent: `orb exec <machine> ./invocables/claude <dispatchId>`. Both pipe stdin/stdout to the host process. The engine owns both ends. No server, no port, no filesystem coordination.
+A program is the template: what to run, how it behaves, what capabilities it declares. Concrete programs — filesystem, shell, claude, echo, read-tile, sidebar — are chunks placed `instance` on `program`.
 
-**Protocol.** JSON lines — one JSON object per line. The invocable writes requests to stdout, reads responses from stdin. Stderr is for logging (forwarded to the engine's log).
+```
+engine/process
+  — An instance of program that represents a single run.
+  body carries engine-written state:
+    status: 'pending' | 'running' | 'completed' | 'failed'
+    started: ISO timestamp
+    pid: OS process id (nullable)
+    timeout_ms: resolved timeout for this run
+    error?: reason string when status is 'failed'
+```
 
-**Operations available to invocables:**
+A process is instance of process AND instance of the program it runs. Dual placement. Reads of the `process` scope list every run in the session; reads of a specific program's scope list its runs.
+
+---
+
+## The Dispatch Verb
+
+The term `dispatch` is the verb — the act of running a program. It appears in commit metadata (`commits.dispatch_id`) as the trace of which run caused a change. It is not an archetype. The noun for the thing that is running is `process`.
+
+In the SDK, the operation is named `run`. It returns the process id synchronously; the program continues asynchronously. `await` blocks on one or more process ids and returns their scopes when they complete.
+
+---
+
+## The Program Protocol
+
+One JSON-lines protocol serves every program regardless of where it runs.
+
+**Operations a running program can call on the engine:**
 
 | Operation | Description |
 |---|---|
-| `scope` | Read scope, filtered by read boundary. External connections visible (names, counts) but not readable. |
-| `search` | Full-text search, filtered by read boundary |
-| `apply` | Write, checked against write boundary |
-| `dispatch` | Dispatch another invocable. Returns dispatch chunk ID immediately. |
-| `await` | Block until one or more dispatches complete. Returns results. |
+| `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. |
+| `search` | Full-text search across readable scopes. |
+| `apply` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. |
+| `run` | Start a new program run. Returns the process id immediately. Used internally by the engine for tool calls. |
+| `await` | Block until one or more processes reach a terminal state. Returns each process's final scope. |
 
-The invocable receives its dispatch ID as a command-line argument.
+### Schema
 
-### Protocol Schema
-
-Every request has an `op` field and an `id` field (monotonic integer, for correlation). Every response has the matching `id` and either `result` or `error`.
-
-**Requests:**
+Every request has an `op` and a monotonic `id`. Every response pairs the same `id` with either `result` or `error`.
 
 ```jsonl
 {"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"]}
-{"id":2,"op":"search","query":"deployment config"}
+{"id":2,"op":"search","query":"session today"}
 {"id":3,"op":"apply","declaration":{"chunks":[...]}}
-{"id":4,"op":"dispatch","invocable":"filesystem","args":{"operation":"read","path":"/src/main.ts"}}
-{"id":5,"op":"await","dispatches":["d_1","d_2","d_3"]}
+{"id":4,"op":"run","program":"filesystem","args":{...}}
+{"id":5,"op":"await","processes":["p_1","p_2"]}
 ```
 
-**Responses:**
-
-| Op | Result type | Description |
-|---|---|---|
-| `scope` | `ScopeResult` | Scope chunks, items, connected scopes |
-| `search` | `ChunkItem[]` | Matching chunks |
-| `apply` | `ApplyResult` | Commit + created chunk IDs |
-| `dispatch` | `{ dispatch: string }` | The dispatch chunk ID, returned immediately |
-| `await` | `Record<string, ScopeResult>` | Map of dispatch ID → result (scope of completed dispatch) |
-
-```jsonl
-{"id":1,"result":{"scope":[...],"head":"c_99","chunks":{"total":12,"in_scope":12,"instance":10,"relates":2,"items":[...]},"connected":[...]}}
-{"id":4,"result":{"dispatch":"d_abc123"}}
-{"id":5,"result":{"d_1":{"scope":[...],...},"d_2":{"scope":[...],...},"d_3":{"scope":[...],...}}}
-```
+| Op | Result shape |
+|---|---|
+| `scope` | `ScopeResult` (scope chunks, items, connected scopes) |
+| `search` | `ChunkItem[]` |
+| `apply` | `ApplyResult` (commit id + created chunk ids) |
+| `run` | `{ process: string }` — the process chunk id |
+| `await` | `Record<string, ScopeResult>` — process id → final scope |
 
 **Errors:**
 
-```jsonl
-{"id":3,"error":{"code":"BOUNDARY_VIOLATION","message":"Write rejected: scope xyz is outside write boundary"}}
-```
-
 | Code | Meaning |
 |---|---|
-| `BOUNDARY_VIOLATION` | Read or write outside effective boundary |
+| `BOUNDARY_VIOLATION` | Read or write outside the effective boundary |
 | `VALIDATION_ERROR` | Declaration fails spec validation |
-| `NOT_FOUND` | Referenced chunk or invocable does not exist |
-| `DISPATCH_FAILED` | Dispatched invocable exited non-zero |
+| `NOT_FOUND` | Referenced chunk or program does not exist |
+| `RUN_FAILED` | A run the program started ended non-zero |
 | `INVALID_REQUEST` | Malformed JSON, unknown op, missing fields |
 
-Types are identical to the substrate library (`ol/src/types.ts`): `Declaration`, `ScopeResult`, `ChunkItem`, `ApplyResult`.
+The types (`ScopeResult`, `ChunkItem`, `Declaration`, `ApplyResult`) are the substrate library's types.
 
-### Dispatch and Await
+### Run and await are separate
 
-`dispatch` and `await` are separate operations. `dispatch` creates the dispatch chunk, spawns the invocable, and returns the dispatch chunk ID immediately. The invocable is running — its writes accumulate in the substrate. `await` takes one or more dispatch IDs and blocks until all complete, then returns each dispatch's result as a `ScopeResult`.
+`run` creates the process chunk and spawns the program's executable. It returns the process id immediately. The spawned program runs on its own. `await` blocks on a set of process ids until they reach a terminal state.
 
-This separation matters because there is no difference between spawning an agent and doing a tool call — both are invocables. A tool call returns in milliseconds. A sub-agent might run for minutes. The protocol handles both identically:
-
-**Sequential tool call (pilot agent loop):**
-```
-→ {"id":1,"op":"dispatch","invocable":"filesystem","args":{...}}
-← {"id":1,"result":{"dispatch":"d_1"}}
-→ {"id":2,"op":"await","dispatches":["d_1"]}
-← {"id":2,"result":{"d_1":{...scope result...}}}
-```
-
-**Parallel tool calls (model returns multiple tool_use):**
-```
-→ {"id":1,"op":"dispatch","invocable":"filesystem","args":{...}}
-← {"id":1,"result":{"dispatch":"d_1"}}
-→ {"id":2,"op":"dispatch","invocable":"shell","args":{...}}
-← {"id":2,"result":{"dispatch":"d_2"}}
-→ {"id":3,"op":"dispatch","invocable":"web","args":{...}}
-← {"id":3,"result":{"dispatch":"d_3"}}
-→ {"id":4,"op":"await","dispatches":["d_1","d_2","d_3"]}
-← {"id":4,"result":{"d_1":{...},"d_2":{...},"d_3":{...}}}
-```
-
-**Fire-and-forget (background agent):**
-```
-→ {"id":1,"op":"dispatch","invocable":"claude","args":{...}}
-← {"id":1,"result":{"dispatch":"d_sub"}}
-... invocable continues its own work ...
-→ {"id":5,"op":"await","dispatches":["d_sub"]}  (later, when it needs the result)
-```
-
-The dispatch chunk exists in the substrate immediately. Any code with read access can scope into a running dispatch to observe its state.
-
-**Client library.** The engine exports a client module (`engine/client.ts`) that wraps the protocol — typed functions (scope, search, apply, dispatch, await) over stdin/stdout serialization. Invocables import the client, not raw IO. Same types as the substrate lib, same API shape. The engine and client are two halves of one contract.
-
-**Testing without VM.** The protocol is stdin/stdout — the VM adds containment, not functionality. For development and TDD, the engine spawns invocables as local subprocesses on the host. Same pipe, same protocol, no VM overhead. The full cycle (dispatch creation → invocable spawn → protocol communication → boundary enforcement → completion) is testable entirely on the host.
-
-## Invocables
-
-An invocable is a chunk with an executable in its body — an instance of the `invocable` archetype (`spec: { required: ["executable"] }`). The `invocable` archetype lives in the `engine` root scope. Actual invocable chunks (filesystem, shell, web, claude) live in the `agent` root scope as project tools — they are instances of the engine's `invocable` contract. The UI discovers invocables by scoping into `invocable`. All invocables run in the VM. The engine spawns them all via the same pipe mechanism — some return fast (filesystem read), some are long-running (agent loop). The containment model is the same.
-
-### Dispatch
-
-A dispatch is a chunk that records an invocation. Every dispatch is an instance of both its invocable and the `dispatch` base archetype. The invocable carries its specific contract. The `dispatch` archetype carries the universal contract. Both use `propagate: true`, so the substrate composes them by union onto the dispatch instance.
-
-**The dispatch chunk is engine-owned.** The engine creates it, sets its status, updates it on completion. Invocables cannot modify the dispatch chunk itself or the boundary chunks placed on it — these are the invocation's structural contract, set before spawn, immutable after.
-
-**The `dispatch` archetype:**
+This separation is deliberate. There is no structural difference between spawning an agent and calling a tool — both are programs. A filesystem read returns in milliseconds; a sub-agent might run for minutes. The protocol handles both identically.
 
 ```
-dispatch
-  spec: { propagate: true, accepts: ["read-boundary", "write-boundary"] }
+# Sequential tool call
+→ {"id":1,"op":"run","program":"filesystem","args":{...}}
+← {"id":1,"result":{"process":"p_1"}}
+→ {"id":2,"op":"await","processes":["p_1"]}
+← {"id":2,"result":{"p_1":{...scope...}}}
+
+# Parallel
+→ {"id":1,"op":"run","program":"filesystem","args":{...}}
+← {"id":1,"result":{"process":"p_1"}}
+→ {"id":2,"op":"run","program":"shell","args":{...}}
+← {"id":2,"result":{"process":"p_2"}}
+→ {"id":3,"op":"await","processes":["p_1","p_2"]}
+← {"id":3,"result":{"p_1":{...},"p_2":{...}}}
+
+# Fire-and-forget
+→ {"id":1,"op":"run","program":"claude","args":{...}}
+← {"id":1,"result":{"process":"p_sub"}}
+... parent continues its own work ...
+→ {"id":5,"op":"await","processes":["p_sub"]}   (later, when the result is needed)
 ```
 
-**Dispatch body fields** (written by the engine, not in `required` on the archetype — propagate means the spec applies to children, not to dispatches themselves):
+Every process chunk exists in the substrate immediately. Any other program (within its boundary) can scope into a running process to watch its state.
 
-```
-body: { status: "pending"|"running"|"completed"|"failed", pid: number, started: ISO string, timeout_ms: number }
-```
+### Engine API (callable from the host)
 
-**An invocable (e.g. claude):**
-
-```
-claude (instance of invocable)
-  spec: { propagate: true, ordered: true, accepts: ["session", "context", "prompt"] }
-  body: { executable: "./invocables/claude" }
-  relates: session, context, prompt
-```
-
-**Effective contract on a claude dispatch:**
-
-```
-ordered: true
-accepts: ["session", "context", "prompt", "read-boundary", "write-boundary"]
-```
-
-The UI reads both archetypes' specs, resolves each accepted type, and generates the input surface from the type's own spec:
-
-- `session` — scope selector
-- `context` (`ordered: true`) — ordered scope-list builder
-- `prompt` — text input
-- `read-boundary` — scope-set builder
-- `write-boundary` — scope-set builder
-
-All inferred. No custom dispatch UI.
-
-**Dispatch flow:**
-
-1. User assembles dispatch arguments in the UI
-2. UI calls the engine with the invocable ID and arguments
-3. Engine creates the dispatch chunk (one `apply()`), validates the contract
-4. Engine spawns the invocable in the VM, passing dispatch ID
-5. Invocable communicates with engine via protocol
-6. On completion, engine updates dispatch status
-
-**Dispatch creation declaration.** The engine constructs a single `apply()` that creates the dispatch chunk and places all arguments. The engine builds three things: the dispatch chunk itself, the boundary containers, and the argument placements. The argument chunks come from the UI — the engine places them on the dispatch without interpreting them. The substrate's spec enforcement validates the composed contract.
-
-The engine pre-generates IDs so chunks created in the same `apply()` can reference each other via placements. It resolves existing chunks by ID (looked up via scope queries before building the declaration).
-
-Example — dispatching `filesystem` with an `fs-command` argument and boundaries:
+The host also calls the engine directly to drive top-level program runs from user action. Three functions plus lifecycle:
 
 ```typescript
-import { generateId } from '../ol/src/id'
+type RunArgs = {
+  chunks: ChunkDeclaration[]       // typed arguments assembled by the caller
+  readBoundary: string[]           // scope ids
+  writeBoundary: string[]          // scope ids
+  timeout?: number                 // defaults to the program's body.timeout_ms
+}
 
-// Pre-generate IDs for new chunks that need intra-declaration references
-const dispatchId = generateId()
-const rbId = generateId()
-const wbId = generateId()
+type RunResult = {
+  processId: string                // the process chunk id
+}
 
-// Resolve existing chunk IDs via scope queries before building the declaration.
-// The engine looks up the invocable, dispatch archetype, boundary types, and
-// boundary scope references by scoping into the relevant scopes and reading IDs.
-// Here shown as constants for clarity:
-const filesystemId = '...'    // looked up: instance of invocable named "filesystem"
-const dispatchTypeId = '...'  // looked up: instance of engine named "dispatch"
-const readBoundaryId = '...'  // looked up: instance of engine named "read-boundary"
-const writeBoundaryId = '...' // looked up: instance of engine named "write-boundary"
-const fsCommandId = '...'     // looked up: relates on filesystem named "fs-command"
-const agentScopeId = '...'    // looked up: boundary scope the user selected
-
-apply(db, {
-  chunks: [
-    // 1. The dispatch chunk — engine creates this for every dispatch.
-    //    Instance of both the target invocable and the dispatch archetype.
-    {
-      id: dispatchId,
-      body: { status: 'pending' },
-      placements: [
-        { scope_id: filesystemId, type: 'instance' },
-        { scope_id: dispatchTypeId, type: 'instance' },
-      ],
-    },
-
-    // 2. Boundary containers — engine creates these from readBoundary/writeBoundary.
-    //    New chunks per dispatch. Scope references placed on them by identity.
-    {
-      id: rbId,
-      placements: [
-        { scope_id: readBoundaryId, type: 'instance' },
-        { scope_id: dispatchId, type: 'instance' },
-      ],
-    },
-    { id: agentScopeId, placements: [{ scope_id: rbId, type: 'instance' }] },
-
-    {
-      id: wbId,
-      placements: [
-        { scope_id: writeBoundaryId, type: 'instance' },
-        { scope_id: dispatchId, type: 'instance' },
-      ],
-    },
-    { id: agentScopeId, placements: [{ scope_id: wbId, type: 'instance' }] },
-
-    // 3. Argument chunks — passed through from the UI (args.chunks).
-    //    The engine adds a placement on the dispatch to each.
-    //    Spec enforcement validates the composed contract.
-    {
-      body: { operation: 'read', path: '/src/main.ts' },
-      placements: [
-        { scope_id: fsCommandId, type: 'instance' },
-        { scope_id: dispatchId, type: 'instance' },
-      ],
-    },
-  ],
-})
+function bootstrap(dbPath: string, projectPath: string): Engine
+function run(engine: Engine, programId: string, args: RunArgs): RunResult
+function cancel(engine: Engine, processId: string): void
+function shutdown(engine: Engine): void
 ```
 
-The composed spec on this dispatch's children comes from `filesystem` (`propagate: true, accepts: ["fs-command"]`) and `dispatch` (`propagate: true, accepts: ["read-boundary", "write-boundary"]`). Union: `accepts: ["fs-command", "read-boundary", "write-boundary"]`. Every child must be instance of one of those types. The boundary container is instance of `read-boundary` — passes. The argument chunk is instance of `fs-command` — passes. The substrate validates; the engine doesn't check types itself.
+The engine is program-agnostic. `RunArgs.chunks` are whatever the program's composed spec accepts — the engine places them on the process chunk and the substrate's spec enforcement validates the contract. Boundary arrays are the scope roots the caller permits this run to reach; the engine builds boundary chunks from them and computes the effective boundary.
 
-The boundary containers are new chunks created per dispatch. The scope references placed on them ARE the boundary roots by identity — existing scope chunks placed as instances. The engine reads the boundary by scoping into the container.
+---
 
-**Traceability.** Commits stay in their own table — single source of truth, inherently tamper-proof because `apply()` can't touch them. The read layer synthesizes them as ChunkItems when relevant. Full projection — the root scope, items, and placements are all virtual. Nothing stored as real chunks or placements.
+## Process Creation — What the Declaration Looks Like
 
-The lib exports `COMMITS_SCOPE` (`'__commits'`) as the virtual scope ID:
+A single atomic `apply()` creates:
 
-- `scope(db, [COMMITS_SCOPE])` → all commits as synthetic ChunkItems.
-- `scope(db, [COMMITS_SCOPE, dispatchId])` → commits where `dispatch_id` matches.
-- `scope(db, [COMMITS_SCOPE, chunkId])` → commits that modified that chunk (via `chunk_versions`).
-- Connected scopes surface unique dispatch identities with counts.
+1. **The process chunk.** Empty body except `status: 'pending'`. Placements: `instance` on the program (so the process is listed under the program), `instance` on `engine/process` (so every run is in the process scope), `instance` on the session (so it shows in the sidebar).
+2. **A read-boundary chunk.** Placements: `instance` on `read-boundary` (type), `relates` on the process (execution configuration, not structural content). Each boundary scope root is placed `relates` on this chunk by identity.
+3. **A write-boundary chunk.** Same shape for `write-boundary`.
+4. **The argument chunks passed by the caller.** Each receives a `{ scope_id: processId, type: 'instance' }` placement added by the engine. The substrate's `accepts` check validates the composed contract.
 
-The `commits` table carries a `dispatch_id` column. The engine sets it by passing `{ dispatch: dispatchId }` as the third argument to `apply()` when executing applies on behalf of invocables. No new tables, no placement inflation, no circularity. Commits look like chunks to every reader but are structurally separate.
+Pre-generated ids let the engine reference the process from the boundary placements in the same declaration.
 
-### Boundaries
+**Why boundaries are `relates` on the process, not `instance`:** the process's composed spec (`program.spec ∪ engine/process.spec`) defines what counts as structural content — typed arguments. Boundaries are not content; they are execution configuration the engine needs to read. Placing them `instance` would force them through the `accepts` check and couple the program's typed-argument spec to boundary presence. `relates` keeps the two orthogonal and honors the substrate semantics: boundaries are about the process, they are not a member of it.
 
-Boundaries operate at two levels:
+---
 
-**Invocable-level** — what the invocable CAN do by nature. Expressed as read and write boundary references on the invocable chunk's body. A bash invocable: read and write only its own dispatch scope. A filesystem invocable: read the dispatch scope for its command, write results to the dispatch scope. An agent invocable: wide open — defers all restriction to the dispatch.
+## Boundaries
 
-**Dispatch-level** — what this specific run is ALLOWED to do. Set by the user at dispatch time. Read and write boundaries placed on the dispatch chunk.
+Two levels:
 
-The **effective boundary** is the intersection — the engine computes it at dispatch time. The dispatch can never widen what the invocable's nature allows. For nested dispatches (tool calls from an agent), the child's boundaries are intersected with the parent's — boundaries can only narrow, never widen. An invocable with no intrinsic boundary (e.g. `boundary: "open"`) is treated as the universal set — intersection with anything yields the other set.
+**Program-level boundary.** What the program can do by its nature. Expressed on the program chunk's body — either a reference to a named boundary or the keyword `open` meaning "defers all restriction to the run." A shell program has a narrow intrinsic boundary (its own process scope only). An agent program has `open`.
 
-**Boundaries are transitive via instance chains.** A boundary root `[agent]` grants access to everything reachable from `agent` by walking instance placements upward. When the invocable requests `scope(['my-session'])`, the engine checks: can `my-session` reach a boundary root through instance placements? `my-session` → instance on `session` → instance on `agent` → boundary root. Accessible. The boundary gates which scopes you can open. Once you open a scope, you see everything placed on it — instances and relates alike.
+**Run-level boundary.** What this specific run is permitted. Set by the caller at `run` time. For a top-level run from the host, this is the user's choice; for a tool call from an agent, this is derived from the agent's current boundary intersected with the target program's intrinsic limit.
 
-**The dispatch scope is always accessible.** Structural invariant: every invocable can always read and write within its own dispatch's scope tree. The dispatch chunk ID is implicitly a boundary root in both read and write boundaries. This is not a boundary entry — it's architectural. Without it, an invocable can't even read its own arguments.
+The **effective boundary** is the intersection. A run can never widen what the program's nature allows. For nested runs (tool calls from an agent), the child's boundaries are intersected with the parent's — boundaries can only narrow through the call stack, never widen. `open` is treated as the universal set — intersecting anything with it yields the other set.
 
-**Read boundary.** The scopes the invocable can see. The engine checks instance-chain reachability from boundary roots. Connected scopes outside the boundary are visible as connections (names, counts) but not readable. The invocable sees the topology but cannot open doors outside its boundary.
+**Transitive via instance chains.** A boundary root `[agent]` grants access to everything reachable from `agent` through instance placements. When a program calls `scope(['my-session'])`, the engine walks: `my-session → session (instance) → agent (instance) → boundary root`. Reachable: grant. Not reachable: `BOUNDARY_VIOLATION`. Once a scope is opened, everything placed on it is visible — instances and relates alike. The boundary gates which doors you can open; it does not filter inside an opened scope.
 
-**Write boundary.** The scopes the invocable can modify. Same instance-chain reachability check. The engine rejects any apply that touches a scope outside the effective set.
+**The process scope is always accessible.** Structural invariant: every program can read and write within its own process's scope tree. The process id is implicitly a boundary root in both read and write boundaries. Without this, a program cannot read its own arguments.
 
-**Protected chunks.** The engine enforces that invocables cannot modify:
-- The dispatch chunk itself (status, pid — engine domain)
-- The boundary chunks placed on the dispatch (read-boundary, write-boundary instances)
-These are the invocation's contract — set before spawn, immutable after.
+**Protected chunks.** The engine rejects any write that modifies:
+- The process chunk itself (status, pid — engine domain)
+- Either boundary chunk attached to the process
 
-Boundary references are structural — chunks placed as instances on read-boundary and write-boundary chunks. The chunks placed on them ARE the scope references by identity. Saved boundary configurations are reusable chunks.
+These are the run's contract — fixed at spawn, immutable during execution.
 
-### Tool-Call Dispatch
+---
 
-When the agent requests a tool call (e.g. `filesystem` read), the engine handles it:
+## Tool Calls Are Just Runs
 
-1. Agent sends `dispatch` request via protocol: target invocable ID + arguments
-2. Engine creates a dispatch chunk for the target invocable (instance of both the invocable and `dispatch`)
-3. Engine computes the effective boundary: intersection of parent dispatch boundaries and the target invocable's intrinsic boundaries
-4. Engine spawns the target invocable in the VM via the same pipe mechanism
-5. Engine returns dispatch chunk ID immediately to the requesting invocable
-6. Agent can await or continue working — the target invocable runs independently
-7. On await, engine returns the completed dispatch's scope result
-8. The agent records tool-call and tool-result on the session (dual placement)
+An agent making a tool call uses the same `run` operation. The engine treats it identically to a top-level run from the host:
 
-Every tool call is a dispatch with its own trace. The dispatch chunk is persisted. Scope into it for what happened inside.
+1. Program calls `run(target-program, args)` via the protocol.
+2. Engine creates the process chunk for the target program, placed on the agent's current process (not the session directly) so the tool-call trace is nested.
+3. Engine computes the effective boundary: intersection of the parent run's effective boundary and the target program's intrinsic boundary.
+4. Engine spawns the target program.
+5. Engine returns the process id to the calling program immediately.
+6. Calling program `await`s the process id when it needs the result, or continues its own work.
+7. On `await`, engine returns the completed process's scope.
 
-Substrate operations (scope, search, apply by the agent itself) are NOT tool-call dispatches — they go directly through the protocol. Only invocable-to-invocable calls are dispatches.
+The agent separately records its own session-level `tool-call` and `tool-result` chunks for message reconstruction (see [`agent.md`](agent.md)). The process chunk itself is the authoritative trace of what happened; session chunks are the model-facing reconstruction.
 
-### Services
+Substrate operations (`scope`, `apply`, `search`) from the agent are not tool calls — they go directly through the protocol and do not create process chunks. Only program-to-program runs create processes.
 
-Deferred for the pilot. All invocables are request-response.
+---
+
+## Traceability
+
+Every commit the substrate records carries a `dispatch_id` column — the process id whose run caused it, or null for host-level applies the engine does on its own behalf. Commits stay in their own table; the read layer projects them as chunks under the virtual scope `COMMITS_SCOPE`:
+
+- `scope(db, [COMMITS_SCOPE])` — all commits
+- `scope(db, [COMMITS_SCOPE, processId])` — commits from this specific run
+- `scope(db, [COMMITS_SCOPE, chunkId])` — commits that modified this chunk
+
+No new tables, no circular placements. Commits look like chunks to readers; they are structurally separate.
+
+---
+
+## Containment — The Fork
+
+The pilot holds two coherent paths for how programs are isolated. Both use the same protocol, the same process lifecycle, the same boundary enforcement. They differ only in where programs run.
+
+**Split containment.** Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a DOM surface run on the host inside the webview the host gave them. The webview sandbox contains view programs at the OS level; the engine's boundary enforcement contains them at the substrate level.
+
+**Uniform containment.** All programs run inside one VM. View programs produce DOM; the engine streams DOM operations from the VM-side program to a thin shim in the host's webview, which applies them. User events flow back through the same channel. Pixel-level rendering stays on the host; view code stays in the VM.
+
+Both paths are architecturally clean. Split is faster to build and shorter for the pilot. Uniform is more consistent and sets up peering more naturally. The full treatment — what the tech actually does, what it costs, what it buys — lives in [`horizon.md`](../horizon.md).
+
+Decision point: before the host is built, the pilot commits to one. The specs here remain true either way.
+
+---
 
 ## Operational Behavior
 
-### Timeout
+### Timeouts
 
-The `dispatch` function accepts an optional `timeout` in ms. The engine writes it to the dispatch body as `timeout_ms`. If not provided, it defaults to the invocable chunk's `body.timeout_ms`. Invocable defaults: tool invocables (filesystem, shell, web): 30000ms. Agent invocables (claude): 300000ms. On expiry, the engine kills the process and sets `status: "failed"` with `body.error: "timeout"`.
+`run`'s optional `timeout` is written to the process body as `timeout_ms`. If omitted, the engine uses the program's own `body.timeout_ms`. Defaults: tool programs (filesystem, shell, web) 30000 ms; agent programs (claude) 300000 ms. On expiry the engine kills the spawned executable and sets `status: 'failed'` with `body.error: 'timeout'`.
 
-### Error Handling
+### Error Classification
 
-Not all errors kill the invocable. The distinction:
+Not every error kills a program. Informational errors return as protocol responses; the program continues and can recover.
 
 | Condition | Engine response |
 |---|---|
-| Boundary violation on scope/search | `BOUNDARY_VIOLATION` error response. Process continues. |
-| Boundary violation on apply | `BOUNDARY_VIOLATION` error response. Process continues. |
-| Spec violation on apply | `VALIDATION_ERROR` error response. Process continues. |
-| Protected chunk modification | `BOUNDARY_VIOLATION` error response. Process continues. |
-| Unknown op or missing fields | `INVALID_REQUEST` error response. Process continues. |
-| Malformed JSON on stdout | Kill process. Set `status: "failed"`, `body.error: "protocol: malformed output"`. |
-| Process crash (non-zero exit) | Set `status: "failed"`. |
-| Process timeout | Kill process. Set `status: "failed"`, `body.error: "timeout"`. |
+| Boundary violation (scope, search) | `BOUNDARY_VIOLATION` response; process continues |
+| Boundary violation (apply) | `BOUNDARY_VIOLATION` response; process continues |
+| Spec violation (apply) | `VALIDATION_ERROR` response; process continues |
+| Write to protected chunk | `BOUNDARY_VIOLATION` response; process continues |
+| Malformed request | `INVALID_REQUEST` response; process continues |
+| Unparseable stdout line | Kill; `status: 'failed'`, `body.error: 'protocol: malformed output'` |
+| Exec exits non-zero | `status: 'failed'` |
+| Timeout | Kill; `status: 'failed'`, `body.error: 'timeout'` |
 
-The invocable can recover from error responses — they are informational. Parse failures and crashes are terminal.
+Parse failures and crashes are terminal. Everything else is informational.
 
 ### Startup Reconciliation
 
-On bootstrap, the engine queries all dispatch chunks with `status: "pending"` or `status: "running"` and sets them to `failed` with `body.error: "engine restart"`. The processes are gone — the engine does not attempt to recover them.
+When the engine starts, it queries every process with status `pending` or `running` and marks them `failed` with `body.error: 'engine restart'`. Those processes are gone; the engine does not attempt to resume them. Future work may introduce resumable services — deferred.
 
-### Boundary Request Behavior
+### Boundary-Request Behavior
 
-When an invocable calls `scope` or `search` and any queried scope is not reachable from the effective read boundary roots via instance chain traversal, the engine returns `BOUNDARY_VIOLATION`. The invocable gets an explicit error rather than a silently empty result — it knows it asked for something outside its boundary.
+An explicit `BOUNDARY_VIOLATION` is better than a silently empty read. The engine returns the error when a queried scope isn't reachable from the read boundary, so the program knows it asked for something it cannot see. Empty results mean genuinely empty scopes, not withheld ones.
 
-### VM Lifecycle
+---
 
-The VM is always used. Containment is architectural, not optional. The engine starts the VM on bootstrap and stops it on shutdown. All invocables share the single VM instance. The engine health-checks the VM before spawning; if it died, it restarts it.
+## Client Library
 
-For testing the engine protocol in isolation, a test harness can spawn mock invocables as local subprocesses — same pipe, same protocol, no real VM. This is for engine development only, not a runtime mode.
+Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `apply`, `run`, `await`. The SDK serializes to JSON lines and wraps correlations. Programs that run in webviews use an SDK that routes through the host's wry IPC channel; programs that run as subprocesses (tools in a VM) use an SDK that writes to stdout directly. Same API surface, different transport.
+
+The engine's client module (`engine/client.ts`) provides the subprocess-side SDK. The webview-side SDK lives under `pilot/sdk/` and wraps the same operations over the wry IPC bridge.
+
+---
+
+## What Is Open
+
+- **Containment model.** See the fork above. Decision precedes host construction.
+- **Named, reusable boundaries.** The pilot creates a fresh boundary chunk per run. A user wanting to reuse a boundary ("my agent-wide boundary") would do so by saving a named chunk and referencing it from multiple runs. The substrate supports this; the engine and UX do not yet.
+- **Services.** A process whose executable lives beyond the completion of a single render or request. Requires lifecycle beyond `pending → running → completed`. Held as a direction; not in the pilot.
+- **Engine-as-library.** The engine is a subprocess for the pilot. Migration to a Rust in-process library is a tracked move in [`horizon.md`](../horizon.md).

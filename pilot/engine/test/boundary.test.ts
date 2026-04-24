@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { scope } from '../../ol/src/index.ts'
+import { scope } from '../../db/src/index.ts'
 import { seedTestDb } from './helpers.ts'
 import { createDispatch } from '../src/dispatch.ts'
 import {

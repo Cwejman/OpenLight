@@ -123,12 +123,12 @@ chunk: answer (placed on session, relates)
 
 chunk: tool-call (placed on session, relates)
   name: "tool-call"
-  spec: { required: ["invocable"] }
+  spec: { required: ["program"] }
   body: { text: "An agent invoking a tool" }
 
 chunk: tool-result (placed on session, relates)
   name: "tool-result"
-  spec: { required: ["invocable"] }
+  spec: { required: ["program"] }
   body: { text: "The result of a tool invocation" }
 
 chunk: context (placed on session, relates)
@@ -148,10 +148,10 @@ chunk: (placed on my-session, instance, seq: 1; placed on prompt, instance)
   body: { text: "Why is the scope query returning duplicates?" }
 
 chunk: (placed on my-session, instance, seq: 2; placed on tool-call, instance)
-  body: { text: "grep -n 'active' src/commands/scope.zig", invocable: "filesystem" }
+  body: { text: "grep -n 'active' src/commands/scope.zig", program: "filesystem" }
 
 chunk: (placed on my-session, instance, seq: 3; placed on tool-result, instance)
-  body: { text: "src/commands/scope.zig:42: if (active) ...", invocable: "filesystem" }
+  body: { text: "src/commands/scope.zig:42: if (active) ...", program: "filesystem" }
 
 chunk: (placed on my-session, instance, seq: 4; placed on answer, instance)
   body: { text: "The scope query wasn't filtering by active=1. Fixed." }

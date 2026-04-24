@@ -1,4 +1,5 @@
-import { open, apply, scope } from '../../ol/src/index.ts'
+import { resolve, dirname } from 'path'
+import { open, apply, scope } from '../../db/src/index.ts'
 import type { Engine } from './types.ts'
 
 /**
@@ -7,7 +8,9 @@ import type { Engine } from './types.ts'
  */
 export const bootstrap = (dbPath: string): Engine => {
   const db = open(dbPath)
-  const engine: Engine = { db, processes: new Map() }
+  // Project root: the directory above `.ol/`, where the user's invocables live.
+  const projectRoot = dirname(dirname(resolve(dbPath)))
+  const engine: Engine = { db, processes: new Map(), projectRoot }
 
   // Reconcile stale dispatches: find all dispatch instances with
   // status 'pending' or 'running' and mark them failed.

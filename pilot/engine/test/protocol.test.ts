@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { apply, scope, COMMITS_SCOPE } from '../../ol/src/index.ts'
+import { apply, scope, COMMITS_SCOPE } from '../../db/src/index.ts'
 import { seedTestDb } from './helpers.ts'
 import { createDispatch } from '../src/dispatch.ts'
 import { buildDispatchContext } from '../src/boundary.ts'

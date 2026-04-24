@@ -6,7 +6,7 @@ import type {
   ChunkDeclaration,
   ScopeResult,
   ApplyResult,
-} from '../ol/src/types.ts'
+} from '../db/src/types.ts'
 
 type ProtocolResponse = {
   id: number
