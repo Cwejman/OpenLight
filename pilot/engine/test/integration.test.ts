@@ -33,7 +33,7 @@ describe('integration', () => {
     expect((result.scope[0]!.body as Record<string, unknown>).status).toBe('completed')
   })
 
-  test('invocable writes to dispatch scope, data persists after completion', async () => {
+  test('program writes to process scope, data persists after completion', async () => {
     const engine = makeEngine()
     const { dispatchId } = createDispatch(engine.db, 'claude', {
       chunks: [],
@@ -51,7 +51,7 @@ describe('integration', () => {
       (c) => (c.body as Record<string, unknown>).written === true,
     )
     expect(written).toBeDefined()
-    expect((written!.body as Record<string, unknown>).text).toBe('result from invocable')
+    expect((written!.body as Record<string, unknown>).text).toBe('result from program')
   })
 
   test('boundary violation returns error, process continues and exits 0', async () => {
@@ -72,7 +72,7 @@ describe('integration', () => {
     expect((result.scope[0]!.body as Record<string, unknown>).status).toBe('completed')
   })
 
-  test('client library: invocable reads scope via client', async () => {
+  test('client library: program reads scope via client', async () => {
     const engine = makeEngine()
     const { dispatchId } = createDispatch(engine.db, 'claude', {
       chunks: [],
@@ -90,7 +90,7 @@ describe('integration', () => {
     expect((result.scope[0]!.body as Record<string, unknown>).status).toBe('completed')
   })
 
-  test('client library: invocable writes via client, data persists', async () => {
+  test('client library: program writes via client, data persists', async () => {
     const engine = makeEngine()
     const { dispatchId } = createDispatch(engine.db, 'claude', {
       chunks: [],

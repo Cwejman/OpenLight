@@ -1,6 +1,7 @@
 /**
- * Client library for invocables. Wraps stdin/stdout JSON lines protocol
- * with typed functions. Invocables import this, not raw IO.
+ * Client library for programs that run as subprocesses (tools, agents).
+ * Wraps the stdin/stdout JSON-lines protocol with typed functions.
+ * Programs import this, not raw IO.
  */
 import type {
   ChunkDeclaration,
@@ -74,8 +75,10 @@ const send = <T>(request: Record<string, unknown>): Promise<T> => {
   }) as Promise<T>
 }
 
-/** The dispatch ID for this invocable (from command-line argument). */
-export const dispatchId = process.argv[2]!
+/** The process ID for this run (passed by the engine as a CLI argument). */
+export const processId = process.argv[2]!
+// Backwards-compat alias; prefer `processId`.
+export const dispatchId = processId
 
 /** Read scope, filtered by the engine's read boundary. */
 export const readScope = (scopes: string[]): Promise<ScopeResult> =>
@@ -89,20 +92,20 @@ export const searchChunks = (query: string): Promise<unknown[]> =>
 export const writeApply = (chunks: ChunkDeclaration[]): Promise<ApplyResult> =>
   send<ApplyResult>({ op: 'apply', declaration: { chunks } })
 
-/** Dispatch another invocable. Returns dispatch chunk ID immediately. */
-export const dispatchInvocable = (
-  invocable: string,
+/** Run another program. Returns the new process ID immediately. */
+export const runProgram = (
+  program: string,
   args: {
     chunks: ChunkDeclaration[]
     readBoundary: string[]
     writeBoundary: string[]
     timeout?: number
   },
-): Promise<{ dispatch: string }> =>
-  send<{ dispatch: string }>({ op: 'dispatch', invocable, args })
+): Promise<{ process: string }> =>
+  send<{ process: string }>({ op: 'run', program, args })
 
-/** Block until one or more dispatches complete. Returns results. */
-export const awaitDispatches = (
-  dispatches: string[],
+/** Block until one or more processes reach a terminal state. */
+export const awaitProcesses = (
+  processes: string[],
 ): Promise<Record<string, ScopeResult>> =>
-  send<Record<string, ScopeResult>>({ op: 'await', dispatches })
+  send<Record<string, ScopeResult>>({ op: 'await', processes })

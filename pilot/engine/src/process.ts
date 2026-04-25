@@ -22,7 +22,7 @@ const updateStatus = (
   )
 }
 
-/** Process stdout lines from the invocable. */
+/** Process stdout lines from the spawned program. */
 const processLine = (
   engine: Engine,
   ctx: DispatchContext,
@@ -86,7 +86,7 @@ const readStdout = async (
 }
 
 /**
- * Spawn an invocable as a local subprocess.
+ * Spawn a program as a local subprocess.
  * Pipes stdin/stdout for the JSON lines protocol.
  */
 export const spawnInvocable = (

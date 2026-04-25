@@ -23,7 +23,7 @@ describe('bootstrap', () => {
     // Let's test with an in-memory DB by using the seedTestDb approach.
 
     // Simulate: mark as pending and verify reconciliation finds it
-    const dispatchScope = scope(db, ['dispatch'])
+    const dispatchScope = scope(db, ['process'])
     const pendingItems = dispatchScope.chunks.items.filter(
       (c) => (c.body as Record<string, unknown>).status === 'pending',
     )
@@ -58,7 +58,7 @@ describe('bootstrap', () => {
     expect((result.scope[0]!.body as Record<string, unknown>).status).toBe('running')
 
     // Reconcile
-    const dispatchScope = scope(db, ['dispatch'])
+    const dispatchScope = scope(db, ['process'])
     for (const item of dispatchScope.chunks.items) {
       const body = item.body as Record<string, unknown>
       if (body.status === 'running') {
@@ -86,7 +86,7 @@ describe('bootstrap', () => {
     })
 
     // Reconcile
-    const dispatchScope = scope(db, ['dispatch'])
+    const dispatchScope = scope(db, ['process'])
     for (const item of dispatchScope.chunks.items) {
       const body = item.body as Record<string, unknown>
       if (body.status === 'pending' || body.status === 'running') {

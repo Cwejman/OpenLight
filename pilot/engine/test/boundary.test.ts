@@ -119,8 +119,8 @@ describe('boundary enforcement', () => {
         writeBoundary: ['agent'],
       })
       const ctx = buildDispatchContext(db, dispatchId, 'filesystem')
-      // filesystem has boundary:'dispatch' — intrinsic is dispatch scope only
-      // Even though dispatch-level boundary includes 'agent', effective is just dispatch
+      // filesystem has boundary:'process' — intrinsic is process scope only
+      // Even though run-level boundary includes 'agent', effective is just the process
       expect(checkWriteAccess(ctx, dispatchId)).toBe(true)
       expect(checkWriteAccess(ctx, 'agent')).toBe(false)
     })

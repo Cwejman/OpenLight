@@ -61,28 +61,28 @@ const readBoundaryRoots = (
 }
 
 /**
- * Compute the effective boundary by intersecting the invocable's
+ * Compute the effective boundary by intersecting the program's
  * intrinsic boundary with the dispatch-level boundary.
  */
 const computeEffectiveBoundary = (
   db: Db,
-  invocableId: string,
+  programId: string,
   dispatchBoundaryRoots: readonly string[],
   dispatchId: string,
 ): readonly string[] => {
-  // Read invocable's intrinsic boundary
-  const invResult = scope(db, [invocableId])
-  const invocable = invResult.scope[0]
-  const intrinsic = (invocable?.body as Record<string, unknown>)?.boundary as string | undefined
+  // Read the program's intrinsic boundary
+  const result = scope(db, [programId])
+  const program = result.scope[0]
+  const intrinsic = (program?.body as Record<string, unknown>)?.boundary as string | undefined
 
   if (intrinsic === 'open' || intrinsic === undefined) {
     // Universal set — effective = dispatch-level
     return dispatchBoundaryRoots
   }
 
-  if (intrinsic === 'dispatch') {
-    // Intrinsic is dispatch scope only — effective is just dispatch
-    // (intersection of dispatch-only with anything = dispatch-only)
+  if (intrinsic === 'process') {
+    // Intrinsic limits the program to its own process scope —
+    // intersection of process-only with anything is process-only.
     return [dispatchId]
   }
 
@@ -97,16 +97,16 @@ const computeEffectiveBoundary = (
 export const buildDispatchContext = (
   db: Db,
   dispatchId: string,
-  invocableId: string,
+  programId: string,
 ): DispatchContext => {
   const dispatchReadRoots = readBoundaryRoots(db, dispatchId, 'read-boundary')
   const dispatchWriteRoots = readBoundaryRoots(db, dispatchId, 'write-boundary')
 
   const effectiveReadRoots = computeEffectiveBoundary(
-    db, invocableId, dispatchReadRoots, dispatchId,
+    db, programId, dispatchReadRoots, dispatchId,
   )
   const effectiveWriteRoots = computeEffectiveBoundary(
-    db, invocableId, dispatchWriteRoots, dispatchId,
+    db, programId, dispatchWriteRoots, dispatchId,
   )
 
   // Collect protected chunk IDs: dispatch chunk + boundary containers
@@ -130,7 +130,7 @@ export const buildDispatchContext = (
     readBoundaryRoots: effectiveReadRoots,
     writeBoundaryRoots: effectiveWriteRoots,
     protectedChunkIds: protectedIds,
-    invocableId,
+    programId,
   }
 }
 

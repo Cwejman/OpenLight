@@ -97,7 +97,7 @@ The agent reads the programs reachable within its read boundary and generates a 
 ```
 filesystem (instance of program)
   spec: { propagate: true, accepts: ["fs-command"] }
-  body: { text: "Read and write files", executable: "./invocables/filesystem", surface: "none" }
+  body: { text: "Read and write files", executable: "./programs/filesystem", surface: "none" }
 
 fs-command (relates to filesystem)
   spec: { required: ["operation", "path"] }

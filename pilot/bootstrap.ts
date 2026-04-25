@@ -6,94 +6,109 @@ mkdirSync('project/.ol', { recursive: true })
 
 const db = open('project/.ol/db')
 
-// ═══ Commit 1: Engine — as if from a peer ═══
-// Runtime contracts and primitives. In a peered system these come from
-// the engine's own database, mounted into the project.
+// ═══ Commit 1: Engine — runtime contracts ═══
+// Program archetype, process archetype, and the boundary types. In a peered
+// system these come from the engine's own database, mounted into the project.
 
 const engine: Declaration = {
   chunks: [
     { id: 'engine', name: 'engine', body: { text: 'Runtime contracts and primitives' } },
 
     {
-      id: 'invocable',
-      name: 'invocable',
+      id: 'program',
+      name: 'program',
       spec: { required: ['executable'] },
-      body: { text: 'An executable program' },
+      body: { text: 'A chunk with an executable; instances are runnable programs' },
       placements: [{ scope_id: 'engine', type: 'instance' }],
     },
 
     {
-      id: 'dispatch',
-      name: 'dispatch',
+      id: 'process',
+      name: 'process',
       spec: { propagate: true },
-      body: { text: 'A dispatch event' },
+      body: { text: 'The artifact of a program run' },
       placements: [{ scope_id: 'engine', type: 'instance' }],
     },
+
     {
       id: 'read-boundary',
       name: 'read-boundary',
-      body: { text: 'Scopes the invocable can read' },
+      body: { text: 'Scopes a process is permitted to read' },
       placements: [
         { scope_id: 'engine', type: 'instance' },
-        { scope_id: 'dispatch', type: 'relates' },
+        { scope_id: 'process', type: 'relates' },
       ],
     },
     {
       id: 'write-boundary',
       name: 'write-boundary',
-      body: { text: 'Scopes the invocable can write to' },
+      body: { text: 'Scopes a process is permitted to write to' },
       placements: [
         { scope_id: 'engine', type: 'instance' },
-        { scope_id: 'dispatch', type: 'relates' },
+        { scope_id: 'process', type: 'relates' },
       ],
     },
   ],
 }
 
-// ═══ Commit 2: UI — as if from a peer ═══
-// Tiling primitives. In a peered system these come from the UI module's
-// own database.
+// ═══ Commit 2: UI — composition primitives ═══
+// Session, tab, tile, overlay, recipe. In a peered system these come from
+// the host module's own database, mounted into the project.
 
 const ui: Declaration = {
   chunks: [
-    { id: 'ui', name: 'ui', body: { text: 'UI domain' } },
+    { id: 'ui', name: 'ui', body: { text: 'Interface composition primitives' } },
 
+    // The UI session shares the human-readable name 'session' with the
+    // agent's session archetype; chunk IDs must be globally unique, so the
+    // UI session takes a prefixed ID. `accepts` resolves names within the
+    // parent scope, so the duplicate name doesn't conflict at lookup time.
     {
-      id: 'split',
-      name: 'split',
-      spec: { ordered: true },
-      body: { text: 'A split tile node' },
+      id: 'ui-session',
+      name: 'session',
+      spec: { propagate: true, accepts: ['tab', 'process'] },
+      body: { text: 'The outer container of a host UI session' },
       placements: [{ scope_id: 'ui', type: 'instance' }],
     },
     {
-      id: 'leaf',
-      name: 'leaf',
-      body: { text: 'A leaf tile node' },
-      placements: [{ scope_id: 'ui', type: 'instance' }],
-    },
-    {
-      id: 'view-root',
-      name: 'view-root',
-      body: {},
+      id: 'tab',
+      name: 'tab',
+      spec: { propagate: true, accepts: ['tile'] },
+      body: { text: 'Root of a tile tree (workspaces are tabs)' },
       placements: [
         { scope_id: 'ui', type: 'instance' },
-        { scope_id: 'leaf', type: 'instance' },
+        { scope_id: 'ui-session', type: 'relates' },
       ],
     },
     {
-      id: 'scope-history',
-      name: 'scope-history',
+      id: 'tile',
+      name: 'tile',
       spec: { ordered: true },
-      body: { text: 'Flat ordered log of scope navigations; entries relate to the leaf that did the read' },
+      body: { text: 'Split-tree node; leaves point at a process via relates' },
+      placements: [
+        { scope_id: 'ui', type: 'instance' },
+        { scope_id: 'tab', type: 'relates' },
+      ],
+    },
+    {
+      id: 'overlay',
+      name: 'overlay',
+      body: { text: 'A program rendered above its anchor (session, tab, or tile)' },
+      placements: [{ scope_id: 'ui', type: 'instance' }],
+    },
+    {
+      id: 'recipe',
+      name: 'recipe',
+      spec: { propagate: true, accepts: ['tile'] },
+      body: { text: 'A preserved tile subtree that can be spawned at any root' },
       placements: [{ scope_id: 'ui', type: 'instance' }],
     },
   ],
 }
 
-// ═══ Commit 3: Agent — the project ═══
-// Session types, tool invocables, and their type definitions.
-// This is the project's own data. It references engine contracts
-// (invocable, dispatch) by placing instances on them.
+// ═══ Commit 3: Agent — the project's own work ═══
+// Session types and concrete programs. References engine contracts across
+// the peer boundary by placing instances on `program`.
 
 const agent: Declaration = {
   chunks: [
@@ -133,7 +148,7 @@ const agent: Declaration = {
     {
       id: 'tool-call',
       name: 'tool-call',
-      spec: { required: ['invocable'] },
+      spec: { required: ['program'] },
       body: { text: 'An agent invoking a tool' },
       placements: [
         { scope_id: 'agent', type: 'instance' },
@@ -143,7 +158,7 @@ const agent: Declaration = {
     {
       id: 'tool-result',
       name: 'tool-result',
-      spec: { required: ['invocable'] },
+      spec: { required: ['program'] },
       body: { text: 'The result of a tool invocation' },
       placements: [
         { scope_id: 'agent', type: 'instance' },
@@ -161,19 +176,22 @@ const agent: Declaration = {
       ],
     },
 
-    // Invocables — project tools, instances of engine's invocable contract
+    // Programs — instances of the engine's `program` archetype.
+    // Tool programs: surface 'none' (headless), narrow intrinsic boundary.
     {
       id: 'filesystem',
       name: 'filesystem',
       spec: { propagate: true, accepts: ['fs-command'] },
       body: {
         text: 'Read and write files',
-        executable: './invocables/filesystem',
-        boundary: 'dispatch',
+        executable: './programs/filesystem',
+        surface: 'none',
+        boundary: 'process',
+        timeout_ms: 30000,
       },
       placements: [
         { scope_id: 'agent', type: 'instance' },
-        { scope_id: 'invocable', type: 'instance' },
+        { scope_id: 'program', type: 'instance' },
       ],
     },
     {
@@ -183,10 +201,7 @@ const agent: Declaration = {
       body: {
         text: 'A filesystem operation',
         schema: {
-          operation: {
-            type: 'string',
-            enum: ['read', 'write', 'edit', 'glob', 'grep'],
-          },
+          operation: { type: 'string', enum: ['read', 'write', 'edit', 'glob', 'grep'] },
           path: { type: 'string', description: 'File or directory path' },
         },
       },
@@ -199,12 +214,14 @@ const agent: Declaration = {
       spec: { propagate: true, accepts: ['shell-command'] },
       body: {
         text: 'Execute shell commands',
-        executable: './invocables/shell',
-        boundary: 'dispatch',
+        executable: './programs/shell',
+        surface: 'none',
+        boundary: 'process',
+        timeout_ms: 30000,
       },
       placements: [
         { scope_id: 'agent', type: 'instance' },
-        { scope_id: 'invocable', type: 'instance' },
+        { scope_id: 'program', type: 'instance' },
       ],
     },
     {
@@ -226,12 +243,14 @@ const agent: Declaration = {
       spec: { propagate: true, accepts: ['web-request'] },
       body: {
         text: 'Make HTTP requests',
-        executable: './invocables/web',
-        boundary: 'dispatch',
+        executable: './programs/web',
+        surface: 'none',
+        boundary: 'process',
+        timeout_ms: 30000,
       },
       placements: [
         { scope_id: 'agent', type: 'instance' },
-        { scope_id: 'invocable', type: 'instance' },
+        { scope_id: 'program', type: 'instance' },
       ],
     },
     {
@@ -242,53 +261,50 @@ const agent: Declaration = {
         text: 'An HTTP request',
         schema: {
           url: { type: 'string', description: 'URL to fetch' },
-          method: {
-            type: 'string',
-            enum: ['GET', 'POST', 'PUT', 'DELETE'],
-          },
+          method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE'] },
         },
       },
       placements: [{ scope_id: 'web', type: 'relates' }],
     },
 
+    // Agent program — wide intrinsic boundary (defers to the run).
     {
       id: 'claude',
       name: 'claude',
-      spec: {
-        propagate: true,
-        accepts: ['session', 'context', 'prompt'],
-      },
+      spec: { propagate: true, accepts: ['session', 'context', 'prompt'] },
       body: {
         text: 'Claude agent',
-        executable: './invocables/claude',
+        executable: './programs/claude',
+        surface: 'none',
         boundary: 'open',
+        timeout_ms: 300000,
       },
       placements: [
         { scope_id: 'agent', type: 'instance' },
-        { scope_id: 'invocable', type: 'instance' },
+        { scope_id: 'program', type: 'instance' },
       ],
     },
-
-    // Claude's type refs
+    // Claude's accepted type refs — placed `relates` on claude so they
+    // resolve in `accepts` name lookups within claude's scope.
     { id: 'session', placements: [{ scope_id: 'claude', type: 'relates' }] },
     { id: 'context', placements: [{ scope_id: 'claude', type: 'relates' }] },
     { id: 'prompt', placements: [{ scope_id: 'claude', type: 'relates' }] },
 
-    // echo — minimal test invocable. Accepts one message chunk, writes an
-    // answer chunk back to the dispatch scope, exits. Proves the full
-    // dispatch cycle without depending on the model API.
+    // echo — minimal test program; echoes its input back as an answer.
     {
       id: 'echo',
       name: 'echo',
       spec: { propagate: true, accepts: ['message'] },
       body: {
         text: 'Echoes the input message back as an answer',
-        executable: './invocables/echo.ts',
-        boundary: 'dispatch',
+        executable: './programs/echo.ts',
+        surface: 'none',
+        boundary: 'process',
+        timeout_ms: 30000,
       },
       placements: [
         { scope_id: 'agent', type: 'instance' },
-        { scope_id: 'invocable', type: 'instance' },
+        { scope_id: 'program', type: 'instance' },
       ],
     },
     {

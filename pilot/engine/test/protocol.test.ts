@@ -22,16 +22,16 @@ describe('protocol', () => {
       expect(result).toHaveProperty('op', 'apply')
     })
 
-    test('parses valid dispatch request', () => {
+    test('parses valid run request', () => {
       const result = parseRequest(
-        '{"id":4,"op":"dispatch","invocable":"filesystem","args":{"chunks":[],"readBoundary":[],"writeBoundary":[]}}',
+        '{"id":4,"op":"run","program":"filesystem","args":{"chunks":[],"readBoundary":[],"writeBoundary":[]}}',
       )
-      expect(result).toHaveProperty('op', 'dispatch')
+      expect(result).toHaveProperty('op', 'run')
     })
 
     test('parses valid await request', () => {
-      const result = parseRequest('{"id":5,"op":"await","dispatches":["d1","d2"]}')
-      expect(result).toEqual({ id: 5, op: 'await', dispatches: ['d1', 'd2'] })
+      const result = parseRequest('{"id":5,"op":"await","processes":["p1","p2"]}')
+      expect(result).toEqual({ id: 5, op: 'await', processes: ['p1', 'p2'] })
     })
 
     test('returns error for malformed JSON', () => {
@@ -131,7 +131,7 @@ describe('protocol', () => {
         declaration: {
           chunks: [
             {
-              body: { text: 'result from invocable' },
+              body: { text: 'result from program' },
               placements: [{ scope_id: dispatchId, type: 'relates' }],
             },
           ],
@@ -209,7 +209,7 @@ describe('protocol', () => {
       })
 
       const commits = scope(db, [COMMITS_SCOPE, dispatchId])
-      // Should have at least 2 commits: dispatch creation + invocable write
+      // Should have at least 2 commits: process creation + program write
       expect(commits.chunks.items.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -252,7 +252,7 @@ describe('protocol', () => {
       expect((result as { error: { code: string } }).error.code).toBe('VALIDATION_ERROR')
     })
 
-    test('dispatch creates child dispatch', () => {
+    test('run creates child process', () => {
       const db = seedTestDb()
       const { dispatchId } = createDispatch(db, 'claude', {
         chunks: [],
@@ -263,8 +263,8 @@ describe('protocol', () => {
 
       const result = handleOp(ctx, {
         id: 9,
-        op: 'dispatch',
-        invocable: 'filesystem',
+        op: 'run',
+        program: 'filesystem',
         args: {
           chunks: [
             {
@@ -277,10 +277,10 @@ describe('protocol', () => {
         },
       })
       expect(result).toHaveProperty('result')
-      const childId = (result as { result: { dispatch: string } }).result.dispatch
+      const childId = (result as { result: { process: string } }).result.process
       expect(childId).toBeTruthy()
 
-      // Verify the child dispatch exists
+      // Verify the child process exists
       const childScope = scope(db, [childId])
       expect(childScope.scope).toHaveLength(1)
     })

@@ -7,13 +7,13 @@ import { apply } from '../../db/src/index.ts'
 import type { Engine } from '../src/types.ts'
 
 /**
- * Re-point echo's executable to the real file in pilot/project/invocables.
+ * Re-point echo's executable to the real file in pilot/project/programs.
  * The seeded helper uses relative paths that assume a different cwd — this
  * overrides to an absolute path so the test runs from any cwd.
  */
 const withRealEchoExecutable = (): Engine => {
   const db = seedTestDb()
-  const echoPath = resolve(import.meta.dir, '..', '..', 'project', 'invocables', 'echo.ts')
+  const echoPath = resolve(import.meta.dir, '..', '..', 'project', 'programs', 'echo.ts')
   apply(db, {
     chunks: [
       {
@@ -21,7 +21,7 @@ const withRealEchoExecutable = (): Engine => {
         body: {
           text: 'Echoes the input message back as an answer',
           executable: echoPath,
-          boundary: 'dispatch',
+          boundary: 'process',
           timeout_ms: 30000,
         },
       },
@@ -30,7 +30,7 @@ const withRealEchoExecutable = (): Engine => {
   return { db, processes: new Map() }
 }
 
-describe('echo invocable end-to-end', () => {
+describe('echo program end-to-end', () => {
   test('dispatch with a message produces an echoed output chunk', async () => {
     const engine = withRealEchoExecutable()
 

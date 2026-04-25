@@ -9,35 +9,35 @@ export function seedTestDb(): Db {
     chunks: [
       { id: 'engine', name: 'engine', body: { text: 'Runtime contracts and primitives' } },
       {
-        id: 'invocable',
-        name: 'invocable',
+        id: 'program',
+        name: 'program',
         spec: { required: ['executable'] },
-        body: { text: 'An executable program' },
+        body: { text: 'A chunk with an executable' },
         placements: [{ scope_id: 'engine', type: 'instance' }],
       },
       {
-        id: 'dispatch',
-        name: 'dispatch',
+        id: 'process',
+        name: 'process',
         spec: { propagate: true },
-        body: { text: 'A dispatch event' },
+        body: { text: 'The artifact of a program run' },
         placements: [{ scope_id: 'engine', type: 'instance' }],
       },
       {
         id: 'read-boundary',
         name: 'read-boundary',
-        body: { text: 'Scopes the invocable can read' },
+        body: { text: 'Scopes a process is permitted to read' },
         placements: [
           { scope_id: 'engine', type: 'instance' },
-          { scope_id: 'dispatch', type: 'relates' },
+          { scope_id: 'process', type: 'relates' },
         ],
       },
       {
         id: 'write-boundary',
         name: 'write-boundary',
-        body: { text: 'Scopes the invocable can write to' },
+        body: { text: 'Scopes a process is permitted to write to' },
         placements: [
           { scope_id: 'engine', type: 'instance' },
-          { scope_id: 'dispatch', type: 'relates' },
+          { scope_id: 'process', type: 'relates' },
         ],
       },
     ],
@@ -80,7 +80,7 @@ export function seedTestDb(): Db {
       {
         id: 'tool-call',
         name: 'tool-call',
-        spec: { required: ['invocable'] },
+        spec: { required: ['program'] },
         body: { text: 'An agent invoking a tool' },
         placements: [
           { scope_id: 'agent', type: 'instance' },
@@ -90,7 +90,7 @@ export function seedTestDb(): Db {
       {
         id: 'tool-result',
         name: 'tool-result',
-        spec: { required: ['invocable'] },
+        spec: { required: ['program'] },
         body: { text: 'The result of a tool invocation' },
         placements: [
           { scope_id: 'agent', type: 'instance' },
@@ -114,13 +114,14 @@ export function seedTestDb(): Db {
         spec: { propagate: true, accepts: ['fs-command'] },
         body: {
           text: 'Read and write files',
-          executable: './invocables/filesystem',
-          boundary: 'dispatch',
+          executable: './programs/filesystem',
+          surface: 'none',
+          boundary: 'process',
           timeout_ms: 30000,
         },
         placements: [
           { scope_id: 'agent', type: 'instance' },
-          { scope_id: 'invocable', type: 'instance' },
+          { scope_id: 'program', type: 'instance' },
         ],
       },
       {
@@ -137,13 +138,14 @@ export function seedTestDb(): Db {
         spec: { propagate: true, accepts: ['shell-command'] },
         body: {
           text: 'Execute shell commands',
-          executable: './invocables/shell',
-          boundary: 'dispatch',
+          executable: './programs/shell',
+          surface: 'none',
+          boundary: 'process',
           timeout_ms: 30000,
         },
         placements: [
           { scope_id: 'agent', type: 'instance' },
-          { scope_id: 'invocable', type: 'instance' },
+          { scope_id: 'program', type: 'instance' },
         ],
       },
       {
@@ -160,13 +162,14 @@ export function seedTestDb(): Db {
         spec: { propagate: true, accepts: ['web-request'] },
         body: {
           text: 'Make HTTP requests',
-          executable: './invocables/web',
-          boundary: 'dispatch',
+          executable: './programs/web',
+          surface: 'none',
+          boundary: 'process',
           timeout_ms: 30000,
         },
         placements: [
           { scope_id: 'agent', type: 'instance' },
-          { scope_id: 'invocable', type: 'instance' },
+          { scope_id: 'program', type: 'instance' },
         ],
       },
       {
@@ -186,35 +189,37 @@ export function seedTestDb(): Db {
         },
         body: {
           text: 'Claude agent',
-          executable: './invocables/claude',
+          executable: './programs/claude',
+          surface: 'none',
           boundary: 'open',
           timeout_ms: 300000,
         },
         placements: [
           { scope_id: 'agent', type: 'instance' },
-          { scope_id: 'invocable', type: 'instance' },
+          { scope_id: 'program', type: 'instance' },
         ],
       },
 
-      // Claude's type refs
+      // Claude's accepted type refs
       { id: 'session', placements: [{ scope_id: 'claude', type: 'relates' }] },
       { id: 'context', placements: [{ scope_id: 'claude', type: 'relates' }] },
       { id: 'prompt', placements: [{ scope_id: 'claude', type: 'relates' }] },
 
-      // echo — minimal test invocable.
+      // echo — minimal test program.
       {
         id: 'echo',
         name: 'echo',
         spec: { propagate: true, accepts: ['message'] },
         body: {
           text: 'Echoes the input message back as an answer',
-          executable: './invocables/echo',
-          boundary: 'dispatch',
+          executable: './programs/echo',
+          surface: 'none',
+          boundary: 'process',
           timeout_ms: 30000,
         },
         placements: [
           { scope_id: 'agent', type: 'instance' },
-          { scope_id: 'invocable', type: 'instance' },
+          { scope_id: 'program', type: 'instance' },
         ],
       },
       {

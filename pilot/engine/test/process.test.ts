@@ -15,14 +15,14 @@ const makeEngine = (dbPath?: string): Engine => {
 }
 
 /** Create a dispatch and return engine + context + dispatchId. */
-const setupDispatch = (invocableId: string, executable: string) => {
+const setupDispatch = (programId: string, executable: string) => {
   const engine = makeEngine()
-  const { dispatchId } = createDispatch(engine.db, invocableId, {
+  const { dispatchId } = createDispatch(engine.db, programId, {
     chunks: [],
     readBoundary: ['agent'],
     writeBoundary: ['agent'],
   })
-  const ctx = buildDispatchContext(engine.db, dispatchId, invocableId)
+  const ctx = buildDispatchContext(engine.db, dispatchId, programId)
   return { engine, ctx, dispatchId, executable }
 }
 
@@ -66,7 +66,7 @@ describe('process lifecycle', () => {
     expect((dispatch.body as Record<string, unknown>).status).toBe('failed')
   })
 
-  test('invocable receives dispatch ID as argv', async () => {
+  test('program receives process ID as argv', async () => {
     const { engine, ctx, dispatchId } = setupDispatch('claude', fixture('scope-read.ts'))
     const handle = spawnInvocable(engine, ctx, fixture('scope-read.ts'))
 

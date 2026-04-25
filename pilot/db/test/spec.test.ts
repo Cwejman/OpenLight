@@ -245,26 +245,26 @@ describe('spec enforcement', () => {
         {
           id: 'read-boundary',
           name: 'read-boundary',
-          body: { text: 'Scopes the invocable can read' },
+          body: { text: 'Scopes a process is permitted to read' },
           placements: [{ scope_id: 'dispatch', type: 'relates' }],
         },
         {
           id: 'write-boundary',
           name: 'write-boundary',
-          body: { text: 'Scopes the invocable can write to' },
+          body: { text: 'Scopes a process is permitted to write to' },
           placements: [{ scope_id: 'dispatch', type: 'relates' }],
         },
       ],
     })
 
-    // claude invocable: requires session, context, prompt
+    // claude program: requires session, context, prompt
     apply(db, {
       chunks: [
         {
           id: 'claude',
           name: 'claude',
           spec: { propagate: true, ordered: true, accepts: ['session', 'context', 'prompt'] },
-          body: { text: 'Claude agent', executable: './invocables/claude' },
+          body: { text: 'Claude agent', executable: './programs/claude' },
         },
         {
           id: 'session',
@@ -385,7 +385,7 @@ describe('spec enforcement', () => {
           id: 'claude',
           name: 'claude',
           spec: { propagate: true, accepts: ['prompt'] },
-          body: { executable: './invocables/claude' },
+          body: { executable: './programs/claude' },
         },
         {
           id: 'prompt',

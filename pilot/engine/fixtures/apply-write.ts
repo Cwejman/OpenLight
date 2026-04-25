@@ -12,7 +12,7 @@ const request = JSON.stringify({
   declaration: {
     chunks: [
       {
-        body: { text: 'result from invocable', written: true },
+        body: { text: 'result from program', written: true },
         placements: [{ scope_id: dispatchId, type: 'relates' }],
       },
     ],

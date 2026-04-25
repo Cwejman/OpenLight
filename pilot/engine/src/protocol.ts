@@ -13,12 +13,12 @@ type ParsedRequest =
   | { id: number; op: 'scope'; scopes: string[] }
   | { id: number; op: 'search'; query: string }
   | { id: number; op: 'apply'; declaration: { chunks: ChunkDeclaration[] } }
-  | { id: number; op: 'dispatch'; invocable: string; args: DispatchArgs }
-  | { id: number; op: 'await'; dispatches: string[] }
+  | { id: number; op: 'run'; program: string; args: DispatchArgs }
+  | { id: number; op: 'await'; processes: string[] }
 
 type ParseError = { error: { code: ProtocolErrorCode; message: string } }
 
-const VALID_OPS = new Set(['scope', 'search', 'apply', 'dispatch', 'await'])
+const VALID_OPS = new Set(['scope', 'search', 'apply', 'run', 'await'])
 
 /** Parse a JSON line into a typed protocol request. */
 export const parseRequest = (line: string): ParsedRequest | ParseError => {
@@ -69,8 +69,8 @@ export const handleOp = (
       return handleSearch(ctx, request)
     case 'apply':
       return handleApply(ctx, request)
-    case 'dispatch':
-      return handleDispatch(ctx, request)
+    case 'run':
+      return handleRun(ctx, request)
     case 'await':
       return handleAwait(ctx, request)
   }
@@ -144,13 +144,13 @@ const handleApply = (
   }
 }
 
-const handleDispatch = (
+const handleRun = (
   ctx: DispatchContext,
-  req: { id: number; invocable: string; args: DispatchArgs },
+  req: { id: number; program: string; args: DispatchArgs },
 ): ProtocolResponse => {
   try {
-    const result = createDispatch(ctx.db, req.invocable, req.args)
-    return { id: req.id, result: { dispatch: result.dispatchId } }
+    const result = createDispatch(ctx.db, req.program, req.args)
+    return { id: req.id, result: { process: result.dispatchId } }
   } catch (e) {
     return errorResponse(req.id, 'NOT_FOUND', (e as Error).message)
   }
@@ -158,15 +158,15 @@ const handleDispatch = (
 
 const handleAwait = (
   _ctx: DispatchContext,
-  req: { id: number; dispatches: string[] },
+  req: { id: number; processes: string[] },
 ): ProtocolResponse => {
   // Await is handled at the process level, not here.
   // This stub exists for protocol completeness — the real await
-  // blocks until dispatches complete, which requires process management.
+  // blocks until processes reach a terminal state.
   return errorResponse(
     req.id,
     'INVALID_REQUEST',
-    `Await not yet implemented (dispatches: ${req.dispatches.join(', ')})`,
+    `Await not yet implemented (processes: ${req.processes.join(', ')})`,
   )
 }
 

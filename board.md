@@ -44,6 +44,10 @@ What doesn't survive: the SvelteKit tile/scope/dispatch UI. The substrate concep
 
 **Code catch-up to specs.** Engine source and `bootstrap.ts` still use the `invocable` archetype name and the old `ui/split`/`leaf`/`view-root`/`scope-history` types. No persistence concerns — the existing `.ol/db` is overwritten on next bootstrap.
 
+## Tracked debt
+
+- **Bootstrap IDs are hand-picked.** Substrate.md says chunk IDs are "globally unique, system-generated." Bootstrap and `seedTestDb()` use human-readable strings (`'agent'`, `'program'`, `'session'`, etc.) as a pragmatic shortcut so tests and seed code can reference well-known anchors. This worked until the new `ui/session` archetype collided with the agent's `session` archetype — resolved for now by giving the ui session id `ui-session` (name stays `session`). The aligned fix: switch all bootstrap chunks to generated IDs, have tests look up canonical chunks by name within scope. Tracked as a separate cleanup; not blocking.
+
 ## Open architectural forks
 
 Held in specs rather than closed prematurely:

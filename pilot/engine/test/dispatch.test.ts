@@ -4,7 +4,7 @@ import { seedTestDb } from './helpers.ts'
 import { createDispatch } from '../src/dispatch.ts'
 
 describe('dispatch creation', () => {
-  test('creates dispatch chunk as instance of invocable and dispatch archetype', () => {
+  test('creates process chunk as instance of program and process archetype', () => {
     const db = seedTestDb()
     const { dispatchId } = createDispatch(db, 'filesystem', {
       chunks: [],
@@ -23,7 +23,7 @@ describe('dispatch creation', () => {
     const instancePlacements = dispatch.placements.filter((p) => p.type === 'instance')
     const scopeIds = instancePlacements.map((p) => p.scope_id)
     expect(scopeIds).toContain('filesystem')
-    expect(scopeIds).toContain('dispatch')
+    expect(scopeIds).toContain('process')
   })
 
   test('creates read-boundary container with scope references', () => {
@@ -139,7 +139,7 @@ describe('dispatch creation', () => {
     expect(commits.chunks.items.length).toBeGreaterThanOrEqual(1)
   })
 
-  test('rejects unknown invocable', () => {
+  test('rejects unknown program', () => {
     const db = seedTestDb()
     expect(() =>
       createDispatch(db, 'nonexistent', {
@@ -150,7 +150,7 @@ describe('dispatch creation', () => {
     ).toThrow('not found')
   })
 
-  test('rejects non-invocable chunk', () => {
+  test('rejects non-program chunk', () => {
     const db = seedTestDb()
     expect(() =>
       createDispatch(db, 'agent', {
@@ -158,7 +158,7 @@ describe('dispatch creation', () => {
         readBoundary: ['agent'],
         writeBoundary: ['agent'],
       }),
-    ).toThrow('not an invocable')
+    ).toThrow('not a program')
   })
 
   test('multiple dispatches produce unique IDs', () => {
