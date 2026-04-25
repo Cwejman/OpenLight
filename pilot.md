@@ -105,21 +105,19 @@ pilot/
   bootstrap.ts     — seed script
   project/         — working project (once initialized)
     .ol/db         — the substrate database
-    invocables/    — program executables (claude, echo, and so on)
+    programs/      — program executables (claude, echo, and so on)
 ```
 
 ## Build Order
 
-The substrate and engine already work in their essentials. The reset is above the engine.
+Substrate, engine, and bootstrap are aligned to the program/process model. What remains is everything above the engine.
 
-1. **Bootstrap** — seed the new archetypes (`program`, `process`, `ui/session`, `ui/tab`, `ui/tile`, `ui/overlay`, `ui/recipe`). Remove the old `ui/split` / `ui/leaf` / `ui/view-root` / `ui/scope-history` seed — they were serving the pilot UI that is now gone.
-2. **Engine terminology** — rename `invocable` references to `program` in code; add `process` as the running artifact; keep `dispatch` as the verb in commit metadata. Tests stay green.
-3. **Host** — scaffold the Rust shell. Minimum to start: a window, one webview, an IPC bridge to the engine subprocess.
-4. **SDK** — `mount`, `scope`, `apply`, `run`, `await`. Plus a small set of React hooks that read the substrate reactively (initial shape is a single `useScope`; this area is deliberately underexplored and will refine through use).
-5. **First program: read tile.** Validates the host ↔ program ↔ SDK ↔ engine loop end-to-end.
-6. **Sidebar, command palette, tab bar** — each a program with a surface.
-7. **Program runner** — the program that renders input forms for running other programs. Handles type-driven argument construction.
-8. **Claude program** — the agent.
+1. **Host** — scaffold the Rust shell. Minimum to start: a window, one webview, an IPC bridge to the engine subprocess.
+2. **SDK** — `mount`, `scope`, `apply`, `run`, `await`. Plus a small set of React hooks that read the substrate reactively (initial shape is a single `useScope`; this area is deliberately underexplored and will refine through use).
+3. **First program: read tile.** Validates the host ↔ program ↔ SDK ↔ engine loop end-to-end.
+4. **Sidebar, command palette, tab bar** — each a program with a surface.
+5. **Program runner** — the program that renders input forms for running other programs. Handles type-driven argument construction.
+6. **Claude program** — the agent.
 
 ---
 
