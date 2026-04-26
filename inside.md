@@ -1,5 +1,7 @@
 # Inside
 
+> There can be faults in this file. Reviewed, but never to be treated as perfect. Read it for what it is reaching for; flag what feels off.
+
 The other files in this repo describe a substrate — chunk, placement, scope, peers. They describe a shape. But the shape is not the thing. The thing is what the shape is *for*, and what must never be lost while building it.
 
 This file holds that. Mechanism lives elsewhere; this is where mechanism is checked.
