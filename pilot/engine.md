@@ -2,9 +2,9 @@
 
 The engine is the authority on running programs against the substrate. A program is a chunk with an executable; to run one is to create a process. The engine creates processes, enforces boundaries, spawns executables, and mediates every substrate operation a running program attempts. Nothing runs without going through the engine, and no program touches the database directly.
 
-The engine is a TypeScript module. The pilot runs it as a subprocess the host spawns on start. It speaks one protocol — JSON lines over stdio — to the host that routes it to webview-hosted programs, and to programs running directly as subprocesses (such as tools in a containment VM). The shape is identical either way; the SDK hides the transport.
+The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no engine subprocess and no JSON-lines hop between host and engine. Webview programs send their protocol messages over wry IPC to the host; the host's IPC handler dispatches them to engine functions and returns the results back through wry. Subprocess programs (tool programs running in a containment VM) speak the same protocol over stdio that the engine spawned and reads.
 
-When the engine is eventually rewritten in Rust, the subprocess hop collapses into a function call. The protocol doesn't change and programs don't know the difference.
+The shape of the program-facing protocol is identical regardless of transport. The SDK hides the difference.
 
 ---
 
@@ -132,24 +132,22 @@ Every process chunk exists in the substrate immediately. Any other program (with
 
 ### Engine API (callable from the host)
 
-The host also calls the engine directly to drive top-level program runs from user action. Three functions plus lifecycle:
+The host calls the engine library directly to drive top-level program runs from user action and to handle webview protocol messages. The shapes below are language-neutral; the Rust implementation gives them concrete types.
 
-```typescript
-type RunArgs = {
-  chunks: ChunkDeclaration[]       // typed arguments assembled by the caller
-  readBoundary: string[]           // scope ids
-  writeBoundary: string[]          // scope ids
-  timeout?: number                 // defaults to the program's body.timeout_ms
-}
+```
+RunArgs
+  chunks:        Chunk declarations — typed arguments assembled by the caller
+  readBoundary:  scope ids
+  writeBoundary: scope ids
+  timeout?:      ms; defaults to the program's body.timeout_ms
 
-type RunResult = {
-  processId: string                // the process chunk id
-}
+RunResult
+  processId:     the process chunk id
 
-function bootstrap(dbPath: string, projectPath: string): Engine
-function run(engine: Engine, programId: string, args: RunArgs): RunResult
-function cancel(engine: Engine, processId: string): void
-function shutdown(engine: Engine): void
+bootstrap(dbPath, projectPath) -> Engine
+run(engine, programId, args)   -> RunResult
+cancel(engine, processId)      -> ()
+shutdown(engine)               -> ()
 ```
 
 The engine is program-agnostic. `RunArgs.chunks` are whatever the program's composed spec accepts — the engine places them on the process chunk and the substrate's spec enforcement validates the contract. Boundary arrays are the scope roots the caller permits this run to reach; the engine builds boundary chunks from them and computes the effective boundary.
@@ -223,17 +221,11 @@ No new tables, no circular placements. Commits look like chunks to readers; they
 
 ---
 
-## Containment — The Fork
+## Containment
 
-The pilot holds two coherent paths for how programs are isolated. Both use the same protocol, the same process lifecycle, the same boundary enforcement. They differ only in where programs run.
+The pilot uses split containment. Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a DOM surface run on the host inside the webview the host gave them. The webview sandbox contains view programs at the OS level; the engine's boundary enforcement contains them at the substrate level. The VM contains tool programs at both levels.
 
-**Split containment.** Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a DOM surface run on the host inside the webview the host gave them. The webview sandbox contains view programs at the OS level; the engine's boundary enforcement contains them at the substrate level.
-
-**Uniform containment.** All programs run inside one VM. View programs produce DOM; the engine streams DOM operations from the VM-side program to a thin shim in the host's webview, which applies them. User events flow back through the same channel. Pixel-level rendering stays on the host; view code stays in the VM.
-
-Both paths are architecturally clean. Split is faster to build and shorter for the pilot. Uniform is more consistent and sets up peering more naturally. The full treatment — what the tech actually does, what it costs, what it buys — lives in [`horizon.md`](../horizon.md).
-
-Decision point: before the host is built, the pilot commits to one. The specs here remain true either way.
+The uniform-VM alternative — every program in one VM with DOM streamed to host webviews — is on the horizon. See [`horizon.md`](../horizon.md). The same protocol, process lifecycle, and boundary enforcement serve either model; only where programs run differs.
 
 ---
 
@@ -272,15 +264,18 @@ An explicit `BOUNDARY_VIOLATION` is better than a silently empty read. The engin
 
 ## Client Library
 
-Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `apply`, `run`, `await`. The SDK serializes to JSON lines and wraps correlations. Programs that run in webviews use an SDK that routes through the host's wry IPC channel; programs that run as subprocesses (tools in a VM) use an SDK that writes to stdout directly. Same API surface, different transport.
+Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `apply`, `run`, `await`. The SDK serializes the call into the protocol's JSON shape and dispatches it through whichever transport the program runs under. Same API surface, two transports:
 
-The engine's client module (`engine/client.ts`) provides the subprocess-side SDK. The webview-side SDK lives under `pilot/sdk/` and wraps the same operations over the wry IPC bridge.
+- **Webview programs** — the SDK calls `window.__wry_ipc.postMessage(...)`. The host's IPC handler deserializes, calls the corresponding engine function, and returns the result through wry's response channel.
+- **Subprocess programs** — the SDK writes a JSON line to stdout. The engine, which spawned the subprocess, reads each line and calls the corresponding engine function.
+
+Both implementations live under [`pilot/sdk/`](sdk/) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
 
 ---
 
 ## What Is Open
 
-- **Containment model.** See the fork above. Decision precedes host construction.
+- **Reactivity protocol.** How a webview program is notified that a scope it is reading has changed. Engine emits push notifications on the wry channel? Polling? The shape decides what `useScope` looks like in the SDK and is settled in this spec before code.
+- **Run/await mechanism.** Real `await` requires the engine to remember which webview-side or subprocess-side request is blocked on which process, and resolve it on terminal-state transition. The shape is settled here before code.
 - **Named, reusable boundaries.** The pilot creates a fresh boundary chunk per run. A user wanting to reuse a boundary ("my agent-wide boundary") would do so by saving a named chunk and referencing it from multiple runs. The substrate supports this; the engine and UX do not yet.
 - **Services.** A process whose executable lives beyond the completion of a single render or request. Requires lifecycle beyond `pending → running → completed`. Held as a direction; not in the pilot.
-- **Engine-as-library.** The engine is a subprocess for the pilot. Migration to a Rust in-process library is a tracked move in [`horizon.md`](../horizon.md).

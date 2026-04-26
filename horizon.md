@@ -63,11 +63,3 @@ Pilot views render DOM. Some views will eventually want direct GPU surfaces — 
 The container shape for these: pixel-level passthrough from the program's rendering context to the host's composited window. Under split containment, the view runs on host and has direct WebGPU access. Under uniform containment, this needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun / Venus for full acceleration).
 
 What makes this a genuine horizon and not just pilot scope: the substrate type system can already accommodate it (`surface: 'wgpu'` on a program body). Implementation is the work. Deferred until a view demands it.
-
----
-
-## Rust engine migration
-
-The engine is TypeScript for the pilot. Runs as a subprocess spawned by the Rust host. The protocol between the host and the engine is the same stdio/JSON-lines shape every running program uses to reach the engine. When the engine is eventually rewritten in Rust, the subprocess collapses into a function call — no protocol change, no API break for programs.
-
-When is this migration worth it? When one of: subprocess latency matters for UX responsiveness, deployment wants one binary, or the db moves to Rust and the engine is the last TypeScript piece on that path. None of these are true at pilot scale. The migration is a tracked move, not a pending task.

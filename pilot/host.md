@@ -1,8 +1,10 @@
 # Host
 
-The host is the native shell. It opens the window. It places tiles inside that window, gives each tile a webview, hands running programs their surfaces, and routes messages between those programs and the engine. It does not write interface — everything a user sees is produced by a program.
+The host is the native shell. It opens the window. It places tiles inside that window, gives each tile a webview, hands running programs their surfaces, and dispatches their substrate operations to the engine. It does not write interface — everything a user sees is produced by a program.
 
 The host is written in Rust against **tao** (cross-platform windowing) and **wry** (cross-platform webview). These are the libraries that underlie Tauri; the host uses them directly, without adopting the Tauri framework's app-level conventions. Our shape — one window with many tiled webviews, each its own program — fits these primitives more naturally than Tauri's one-webview-per-window default.
+
+The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no engine subprocess and no inter-process hop between host and engine. Subprocess programs (tool programs in a VM) are spawned by the engine and reach it over stdio JSON-lines.
 
 ---
 
@@ -11,18 +13,18 @@ The host is written in Rust against **tao** (cross-platform windowing) and **wry
 - Opens and manages a single native window
 - Decides where tiles go within that window — split-tree geometry, padding, spacing, card treatment
 - Creates a webview for each tile that holds a running program with a DOM surface
-- Routes messages between those webviews and the engine
-- Manages the engine subprocess — spawn on start, graceful shutdown on exit
+- Receives wry IPC messages from webview programs and dispatches them to the engine library
+- Bootstraps the substrate (open the database) and the engine on startup; closes both on exit
 - Handles visual chrome that's properly the window's concern: padding, background color, shadows under cards, overlay darkening behind modal programs
 
 ## What the Host Does Not Do
 
 - Render any part of the interface. Sidebar, tabs, command palette, tile contents — all programs.
-- Interpret substrate operations. Those go through to the engine.
+- Interpret substrate operations. Those are dispatched to the engine.
 - Hold session state. Session state lives in the substrate.
 - Own program lifecycle. The engine does that.
 
-The host stays small. Rust, a few hundred lines at the core, oriented around window + webviews + IPC. This is not an aesthetic preference — it's the line that keeps interface authorship in the language the substrate's self-description already describes, rather than in a second language that has to keep up.
+The host stays small. Rust, a few hundred lines at the core, oriented around window + webviews + the wry IPC dispatch surface. This is not an aesthetic preference — it's the line that keeps interface authorship in the language the substrate's self-description already describes, rather than in a second language that has to keep up.
 
 ---
 
@@ -127,12 +129,11 @@ Future visual refinements — glow around cards derived from their content pixel
 
 ## Transport
 
-Two hops for the pilot, one protocol shape end-to-end.
+One hop. One protocol shape.
 
-1. **Webview → host** via wry's IPC channel. JSON messages with an `op` and a correlating `id`. The host receives these as Rust handlers.
-2. **Host → engine** via stdio JSON-lines to the engine subprocess. The same protocol a program uses once it is running to reach the engine.
+A webview program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel as a JSON message with an `op` and a correlating `id`. The host's IPC handler deserializes, calls the matching engine function with the appropriate process context, and sends the result back through wry's response channel to the SDK, which resolves the call.
 
-Responses flow back the same way. The host does not interpret substrate operations — it is a router. When the engine is later rewritten in Rust (see [`horizon.md`](horizon.md)), the second hop becomes a function call and one seam collapses. The program-facing SDK doesn't change.
+The host does not interpret substrate operations — it dispatches them. Subprocess programs (tool programs in a VM) speak the same protocol shape over stdio; the engine reads their stdout directly without going through the host.
 
 ### SDK surface
 

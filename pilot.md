@@ -46,17 +46,17 @@ The unification of view and tool into one concept — the program — is what le
 
 ### The substrate (`db`)
 
-A single SQLite-backed library. Chunks, placements, commits. See [`pilot/substrate.md`](pilot/substrate.md). Implementation at [`pilot/db/`](pilot/db/).
+A SQLite-backed Rust library. Chunks, placements, commits. See [`pilot/substrate.md`](pilot/substrate.md). Compiled into the host binary; not a separate process.
 
 ### The engine
 
 Sits between the substrate and anything that would run against it. Creates a `process` chunk when a program is run, enforces boundaries, spawns the program's executable, mediates all substrate access the running program attempts. See [`pilot/engine.md`](pilot/engine.md).
 
-Runs as a TypeScript subprocess the host spawns. Speaks JSON-lines over stdio — the same protocol running programs use to reach the field. When the engine is eventually rewritten in Rust (see [`horizon.md`](horizon.md)), the subprocess hop collapses; the protocol stays.
+A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; subprocess programs reach the engine over stdio JSON-lines spawned and read by the engine. There is no engine subprocess, no inter-process hop between host and engine.
 
 ### The host
 
-A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry, webview lifecycles, IPC routing to the engine. Does not render UI. See [`pilot/host.md`](pilot/host.md).
+A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. Does not render UI. See [`pilot/host.md`](pilot/host.md).
 
 ### Programs
 
@@ -66,10 +66,10 @@ A program is authored however its runtime allows — TSX + React for the first-p
 
 ### Transport
 
-The program-to-engine protocol is a single JSON-lines shape with operations `scope`, `apply`, `run`, `await`. Programs reach the engine through whichever transport fits their runtime:
+The program-to-engine protocol is a single JSON-lines shape with operations `scope`, `apply`, `run`, `await`. The shape is the same regardless of where a program runs; the transport differs:
 
-- **Programs in webviews** → wry IPC to the host → stdio to the engine subprocess (two hops for the pilot)
-- **Programs running as subprocesses** → direct stdio to the engine (one hop)
+- **Programs in webviews** — the SDK serializes to JSON, the host's wry IPC handler receives the message and calls the engine library directly. One hop, no subprocess between.
+- **Programs as subprocesses** — the SDK writes JSON lines to stdout. The engine spawns the subprocess and reads its stdout, processing each line through the same op handlers.
 
 The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
@@ -85,41 +85,59 @@ The uniform alternative — every program in one VM with DOM streamed to host we
 
 ## Stack
 
-TypeScript for engine and programs. Bun as the TypeScript runtime. `bun:sqlite` for the substrate. Rust (tao + wry) for the host. One compile-time seam between host and everything else; one runtime seam between the engine subprocess and programs.
+Rust for the host, the engine, and the substrate — one binary, three crates in a workspace, `rusqlite` for the database. Bun + TypeScript for programs (the program runtime, not the engine runtime). The only runtime seam is between the host binary and program subprocesses; webview programs cross no process boundary to reach the substrate.
 
 ### Directory
 
 ```
 pilot/
-  db/              — substrate library + CLI
-  engine/          — dispatch, boundaries, program protocol, process lifecycle
-  host/            — Rust shell (tao + wry). To be built.
-  programs/        — first-party TSX programs. To be built.
-  sdk/             — TS SDK imported by programs. To be built.
-  bootstrap.ts     — seed script
+  db/              — Rust crate. Substrate library: chunks, placements, commits, FTS, spec language.
+  engine/          — Rust crate. Process lifecycle, boundary enforcement, program protocol, run/await.
+  host/            — Rust binary. tao + wry. Window, tile geometry, webview lifecycle, wry IPC surface.
+                     Depends on db and engine; everything compiles to one executable.
+  sdk/             — TS SDK imported by programs. Webview transport via wry IPC; subprocess transport via stdio.
+  programs/        — first-party TSX programs.
+  bootstrap.rs     — seed routine the host runs on a fresh project.
   project/         — working project (once initialized)
     .ol/db         — the substrate database
     programs/      — program executables (claude, echo, and so on)
 ```
 
+The TS db and engine implementations under their current paths remain as the porting oracle: the Rust ports are validated by running both side by side and diffing outputs against the existing 129-test suite. Once parity holds, the TS sources retire.
+
 ## Build Order
 
-Substrate, engine, and bootstrap are aligned to the program/process model. What remains is everything above the engine.
+The implemented foundation is drawn whole in `.md` before any of it is coded. The substrate's outward face is already settled, so its conceptual spec can be audited in isolation — but its *implementation drawing* (how the Rust db actually works, both contracts) is its own document. Engine, host, and SDK are mutually-defining and grow as one holistic drawing.
 
-1. **Host** — scaffold the Rust shell. Minimum to start: a window, one webview, an IPC bridge to the engine subprocess.
-2. **SDK** — `mount`, `scope`, `apply`, `run`, `await`. Plus a small set of React hooks that read the substrate reactively (initial shape is a single `useScope`; this area is deliberately underexplored and will refine through use).
-3. **First program: read tile.** Validates the host ↔ program ↔ SDK ↔ engine loop end-to-end.
-4. **Sidebar, command palette, tab bar** — each a program with a surface.
-5. **Program runner** — the program that renders input forms for running other programs. Handles type-driven argument construction.
-6. **Claude program** — the agent.
+The rule across the spec phase: implementation drawings are derived from the inside — the conceptual spec, plus Rust and SQLite and tao and wry as materials — outward. The existing TypeScript implementation is a **correctness oracle** for the port (it verifies behavior, diff outputs against it). It is not a **design oracle** the Rust copies from. Reading TS to translate it would be outside-to-outside; reading the spec and writing Rust-natural code is inside-out.
+
+**Spec phase — draw the foundation holistically.**
+
+1. **Substrate component.**
+   - **1a.** Audit [`pilot/substrate.md`](pilot/substrate.md) for gaps in the two contracts: consumer ↔ db (the program-facing operations and types), db ↔ sqlite (the schema, indexes, FTS, transaction discipline). Mostly there; small audit.
+   - **1b.** Write a new [`pilot/db.md`](pilot/db.md) — top-to-bottom drawing of how the Rust db actually works. Derived from the substrate spec, Rust idiom, and SQLite idiom. Holistic, not transliterated from the TS source.
+2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`pilot/engine.md`](pilot/engine.md), [`pilot/host.md`](pilot/host.md), and a new [`pilot/sdk.md`](pilot/sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
+
+**Implementation phase — code from the settled drawings.**
+
+3. **Code the db** from [`pilot/db.md`](pilot/db.md). TS suite as correctness oracle.
+4. **Code the engine** from [`pilot/engine.md`](pilot/engine.md). TS suite as correctness oracle.
+5. **Scaffold host** — tao + wry, window, one webview, the wry IPC handler dispatching to the engine library.
+6. **Draft SDK** — TypeScript, two transports behind one surface.
+7. **First program: read tile.** Validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
+8. **Remaining first-party programs** — sidebar, command palette, tab bar, program runner, claude.
+
+The implementation order in 3–6 is sequential because each layer compiles on the one below, but they were drawn as one piece — no design decisions are made in implementation that weren't already made in the spec phase.
 
 ---
 
 ## Specs
 
-- [`pilot/substrate.md`](pilot/substrate.md) — chunk, placement, spec language, commits, queries. The primitive layer.
+- [`pilot/substrate.md`](pilot/substrate.md) — chunk, placement, spec language, commits, queries. The primitive layer (concept, two contracts).
+- [`pilot/db.md`](pilot/db.md) — implementation drawing of the Rust db. Top-to-bottom, derived holistically from the substrate spec. To be written.
 - [`pilot/engine.md`](pilot/engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
-- [`pilot/host.md`](pilot/host.md) — the native shell, tile geometry, IPC routing, the UI composition types, visual language.
+- [`pilot/host.md`](pilot/host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
+- [`pilot/sdk.md`](pilot/sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API. To be written.
 - [`pilot/agent.md`](pilot/agent.md) — the claude agent expressed as a program.
 - [`pilot/bootstrap.md`](pilot/bootstrap.md) — the seed data.
 
@@ -133,4 +151,3 @@ Held in the specs rather than closed prematurely. These do not block the pilot's
 - **Service lifecycle UX** — when a program is long-lived and mounted in multiple tiles, identity, termination, and display semantics.
 - **Sidebar disambiguation** — visual scheme for multiple processes with the same program + args.
 - **React hooks surface** — `useScope` is the current guess for reading. The full hook vocabulary will refine through building real programs.
-- **Rust engine migration** — when to collapse the engine subprocess into an in-process library.
