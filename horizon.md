@@ -32,7 +32,7 @@ For the current state of provider cache primitives, see [`research/backend.md`](
 
 ## Uniform VM containment via DOM streaming
 
-The pilot currently holds a fork open on how programs are contained: split (tool-programs in VM, view-programs in host webviews) vs uniform (every program in one VM). The uniform direction becomes viable because views produce DOM, not pixels. A thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for this same pattern — DOM over a wire.
+The pilot uses split containment — tool-programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels. A thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for this same pattern — DOM over a wire.
 
 What it buys: uniform security posture across all programs; peer model clarifies (a peer is a VM image); no per-capability execution split; the protocol stays one-shape across tool programs and view programs.
 
@@ -40,19 +40,19 @@ What it costs: VM lifecycle engineering, a small DOM-diff protocol, and the disc
 
 What stays pilot-deferred: WebGPU-capable views. These need pixel-level passthrough (virtio-gpu, Venus) and are a separate engineering track. DOM streaming covers ordinary UI, which is what pilot views need.
 
-The decision between split and uniform containment belongs in the pilot. The direction this horizon entry holds is: **uniform containment is architecturally cleanest, DOM streaming makes it tractable, and the pilot should choose with eyes open.**
+The pilot chose split for simplicity and speed — capability-bearing programs in a VM, surface-only programs on host webviews — which gives an agentic-safe floor without new mechanism. The direction this horizon entry holds: **uniform containment is architecturally cleaner, DOM streaming makes it tractable, and the migration is reachable when the engineering cost is worth paying.**
 
 ---
 
-## Multidimensional / zoomable tiling
+## View modes beyond tabs
 
-The pilot commits to tabs — each tab a root of a tile tree, workspaces are tabs. A substantial alternative has been charted: replace tabs with a single zoomable canvas where workspaces are nested regions, not discrete containers. Containers expand or abstract based on zoom level; navigation is spatial rather than discrete.
+The pilot ships tabs — each tab a root of a tile tree, workspaces are tabs. Tabs are one lens on what the substrate holds. Other lenses are reachable on the same chunks.
 
-Precedents: Figma, tldraw, Muse, Miro, Prezi. Spatial memory becomes a navigation axis. Nested compositions show naturally — zoomed out, they're cards; zoomed in, you're inside them. Looking inside a container = zoom in, not open a new tab.
+The most charted alternative: a zoomable canvas where workspaces are nested regions, not discrete containers. Containers expand or abstract based on zoom level; navigation is spatial rather than discrete. Precedents: Figma, tldraw, Muse, Miro, Prezi. Spatial memory becomes a navigation axis. Nested compositions show naturally — zoomed out, they're cards; zoomed in, you're inside them. Looking inside a container = zoom in, not open a new tab.
 
-The substrate type system doesn't forbid this direction — the composition types hold for either geometry. What changes is the host's layout engine and what "current tab" becomes (maybe "current viewport region").
+The substrate type system doesn't forbid this direction — the composition types hold for either geometry. What changes is the layout the view program imposes, and what "current tab" becomes (maybe "current viewport region").
 
-Holding as a direction. Tabs ship first. Canvas is the next geometry if the tab model turns out to fight the values (spatial memory, multidimensional navigation).
+The framing matters: because the host is built by programs themselves, a view mode is a program. Tabs and canvas are two lenses; others — outline, timeline, graph — are reachable in the same way. Tabs ship first; lenses are additive, not forks.
 
 ---
 

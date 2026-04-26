@@ -6,6 +6,10 @@ Current state and what comes next. Updated as things move.
 
 ## Recent
 
+**Containment resolved: split for the pilot.** Capability-bearing programs (network, filesystem, shell) run inside a lightweight Linux VM; surface-only programs run on host webviews. Simpler to build, and gives an agentic-safe floor without new mechanism. Uniform-VM-with-DOM-streaming moves to the horizon. See [`pilot.md`](pilot.md#containment) and [`horizon.md`](horizon.md).
+
+**View mode resolved: tabs first, lenses framing.** Tabs ship first as the pilot's geometry. Canvas and other view modes are additional lenses on the same chunks, not forks. Reachable because the host is built by programs themselves — a view mode is just another program. See [`pilot/host.md`](pilot/host.md#view-modes-as-lenses) and [`horizon.md`](horizon.md).
+
 **Architecture reset for the UI layer, fully landed in specs and code.**
 
 - **Invocables and views unified as `program`.** A program is a chunk with an executable and an optional `surface` capability declaration. Views are programs with a surface. Tools are programs without.
@@ -25,21 +29,17 @@ Current state and what comes next. Updated as things move.
 - **Internal type names still use legacy nouns.** `DispatchArgs`, `DispatchResult`, `DispatchContext`, `createDispatch` — these are internal type and function names. Their behavior matches the new spec (process artifact, run verb), but the names predate the rename. Cosmetic; rename when convenient.
 - **`inside.md` carries one or two "invocable" references** in its values prose. Left alone — the inside text is held with care; touch only if the user asks.
 
-## Open architectural forks
+## Note from a failed purification attempt (2026-04-25)
 
-Held in specs rather than closed prematurely:
-
-- **Containment model** — split (tool-VM only; views on host) vs uniform (everything in VM with DOM streaming to host). Affects host implementation scope. See `pilot.md` and `horizon.md`.
-- **Tabs vs zoomable canvas** — current design assumes tabs; zoomable nested canvas is a substantive alternative direction. See `horizon.md`.
+A session attempted a code-and-MD purification pass that went the wrong way: it began renaming `runDispatch` → `runProgram` and `spawnInvocable` → `spawnProgram` in the code (legitimate purification toward the new lingo), but then reversed direction in `engine.md` and rewrote the aspirational new-lingo names (`RunArgs`, `RunResult`, `run`, `cancel`, `shutdown`) into the legacy names (`DispatchArgs`, `DispatchResult`, `runProgram`, `cancelProcess`, `shutdownAll`) — collapsing the spec to match the legacy code instead of cleaning the legacy code to match the spec. All changes were reverted to HEAD; the working tree is clean. The proper purification — code follows spec, not the other way — is a separate task left for a later session. The failure was a misread of the direction "tracked debt" pointed; the spec is the truth, the legacy code is what should eventually rename.
 
 ## Next
 
-1. Pick a containment model (or spike both briefly). Required before host scaffold.
-2. Scaffold `pilot/host/` (Rust, tao + wry) — minimum: window + one webview + stdio bridge to the engine subprocess.
-3. Scaffold `pilot/sdk/` — TS SDK with `mount()` and substrate ops.
-4. First program: read tile as a TSX program, to validate the host ↔ program ↔ SDK ↔ engine loop.
-5. Sidebar, command palette, tab bar, program runner — each a program with a surface.
-6. Claude program — the agent.
+1. Scaffold `pilot/host/` (Rust, tao + wry) — minimum: window + one webview + stdio bridge to the engine subprocess.
+2. Scaffold `pilot/sdk/` — TS SDK with `mount()` and substrate ops.
+3. First program: read tile as a TSX program, to validate the host ↔ program ↔ SDK ↔ engine loop.
+4. Sidebar, command palette, tab bar, program runner — each a program with a surface.
+5. Claude program — the agent.
 
 ---
 

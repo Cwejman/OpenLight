@@ -83,6 +83,10 @@ A recipe, when spawned, produces a **composition**: a container process visible 
 
 ---
 
+## View Modes as Lenses
+
+The pilot ships tabs — the geometry described below. That is one lens on what the substrate holds, not the only one. A zoomable canvas is another lens on the same chunks; further geometries are reachable too. Because the host is built by programs themselves, a view mode is just another program working over the composition types — not a different host. Tabs go first; new lenses are additive, not forks.
+
 ## Tile Geometry
 
 Binary split tree. Same primitive the earlier pilot used; the model survived the redesign because it is the right one.
@@ -208,7 +212,6 @@ Not a host feature. Just another program, living as an overlay.
 
 ## What Is Open
 
-- **Containment model.** Split vs uniform. Decided before the host ships. See [`pilot.md`](../pilot.md) and [`horizon.md`](../horizon.md).
 - **React hooks surface.** Starting guess: a single `useScope(ids)`. Richer vocabulary (for mutations, for subscriptions to typed events, for React Suspense integration) may appear through use. This is deliberately underexplored; the shape will emerge.
 - **Reactivity protocol.** How `useScope` is notified of changes — server-sent events, in-process subscription, native IPC callback. Implementation choice deferred.
 - **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Requires write-boundary reach into a parent scope; the mechanics are not specified.
@@ -218,7 +221,6 @@ Not a host feature. Just another program, living as an overlay.
 - **Color coding.** Whether scopes or programs carry a color attribute, and how it surfaces in the visual language.
 - **Cross-workspace wrap policy.** When wrapping tiles into a composition, if a child is visible in another tab, what happens to the other tab's view.
 - **Selection on padding.** Gesture for selecting a subtree of tiles to wrap, save as recipe, or delete as a group.
-- **Tabs vs zoomable canvas.** The pilot uses tabs; a zoomable nested canvas is a substantive alternative. See [`horizon.md`](../horizon.md).
 - **Native visual effects.** The pilot uses CSS for blur and glow; native compositor effects (pixel-readback, GPU blur) are later.
 
 ---

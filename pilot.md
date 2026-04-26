@@ -75,17 +75,11 @@ The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
 ---
 
-## The Containment Fork
+## Containment
 
-How programs are isolated from the host and from each other is an open architectural choice the pilot must resolve before shipping. Both paths are coherent and both use the same program/process/boundary primitives. The specs carry both.
+The pilot uses **split containment**. Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a surface (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain view-kind programs together; the VM contains tool-kind programs. This is the simpler path, and putting capability-bearing programs in a VM gives the pilot the safety floor it needs to host agentic programs without inventing new mechanism.
 
-**Split containment.** Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a surface (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement together contain view-kind programs; the VM contains tool-kind programs.
-
-**Uniform containment.** All programs run in one VM. Programs with a surface produce DOM; a thin shim in each host webview receives DOM operations streamed from the VM-side program and forwards user events back. The host composes tiles from these DOM surfaces. Tool programs work exactly as they already do.
-
-The uniform path is architecturally cleaner — one containment model across the system, peer model clarifies to "a peer is a VM image." The split path is faster to build. See [`horizon.md`](horizon.md) for the full tradeoff.
-
-The pilot chooses before the host is built. Neither choice changes the substrate or the program contract.
+The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 
 ---
 
@@ -133,8 +127,6 @@ Substrate, engine, and bootstrap are aligned to the program/process model. What 
 
 Held in the specs rather than closed prematurely. These do not block the pilot's structure; they need decisions as implementation reaches them.
 
-- **Containment model** — split vs uniform. Described above; fuller treatment in [`horizon.md`](horizon.md).
-- **Tabs vs zoomable canvas.** The current design assumes tabs. Zoomable canvas is a substantive alternative direction; deferred.
 - **Recipe referencing** — does a recipe bind specific programs, or declare slots the user fills on spawn?
 - **Overlay anchor escalation** — how a program anchors an overlay above its own tile boundary. Related to write-boundary semantics.
 - **Cross-workspace wrap policy** — when composing tiles into a container, what happens to children visible in other tabs.
