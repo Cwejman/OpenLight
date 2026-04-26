@@ -103,7 +103,33 @@ Archetypes enable typed interfaces. The shell can require "I need an instance of
 
 **Type definitions use `relates`.** Type-defining chunks (like `prompt` on `session`) are placed as `relates`, not `instance`. This keeps them out of ordered content (no seq required) while remaining resolvable for `accepts` name resolution. Content chunks use `instance` with dual placement — on the scope (with seq) and on the archetype (for type membership).
 
-**Dual placement enforcement.** When a chunk has dual placement (scope + type), the type-membership placement must be written before the scope placement is enforced — otherwise the `accepts` check can't find the type membership. The lib handles this by writing all placements first, then enforcing all specs second (two-pass within each chunk).
+**Dual placement enforcement.** A chunk with dual placement (scope + type) needs its type-membership placement visible before its scope placement is enforced — otherwise the `accepts` check can't find the type membership. The substrate's two-pass write-then-validate (see [Mutations and validation](#mutations-and-validation)) makes this work.
+
+### Mutations and validation
+
+Mutations are atomic. A declaration — one or many chunks, with their placements — succeeds entirely or fails entirely. If any part of a declaration fails validation, none of it is recorded; a commit appears only when every write in the declaration passes. This atomicity is a property of the field itself, not of any storage layer beneath it. Whatever materialization holds the field delivers it.
+
+#### Spec validation
+
+The spec language defines what conformance means; the substrate enforces conformance at write time.
+
+For a chunk being placed `instance` on a scope, the **effective contract** is the union of:
+
+- The scope's own non-propagating spec, if any.
+- The propagating spec of every archetype the scope is itself `instance` of (transitively). `accepts` names from each archetype are resolved within that archetype's own scope.
+
+The chunk must satisfy the union:
+
+- **`ordered`** — the placement carries a `seq`. Auto-assigned to `max(existing seq on scope) + 1` when omitted.
+- **`accepts`** — the chunk is `instance` of at least one of the listed type chunks. A chunk that is `instance` of two of the listed types in the same union contract is rejected (type ambiguity).
+- **`required`** — the chunk's body carries every listed key.
+- **`unique`** — for each listed body key, the chunk's value is unique across all chunks placed `instance` on this scope.
+
+Validation runs against the post-write state of the declaration: all placements declared together are recorded before any spec is checked. This lets a chunk and its dual placement (on a scope and on its type) appear in the same declaration without ordering failure.
+
+#### Name uniqueness
+
+Within a scope, the names of all chunks placed `instance` on it — when name is non-null — are unique. The same chunk may carry the same name across multiple scopes; two different chunks may not collide on a name within any single scope. Enforced at placement-write time.
 
 ### Example: Session archetype
 
@@ -159,11 +185,9 @@ chunk: (placed on my-session, instance, seq: 4; placed on answer, instance)
 
 ## History
 
-Unchanged from the current design. Proven and solid.
-
 ### Commits
 
-Every mutation is a commit. A commit is atomic — all changes succeed or all fail.
+Every successful declaration produces a commit.
 
 ```
 commit {
@@ -174,7 +198,7 @@ commit {
 }
 ```
 
-Commits record changes to chunks and placements. The current state is resolved by walking from branch HEAD to root, taking the latest version of each chunk and placement in that ancestry.
+Commits record changes to chunks and placements. The current state on a branch is resolved by walking from that branch's HEAD to root, taking the latest version of each chunk and placement in the ancestry.
 
 ### Branches
 
@@ -187,21 +211,23 @@ branch {
 }
 ```
 
-Branches fork (new pointer from any commit) and merge (commit with two parents, conflict resolution is explicit). The active branch is client state — stored in `.openlight/config.json`, not in the database.
+The substrate is branch-aware: every read and every write specifies a branch. The substrate stores all branches and their HEADs. Which branch is "active" for a given consumer at a given moment is consumer-level state, not field state — the consumer chooses which branch to read or commit to.
+
+Branches fork (a new pointer from any commit) and merge (a commit with two parents; conflict resolution is explicit, above the primitives).
 
 ### Lossless
 
-Nothing is destroyed. Chunk removal sets `removed: true`. Placement removal sets `active: false`. Both are preserved in history. Any past state is reconstructable.
+Nothing is destroyed. Removal is logical: a removed chunk drops out of current-state reads, as do placements involving it (whether the chunk is the scope or the chunk being placed). The version history retains everything as it was — time-travel reads see the past state intact.
+
+Removal is itself a mutation, recorded in a commit like any other write.
 
 ## Queries / Scoping
 
 ### Scope
 
-The primary read operation. Declarative, pure, deterministic. Same query + same data = same result.
+The primary read operation. Declarative, pure, deterministic — same query against the same field state returns the same result.
 
-Select scopes. Get everything at the intersection. Add a scope to narrow. Remove to widen.
-
-With the current `ol scope` model adapted: scoping a set of chunks (identity chunks / scopes) returns all chunks placed on ALL of them. Connected scopes are computed from shared placements.
+Select scopes. Get everything at the intersection. Add a scope to narrow. Remove to widen. Scoping a set of chunks (identity chunks / scopes) returns all chunks placed on every one of them. Connected scopes are computed from shared placements.
 
 ### Traversal
 
@@ -211,9 +237,9 @@ Traversal and scoping work together: scope to narrow the space, then explore con
 
 ### Full-text search
 
-A native substrate feature, not external. Entry point into the structure when you don't know the scope vocabulary. SQLite FTS5 over chunk name and body string values. Find chunks by keyword, discover their scopes, then navigate structurally.
+A native substrate feature, not an external add-on. Entry point into the structure when the scope vocabulary isn't known yet. The index covers chunk names and string values in chunk bodies. Find chunks by keyword, discover their scopes, then navigate structurally.
 
-The FTS index is maintained by the substrate and updated on each commit.
+The FTS index is maintained by the substrate and stays consistent with current state on each commit.
 
 ### Derived data — summaries, embeddings, and beyond
 
@@ -237,7 +263,9 @@ No `summary_cache` table. No vector table. One primitive handles it all. The der
 
 ### Temporal scoping
 
-Reconstruct state at any commit. `--at <commit-id>` resolves all chunks and placements as of that point in history.
+Reconstruct state at any commit. A scope read at `--at <commit-id>` resolves all chunks and placements as of that point in history.
+
+Time travel is read-only. Mutations apply to the chosen branch's HEAD; reading the field at a past commit does not enable mutation from that point. To work from a past state, fork a new branch from that commit and mutate forward.
 
 ### Negation
 
@@ -265,84 +293,17 @@ A peer is any directory with a substrate database. Multiple peers compose by mou
 
 Peers are separate databases, not partitions of one. Each peer owns its data. The mounting mechanism is runtime — the peer protocol, conflict resolution, and exact mounting mechanics are open.
 
-## Schema
+## Logical schema
 
-```sql
-CREATE TABLE commits (
-    id        TEXT PRIMARY KEY,
-    parent_id TEXT,
-    timestamp TEXT NOT NULL,
-    message   TEXT
-);
+The field is composed of:
 
-CREATE TABLE branches (
-    name TEXT PRIMARY KEY,
-    head TEXT NOT NULL
-);
+- **Chunks** — id (system-generated, globally unique), optional name, spec (JSON), body (JSON). Identity is the id; name is unique within scope.
+- **Placements** — a chunk placed on a scope (another chunk), typed `instance` or `relates`, optionally carrying `seq` for ordered scopes.
+- **Commits** — forming a DAG via parent links. Each commit groups one declaration of mutations and carries a timestamp and optional message.
+- **Branches** — named pointers to commits.
+- **A full-text index** over chunk names and string values in chunk bodies, native to the substrate.
 
-CREATE TABLE chunk_versions (
-    chunk_id  TEXT NOT NULL,
-    commit_id TEXT NOT NULL REFERENCES commits(id),
-    name      TEXT,
-    spec      TEXT DEFAULT '{}',
-    body      TEXT DEFAULT '{}',
-    removed   INTEGER DEFAULT 0,
-    PRIMARY KEY (chunk_id, commit_id)
-);
-
-CREATE TABLE placement_versions (
-    chunk_id  TEXT NOT NULL,
-    scope_id  TEXT NOT NULL,
-    type      TEXT NOT NULL CHECK (type IN ('instance', 'relates')),
-    seq       INTEGER,
-    active    INTEGER DEFAULT 1,
-    commit_id TEXT NOT NULL REFERENCES commits(id),
-    PRIMARY KEY (chunk_id, scope_id, commit_id)
-);
-
-CREATE INDEX idx_pv_scope ON placement_versions(scope_id, type);
-CREATE INDEX idx_pv_chunk ON placement_versions(chunk_id);
-CREATE INDEX idx_cv_chunk ON chunk_versions(chunk_id, commit_id);
-
--- Full-text search (native)
-CREATE VIRTUAL TABLE chunk_fts USING fts5(name, body, content='chunk_versions', content_rowid='rowid');
-
-```
-
-### Current-state tables (performance)
-
-Reading current state must not degrade with commit count. Materialized current-state tables are updated on each commit and used for all reads. The version tables remain the source of truth for history and time travel.
-
-```sql
-CREATE TABLE current_chunks (
-    chunk_id  TEXT NOT NULL,
-    branch    TEXT NOT NULL,
-    name      TEXT,
-    spec      TEXT DEFAULT '{}',
-    body      TEXT DEFAULT '{}',
-    PRIMARY KEY (chunk_id, branch)
-);
-
-CREATE TABLE current_placements (
-    chunk_id  TEXT NOT NULL,
-    scope_id  TEXT NOT NULL,
-    branch    TEXT NOT NULL,
-    type      TEXT NOT NULL,
-    seq       INTEGER,
-    PRIMARY KEY (chunk_id, scope_id, branch)
-);
-```
-
-On each commit: apply the commit's mutations to the current-state tables within the same transaction. Reads query current-state tables (O(1) per entity). Time travel (`--at <commit-id>`) falls back to ancestry walk over the version tables.
-
-### State resolution (history / time travel)
-
-For historical queries only:
-
-1. Walk from the target commit to root, collecting the ancestry.
-2. For each chunk: latest `chunk_versions` row in ancestry = state at that point.
-3. For each placement: latest `placement_versions` row in ancestry = state at that point.
-4. Filter: `removed=0` for chunks, `active=1` for placements.
+These are the field's data shape. How they persist — versioned tables for history, materialized current-state tables for read performance, the SQL DDL, indexes, FTS hookup, transaction discipline — is db-level. See [`pilot/db.md`](db.md) for the physical schema and access patterns.
 
 ## What This System Is
 
@@ -363,7 +324,6 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 ## What's Open
 
 - **Scope limit and offset.** Ordered scopes can grow large. A `limit` parameter (from seq tail) and `offset` for pagination prevent overload. Default limit prevents accidental flooding. The scope result already includes counts — agents probe shape before pulling data. Deferred for the pilot but needed soon.
-- ~~**Seq auto-assignment.**~~ Implemented. When `ordered: true` and seq is null on an instance placement, `apply()` sets `seq = max(existing seq on scope) + 1`.
 - **Spec language evolution.** The four fields (ordered, accepts, required, unique) cover the known cases. The vocabulary may grow through use.
 - **Merge semantics.** The structure supports merge commits. Conflict resolution strategy is above the primitives.
 - **Peer protocol.** Separate databases mounted read-only. The mounting mechanism is runtime, not structural.
