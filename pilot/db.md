@@ -375,7 +375,7 @@ commit(declaration, opts):
   return Commit
 ```
 
-Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would require recursive CTEs over the propagating-archetype graph and lock the rule into SQL; Rust gives clearer code and easier evolution.
+Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would require recursive CTEs over the propagating-archetype graph and lock the rule into SQL; Rust gives clearer code and easier evolution. Rules read through ordinary SELECTs against the open transaction's connection, not pre-fetched into pure structs — the post-write state already lives in `current_chunks` / `current_placements` inside the transaction.
 
 ### Current-state transitions
 
@@ -552,9 +552,9 @@ SELECT * FROM chunk_state WHERE rn = 1 AND removed = 0;
 
 ### Reactivity wiring
 
-The `Db` handle holds a `tokio::sync::broadcast::Sender<Commit>`. SQLite's `commit_hook` fires after a successful commit; the hook pushes the Commit to the channel. Subscribers (`subscribe_scope`) hold receivers and filter on `placements_modified`/`chunks_modified`.
+The `Db` handle holds a `tokio::sync::broadcast::Sender<Commit>`. Each successful write op (`commit`, `create_branch`, `delete_branch`) pushes the resulting `Commit` onto the channel immediately after `tx.commit()` returns Ok. Subscribers (`subscribe_scope`) hold receivers and filter on `placements_modified`/`chunks_modified`.
 
-Push happens inside the commit_hook — atomic-from-observer-perspective with the SQL commit. Subscribers see only durable commits; rolled-back transactions do not surface.
+By the time the push runs, the SQL commit is durable and visible to any subsequent reader — atomic from any observer's perspective. Rolled-back transactions never reach the push, so subscribers see only durable commits.
 
 The channel is bounded; on overflow the oldest event drops and a `Lagged` marker reaches the subscriber so they can re-read from a known commit if needed. The push itself is non-blocking — slow consumers do not block the writer.
 
@@ -580,60 +580,83 @@ SQLite in WAL mode gives single-writer, many-reader. The db inherits this; nothi
 
 ---
 
-## Code architecture — a starting position
+## Code architecture
 
 ### Module layout
 
 ```
 pilot/db/
   src/
-    lib.rs           — re-exports the public API
-    db.rs            — Db handle: open(), Drop, internal connection management
-    types.rs         — public types: ChunkId, CommitId, ChunkItem, Spec, Commit, ...
-    errors.rs        — discriminated error types
-    schema.rs        — embedded SQL DDL constants and the migration list
-    commit/
-      mod.rs         — Db::commit() entrypoint, transaction wrapper
-      transitions.rs — current-state transition rules
-      seq.rs         — seq auto-assignment
-    read/
-      mod.rs         — Db::scope() and Db::get() entrypoints
-      query.rs       — SQL query construction (intersection, dimensions, edges, FTS, time travel)
-      virtual_.rs    — branches and commits virtual-chunk projection
-    validation/
-      mod.rs         — validate() entrypoint
-      contract.rs    — compose effective contract for a chunk on a scope
-      rules.rs       — ordered, accepts, required, unique, name uniqueness
-    branches.rs      — Db::create_branch(), Db::delete_branch()
-    reactivity.rs    — broadcast channel; Db::subscribe_scope()
-    bootstrap.rs     — minimum seed on first open (main branch, initial commit)
-    id.rs            — id generation (ULID-shaped)
-  tests/             — integration tests; oracle-checked vs the TS suite
+    lib.rs                 — public re-exports
+    types.rs               — ChunkId, CommitId, ChunkItem, Spec, Commit, Includes,
+                             ScopeOpts, ScopeResult, Dim, Edge, Placement,
+                             Declaration, ChunkDeclaration, PlacementSpec,
+                             ReadOpts, CommitOpts, BranchName, Branch, SubscribeOpts
+    errors.rs              — per-op error enums (OpenError, ReadError, WriteError, ...) via thiserror
+    schema.rs              — embedded DDL via include_str! + rusqlite_migration list
+    schema.sql             — DDL: tables, indexes, FTS triggers
+    id.rs                  — ULID-shaped id generation (`ulid` crate)
+    db.rs                  — Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }
+                             Db::open, Drop
+    validate.rs            — Rule enum + check_commit; effective-contract composition
+    virtual_chunks.rs      — branches_root / commits_root projection (used by ops::scope, ops::get)
+    bootstrap.rs           — initial seed on fresh open (main branch + initial commit)
+    ops/                   — public surface; one module per Db method
+      mod.rs               — re-exports
+      get.rs               — Db::get
+      commit.rs            — Db::commit; transitions inline
+      branches.rs          — Db::create_branch, Db::delete_branch
+      subscribe.rs         — Db::subscribe_scope (BroadcastStream + scope filter)
+      scope/               — folded because of size: four distinct query paths
+        mod.rs             — Db::scope orchestrator; opts/result plumbing
+        intersection.rs    — chunks query (with/without FTS, with/without empty scope, hydration)
+        dimensions.rs      — dimensions CTE
+        edges.rs           — edges-beyond-adjacency
+        time_travel.rs     — `at: Some(commit)` ancestry walk
+  tests/                   — integration tests; oracle-checked vs the TS suite
   Cargo.toml
 ```
 
-### Key internal abstractions
+Each `ops/*.rs` owns its method end-to-end via `impl Db { pub fn ... }`. Rust spreads `impl Db` across files — that keeps `ops/` flat where it can be flat. `scope/` is folded because the public method fans into four distinct query paths.
 
-**`Db` holds a `rusqlite::Connection` plus a `broadcast::Sender<Commit>`.** Construction is `Db::open(path)`. The host owns one `Db` for the project's lifetime.
+### Pattern repeated in every feature file
 
-**Commit uses an RAII `Tx<'db>` helper.** `Tx::begin(&db)` issues `BEGIN IMMEDIATE`; `tx.commit()` issues `COMMIT`; `Drop` issues `ROLLBACK` if neither was called. The commit algorithm body uses `?` freely; rollback is correct on any error path.
+```rust
+// 1. SQL as `const`s at the top — declarative, scannable.
+const INTERSECTION: &str = "...";
 
-**Validation reads through normal SELECTs.** No separate scratch space — current-state tables hold the post-write state inside the transaction.
+// 2. The public method on Db. Reads top-to-bottom; narrates the flow.
+impl Db {
+    pub fn scope(&self, scopes: &[ChunkId], opts: ScopeOpts)
+        -> Result<ScopeResult, ReadError> { ... }
+}
 
-**Errors via `thiserror`.** Each module's variants compose into a top-level enum.
+// 3. Private free functions for shape: param prep, row mapping.
+fn row_to_chunk_item(row: &Row) -> Result<ChunkItem> { ... }
+```
 
-**IDs as newtypes.** `ChunkId(String)`, `CommitId(String)`, `BranchName(String)` with `From<&str>`, `Display`.
+`git diff` between any two feature files reads as the same shape with different verbs. Coherence through pattern, not folder.
 
-**Reactivity built on `tokio::sync::broadcast`.** Push is non-blocking; subscribers each have a receiver bounded to a small buffer.
+### Key mechanics
 
-**Sync surface, async reactivity.** `scope`, `get`, `commit`, `create_branch`, `delete_branch` are sync (SQLite is sync). `subscribe_scope` returns a Stream — async, the natural shape for change feeds.
+**Connection ownership.** `Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }`. Every op locks before touching the connection. SQLite is single-writer anyway; the mutex is uncontested in practice and gives `Db: Send + Sync` for free. Subscribers hold their own `broadcast::Receiver`; they do not retain `&Db`.
 
-### Patterns and schools — what is open
+**Transactions.** No custom RAII helper. `conn.transaction_with_behavior(TransactionBehavior::Immediate)?` returns rusqlite's `Transaction` — Drop = ROLLBACK; explicit `tx.commit()` advances. Used directly inside `ops::commit` and `ops::branches`.
 
-- **Builder vs direct struct construction for `Declaration`.** *Lean: direct construction with helper free-functions.*
-- **`thiserror` vs alternatives.** *Lean: `thiserror`.*
-- **Connection ownership.** `&Db` everywhere with internal `Mutex` if `Connection: !Sync` matters. *Lean: `&Db`; the engine is the only writer caller and is single-threaded against a given Db.*
-- **Migration strategy.** *Lean: `rusqlite_migration`.*
+**Reactivity push.** After `tx.commit()` returns Ok, the op pushes the resulting `Commit` onto `db.sender`. Three call sites: `ops::commit`, `ops::branches::create_branch`, `ops::branches::delete_branch`. Two lines each; repetition over a wrapper. By the time the push runs, the SQL commit is durable and visible to any subsequent reader.
+
+**Validation.** `Rule` enum with one variant per rule (`Ordered`, `Accepts`, `Required`, `Unique`, `NameUnique`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through ordinary SELECTs against the open transaction's connection — no pre-fetch into pure structs.
+
+**Errors.** `thiserror`. Per-op enums (`OpenError`, `ReadError`, `WriteError`) with shared variants (e.g. `IoError(rusqlite::Error)`) duplicated across them — dumb-but-clear over a single mega-enum.
+
+**IDs as newtypes.** `ChunkId(String)`, `CommitId(String)`, `BranchName(String)` with `From<&str>` and `Display`.
+
+**Sync surface, async reactivity.** `scope`, `get`, `commit`, `create_branch`, `delete_branch` are sync (SQLite is sync). `subscribe_scope` returns a `Stream` — async, the natural shape for change feeds (via `tokio_stream::wrappers::BroadcastStream`).
+
+### Settled choices
+
+- **Direct struct construction for `Declaration`,** with helper free-functions where useful. No builder.
+- **`rusqlite_migration`** with the full schema as the v1 migration.
 - **JSON for body and spec.** Body is `serde_json::Value`. Spec is a typed struct with `#[serde(default)]`.
 - **Bootstrap idempotence.** A `meta` table with a single bootstrap-version row; `open()` checks before seeding.
 
