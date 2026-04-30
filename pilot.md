@@ -19,12 +19,12 @@ The unification of view and tool into one concept — the program — is what le
 - **Scope is the read mechanism.** Programs read the field by intersecting scopes. No snapshots, no manual tool calls for retrieval.
 - **Boundaries are architectural.** A program running against the field sees only what its read boundary reaches, writes only where its write boundary allows. The engine enforces this uniformly.
 - **Everything is traceable.** Chunk → commit → process → program. Any change the field underwent can be walked back to the program that caused it and the user who ran it.
-- **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare a surface; tools don't. Both pass through the same lifecycle.
+- **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare `runtime: 'webview'`; tools declare `runtime: 'subprocess'`. Both pass through the same lifecycle.
 - **The loop closes.** A user opens a program. The program produces an answer. The answer is in the field. The next program reads from the field the previous one wrote.
 
 ## What the Pilot Sets Aside
 
-- **Peering.** One database. Two root scopes (`engine` and `agent`) stand in for what a peered system would mount from multiple sources.
+- **Peering.** One database. Three root scopes (`engine`, `ui`, `agent`) stand in for what a peered system would mount from multiple sources.
 - **Services as first-class.** A long-lived program is a code pattern, not a substrate distinction.
 - **Derived chunks** — summaries, embeddings. The pattern works; generation is not in the loop.
 - **Temporal queries.** `--at <commit>` for time travel is possible against the current schema, not wired into the interface.
@@ -60,7 +60,7 @@ A native Rust process built on **tao** (windowing) and **wry** (webview) — the
 
 ### Programs
 
-A program is a chunk whose body carries an `executable` path and an optional `surface` capability. Programs with `surface: 'dom'` are rendered in webviews the host mounts into tiles. Programs without a surface run in their own containment context and produce substrate writes.
+A program is a chunk whose body carries an `executable` path and a `runtime` declaration. Programs with `runtime: 'webview'` are rendered in webviews the host mounts into tiles. Programs with `runtime: 'subprocess'` run in their own containment context (with shebang-declared interpreter) and produce substrate writes.
 
 A program is authored however its runtime allows — TSX + React for the first-party programs of the pilot, any WASM target or native executable later. The substrate doesn't care. The shebang on the program's executable determines how it runs.
 
@@ -77,7 +77,7 @@ The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
 ## Containment
 
-The pilot uses **split containment**. Programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. Programs with only a surface (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain view-kind programs together; the VM contains tool-kind programs. This is the simpler path, and putting capability-bearing programs in a VM gives the pilot the safety floor it needs to host agentic programs without inventing new mechanism.
+The pilot uses **split containment**. `runtime: 'subprocess'` programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains capability-bearing subprocess programs. This is the simpler path, and putting capability-bearing programs in a VM gives the pilot the safety floor it needs to host agentic programs without inventing new mechanism.
 
 The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 

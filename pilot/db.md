@@ -57,7 +57,7 @@ ScopeOpts
 
 `scopes` may be empty. Empty scope means the whole field — every chunk qualifies for the intersection (vacuous truth). Combined with `match_`, it is field-wide search; combined with `Includes::shape()`, it is the browser's starting view (all dims sorted by count); combined with `intersection_chunks` plus `limit`, it enumerates the field. Pagination is the guardrail against unbounded fetches, not a runtime restriction.
 
-When `scopes` is empty: `in_scope = total` (every chunk qualifies), and the `in_scope_instance` / `in_scope_relates` split has no "intersection" semantic to apply — both are `0` since no chunk is "instance on every queried scope" or "relates on every queried scope" when no scopes are queried.
+When `scopes` is empty, vacuous truth applies uniformly: `in_scope = in_scope_instance = in_scope_relates = total`. Every chunk is trivially "placed instance on every queried scope" and "placed relates on every queried scope" when no scopes are queried (the empty conjunction is true). Consumers should treat the instance/relates split as degenerate (uninformative) under empty scope — it is reported for consistency with the non-empty case, not as useful attribution.
 
 ### Result
 
@@ -200,7 +200,7 @@ impl Db {
 }
 ```
 
-A single subscription primitive. Yields commits that touch the named scopes (any of them). Backed by an internal broadcast channel pushed from inside SQLite's `commit_hook`, so state and event are tightly coupled — no observable window where the field has changed but the event has not arrived.
+A single subscription primitive. Yields commits that touch the named scopes (any of them). Backed by an internal broadcast channel pushed from Rust right after `tx.commit()` returns Ok (see *Reactivity wiring*); state and event are tightly coupled — by the time the event arrives, the SQL commit is durable and visible to any reader.
 
 Subscribe at any scope to listen there:
 
@@ -337,6 +337,8 @@ END;
 
 The FTS index covers all branches' current state; branch filtering is a JOIN at query time.
 
+**Tokenization.** `body` is stored and indexed as JSON text. The `unicode61` tokenizer splits on word boundaries — punctuation including `{`, `}`, `"`, `:`, `,` is treated as separators — so a query like `match_: "world"` matches `body = {"greeting": "hello world"}`. The flip side: tokens from JSON keys are not distinguished from values, so `match_: "greeting"` would also match. The pilot accepts this as a "search over chunk text content" semantic, not a structured query — programs that need keyed search compose substrate queries from scopes and dimensions, not FTS.
+
 ### The commit algorithm
 
 ```
@@ -370,7 +372,7 @@ commit(declaration, opts):
 
   UPDATE branches SET head = commit_id WHERE name = opts.branch
   COMMIT
-  (commit_hook fires → push Commit to broadcast channel)
+  (after tx.commit() returns Ok, push Commit to broadcast channel)
 
   return Commit
 ```
@@ -390,10 +392,12 @@ For each `placement_versions` row at branch B:
 
 | placement_versions row | current_placements rule (branch B) |
 |---|---|
-| `active = 1` | UPSERT row with (type, seq); auto-assign seq when scope is `ordered: true` and seq omitted |
+| `active = 1` | UPSERT row with (type, seq); auto-assign seq when scope is `ordered: true` and seq omitted (see below) |
 | `active = 0` | DELETE row for (chunk_id, scope_id, branch B) |
 
 Removal is per-branch.
+
+**Seq auto-assignment.** When `ordered: true` and `seq` is omitted, the assignment is `max(seq) + 1` over `current_placements` for that `(scope_id, branch)`, evaluated as each placement is applied (not in batch). Within a single declaration that places multiple chunks on the same ordered scope without seq, the assignments run sequentially: the second sees the first's just-applied row, gets `max + 2`, etc. Across concurrent commits, `BEGIN IMMEDIATE` serializes writes, so one commit's auto-assigned seqs are visible to the next before its `max` lookup runs.
 
 ### Query patterns
 
@@ -439,7 +443,7 @@ LIMIT :limit OFFSET :offset;
 
 With `match_` added, intersect against FTS as above but again without the placement join.
 
-For ordered scopes (non-empty case), `ORDER BY cp.seq` with `LIMIT/OFFSET`.
+For ordered scopes (non-empty case), `ORDER BY cp.seq` with `LIMIT/OFFSET`. Pagination is position-based on the ordered result set, not seq-value-based: `LIMIT 10 OFFSET 20` returns the chunks at positions 21–30 in the seq order, regardless of how sparse seq values are.
 
 #### Dimensions
 

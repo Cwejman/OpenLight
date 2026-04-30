@@ -1,14 +1,14 @@
 # Bootstrap
 
-Three `commit()` calls — one per root scope, simulating three peers. Engine and UI chunks come first, as if mounted from external databases. Agent chunks come last, referencing engine contracts by placing instances on them.
+Three `commit()` calls — one per root scope (`engine`, `ui`, `agent`; see [`pilot.md`](../pilot.md#three-root-scopes-stand-for-three-peers)). The pilot uses a single database with these three scopes standing in for what a peered system would mount from separate sources. Engine and UI chunks come first, as if mounted from external databases. Agent chunks come last, referencing engine contracts by placing instances on them.
 
 ## Commit 1: Engine
 
 Runtime contracts and primitives. In a peered system these come from the engine's own database.
 
 1. `engine` — root scope
-2. `program` archetype on `engine`: `{ required: ['executable'] }`. Any chunk with an executable is a program; instances of program are the runnable things in the system.
-3. `process` archetype on `engine`: `{ propagate: true }`. A process chunk is the artifact of a run — created by the engine each time a program is invoked. `propagate: true` so any typed arguments placed on a process are validated against the program's `accepts`.
+2. `program` archetype on `engine`: `{ required: ['executable', 'runtime'] }`. Any chunk with an executable and a runtime declaration is a program; instances of program are the runnable things in the system. The `runtime` field is `'webview' | 'subprocess'` (see [`engine.md`](engine.md#program-and-process)); other body fields (`capabilities`, `boundary`, `timeout_ms`) are optional.
+3. `process` archetype on `engine`: `{ propagate: true }`. A process chunk is the artifact of a run — created by the engine each time a program is invoked. `propagate: true` so any typed arguments placed on a process are validated against the program's `accepts`. The engine writes process state into the body (`status`, `started`, `pid`, `timeout_ms`, `error?` — see [`engine.md`](engine.md#program-and-process)); these are engine-managed, not enforced by the substrate's spec rules.
 4. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
 5. `write-boundary` on `engine` (instance) and `process` (relates).
 

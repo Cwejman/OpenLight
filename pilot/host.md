@@ -90,6 +90,8 @@ ui/recipe
 
 A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, a nested tile structure visible as one rounded card on the board (with inner tiles separated by borders rather than padding). Collapsing the container stops its children. Composition is the live form; recipe is the saved template.
 
+Each spawn creates fresh process chunks with new ids and new dispatch_ids; cloned processes do not inherit the recipe's history. The recipe template stays unchanged after spawn.
+
 Compositions are how complex UIs that mix DOM and capabilities get built. A program that needs both a designed UI and direct system access is a composition of a webview program and a subprocess program, bound by their shared scope. Visually they can read as one designed surface — the host renders inner tiles with no padding when the composition wants seamlessness — even though they're independent runtimes.
 
 ---

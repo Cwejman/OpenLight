@@ -255,13 +255,13 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
 
 2. **engine.** On `Engine::open`, the engine subscribes once to `db.subscribe_scope(&[commits_root], ..)` — the universal change stream. A background task drains the receiver and runs the dispatcher.
 
-3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched scope set*:
-   - `commit.chunks_modified` — chunks whose body, spec, or name changed.
-   - Scope side of `commit.placements_modified` — scopes that gained or lost a chunk.
-   - Chunk side of `commit.placements_modified` — chunks whose own placements changed (a subscriber on that chunk's scope cares).
-   - Plus, for each chunk in `chunks_modified`, the scopes it is currently `instance` on — so a subscription to a parent scope fires when a member's body changes (one bulk `current_placements` lookup per commit).
+3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched scope set* — the union of:
+   - `commit.chunks_modified` — chunks whose body, spec, or name changed (each is itself a scope a subscriber may have registered on).
+   - Scope side of `commit.placements_modified` — scopes that gained or lost a placement.
+   - Chunk side of `commit.placements_modified` — chunks whose own placements changed (each is itself a scope).
+   - For each chunk in `chunks_modified`, the scopes it is currently placed on (both `instance` and `relates`) — so a subscriber on a parent scope sees an event when a member's body changes. Computed via one bulk `current_placements` lookup per commit.
 
-   The dispatcher iterates the subscription registry and fires `scope_changed` on every subscription whose scopes intersect the touched set.
+   The dispatcher iterates the subscription registry and fires `scope_changed` on every subscription whose `scopes` intersect the touched set. The lookup-per-commit is the dispatcher's main cost; coalescing under high write rates is a deferred optimization (see *Backpressure*).
 
 4. **transport.** Each subscription holds a transport reference:
    - **Webview.** The host's `WebView` handle plus a JS-side dispatcher name. The engine asks the host (on its main thread, as wry requires) to call `webview.evaluate_script("__sdk.event(<json>)")`.
@@ -272,13 +272,23 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
 ### Subscription lifecycle
 
 - `subscribe(ctx, scopes)` — engine boundary-checks the scopes against `ctx.process_id`'s read boundary. On pass: register `(SubscriptionId, ProcessId, scopes, transport)` and return the id. On fail: `BOUNDARY_VIOLATION`.
-- Subscriptions are owned by the calling process. When a process reaches terminal state, the engine drops all its subscriptions.
-- `unsubscribe(id)` — removes from the registry; transport reference dropped.
+- Subscriptions are owned by the calling process. When a process reaches terminal state, the engine drops all its subscriptions before any further event dispatch can reach them.
+- `unsubscribe(id)` — removes from the registry; transport reference dropped. Idempotent — unsubscribing an unknown id is a no-op.
 - Boundaries are checked **only at subscribe time.** Process boundaries are immutable for the run, so a once-allowed subscription stays allowed for its lifetime.
+
+### Race-tolerant delivery
+
+Subscription state and event dispatch are concurrent; the spec is tolerant of natural races.
+
+- **Unsubscribe during dispatch.** If a subscription is unsubscribed between the dispatcher computing the touched-set and firing the event, the event is silently dropped for that subscription (the registry no longer holds it). On the SDK side, an event arriving after a local `unsubscribe` is ignored — the SDK's callback registry was cleared on unsubscribe.
+- **Terminal during dispatch.** Same shape: the engine drops the process's subscriptions before terminal-state cleanup completes; in-flight events for those subscriptions are dropped.
+- **Subscribed scope becomes unreachable.** Substrate changes (a placement removed, an ancestor deleted) can break reachability of a subscribed scope mid-subscription. The dispatcher continues firing `scope_changed` for it (the registry still holds the subscription). Subsequent `scope` reads against that scope return `BOUNDARY_VIOLATION` from the engine. The subscription is effectively stale; programs detect it from the boundary error and either unsubscribe or subscribe to something reachable.
 
 ### Backpressure
 
 The engine's input from db is a bounded `broadcast::Receiver`. On overflow, a `Lagged` marker arrives in the receiver. The engine forwards a `lagged` event listing every currently-active subscription id; the SDK re-fetches the affected scopes. Slow subscribers do not block the writer and do not block the engine's dispatcher — the dispatcher's per-subscription send is non-blocking, and a slow transport drops the subscription with a final `lagged` event.
+
+Lagged events for already-unsubscribed subscriptions are dropped the same way as `scope_changed` events (race-tolerant).
 
 Coalescing multiple commits in a tight burst into a single `scope_changed` per subscription is deferred. The pilot fires one event per touching commit; acceptable for expected volumes.
 
@@ -305,11 +315,18 @@ The process map is `HashMap<ProcessId, ProcessSlot>` guarded by a Mutex. Slots a
 
 ### `run`
 
-1. **Compose the declaration.** Process chunk + read-boundary chunk + write-boundary chunk + the caller's argument chunks (see *Process Creation*).
-2. **`db.commit(declaration)`** — atomic. The process chunk exists in the substrate the moment this returns.
-3. **Spawn.** Subprocess transport: spawn the executable via `tokio::process::Command`, attach stdin/stdout. DOM transport: ask the host to mount a webview; the host returns a `WebViewRef`.
-4. **Insert the slot.** Set status `pending` initially; flip to `running` once the spawn is alive (subprocess: child PID reported; DOM: webview navigated).
-5. **Return `process_id`.** The caller's call returns; the program continues to its own `await` or its own work.
+The slot is inserted *before* the substrate write so that `cancel` and `timeout` can always land on a known process_id. The process chunk's body starts at `status: 'pending'`; cleanup writes the final status via a follow-up commit on terminal transition.
+
+1. **Generate `process_id`** and compose the declaration. Process chunk + read-boundary chunk + write-boundary chunk + the caller's argument chunks (see *Process Creation*).
+2. **Insert the slot.** Status `pending`. Register the timeout JoinHandle (fires after `timeout_ms`).
+3. **`db.commit(declaration)`** — atomic. If commit fails, remove the slot and return error.
+4. **Spawn.** Subprocess transport: spawn the executable via `tokio::process::Command`, attach stdin/stdout. DOM transport: ask the host to mount a webview; the host returns a `WebViewRef`.
+5. **Flip status to `running`** once the spawn is alive (subprocess: child PID reported; DOM: webview navigated).
+6. **Return `process_id`.**
+
+If `cancel(process_id)` or the timeout fires between any of steps 2–5, the slot's status flips to `failed`. The next step in the run path checks status before proceeding: the spawn step is skipped, the running flip is skipped, and cleanup (below) takes over. The process chunk in the substrate, born `pending`, gets a follow-up commit to status `failed` during cleanup.
+
+A `cancel` for a `process_id` whose slot does not exist (cancel before step 2, or cancel after slot removal) returns `NOT_FOUND`.
 
 ### `await_processes`
 
@@ -371,13 +388,15 @@ Substrate operations (`scope`, `commit`, `subscribe`) from the agent are not too
 
 ## Traceability
 
-Every commit the substrate records carries a `dispatch_id` column — the process id whose run caused it, or null for host-level applies the engine does on its own behalf. Commits stay in their own table; the read layer projects them as chunks under the virtual scope `COMMITS_SCOPE`:
+Every commit the substrate records carries a `dispatch_id` column — the process id whose run caused it, or null for host-level commits the engine does on its own behalf. Commits stay in their own table; the read layer projects them as chunks under the virtual scope `commits_root`:
 
-- `scope(db, [COMMITS_SCOPE])` — all commits
-- `scope(db, [COMMITS_SCOPE, processId])` — commits from this specific run
-- `scope(db, [COMMITS_SCOPE, chunkId])` — commits that modified this chunk
+- `scope(db, [commits_root])` — all commits
+- `scope(db, [commits_root, processId])` — commits from this specific run
+- `scope(db, [commits_root, chunkId])` — commits that modified this chunk
 
 No new tables, no circular placements. Commits look like chunks to readers; they are structurally separate.
+
+The substrate rejects mixing real and virtual scopes in one query (see [`db.md`](db.md)) — `scope(db, [my_scope, commits_root])` returns `INVALID_REQUEST` from the engine. The engine surfaces this as `INVALID_REQUEST` in the protocol; programs that need both must issue two scope calls.
 
 ---
 
@@ -409,12 +428,14 @@ Not every error kills a program. Informational errors return as protocol respons
 | Unparseable stdout line | Kill; `status: 'failed'`, `body.error: 'protocol: malformed output'` |
 | Exec exits non-zero | `status: 'failed'` |
 | Timeout | Kill; `status: 'failed'`, `body.error: 'timeout'` |
+| Subprocess stdout closes, exit code unreadable | `status: 'failed'`, `body.error: 'killed'` |
+| Webview destroyed mid-response | The pending request's Promise rejects with `EngineError { code: 'TRANSPORT_CLOSED' }` on the SDK side; the engine cancels the process if not already terminal |
 
 Parse failures and crashes are terminal. Everything else is informational.
 
 ### Startup Reconciliation
 
-When the engine starts, it queries every process with status `pending` or `running` and marks them `failed` with `body.error: 'engine restart'`. Those processes are gone; the engine does not attempt to resume them. Future work may introduce resumable services — deferred.
+When the engine starts, it queries every process with status `pending` or `running` and marks them `failed` with `body.error: 'engine restart'`. Those processes are gone; the engine does not attempt to resume them. Subscriptions are not persisted across restarts; they live only in the engine's in-memory registry and disappear on shutdown. Child processes — themselves processes — are reconciled the same way: each is independently marked failed if pending or running, regardless of parent state. Future work may introduce resumable services — deferred.
 
 ### Boundary-Request Behavior
 
