@@ -4,7 +4,7 @@ The host is the native shell. It opens the window. It places tiles inside that w
 
 The host is written in Rust against **tao** (cross-platform windowing) and **wry** (cross-platform webview). These are the libraries that underlie Tauri; the host uses them directly, without adopting the Tauri framework's app-level conventions. Our shape — one window with many tiled webviews, each its own program — fits these primitives more naturally than Tauri's one-webview-per-window default.
 
-The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no engine subprocess and no inter-process hop between host and engine. Subprocess programs (tool programs in a VM) are spawned by the engine and reach it over stdio JSON-lines.
+The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no separate engine process and no inter-process hop between host and engine. VM programs (tool programs running inside their VM) are spawned by the engine and reach it over stdio JSON-lines.
 
 ---
 
@@ -34,16 +34,16 @@ Interface and tool are one kind of thing. A program is a chunk with an executabl
 
 The pilot supports two runtimes:
 
-- `runtime: 'subprocess'` — the program is an executable spawned as a process inside its containment. A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. A default inspector program can render a subprocess's activity in a tile when the user wants to look in.
+- `runtime: 'vm'` — the program is an executable spawned as a process inside its own Linux VM (the pilot's containment). A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. A default inspector program can render a VM program's activity in a tile when the user wants to look in.
 - `runtime: 'webview'` — the program is a JS bundle loaded into a wry-hosted webview. The runtime is the webview's V8 — a sandboxed browser engine with full DOM, full client-side React, and 60fps interactions. The SDK reaches the engine over wry IPC.
 
-Programs of both runtimes use the same SDK surface (`scope`, `commit`, `run`, `awaitRun`, `subscribe`); only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `subprocess` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
+Programs of both runtimes use the same SDK surface (`scope`, `commit`, `run`, `awaitRun`, `subscribe`); only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `vm` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
 
-The pilot ships a TypeScript SDK only. First-party subprocess programs use `#!/usr/bin/env bun` so they can import the TS SDK directly; programs in other languages would need their own SDK speaking the same JSON-lines protocol. That is out of scope for the pilot, in scope for the horizon.
+The pilot ships a TypeScript SDK only. First-party VM programs use `#!/usr/bin/env bun` so they can import the TS SDK directly; programs in other languages would need their own SDK speaking the same JSON-lines protocol. That is out of scope for the pilot, in scope for the horizon.
 
-Every interface element is a program: sidebar, tabs, command palette, read tile, program runner. The host composes their outputs. When the user opens a read tile, a webview program is running. When the user brings up the command palette, a webview program is running as an overlay. The claude agent is a subprocess program; its output appears as session chunks the UI programs read.
+Every interface element is a program: sidebar, tabs, command palette, read tile, program runner. The host composes their outputs. When the user opens a read tile, a webview program is running. When the user brings up the command palette, a webview program is running as an overlay. The claude agent is a VM program; its output appears as session chunks the UI programs read.
 
-When future runtimes land (host-rendered DOM from a subprocess, GPU-canvas, terminal, native widgets), they become new runtime values. See [`research/runtimes-and-surfaces.md`](../research/runtimes-and-surfaces.md) for the topologies considered and what's deferred.
+When future runtimes land (host-rendered DOM from a VM program, GPU-canvas, terminal, native widgets), they become new runtime values. See [`research/runtimes-and-surfaces.md`](../research/runtimes-and-surfaces.md) for the topologies considered and what's deferred.
 
 ---
 
@@ -88,11 +88,9 @@ ui/recipe
     tab. The recipe itself persists separately from any spawned instance.
 ```
 
-A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, a nested tile structure visible as one rounded card on the board (with inner tiles separated by borders rather than padding). Collapsing the container stops its children. Composition is the live form; recipe is the saved template.
+A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, a nested tile structure visible as one rounded card on the board (with inner tiles separated by borders rather than padding). Collapsing the container stops its children. Composition is the live form; recipe is the saved template. Spawning instantiates fresh processes from the template; the recipe itself is unchanged.
 
-Each spawn creates fresh process chunks with new ids and new dispatch_ids; cloned processes do not inherit the recipe's history. The recipe template stays unchanged after spawn.
-
-Compositions are how complex UIs that mix DOM and capabilities get built. A program that needs both a designed UI and direct system access is a composition of a webview program and a subprocess program, bound by their shared scope. Visually they can read as one designed surface — the host renders inner tiles with no padding when the composition wants seamlessness — even though they're independent runtimes.
+Compositions are how complex UIs that mix DOM and capabilities get built. A program that needs both a designed UI and direct system access is a composition of a webview program and a VM program, bound by their shared scope. Visually they can read as one designed surface — the host renders inner tiles with no padding when the composition wants seamlessness — even though they're independent runtimes.
 
 ---
 
@@ -146,7 +144,7 @@ A webview program calls the SDK; the SDK serializes the call and posts it throug
 
 Unsolicited events from the engine ride the same channel in the other direction: `webview.evaluate_script("__sdk.event(<payload>)")`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape on the JS side. See [`pilot/engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
 
-The host does not interpret substrate operations — it dispatches them. Subprocess programs (tool programs in a VM) speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly without going through the host.
+The host does not interpret substrate operations — it dispatches them. VM programs (tool programs running inside their VMs) speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly without going through the host.
 
 ### SDK surface
 
@@ -198,7 +196,7 @@ createRoot(document.getElementById('root')!).render(<MyProgram />)
 
 The program is a substrate chunk with `body.executable` pointing at the bundle and `body.runtime: 'webview'`. When the host runs the program, it creates a webview, loads the bundle, the JS runs `createRoot(...).render(...)` against the host-provided root.
 
-**Subprocess program** (`runtime: 'subprocess'`). An executable file with a shebang. Runs as a standalone process inside its containment. The shebang determines the interpreter and what APIs the program has access to. The pilot's first-party subprocess programs use `#!/usr/bin/env bun` because the SDK is TypeScript:
+**VM program** (`runtime: 'vm'`). An executable file with a shebang. Runs as a standalone process inside its own VM. The shebang determines the interpreter and what APIs the program has access to. The pilot's first-party VM programs use `#!/usr/bin/env bun` because the SDK is TypeScript:
 
 ```ts
 #!/usr/bin/env bun
@@ -209,11 +207,11 @@ const args = await scope([process.env.PROCESS_ID!])
 process.exit(0)
 ```
 
-The program is a substrate chunk with `body.executable` pointing at the script and `body.runtime: 'subprocess'`. When the host runs the program, the engine spawns the script with stdio attached. Other interpreters (Python, Ruby, anything installed in the VM that can speak the JSON-lines protocol) become viable when an SDK for that language exists.
+The program is a substrate chunk with `body.executable` pointing at the script and `body.runtime: 'vm'`. When the host runs the program, the engine spawns the script inside its VM with stdio attached. Other interpreters (Python, Ruby, anything installed in the VM that can speak the JSON-lines protocol) become viable when an SDK for that language exists.
 
 **Lifecycle differs by kind.**
 
-- *Subprocess programs* end when their process exits (`process.exit()` or stdout closing). Stateless tools naturally exit when work is done; long-running services stay alive in their own loop.
+- *VM programs* end when their process exits (`process.exit()` or stdout closing). Stateless tools naturally exit when work is done; long-running services stay alive in their own loop.
 - *Webview programs* don't end via "JS reaches its last statement" — the webview's runtime keeps the page alive (React is still reconciling, event listeners are still registered). The program ends when the host destroys its webview, which the host does on tile-close, on `cancel`, or on timeout. To dismiss itself, a webview program writes a "done" signal to the substrate; the launcher subscribed to that scope sees it and asks the engine to cancel.
 
 **State lives in the substrate.** Programs use the substrate directly via `scope` and `commit` (and `useScope` for reactive reads in webview programs) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`.

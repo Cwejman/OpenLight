@@ -2,7 +2,7 @@
 
 The engine is the authority on running programs against the substrate. A program is a chunk with an executable; to run one is to create a process. The engine creates processes, enforces boundaries, spawns executables, and mediates every substrate operation a running program attempts. Nothing runs without going through the engine, and no program touches the database directly.
 
-The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no engine subprocess and no JSON-lines hop between host and engine. Webview programs send their protocol messages over wry IPC to the host; the host's IPC handler dispatches them to engine functions and returns the results back through wry. Subprocess programs (tool programs running in a containment VM) speak the same protocol over stdio that the engine spawned and reads.
+The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no separate engine process and no JSON-lines hop between host and engine. Webview programs send their protocol messages over wry IPC to the host; the host's IPC handler dispatches them to engine functions and returns the results back through wry. VM programs (tool programs running in a containment VM) speak the same protocol over stdio JSON-lines — the engine spawns them inside their VM and reads stdout.
 
 The shape of the program-facing protocol is identical regardless of transport. The SDK hides the difference.
 
@@ -23,7 +23,7 @@ engine/program
   spec: { required: ['executable'] }
   body may carry:
     executable: path relative to project
-    runtime: 'webview' | 'subprocess'
+    runtime: 'webview' | 'vm'
     capabilities: { network?, filesystem?, ... }
     boundary: reference to intrinsic boundary, or 'open'
     timeout_ms: default run timeout
@@ -111,6 +111,7 @@ A program receives unsolicited messages from the engine on the same channel it s
 |---|---|---|
 | `scope_changed` | `{ event: "scope_changed", subscriptionId, commit }` | A commit touched a scope this subscription registered on. The SDK re-fetches via `scope` to read the new state. |
 | `lagged` | `{ event: "lagged", subscriptionIds: [string] }` | The engine's input channel overflowed; the named subscriptions may have missed events. The SDK re-fetches to recover. |
+| `subscription_invalid` | `{ event: "subscription_invalid", subscriptionId, reason }` | A subscribed scope became unreachable from the process's read boundary (placement removed, ancestor deleted, etc.). The engine has unsubscribed; the SDK should treat the subscription as dead. `reason` is a short string ("scope unreachable", "scope removed"). |
 
 The `commit` payload on `scope_changed` is the same shape as the `commit` op result — the metadata is carried for debugging and optional delta optimization. The contract remains: re-fetch on event. Process state changes (`pending → running → completed | failed`) are not surfaced as events; the program tracks them through `await`.
 
@@ -146,7 +147,7 @@ Every process chunk exists in the substrate immediately. Any other program (with
 
 ### Engine API (callable from the host)
 
-The host calls the engine library directly to drive top-level program runs from user action and to handle webview protocol messages. Subprocess-program protocol messages reach the same functions through the engine's stdio reader.
+The host calls the engine library directly to drive top-level program runs from user action and to handle webview protocol messages. VM-program protocol messages reach the same functions through the engine's stdio reader.
 
 ```rust
 pub struct Engine { /* db: Arc<Db>, processes, subscriptions, ... */ }
@@ -248,7 +249,7 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
                        db.subscribe_scope                                 message shape)
                        at engine startup)
                                                 stdio JSON lines
-                                                (per subprocess)
+                                                (per VM program)
 ```
 
 1. **db.** Each successful write op pushes a `Commit` onto the substrate's broadcast channel after `tx.commit()` returns. Settled in db.md.
@@ -265,7 +266,7 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
 
 4. **transport.** Each subscription holds a transport reference:
    - **Webview.** The host's `WebView` handle plus a JS-side dispatcher name. The engine asks the host (on its main thread, as wry requires) to call `webview.evaluate_script("__sdk.event(<json>)")`.
-   - **Subprocess.** The child's stdin handle. The engine writes a JSON line.
+   - **VM program.** The child's stdin handle. The engine writes a JSON line.
 
 5. **SDK.** Distinguishes by message shape (`event` field present → event; `id` + `result|error` → response), routes to the registered subscription's callback. `useScope(ids)` re-fetches via `scope(ids)` and re-renders.
 
@@ -282,7 +283,17 @@ Subscription state and event dispatch are concurrent; the spec is tolerant of na
 
 - **Unsubscribe during dispatch.** If a subscription is unsubscribed between the dispatcher computing the touched-set and firing the event, the event is silently dropped for that subscription (the registry no longer holds it). On the SDK side, an event arriving after a local `unsubscribe` is ignored — the SDK's callback registry was cleared on unsubscribe.
 - **Terminal during dispatch.** Same shape: the engine drops the process's subscriptions before terminal-state cleanup completes; in-flight events for those subscriptions are dropped.
-- **Subscribed scope becomes unreachable.** Substrate changes (a placement removed, an ancestor deleted) can break reachability of a subscribed scope mid-subscription. The dispatcher continues firing `scope_changed` for it (the registry still holds the subscription). Subsequent `scope` reads against that scope return `BOUNDARY_VIOLATION` from the engine. The subscription is effectively stale; programs detect it from the boundary error and either unsubscribe or subscribe to something reachable.
+
+### Subscription invalidation
+
+Process boundaries are immutable, but reachability through them is dynamic — a placement removal elsewhere in the substrate can sever the path from a process's boundary to a subscribed scope. The engine takes responsibility for cleanup rather than letting subscriptions go zombie:
+
+- On every commit whose `placements_modified` includes a removal (`active = 0`) of an `instance` placement, the engine recomputes reachability for any subscription whose scopes might now be unreachable from their process's read boundary.
+- Subscriptions whose scopes have become unreachable: removed from the registry, `subscription_invalid` event fired with a short reason.
+- After `subscription_invalid`, the engine fires no further `scope_changed` events for that subscription.
+- The SDK's `useScope` hook treats this as "subscription is dead" — stops re-fetching, returns `undefined`. Imperative `subscribe` callers receive an explicit signal. Programs that want continued visibility re-subscribe under a reachable scope.
+
+Cost: one boundary walk per affected subscription per relevant commit (same shape as the original subscribe-time check). The dumb implementation recomputes reachability for every subscription on the affected process; an optimization that tracks which placements each subscription's reachability depends on is deferred.
 
 ### Backpressure
 
@@ -320,13 +331,13 @@ The slot is inserted *before* the substrate write so that `cancel` and `timeout`
 1. **Generate `process_id`** and compose the declaration. Process chunk + read-boundary chunk + write-boundary chunk + the caller's argument chunks (see *Process Creation*).
 2. **Insert the slot.** Status `pending`. Register the timeout JoinHandle (fires after `timeout_ms`).
 3. **`db.commit(declaration)`** — atomic. If commit fails, remove the slot and return error.
-4. **Spawn.** Subprocess transport: spawn the executable via `tokio::process::Command`, attach stdin/stdout. DOM transport: ask the host to mount a webview; the host returns a `WebViewRef`.
-5. **Flip status to `running`** once the spawn is alive (subprocess: child PID reported; DOM: webview navigated).
+4. **Spawn.** VM runtime: spawn the executable via `tokio::process::Command` inside the program's VM, attach stdin/stdout. Webview runtime: ask the host to mount a webview; the host returns a `WebViewRef`.
+5. **Flip status to `running`** once the spawn is alive (VM: child PID reported; webview: navigated).
 6. **Return `process_id`.**
 
 If `cancel(process_id)` or the timeout fires between any of steps 2–5, the slot's status flips to `failed`. The next step in the run path checks status before proceeding: the spawn step is skipped, the running flip is skipped, and cleanup (below) takes over. The process chunk in the substrate, born `pending`, gets a follow-up commit to status `failed` during cleanup.
 
-A `cancel` for a `process_id` whose slot does not exist (cancel before step 2, or cancel after slot removal) returns `NOT_FOUND`.
+`cancel(process_id)` is idempotent. A cancel for a `process_id` whose slot does not exist — either because the slot hasn't been inserted yet, has already been removed, or never existed — returns `Ok`. The desired state ("process is not running") is satisfied; callers don't need to race against terminal cleanup. The same applies to cancel for an already-terminal process.
 
 ### `await_processes`
 
@@ -344,12 +355,12 @@ pub async fn await_processes(&self, ctx: &Context, ids: &[ProcessId])
 }
 ```
 
-Subprocess and DOM programs reach terminal differently:
+VM and webview programs reach terminal state differently:
 
-| Transport | `completed` signal | `failed` signal |
+| Runtime | `completed` signal | `failed` signal |
 |---|---|---|
-| Subprocess | stdout closed AND exit code 0 | stdout closed AND exit code ≠ 0; OR `cancel`; OR timeout; OR malformed output |
-| DOM | The user closes the tile (host unmounts the webview) | `cancel`; OR timeout |
+| VM | stdout closed AND exit code 0 | stdout closed AND exit code ≠ 0; OR `cancel`; OR timeout; OR malformed output |
+| Webview | The user closes the tile (host unmounts the webview) | `cancel`; OR timeout |
 
 `cancel(processId)` and timeout both flip the watcher to `failed` and tear down the spawn. Multiple programs may await the same process; `watch::Receiver` broadcasts the terminal state to every awaiter.
 
@@ -358,11 +369,14 @@ Subprocess and DOM programs reach terminal differently:
 When a process transitions to a terminal status:
 
 1. **Update the process chunk** via `db.commit()` — `body.status`, `body.error?`.
-2. **Drop the spawn.** Kill subprocess if still running; unmount webview if still mounted.
+2. **Drop the spawn.** Kill the program's process if still running; unmount webview if still mounted.
 3. **Cancel the timeout JoinHandle** if pending.
 4. **Unregister all subscriptions** owned by the process.
-5. **Resolve any awaiting `watch::Receiver`s** (handled by the `watch::Sender`'s final state plus its Drop).
-6. **Remove the slot** from the process map.
+5. **Cascade to children.** For every active process placed `instance` on this one (its tool calls and nested runs), trigger the same terminal transition with `body.error: 'parent ended'`. Recursive — children-of-children cascade the same way.
+6. **Resolve any awaiting `watch::Receiver`s** (handled by the `watch::Sender`'s final state plus its Drop).
+7. **Remove the slot** from the process map.
+
+A child process never outlives its parent. If the parent's intent ended (completed, failed, cancelled), the child's work has nowhere to be claimed — its results would be orphaned.
 
 The slot's existence is the ground truth for "process is active." Once removed, a future `await` for that id reads terminal state from the substrate directly.
 
@@ -428,14 +442,14 @@ Not every error kills a program. Informational errors return as protocol respons
 | Unparseable stdout line | Kill; `status: 'failed'`, `body.error: 'protocol: malformed output'` |
 | Exec exits non-zero | `status: 'failed'` |
 | Timeout | Kill; `status: 'failed'`, `body.error: 'timeout'` |
-| Subprocess stdout closes, exit code unreadable | `status: 'failed'`, `body.error: 'killed'` |
+| VM program stdout closes, exit code unreadable | `status: 'failed'`, `body.error: 'killed'` |
 | Webview destroyed mid-response | The pending request's Promise rejects with `EngineError { code: 'TRANSPORT_CLOSED' }` on the SDK side; the engine cancels the process if not already terminal |
 
 Parse failures and crashes are terminal. Everything else is informational.
 
 ### Startup Reconciliation
 
-When the engine starts, it queries every process with status `pending` or `running` and marks them `failed` with `body.error: 'engine restart'`. Those processes are gone; the engine does not attempt to resume them. Subscriptions are not persisted across restarts; they live only in the engine's in-memory registry and disappear on shutdown. Child processes — themselves processes — are reconciled the same way: each is independently marked failed if pending or running, regardless of parent state. Future work may introduce resumable services — deferred.
+When the engine starts, it queries every process with status `pending` or `running` and marks them `failed` with `body.error: 'engine restart'`. Those processes are gone; the engine does not attempt to resume them. Subscriptions are not persisted across restarts; they live only in the engine's in-memory registry and disappear on shutdown. Children of failed parents fall out of the cascade rule above (parent ending cascades to children) — at restart, every parent is failed, so children are too; no special logic. Future work may introduce resumable services — deferred.
 
 ### Boundary-Request Behavior
 
@@ -448,7 +462,7 @@ An explicit `BOUNDARY_VIOLATION` is better than a silently empty read. The engin
 Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `commit`, `run`, `await`, `subscribe`. The SDK serializes each call into the protocol's JSON shape and dispatches it through whichever transport the program runs under. Same API surface, two transports:
 
 - **Webview programs** — the SDK calls `window.__wry_ipc.postMessage(...)`. The host's IPC handler deserializes, calls the corresponding engine function, and returns the result through wry's response channel.
-- **Subprocess programs** — the SDK writes a JSON line to stdout. The engine, which spawned the subprocess, reads each line and calls the corresponding engine function.
+- **VM programs** — the SDK writes a JSON line to stdout. The engine, which spawned the program inside its VM, reads each line and calls the corresponding engine function.
 
 Implementation lives under [`pilot/sdk/`](sdk/) and is specified in [`pilot/sdk.md`](sdk.md) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
 

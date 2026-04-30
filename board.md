@@ -6,61 +6,44 @@ Current state and what comes next. Updated as things move.
 
 ## Recent
 
-**Stack collapsed: db + engine + host as one Rust binary.** The TS engine subprocess and the host↔engine JSON-lines hop are removed from the pilot. The substrate library is ported to Rust alongside the engine; programs (TSX + Bun, and tool subprocesses) stay TS. The audit on the TS engine surfaced gaps — daemon entrypoint, multiplexing envelope, host-as-router — that exist only because the engine was a subprocess; the unified-binary shape dissolves them. The horizon entry "Rust engine migration" collapses (it's the pilot now). The TS db and engine remain as the porting oracle, validated against the existing 129-test suite, retired once parity holds. See [`pilot.md`](pilot.md), [`pilot/engine.md`](pilot/engine.md), [`pilot/host.md`](pilot/host.md).
+**Spec phase complete.** db, engine, host, sdk all drawn whole; cross-referenced and stress-tested. Ready for implementation.
 
-**Containment resolved: split for the pilot.** Capability-bearing programs (network, filesystem, shell) run inside a lightweight Linux VM; surface-only programs run on host webviews. Simpler to build, and gives an agentic-safe floor without new mechanism. Uniform-VM-with-DOM-streaming moves to the horizon. See [`pilot.md`](pilot.md#containment) and [`horizon.md`](horizon.md).
+- **db.md (substrate, Rust port).** Spec settled and code architecture drawn. `Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }`. rusqlite's `Transaction` used directly (no custom Tx helper). Validation runs SELECTs through the open transaction. Reactivity push happens from Rust right after `tx.commit()` returns Ok (no SQLite commit_hook). `ops/` folder for the public surface (one file per Db method); `scope/` folded sub-folder for its four query paths. Per-op error enums via thiserror. `rusqlite_migration` with full schema as v1. Estimated ~2,300 Rust lines. (Commits `7a858a5`, `2cec794`.)
 
-**View mode resolved: tabs first, lenses framing.** Tabs ship first as the pilot's geometry. Canvas and other view modes are additional lenses on the same chunks, not forks. Reachable because the host is built by programs themselves — a view mode is just another program. See [`pilot/host.md`](pilot/host.md#view-modes-as-lenses) and [`horizon.md`](horizon.md).
+- **engine.md / host.md / sdk.md drawn together.** Settled: op vocabulary (`scope`, `commit`, `run`, `await`, `subscribe`, `unsubscribe`); reactivity end-to-end (db broadcast → engine dispatcher → wry IPC or stdio JSON-lines → SDK event router → `useScope` re-fetch); run/await mechanics (`ProcessSlot` per active process, `watch::Sender` for terminal transitions, async `await_processes`); engine API as concrete Rust signatures; host IPC dispatch via wry's `set_ipc_handler` + `evaluate_script`. Programs use the same SDK surface across both runtimes; only the transport differs. (Commit `b183256`.)
 
-**Architecture reset for the UI layer, fully landed in specs and code.**
+- **Programs come in runtime kinds:** `runtime: 'webview' | 'vm'` declared on the program archetype. Single enum, no invalid combinations. `webview` = wry-hosted V8 with full client-side React, browser APIs, 60fps interactions. `vm` = shebang-spawned process inside a Linux VM (Bun for first-party programs because the SDK is TS, not as a property of the kind). Future runtimes (host-rendered DOM from a VM program, GPU canvas, terminal, native widgets) become new enum values. The pilot ships TS-only SDK; non-TS programs reachable when an SDK exists for that language.
 
-- **Invocables and views unified as `program`.** A program is a chunk with an executable and an optional `surface` capability declaration. Views are programs with a surface. Tools are programs without.
-- **Host is Rust** — native shell built on tao + wry (not Tauri the framework). Owns window, tile geometry, webview lifecycle, IPC routing. Does not write UI — UI is programs.
-- **Programs in webviews, each isolated.** First-party UI (sidebar, tabs, command palette, read tile, program runner) are TSX + React programs, one webview each.
-- **Engine stays TypeScript subprocess.** Rust migration is a tracked horizon item.
-- **UI composition types seeded** — `ui/session` (id `ui-session`), `ui/tab`, `ui/tile`, `ui/overlay`, `ui/recipe`. See [`pilot/host.md`](pilot/host.md).
-- **SvelteKit scaffold removed.** `pilot/ui/` deleted.
-- **`ol` renamed to `db`.** Substrate library at [`pilot/db/`](pilot/db/).
-- **`pilot/project/invocables/` renamed to `pilot/project/programs/`.**
-- **`interface.md` folded into `pilot.md` + `pilot/host.md`.** Pilot is mature enough to hold the interface spec inline.
-- **Code catch-up done:** archetypes (`program`, `process`), protocol op (`run` over `dispatch`), error code (`RUN_FAILED`), `boundary: 'process'` body convention, `DispatchContext.programId`. All 129 tests pass (63 db + 66 engine).
+- **SDK splits into two packages:** `@night/sdk` (universal substrate access — `scope`, `commit`, `run`, `awaitRun`, `cancel`, `subscribe`) and `@night/sdk-react` (hooks; pilot ships `useScope`). SDK has zero rendering concerns — webview programs call `createRoot(...).render(...)` directly.
+
+- **Compositions are first-class as the substrate's island system.** A complex UI mixing DOM and capabilities is a composition of two programs (webview + vm) bound by shared scope, communicating through the substrate. The host renders inner tiles seamlessly when the composition wants seamlessness, even though the programs are independent runtimes.
+
+- **Research file** [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) captures the runtime/surface exploration: nine topologies surveyed (Electron+nodeIntegration, Tauri, custom React reconciler, DOM-shim in Bun, SSR+HTML diff / LiveView, native UI, embedded JS, WASM, hydration islands), load-bearing constraints (Bun ≠ wry process, react-dom's behavior is the heavy piece, modern webviews do 60fps, compositions are our islands), and deferred paths with reach points so future work can pick up without re-running the survey.
+
+- **Stress-test + DX pass** — six review subagents (impl-engineer × adversary × cross-doc × bootstrap, against substrate side and engine/host/sdk side). Closed gaps: empty-scope counts contradiction, subscription touched-set algorithm, cancel/timeout race window, FTS tokenization, seq under concurrency. Plus deliberate DX fixes: `subscription_invalid` event when a subscribed scope becomes unreachable (engine auto-unsubscribes; SDK treats subscription as dead); cascade-on-parent-end so child processes never outlive their parents; idempotent `cancel`. (Commit `7d1e688` + this commit.)
 
 ## Tracked debt
 
-- **Bootstrap IDs are hand-picked.** `substrate.md` says chunk IDs are "globally unique, system-generated." Bootstrap and `seedTestDb()` use human-readable strings (`'agent'`, `'program'`, `'session'`, etc.) as a pragmatic shortcut so tests and seed code can reference well-known anchors. This worked until the new `ui/session` archetype collided with the agent's `session` archetype — resolved for now by giving the ui session id `ui-session` (name stays `session`). The aligned fix: switch all bootstrap chunks to generated IDs, have tests look up canonical chunks by name within scope. Tracked separately; not blocking. Carries through to the Rust port.
-- **Internal type names use legacy "dispatch" nouns** in the TS engine. Resolved by the Rust port — the new code uses the spec's `Run*` names from the start; the TS source retires when parity holds, taking the cosmetic debt with it.
+- **Bootstrap IDs are hand-picked.** [`substrate.md`](pilot/substrate.md) says chunk IDs are "globally unique, system-generated." Bootstrap and `seedTestDb()` use human-readable strings (`'agent'`, `'program'`, `'session'`) as a pragmatic shortcut so tests and seed code can reference well-known anchors. The aligned fix: switch all bootstrap chunks to generated IDs, have tests look up canonical chunks by name within scope. Carries through to the Rust port; not blocking implementation.
 - **`inside.md` carries one or two "invocable" references** in its values prose. Left alone — the inside text is held with care; touch only if the user asks.
-
-## Note from a failed purification attempt (2026-04-25)
-
-A session attempted a code-and-MD purification pass that went the wrong way: it began renaming `runDispatch` → `runProgram` and `spawnInvocable` → `spawnProgram` in the code (legitimate purification toward the new lingo), but then reversed direction in `engine.md` and rewrote the aspirational new-lingo names (`RunArgs`, `RunResult`, `run`, `cancel`, `shutdown`) into the legacy names (`DispatchArgs`, `DispatchResult`, `runProgram`, `cancelProcess`, `shutdownAll`) — collapsing the spec to match the legacy code instead of cleaning the legacy code to match the spec. All changes were reverted to HEAD; the working tree is clean. The proper purification — code follows spec, not the other way — is a separate task left for a later session. The failure was a misread of the direction "tracked debt" pointed; the spec is the truth, the legacy code is what should eventually rename.
 
 ## Next
 
-The implemented foundation is drawn whole in `.md` before any of it is coded. Substrate's conceptual face is settled, but its implementation drawing is its own document. Engine + host + SDK are mutually-defining and grow as one holistic drawing. TS implementation is a **correctness oracle** for the port (verify behavior), not a design oracle (do not transliterate).
+Spec phase complete. Implementation phase begins.
 
-**Spec phase.**
-
-1. **Substrate component.**
-   - **1a.** Audit [`pilot/substrate.md`](pilot/substrate.md) for gaps in the two contracts (consumer ↔ db, db ↔ sqlite). Small audit.
-   - **1b.** Write [`pilot/db.md`](pilot/db.md) — Rust db implementation drawing, top-to-bottom, derived holistically from substrate spec + Rust + SQLite. Not transliterated from TS.
-2. **Foundation spec — engine, host, SDK as one drawing.** Cross-reference [`pilot/engine.md`](pilot/engine.md), [`pilot/host.md`](pilot/host.md), and a new [`pilot/sdk.md`](pilot/sdk.md). Settle: program protocol shape, host's IPC dispatch surface, engine API the host calls, reactivity end-to-end, real run/await. Done when no question remains across the three about what any side does or exposes.
-
-**Implementation phase.**
-
-3. Code the db from [`pilot/db.md`](pilot/db.md). TS suite as correctness oracle.
-4. Code the engine from [`pilot/engine.md`](pilot/engine.md). TS suite as correctness oracle.
-5. Scaffold host (tao + wry, window, IPC handler).
-6. Draft SDK (TS, two transports, one surface).
-7. First program: read tile — validates the webview ↔ host ↔ engine ↔ db loop.
-8. Sidebar, command palette, tab bar, program runner, claude.
+1. **Code the db** from [`pilot/db.md`](pilot/db.md). Existing TS suite (63 db tests) as correctness oracle.
+2. **Code the engine** from [`pilot/engine.md`](pilot/engine.md). Existing TS suite (66 engine tests) as correctness oracle.
+3. **Scaffold host** — tao + wry, window, wry IPC handler dispatching to the engine library.
+4. **Draft SDK** — `@night/sdk` + `@night/sdk-react`, two transports (wry IPC for webview, stdio JSON-lines for VM).
+5. **First program: read tile** — validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
+6. **Remaining first-party programs** — sidebar, tabs, command palette, program runner, claude (the agent).
 
 ---
 
 ## Notes
 
-**The strange (`~/git/agi/`).** Referenced in `inside.md` as the intellectual parent. Loose exploration — not a source of truth. Sessions should not reach for the strange to resolve questions; if the answer isn't in `inside.md`, the inside is what needs work.
+**The strange (`~/git/agi/`).** Referenced in [`inside.md`](inside.md) as the intellectual parent. Loose exploration — not a source of truth. Sessions should not reach for the strange to resolve questions; if the answer isn't in `inside.md`, the inside is what needs work.
 
-**Research informing the reset.** [`research/ui-landscape-draft.md`](research/ui-landscape-draft.md) (wide survey of UI paradigms) and [`research/ui-stacks.md`](research/ui-stacks.md) (technically adoptable shortlist) hold the breadth that informed the current shape. Kept as reference; decisions distilled from them live in `pilot.md` and `pilot/host.md`.
+**Research informing the pilot shape.** [`research/ui-landscape-draft.md`](research/ui-landscape-draft.md) (wide survey of UI paradigms), [`research/ui-stacks.md`](research/ui-stacks.md) (technically adoptable shortlist), and [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) (the runtime/surface exploration behind the `runtime: 'webview' | 'vm'` decision and the deferred topologies). Decisions distilled from these live in the pilot specs; the research files stay as reference depth.
 
 **README hook.** The current README is acceptable but the formulation exercise is not fully crystallized. Preserved threads: "projected not generated," "the generative process itself is native to the medium," "the cyclical process of understanding → implementing," "one act of structuring knowledge." Not settled — material waiting for a future session.

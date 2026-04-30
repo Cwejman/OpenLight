@@ -86,7 +86,7 @@ Whether the knowledge layer goes into the system prompt (cacheable) or is manufa
 
 Tool definitions sent to the Anthropic API are derived from the substrate. No manual sync.
 
-The agent reads the programs reachable within its read boundary and generates a tool definition for each program that declares `runtime: 'subprocess'` (tool-shaped, not view-shaped):
+The agent reads the programs reachable within its read boundary and generates a tool definition for each program that declares `runtime: 'vm'` (tool-shaped, not view-shaped):
 
 1. Program `name` → tool `name`
 2. Program `body.text` → tool `description`
@@ -97,7 +97,7 @@ The agent reads the programs reachable within its read boundary and generates a 
 ```
 filesystem (instance of program)
   spec: { propagate: true, accepts: ["fs-command"] }
-  body: { text: "Read and write files", executable: "./programs/filesystem", runtime: "subprocess" }
+  body: { text: "Read and write files", executable: "./programs/filesystem", runtime: "vm" }
 
 fs-command (relates to filesystem)
   spec: { required: ["operation", "path"] }

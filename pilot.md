@@ -19,7 +19,7 @@ The unification of view and tool into one concept — the program — is what le
 - **Scope is the read mechanism.** Programs read the field by intersecting scopes. No snapshots, no manual tool calls for retrieval.
 - **Boundaries are architectural.** A program running against the field sees only what its read boundary reaches, writes only where its write boundary allows. The engine enforces this uniformly.
 - **Everything is traceable.** Chunk → commit → process → program. Any change the field underwent can be walked back to the program that caused it and the user who ran it.
-- **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare `runtime: 'webview'`; tools declare `runtime: 'subprocess'`. Both pass through the same lifecycle.
+- **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare `runtime: 'webview'`; tools declare `runtime: 'vm'`. Both pass through the same lifecycle.
 - **The loop closes.** A user opens a program. The program produces an answer. The answer is in the field. The next program reads from the field the previous one wrote.
 
 ## What the Pilot Sets Aside
@@ -52,7 +52,7 @@ A SQLite-backed Rust library. Chunks, placements, commits. See [`pilot/substrate
 
 Sits between the substrate and anything that would run against it. Creates a `process` chunk when a program is run, enforces boundaries, spawns the program's executable, mediates all substrate access the running program attempts. See [`pilot/engine.md`](pilot/engine.md).
 
-A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; subprocess programs reach the engine over stdio JSON-lines spawned and read by the engine. There is no engine subprocess, no inter-process hop between host and engine.
+A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. There is no separate engine process, no inter-process hop between host and engine.
 
 ### The host
 
@@ -60,7 +60,7 @@ A native Rust process built on **tao** (windowing) and **wry** (webview) — the
 
 ### Programs
 
-A program is a chunk whose body carries an `executable` path and a `runtime` declaration. Programs with `runtime: 'webview'` are rendered in webviews the host mounts into tiles. Programs with `runtime: 'subprocess'` run in their own containment context (with shebang-declared interpreter) and produce substrate writes.
+A program is a chunk whose body carries an `executable` path and a `runtime` declaration. Programs with `runtime: 'webview'` are rendered in webviews the host mounts into tiles. Programs with `runtime: 'vm'` run inside their own Linux VM (with shebang-declared interpreter) and produce substrate writes.
 
 A program is authored however its runtime allows — TSX + React for the first-party programs of the pilot, any WASM target or native executable later. The substrate doesn't care. The shebang on the program's executable determines how it runs.
 
@@ -68,8 +68,8 @@ A program is authored however its runtime allows — TSX + React for the first-p
 
 The program-to-engine protocol is a single JSON-lines shape with operations `scope`, `apply`, `run`, `await`. The shape is the same regardless of where a program runs; the transport differs:
 
-- **Programs in webviews** — the SDK serializes to JSON, the host's wry IPC handler receives the message and calls the engine library directly. One hop, no subprocess between.
-- **Programs as subprocesses** — the SDK writes JSON lines to stdout. The engine spawns the subprocess and reads its stdout, processing each line through the same op handlers.
+- **Webview programs** — the SDK serializes to JSON, the host's wry IPC handler receives the message and calls the engine library directly. One hop, no extra process between.
+- **VM programs** — the SDK writes JSON lines to stdout. The engine spawns the program inside its VM and reads its stdout, processing each line through the same op handlers.
 
 The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
@@ -77,7 +77,7 @@ The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
 ## Containment
 
-The pilot uses **split containment**. `runtime: 'subprocess'` programs that declare broad capabilities — network, filesystem, shell — run inside a lightweight Linux VM. `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains capability-bearing subprocess programs. This is the simpler path, and putting capability-bearing programs in a VM gives the pilot the safety floor it needs to host agentic programs without inventing new mechanism.
+The pilot uses **split containment**. `runtime: 'vm'` programs run inside a lightweight Linux VM (the substrate's containment for capability-bearing programs). `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains VM programs. This is the simpler path, and putting capability-bearing programs in a VM gives the pilot the safety floor it needs to host agentic programs without inventing new mechanism.
 
 The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 
@@ -85,7 +85,7 @@ The uniform alternative — every program in one VM with DOM streamed to host we
 
 ## Stack
 
-Rust for the host, the engine, and the substrate — one binary, three crates in a workspace, `rusqlite` for the database. Bun + TypeScript for programs (the program runtime, not the engine runtime). The only runtime seam is between the host binary and program subprocesses; webview programs cross no process boundary to reach the substrate.
+Rust for the host, the engine, and the substrate — one binary, three crates in a workspace, `rusqlite` for the database. Bun + TypeScript for programs (the program runtime, not the engine runtime). The only runtime seam is between the host binary and program processes (VM programs spawned inside their VMs); webview programs cross no process boundary to reach the substrate.
 
 ### Directory
 
@@ -95,7 +95,7 @@ pilot/
   engine/          — Rust crate. Process lifecycle, boundary enforcement, program protocol, run/await.
   host/            — Rust binary. tao + wry. Window, tile geometry, webview lifecycle, wry IPC surface.
                      Depends on db and engine; everything compiles to one executable.
-  sdk/             — TS SDK imported by programs. Webview transport via wry IPC; subprocess transport via stdio.
+  sdk/             — TS SDK imported by programs. Webview transport via wry IPC; VM transport via stdio.
   programs/        — first-party TSX programs.
   bootstrap.rs     — seed routine the host runs on a fresh project.
   project/         — working project (once initialized)

@@ -110,7 +110,7 @@ The third class. Don't run React continuously on the server; render once per sta
 
 ### G. Embedded JS runtime in host — deno_core, QuickJS
 
-Embed a JS runtime inside the Rust host. Programs run in-process. No subprocess hop, no IPC. Host owns the renderer (Blitz / WGPU / etc.).
+Embed a JS runtime inside the Rust host. Programs run in-process. No extra process hop, no IPC. Host owns the renderer (Blitz / WGPU / etc.).
 
 - **Maturity.** deno_core is mature; QuickJS is small and fast. Both embeddable.
 - **Cost.** Embedded JS engines have less of the Node ecosystem than Bun. fs etc. are host-implemented (cheap). No Bun-specific APIs unless we shim them.
@@ -177,7 +177,7 @@ Worth grounding plainly:
 Programs come in kinds. The kind is declared on the program archetype.
 
 - `runtime: 'webview'` → runs in a webview. The runtime is the webview's V8. Full client-side React + react-dom. Browser APIs available. Capabilities (fs, network, etc.) reach the host through the SDK over wry IPC. 60fps interactions are normal. This is the Tauri shape.
-- `runtime: 'subprocess'` → runs as a process with shebang-declared interpreter. The pilot's first-party subprocess programs use `#!/usr/bin/env bun` because the SDK is TypeScript-only; the runtime kind itself doesn't bind to Bun. fs, network, shell available through whatever the interpreter provides. Substrate via SDK over stdio JSON-lines. Folk Unix shape.
+- `runtime: 'vm'` → runs inside a Linux VM with shebang-declared interpreter. The pilot's first-party VM programs use `#!/usr/bin/env bun` because the SDK is TypeScript-only; the runtime kind itself doesn't bind to Bun. fs, network, shell available through whatever the interpreter provides inside the VM. Substrate via SDK over stdio JSON-lines. Folk Unix shape.
 
 Both kinds:
 - Are folk-natural in their respective lanes.
@@ -206,7 +206,7 @@ A program with both DOM and capabilities in one source file, one process, one id
 
 ### Other surfaces
 
-- **WGPU.** Programs that render via WGPU — either as a webview-runtime canvas, or as a new runtime value (e.g. `runtime: 'wgpu'` or `'subprocess-wgpu'`) where the host owns a WGPU surface and the program drives it. Implementations exist (Iced + WGPU, raw WGPU); needs a renderer in the host and a surface protocol from programs.
+- **WGPU.** Programs that render via WGPU — either as a webview-runtime canvas, or as a new runtime value (e.g. `runtime: 'wgpu'` or `'vm-wgpu'`) where the host owns a WGPU surface and the program drives it. Implementations exist (Iced + WGPU, raw WGPU); needs a renderer in the host and a surface protocol from programs.
 - **Terminal.** Programs rendering ANSI to a terminal-shaped surface. ratatui, Ink, Textual exist; the host would need to host a terminal-buffer surface.
 - **Native widgets.** Per-platform (libcosmic, GTK, AppKit). Cross-platform ones (Slint, Dioxus-Blitz). Useful if "feels OS-native" becomes important.
 
@@ -264,6 +264,6 @@ Skipping webviews altogether. Slint or Dioxus-Blitz or Compose-Multiplatform for
 
 ## What this session settled
 
-- **Pilot.** Programs come in kinds, declared via a single `runtime` field: `runtime: 'webview'` → webview-V8 with client-side React; `runtime: 'subprocess'` → shebang-spawned process (Bun for first-party programs because the SDK is TS, not as a property of the kind). Same SDK; different transport. Compositions handle the "complex UI" case.
+- **Pilot.** Programs come in kinds, declared via a single `runtime` field: `runtime: 'webview'` → webview-V8 with client-side React; `runtime: 'vm'` → shebang-spawned process inside a Linux VM (Bun for first-party programs because the SDK is TS, not as a property of the kind). Same SDK; different transport. Compositions handle the "complex UI" case.
 - **Future.** Each deferred topology has a known reach point. The substrate's program archetype is general enough to admit them when the engineering becomes proportionate.
 - **What was abandoned.** Nothing. The exploration walked the territory; it did not close any direction off.
