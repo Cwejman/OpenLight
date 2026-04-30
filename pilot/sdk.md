@@ -240,7 +240,7 @@ pilot/sdk-react/                              — @night/sdk-react package
     useScope.test.ts      — hook semantics
 ```
 
-Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below).
+Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. Comments are reserved for the genuinely non-obvious — the transport's module-load selection (`window.__wry_ipc` present vs falling through to stdio), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription. Names carry the rest.
 
 The hook package depends on `@night/sdk` for transport-aware functions; nothing else.
 

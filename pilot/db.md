@@ -641,6 +641,12 @@ fn row_to_chunk_item(row: &Row) -> Result<ChunkItem> { ... }
 
 `git diff` between any two feature files reads as the same shape with different verbs. Coherence through pattern, not folder.
 
+### Within-file shape
+
+The pattern scales by decomposition. When a method outgrows top-to-bottom narrative, it splits into named private helpers in the same file; the public method becomes the orchestrator that reads the helpers in order. `ops/scope/` is the folded form when one method fans into four distinct query paths; inside any single file, no function reads as a wall.
+
+Comments are reserved for the genuinely non-obvious — the post-`tx.commit()` broadcast send is a deliberate ordering (the SQL commit must be durable before subscribers can see the change); `check_commit` reads through the open transaction's view, not a pre-fetched snapshot; the `meta` table check guards against re-seeding on bootstrap. Expected count: a handful per crate. Names carry the rest.
+
 ### Key mechanics
 
 **Connection ownership.** `Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }`. Every op locks before touching the connection. SQLite is single-writer anyway; the mutex is uncontested in practice and gives `Db: Send + Sync` for free. Subscribers hold their own `broadcast::Receiver`; they do not retain `&Db`.

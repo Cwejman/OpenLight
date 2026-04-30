@@ -468,6 +468,89 @@ Implementation lives under [`pilot/sdk/`](sdk/) and is specified in [`pilot/sdk.
 
 ---
 
+## Code architecture
+
+### Module layout
+
+```
+pilot/engine/
+  src/
+    lib.rs              — public re-exports
+    types.rs            — Context, RunArgs, ProcessId, SubscriptionId,
+                          ProcessStatus, SlotPhase, Event, HostCmd,
+                          EffectiveBoundary, plus Display/From impls
+    errors.rs           — EngineError (single enum); From<DbError>, From<ProtocolError>
+    engine.rs           — Engine struct; open returns (Engine, mpsc::Receiver<HostCmd>);
+                          shutdown(self) -> impl Future; impl Drop;
+                          on_webview_ready callback
+    bootstrap.rs        — reconcile_zombies(&Db): one scope query, one declarative commit
+    process.rs          — ProcessSlot { phase: watch::Sender<SlotPhase>,
+                                        spawn: SpawnHandle, timeout, config };
+                          SpawnHandle enum; set_terminal, flip, cascade_children
+    subscription.rs     — Subscription, TransportRef, SubscriptionRegistry;
+                          insert / remove / iter_for_process
+    reactivity.rs       — loop_task; handle_commit composed from compute_touched,
+                          gather_fanout, gather_invalidations, apply
+    protocol.rs         — Request | Response | Event JSON shapes;
+                          dispatch_request(&Engine, &Context, Request) -> Response;
+                          From<EngineError> for wire ErrorCode
+    boundary.rs         — reachable, effective, intersect (stateless reads via &Db)
+    vm.rs               — tokio::process::Command spawn; stdout JSON-line pump;
+                          stdin event writer; cleanup
+    ops/                — public surface; one module per Engine method
+      mod.rs            — re-exports
+      scope.rs          — Engine::scope    (reachable check → db.scope)
+      commit.rs         — Engine::commit   (reachable + protected → db.commit)
+      run.rs            — Engine::run      (insert slot → declaration → db.commit →
+                                            spawn → flip phase → return)
+      cancel.rs         — Engine::cancel   (set_terminal → cleanup)
+      subscribe.rs      — Engine::subscribe / unsubscribe
+      await_processes.rs — Engine::await_processes (async; phase watcher with
+                                                    substrate fallback)
+  tests/                — integration; oracle-checked against the TS engine
+  Cargo.toml
+```
+
+Each `ops/*.rs` owns its method end-to-end via `impl Engine`. Internal modules (`engine`, `bootstrap`, `process`, `subscription`, `reactivity`, `protocol`, `boundary`, `vm`) are flat siblings — same posture as db's `validate.rs`, `virtual_chunks.rs`. No further folding: the engine has one structuring axis (the public ops) and serves it with one folder.
+
+Webview "spawn" is a single `HostCmd::MountWebview` send and lives inline in `ops/run.rs`. Only the VM runtime warrants its own file; the asymmetry is real, not a coherence break.
+
+### Within-file shape
+
+Each file composes from small named functions. The public method (or task body) reads as a top-to-bottom narrative that calls private helpers, each doing one thing. `reactivity.rs` decomposes into six functions (`loop_task`, `handle_commit`, `compute_touched`, `gather_fanout`, `gather_invalidations`, `apply`) where the orchestrator is ~30 lines and each helper ~30–60. `vm.rs` decomposes into `spawn`, `stdout_pump_task`, `parse_line`, `write_event`, `cleanup`. `ops/run.rs` decomposes into the public `run` method plus `assemble_declaration`, `spawn_for_runtime`, `cleanup_on_failure`.
+
+Comments are reserved for the genuinely non-obvious — race semantics, ordering invariants, channel-primitive quirks. Expected count across the whole crate: a handful, not a paragraph per file. Names carry the rest.
+
+### Key mechanics
+
+**State authority follows lifecycle.** A process has two natural homes — its slot (live runtime: spawn handle, phase watcher, timeout) and its substrate chunk (durable: status, error). The slot is authoritative while the process is active; the substrate is authoritative once the slot is gone. Authority transfers in one ordered step at terminal: cleanup writes the terminal status, then drops the slot. `await_processes` resolves either side — slot present, watch the phase; slot absent, read the substrate (always terminal there). One truth at any moment; the seam is the cleanup commit.
+
+**Reactivity owns event emission.** The reactivity task is the engine's only consumer of `db.subscribe_scope(&[commits_root])` and the only emitter of `scope_changed` / `lagged` / `subscription_invalid`. Cleanup paths (cancel, timeout, child exit, parent cascade) trigger reactivity by writing terminal commits; they never emit events directly. This collapses what would otherwise be two writers to the subscription registry: subscription invalidation on terminal is reactivity's job, not cleanup's.
+
+**Webview transport as commands.** The host's wry/tao machinery is main-thread and `!Send`. The engine never holds a `WebView`. `Engine::open` returns `(Engine, mpsc::Receiver<HostCmd>)`; the host drains the receiver on its event loop and translates each `HostCmd` (`MountWebview`, `UnmountWebview`, `EvaluateScript`) into a wry call. `ops::run` for a webview program sends `MountWebview` and returns; the host calls `Engine::on_webview_ready(process_id)` to flip the slot to `Running`. Outgoing events to webview subscriptions are `EvaluateScript` commands emitted by reactivity. This is the engine's only seam to non-`Send` code, expressed as data.
+
+**Errors as one vocabulary.** The engine has one wire surface, so it has one error enum. `EngineError` carries every condition the protocol needs to express (`BoundaryViolation`, `ValidationError`, `InvalidRequest`, `NotFound`, `TransportClosed`, `Db`, `Protocol`). The protocol response builder maps `&EngineError` to a wire code via a single `match`; the VM stdout pump consults the same enum to decide whether parse failures are terminal. Two consumers, one enum — no scattered tables.
+
+**Single writer where it matters; locks where it doesn't.** Reactivity is the sole emitter of events and the sole path that drops subscriptions on invalidation. The registry itself is `Mutex<HashMap>` because `ops::subscribe` inserts new entries — the lock is held only for insert/remove, never across an `await`. The processes map follows the same discipline: `ops::run` inserts, terminal triggers remove, `await_processes` clones a watch receiver. Mutex is the dumb-clear choice for shared state with brief critical sections.
+
+**Async surface mirrors db's.** `scope`, `commit`, `run`, `cancel`, `subscribe`, `unsubscribe` are sync (the substrate is sync). `await_processes` and `shutdown` are async. The reactivity task and per-VM stdio pumps run on tokio, spawned via a `tokio::runtime::Handle` stored on `Engine` at `open`. The host calls `Engine::open` from within its tokio runtime context.
+
+### Settled choices
+
+- **Single `EngineError` enum** (not per-op like db). Engine has one wire surface; one vocabulary serves it. Principled divergence from db, justified by surface shape.
+- **`HostCmd` channel** as the host integration seam. Commands as data; engine = producer, host = consumer on its main loop. Honors `!Send` host machinery without leaking it into engine state.
+- **`tokio::sync::watch`** for `SlotPhase`. Multi-awaiter; late readers see the final value via `borrow()` after the sender drops.
+- **`tokio::sync::broadcast::Receiver`** for the db change feed; one receiver, owned by the reactivity task.
+- **`tokio::sync::mpsc`** for `HostCmd` and per-VM stdin event queues. Bounded; drop-on-full surfaces a `lagged` event.
+- **`std::sync::Mutex`** for registries. Never held across `await`.
+- **`tokio::runtime::Handle`** stored on `Engine` at `open`, used to spawn tasks from sync entry points.
+- **`Engine::shutdown(self)`** consumes self: cancels reactivity via `CancellationToken`, awaits the join, runs terminal cleanup on every active process. `impl Drop` aborts reactivity as best-effort fallback.
+- **Bootstrap as one declarative commit.** `reconcile_zombies` does one `db.scope` for `pending|running` processes, then one commit setting each to `failed` with `error: "engine restart"`.
+- **No builders.** Direct `RunArgs` / `Declaration` construction; free-function helpers where useful.
+- **`thiserror`** for `EngineError`; `From<DbError>` and `From<ProtocolError>` for ergonomic `?`.
+
+---
+
 ## What Is Open
 
 - **Named, reusable boundaries.** The pilot creates a fresh boundary chunk per run. A user wanting to reuse a boundary ("my agent-wide boundary") would do so by saving a named chunk and referencing it from multiple runs. The substrate supports this; the engine and UX do not yet.
