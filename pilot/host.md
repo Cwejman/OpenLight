@@ -30,13 +30,20 @@ The host stays small. Rust, a few hundred lines at the core, oriented around win
 
 ## Program as Interface
 
-Interface and tool are one kind of thing. A program is a chunk with an executable and an optional surface capability — nothing distinguishes a program that renders a read tile from a program that touches the filesystem beyond what their bodies declare.
+Interface and tool are one kind of thing. A program is a chunk with an executable and a runtime declaration — nothing distinguishes a program that renders a read tile from a program that touches the filesystem beyond what their bodies declare.
 
-- `surface: 'none'` — the program has no rendering. A default inspector program can render its process chunk's activity in a tile when the user wants to look in.
-- `surface: 'dom'` — the program renders via a webview. The host gives it one.
-- `surface: 'wgpu'` — reserved for future direct-GPU rendering. Not in the pilot.
+The pilot supports two runtimes:
 
-Every interface element is a program: sidebar, tabs, command palette, read tile, program runner, the claude agent. The host composes their outputs. When the user opens a read tile, a program is running in its webview. When the user brings up the command palette, a program is running as an overlay.
+- `runtime: 'subprocess'` — the program is an executable spawned as a process inside its containment. A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. A default inspector program can render a subprocess's activity in a tile when the user wants to look in.
+- `runtime: 'webview'` — the program is a JS bundle loaded into a wry-hosted webview. The runtime is the webview's V8 — a sandboxed browser engine with full DOM, full client-side React, and 60fps interactions. The SDK reaches the engine over wry IPC.
+
+Programs of both runtimes use the same SDK surface (`scope`, `commit`, `run`, `awaitRun`, `subscribe`); only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `subprocess` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
+
+The pilot ships a TypeScript SDK only. First-party subprocess programs use `#!/usr/bin/env bun` so they can import the TS SDK directly; programs in other languages would need their own SDK speaking the same JSON-lines protocol. That is out of scope for the pilot, in scope for the horizon.
+
+Every interface element is a program: sidebar, tabs, command palette, read tile, program runner. The host composes their outputs. When the user opens a read tile, a webview program is running. When the user brings up the command palette, a webview program is running as an overlay. The claude agent is a subprocess program; its output appears as session chunks the UI programs read.
+
+When future runtimes land (host-rendered DOM from a subprocess, GPU-canvas, terminal, native widgets), they become new runtime values. See [`research/runtimes-and-surfaces.md`](../research/runtimes-and-surfaces.md) for the topologies considered and what's deferred.
 
 ---
 
@@ -82,6 +89,8 @@ ui/recipe
 ```
 
 A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, a nested tile structure visible as one rounded card on the board (with inner tiles separated by borders rather than padding). Collapsing the container stops its children. Composition is the live form; recipe is the saved template.
+
+Compositions are how complex UIs that mix DOM and capabilities get built. A program that needs both a designed UI and direct system access is a composition of a webview program and a subprocess program, bound by their shared scope. Visually they can read as one designed surface — the host renders inner tiles with no padding when the composition wants seamlessness — even though they're independent runtimes.
 
 ---
 
@@ -131,16 +140,20 @@ Future visual refinements — glow around cards derived from their content pixel
 
 One hop. One protocol shape.
 
-A webview program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel as a JSON message with an `op` and a correlating `id`. The host's IPC handler deserializes, calls the matching engine function with the appropriate process context, and sends the result back through wry's response channel to the SDK, which resolves the call.
+A webview program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel via `window.__wry_ipc.postMessage(<json>)`. The host registers `WebView::set_ipc_handler` per webview at mount time; each invocation parses the JSON, attaches a `Context { process_id }` from the host's webview→process registry, calls the matching engine function, and resolves the call by injecting `webview.evaluate_script("__sdk.resolve(<id>, <payload>)")`.
 
-The host does not interpret substrate operations — it dispatches them. Subprocess programs (tool programs in a VM) speak the same protocol shape over stdio; the engine reads their stdout directly without going through the host.
+Unsolicited events from the engine ride the same channel in the other direction: `webview.evaluate_script("__sdk.event(<payload>)")`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape on the JS side. See [`pilot/engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
+
+The host does not interpret substrate operations — it dispatches them. Subprocess programs (tool programs in a VM) speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly without going through the host.
 
 ### SDK surface
 
-A program imports the SDK and calls the substrate operations it needs directly.
+A program imports the SDK and calls the substrate operations it needs directly. Webview programs render with their DOM library of choice — `react-dom/client` for React, anything else otherwise; the SDK has no rendering concerns.
 
-```ts
-import { mount, scope, apply, run, await as awaitRun } from '@night/sdk'
+```tsx
+import { scope, commit, run, awaitRun } from '@night/sdk'
+import { useScope } from '@night/sdk-react'
+import { createRoot } from 'react-dom/client'
 
 function ReadTile() {
   const scopeId = /* from host-provided mount context */
@@ -148,41 +161,60 @@ function ReadTile() {
   return <div>{/* render data */}</div>
 }
 
-mount(ReadTile)
+createRoot(document.getElementById('root')!).render(<ReadTile />)
 ```
 
-Operations the SDK exposes directly (not wrapped in an object):
+Operations the SDK exposes (in `@night/sdk`):
 
-- `mount(Component)` — render the program's React tree into the host-provided root. Pure local DOM; no transport involved.
-- `scope(ids)` — read the intersection of scopes.
-- `apply(declaration)` — write.
-- `run(programId, args)` — start a new process; returns the process ID.
-- `await(processIds)` — block until processes complete; returns their scopes.
+- `scope(ids, opts?)` — read the intersection of scopes.
+- `commit(declaration)` — write.
+- `run(programId, args)` — start a new process; returns the process id.
+- `awaitRun(processIds)` — block until processes complete; returns their scopes.
+- `subscribe(ids, callback)` — imperative subscription. Returns an `unsubscribe` thunk. Typically consumed through `useScope`.
 
-The SDK also exposes React hooks that read the substrate reactively. The hooks surface is underexplored; the initial expectation is a single `useScope(ids)` that re-renders its caller when chunks in that scope change. A richer hook vocabulary may emerge as programs are written, or it may stay minimal. This is held open.
+React hooks live in a separate package, `@night/sdk-react`. The starting hook is `useScope(ids)` — calls `scope` for initial data, registers a `subscribe`, re-fetches on `scope_changed`, unsubscribes on unmount. A richer hook vocabulary may emerge through use. Full surface in [`pilot/sdk.md`](sdk.md).
 
 ---
 
 ## Authoring Programs
 
-First-party programs for the pilot are TSX + React. The program is a file with a shebang declaring its runtime, an import of the SDK, a component, and a `mount(Component)` call:
+Two shapes for the two kinds.
+
+**Webview program** (`runtime: 'webview'`). A TSX entry that renders its component tree directly. The host loads the program's bundled JS into a webview that already has `<div id="root"></div>` in the page. No shebang — the file is bundled to JS by the build pipeline, not run directly.
+
+```tsx
+import { useScope } from '@night/sdk-react'
+import { createRoot } from 'react-dom/client'
+
+function MyProgram() {
+  const data = useScope([/* ... */])
+  return <div>{/* ... */}</div>
+}
+
+createRoot(document.getElementById('root')!).render(<MyProgram />)
+```
+
+The program is a substrate chunk with `body.executable` pointing at the bundle and `body.runtime: 'webview'`. When the host runs the program, it creates a webview, loads the bundle, the JS runs `createRoot(...).render(...)` against the host-provided root.
+
+**Subprocess program** (`runtime: 'subprocess'`). An executable file with a shebang. Runs as a standalone process inside its containment. The shebang determines the interpreter and what APIs the program has access to. The pilot's first-party subprocess programs use `#!/usr/bin/env bun` because the SDK is TypeScript:
 
 ```ts
 #!/usr/bin/env bun
-import { mount, scope } from '@night/sdk'
+import { scope, commit, awaitRun } from '@night/sdk'
 
-function MyProgram() {
-  // ...
-}
-
-mount(MyProgram)
+const args = await scope([process.env.PROCESS_ID!])
+// ... do work, call APIs, write to substrate ...
+process.exit(0)
 ```
 
-The program is a substrate chunk with `body.executable` pointing at this file and `body.surface: 'dom'`. When the host runs the program, it creates a webview, loads the program's bundle, lets it mount.
+The program is a substrate chunk with `body.executable` pointing at the script and `body.runtime: 'subprocess'`. When the host runs the program, the engine spawns the script with stdio attached. Other interpreters (Python, Ruby, anything installed in the VM that can speak the JSON-lines protocol) become viable when an SDK for that language exists.
 
-**Sync versus service lifecycle is a code pattern, not a declaration.** If the program calls `mount(Component)` and then its process exits (the natural completion of a stateless program), it's a sync view — unmounting ends the process. If the program calls `mount(Component)` and continues running its own async work, it's a service — unmount detaches the surface but the process persists. The SDK is the same either way; the program chooses.
+**Lifecycle differs by kind.**
 
-**State lives in the substrate.** Programs use the substrate directly via `scope` and `apply` (and `useScope` for reactive reads) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`, the way the substrate's existing argument mechanism already handles it.
+- *Subprocess programs* end when their process exits (`process.exit()` or stdout closing). Stateless tools naturally exit when work is done; long-running services stay alive in their own loop.
+- *Webview programs* don't end via "JS reaches its last statement" — the webview's runtime keeps the page alive (React is still reconciling, event listeners are still registered). The program ends when the host destroys its webview, which the host does on tile-close, on `cancel`, or on timeout. To dismiss itself, a webview program writes a "done" signal to the substrate; the launcher subscribed to that scope sees it and asks the engine to cancel.
+
+**State lives in the substrate.** Programs use the substrate directly via `scope` and `commit` (and `useScope` for reactive reads in webview programs) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`.
 
 **Process identity.** Each run of a program is a distinct process chunk with a distinct id. Two processes of the same program with the same arguments can coexist — they are different chunks. The sidebar disambiguates them with program name + args + some visual suffix (timestamp, index, or user-assigned name — the scheme is open UX).
 
@@ -205,7 +237,7 @@ History of what has been run is reachable without a dedicated scope-history chun
 
 ## Command Palette
 
-A program with `surface: 'dom'` and an `ui/overlay` placed on the current session. Opened by a leader key the host catches and forwards. Sources: available commands, programs in the system, recent processes, substrate search.
+A program with `runtime: 'webview'` and an `ui/overlay` placed on the current session. Opened by a leader key the host catches and forwards. Sources: available commands, programs in the system, recent processes, substrate search.
 
 Not a host feature. Just another program, living as an overlay.
 
@@ -213,8 +245,7 @@ Not a host feature. Just another program, living as an overlay.
 
 ## What Is Open
 
-- **React hooks surface.** Starting guess: a single `useScope(ids)`. Richer vocabulary (for mutations, for subscriptions to typed events, for React Suspense integration) may appear through use. This is deliberately underexplored; the shape will emerge.
-- **Reactivity protocol.** How `useScope` is notified of changes — server-sent events, in-process subscription, native IPC callback. Implementation choice deferred.
+- **React hooks surface.** Starting hook is `useScope(ids)`. Richer vocabulary (for mutations, for subscriptions to typed events, for React Suspense integration) may appear through use. The full surface is specified in [`pilot/sdk.md`](sdk.md).
 - **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Requires write-boundary reach into a parent scope; the mechanics are not specified.
 - **Recipe referencing.** Identity-based (binds specific programs) or slot-based (declares placeholders the user fills). Leaning identity for the pilot.
 - **Multi-mount of services.** One long-running program mounted in two tiles — shared single surface, or two surfaces over one backing state?
@@ -228,13 +259,18 @@ Not a host feature. Just another program, living as an overlay.
 
 ## Directory
 
-To be built:
+To be built (Rust):
 
-- `pilot/host/` — Rust, tao + wry, the window + geometry + webview lifecycle + IPC routing.
-- `pilot/sdk/` — TypeScript, the SDK programs import.
-- `pilot/programs/` — TypeScript + React, the first-party programs.
+- `pilot/host/` — tao + wry. The window + geometry + webview lifecycle + IPC routing.
+
+To be built (TypeScript):
+
+- `pilot/sdk/` — the SDK programs import. Spec: [`pilot/sdk.md`](sdk.md).
+- `pilot/programs/` — first-party programs (TSX + React).
 
 Existing:
 
-- `pilot/engine/` — the engine in TypeScript; runs as a subprocess spawned by the host.
-- `pilot/db/` — the substrate library; the engine owns the database it provides.
+- `pilot/engine/` — the engine in TypeScript; the porting oracle for the Rust port. Retires once parity holds.
+- `pilot/db/` — the substrate library in TypeScript; same role as engine.
+
+The Rust port lands db, engine, and host as one binary (three crates in a workspace). See [`pilot.md`](../pilot.md#stack).

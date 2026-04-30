@@ -10,7 +10,7 @@ The shape of the program-facing protocol is identical regardless of transport. T
 
 ## What the Engine Owns
 
-- **Process creation.** The act of running a program is `dispatch`; the resulting artifact is a `process` chunk. The engine creates the process chunk in one atomic `apply()`, placing it on the program by identity and on its session (or parent process, for tool calls) so it's visible where it belongs. The process chunk is engine-owned — a running program cannot modify its own process chunk or the boundary chunks attached to it.
+- **Process creation.** The act of running a program is `dispatch`; the resulting artifact is a `process` chunk. The engine creates the process chunk in one atomic `db.commit()`, placing it on the program by identity and on its session (or parent process, for tool calls) so it's visible where it belongs. The process chunk is engine-owned — a running program cannot modify its own process chunk or the boundary chunks attached to it.
 - **Boundary enforcement.** Every scope read, every write, every nested program run is checked. The engine computes the effective boundary as the intersection of the program's intrinsic boundary and the boundary the user (or parent process) set at run time. Reads outside the read boundary return `BOUNDARY_VIOLATION`. Writes outside the write boundary are rejected.
 - **Program lifecycle.** The engine spawns the program's executable, tracks its status through `pending → running → completed | failed`, updates the process chunk as state changes, kills on timeout or cancel. The program itself does not set its status — it simply exits.
 - **Protocol mediation.** The engine receives every substrate operation a running program attempts, validates it, executes it via the substrate library, returns the result. Programs do not carry database access; the protocol is the boundary.
@@ -23,7 +23,7 @@ engine/program
   spec: { required: ['executable'] }
   body may carry:
     executable: path relative to project
-    surface: 'none' | 'dom' | 'wgpu'
+    runtime: 'webview' | 'subprocess'
     capabilities: { network?, filesystem?, ... }
     boundary: reference to intrinsic boundary, or 'open'
     timeout_ms: default run timeout
@@ -62,31 +62,34 @@ One JSON-lines protocol serves every program regardless of where it runs.
 
 | Operation | Description |
 |---|---|
-| `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. |
-| `search` | Full-text search across readable scopes. |
-| `apply` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. |
+| `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. FTS filtering via `ScopeOpts.match_`. |
+| `commit` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. |
 | `run` | Start a new program run. Returns the process id immediately. Used internally by the engine for tool calls. |
 | `await` | Block until one or more processes reach a terminal state. Returns each process's final scope. |
+| `subscribe` | Register on a set of scopes; returns a subscription id. The engine pushes `scope_changed` events when commits touch those scopes. |
+| `unsubscribe` | Cancel a subscription by id. |
 
 ### Schema
 
 Every request has an `op` and a monotonic `id`. Every response pairs the same `id` with either `result` or `error`.
 
 ```jsonl
-{"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"]}
-{"id":2,"op":"search","query":"session today"}
-{"id":3,"op":"apply","declaration":{"chunks":[...]}}
-{"id":4,"op":"run","program":"filesystem","args":{...}}
-{"id":5,"op":"await","processes":["p_1","p_2"]}
+{"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"],"opts":{"match_":"session today"}}
+{"id":2,"op":"commit","declaration":{"chunks":[...]}}
+{"id":3,"op":"run","program":"filesystem","args":{...}}
+{"id":4,"op":"await","processes":["p_1","p_2"]}
+{"id":5,"op":"subscribe","scopes":["my-session"]}
+{"id":6,"op":"unsubscribe","subscriptionId":"sub_1"}
 ```
 
 | Op | Result shape |
 |---|---|
-| `scope` | `ScopeResult` (scope chunks, items, connected scopes) |
-| `search` | `ChunkItem[]` |
-| `apply` | `ApplyResult` (commit id + created chunk ids) |
+| `scope` | `ScopeResult` |
+| `commit` | `Commit` (id, parent_id, timestamp, chunks_modified, placements_modified) |
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ScopeResult>` — process id → final scope |
+| `subscribe` | `{ subscriptionId: string }` |
+| `unsubscribe` | `{}` |
 
 **Errors:**
 
@@ -94,11 +97,22 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 |---|---|
 | `BOUNDARY_VIOLATION` | Read or write outside the effective boundary |
 | `VALIDATION_ERROR` | Declaration fails spec validation |
-| `NOT_FOUND` | Referenced chunk or program does not exist |
+| `NOT_FOUND` | Referenced chunk, program, or subscription does not exist |
 | `RUN_FAILED` | A run the program started ended non-zero |
 | `INVALID_REQUEST` | Malformed JSON, unknown op, missing fields |
 
-The types (`ScopeResult`, `ChunkItem`, `Declaration`, `ApplyResult`) are the substrate library's types.
+The types (`ScopeResult`, `ChunkItem`, `Declaration`, `Commit`) are the substrate library's types.
+
+### Events
+
+A program receives unsolicited messages from the engine on the same channel it sends requests over. An event has no `id`; it is identified by its `event` field. Programs distinguish responses (`id` + `result|error`) from events (`event`) by message shape.
+
+| Event | Shape | Meaning |
+|---|---|---|
+| `scope_changed` | `{ event: "scope_changed", subscriptionId, commit }` | A commit touched a scope this subscription registered on. The SDK re-fetches via `scope` to read the new state. |
+| `lagged` | `{ event: "lagged", subscriptionIds: [string] }` | The engine's input channel overflowed; the named subscriptions may have missed events. The SDK re-fetches to recover. |
+
+The `commit` payload on `scope_changed` is the same shape as the `commit` op result — the metadata is carried for debugging and optional delta optimization. The contract remains: re-fetch on event. Process state changes (`pending → running → completed | failed`) are not surfaced as events; the program tracks them through `await`.
 
 ### Run and await are separate
 
@@ -132,31 +146,60 @@ Every process chunk exists in the substrate immediately. Any other program (with
 
 ### Engine API (callable from the host)
 
-The host calls the engine library directly to drive top-level program runs from user action and to handle webview protocol messages. The shapes below are language-neutral; the Rust implementation gives them concrete types.
+The host calls the engine library directly to drive top-level program runs from user action and to handle webview protocol messages. Subprocess-program protocol messages reach the same functions through the engine's stdio reader.
 
+```rust
+pub struct Engine { /* db: Arc<Db>, processes, subscriptions, ... */ }
+
+pub struct Context {
+    pub process_id: Option<ProcessId>,  // None = host-initiated; Some = caller's process
+}
+
+pub struct RunArgs {
+    pub program_id:     ChunkId,
+    pub chunks:         Vec<ChunkDeclaration>,    // typed arguments
+    pub read_boundary:  Vec<ChunkId>,
+    pub write_boundary: Vec<ChunkId>,
+    pub timeout_ms:     Option<u64>,              // overrides program body
+}
+
+impl Engine {
+    pub fn open(db: Arc<Db>) -> Result<Engine, OpenError>;
+    pub fn shutdown(&self);                       // cancels active processes; closes subscriptions
+
+    // sync — return immediately
+    pub fn scope(&self, ctx: &Context, scopes: &[ChunkId], opts: ScopeOpts)
+        -> Result<ScopeResult, EngineError>;
+    pub fn commit(&self, ctx: &Context, decl: Declaration)
+        -> Result<Commit, EngineError>;
+    pub fn run(&self, ctx: &Context, args: RunArgs)
+        -> Result<ProcessId, EngineError>;
+    pub fn cancel(&self, process_id: &ProcessId)
+        -> Result<(), EngineError>;
+    pub fn subscribe(&self, ctx: &Context, scopes: &[ChunkId])
+        -> Result<SubscriptionId, EngineError>;
+    pub fn unsubscribe(&self, sub_id: SubscriptionId);
+
+    // async — Future resolves on terminal-state transition
+    pub async fn await_processes(&self, ctx: &Context, ids: &[ProcessId])
+        -> Result<HashMap<ProcessId, ScopeResult>, EngineError>;
+
+    // event channel — host/SDK pulls events bound to a subscription
+    pub fn events(&self, sub_id: SubscriptionId) -> impl Stream<Item = Event>;
+}
 ```
-RunArgs
-  chunks:        Chunk declarations — typed arguments assembled by the caller
-  readBoundary:  scope ids
-  writeBoundary: scope ids
-  timeout?:      ms; defaults to the program's body.timeout_ms
 
-RunResult
-  processId:     the process chunk id
+**The engine is program-agnostic.** `RunArgs.chunks` are whatever the program's composed spec accepts — the engine places them on the process chunk and the substrate's spec enforcement validates the contract. Boundary arrays are the scope roots the caller permits this run to reach; the engine builds boundary chunks from them and computes the effective boundary.
 
-bootstrap(dbPath, projectPath) -> Engine
-run(engine, programId, args)   -> RunResult
-cancel(engine, processId)      -> ()
-shutdown(engine)               -> ()
-```
+**`Context::process_id = None`** marks a host-initiated call (the user opening a tile, the host's own bootstrap). The engine treats it as having full read and write reach over the project. `Some(process_id)` resolves boundaries from the named process chunk's attached boundary chunks.
 
-The engine is program-agnostic. `RunArgs.chunks` are whatever the program's composed spec accepts — the engine places them on the process chunk and the substrate's spec enforcement validates the contract. Boundary arrays are the scope roots the caller permits this run to reach; the engine builds boundary chunks from them and computes the effective boundary.
+**Sync vs async.** The substrate is sync (SQLite is sync), so `scope`, `commit`, `run`, `subscribe`, `unsubscribe`, `cancel` return without awaiting. `await_processes` is genuinely async — it holds open until processes reach terminal state. `events()` returns a Stream that the transport layer (host wry IPC pump, or engine's stdio writer) pumps to the program.
 
 ---
 
 ## Process Creation — What the Declaration Looks Like
 
-A single atomic `apply()` creates:
+A single atomic `db.commit()` creates:
 
 1. **The process chunk.** Empty body except `status: 'pending'`. Placements: `instance` on the program (so the process is listed under the program), `instance` on `engine/process` (so every run is in the process scope), `instance` on the session (so it shows in the sidebar).
 2. **A read-boundary chunk.** Placements: `instance` on `read-boundary` (type), `relates` on the process (execution configuration, not structural content). Each boundary scope root is placed `relates` on this chunk by identity.
@@ -191,6 +234,123 @@ These are the run's contract — fixed at spawn, immutable during execution.
 
 ---
 
+## Reactivity Wiring
+
+How a `subscribe` op on the protocol becomes a `scope_changed` event in the calling program.
+
+### The chain
+
+```
+db                    engine                    transport               program
+──                    ──────                    ─────────               ───────
+broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─→   SDK event handler
+(post tx.commit)      (one, from               (per webview)            (dispatches by
+                       db.subscribe_scope                                 message shape)
+                       at engine startup)
+                                                stdio JSON lines
+                                                (per subprocess)
+```
+
+1. **db.** Each successful write op pushes a `Commit` onto the substrate's broadcast channel after `tx.commit()` returns. Settled in db.md.
+
+2. **engine.** On `Engine::open`, the engine subscribes once to `db.subscribe_scope(&[commits_root], ..)` — the universal change stream. A background task drains the receiver and runs the dispatcher.
+
+3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched scope set*:
+   - `commit.chunks_modified` — chunks whose body, spec, or name changed.
+   - Scope side of `commit.placements_modified` — scopes that gained or lost a chunk.
+   - Chunk side of `commit.placements_modified` — chunks whose own placements changed (a subscriber on that chunk's scope cares).
+   - Plus, for each chunk in `chunks_modified`, the scopes it is currently `instance` on — so a subscription to a parent scope fires when a member's body changes (one bulk `current_placements` lookup per commit).
+
+   The dispatcher iterates the subscription registry and fires `scope_changed` on every subscription whose scopes intersect the touched set.
+
+4. **transport.** Each subscription holds a transport reference:
+   - **Webview.** The host's `WebView` handle plus a JS-side dispatcher name. The engine asks the host (on its main thread, as wry requires) to call `webview.evaluate_script("__sdk.event(<json>)")`.
+   - **Subprocess.** The child's stdin handle. The engine writes a JSON line.
+
+5. **SDK.** Distinguishes by message shape (`event` field present → event; `id` + `result|error` → response), routes to the registered subscription's callback. `useScope(ids)` re-fetches via `scope(ids)` and re-renders.
+
+### Subscription lifecycle
+
+- `subscribe(ctx, scopes)` — engine boundary-checks the scopes against `ctx.process_id`'s read boundary. On pass: register `(SubscriptionId, ProcessId, scopes, transport)` and return the id. On fail: `BOUNDARY_VIOLATION`.
+- Subscriptions are owned by the calling process. When a process reaches terminal state, the engine drops all its subscriptions.
+- `unsubscribe(id)` — removes from the registry; transport reference dropped.
+- Boundaries are checked **only at subscribe time.** Process boundaries are immutable for the run, so a once-allowed subscription stays allowed for its lifetime.
+
+### Backpressure
+
+The engine's input from db is a bounded `broadcast::Receiver`. On overflow, a `Lagged` marker arrives in the receiver. The engine forwards a `lagged` event listing every currently-active subscription id; the SDK re-fetches the affected scopes. Slow subscribers do not block the writer and do not block the engine's dispatcher — the dispatcher's per-subscription send is non-blocking, and a slow transport drops the subscription with a final `lagged` event.
+
+Coalescing multiple commits in a tight burst into a single `scope_changed` per subscription is deferred. The pilot fires one event per touching commit; acceptable for expected volumes.
+
+---
+
+## Run and Await Mechanics
+
+How `run` returns immediately and `await` blocks until processes reach terminal state.
+
+### Process state and watchers
+
+The engine holds a per-active-process slot:
+
+```rust
+struct ProcessSlot {
+    status:  watch::Sender<ProcessStatus>,   // pending | running | completed | failed
+    spawn:   SpawnHandle,                    // child process, or webview ref
+    timeout: Option<JoinHandle<()>>,         // pending timeout future
+    config:  RunConfig,                      // resolved boundaries, timeout_ms
+}
+```
+
+The process map is `HashMap<ProcessId, ProcessSlot>` guarded by a Mutex. Slots are created on `run` and removed on terminal-state transition.
+
+### `run`
+
+1. **Compose the declaration.** Process chunk + read-boundary chunk + write-boundary chunk + the caller's argument chunks (see *Process Creation*).
+2. **`db.commit(declaration)`** — atomic. The process chunk exists in the substrate the moment this returns.
+3. **Spawn.** Subprocess transport: spawn the executable via `tokio::process::Command`, attach stdin/stdout. DOM transport: ask the host to mount a webview; the host returns a `WebViewRef`.
+4. **Insert the slot.** Set status `pending` initially; flip to `running` once the spawn is alive (subprocess: child PID reported; DOM: webview navigated).
+5. **Return `process_id`.** The caller's call returns; the program continues to its own `await` or its own work.
+
+### `await_processes`
+
+```rust
+pub async fn await_processes(&self, ctx: &Context, ids: &[ProcessId])
+    -> Result<HashMap<ProcessId, ScopeResult>, EngineError>
+{
+    // 1. Boundary-check each id against ctx.
+    // 2. For each id, get the watch::Receiver. If the process is already
+    //    terminal (or unknown to the slot map but present in the substrate),
+    //    short-circuit to terminal.
+    // 3. Concurrently await each receiver until it observes terminal.
+    // 4. db.scope(process_id) for each, collect into the map.
+    // 5. Return.
+}
+```
+
+Subprocess and DOM programs reach terminal differently:
+
+| Transport | `completed` signal | `failed` signal |
+|---|---|---|
+| Subprocess | stdout closed AND exit code 0 | stdout closed AND exit code ≠ 0; OR `cancel`; OR timeout; OR malformed output |
+| DOM | The user closes the tile (host unmounts the webview) | `cancel`; OR timeout |
+
+`cancel(processId)` and timeout both flip the watcher to `failed` and tear down the spawn. Multiple programs may await the same process; `watch::Receiver` broadcasts the terminal state to every awaiter.
+
+### Cleanup on terminal state
+
+When a process transitions to a terminal status:
+
+1. **Update the process chunk** via `db.commit()` — `body.status`, `body.error?`.
+2. **Drop the spawn.** Kill subprocess if still running; unmount webview if still mounted.
+3. **Cancel the timeout JoinHandle** if pending.
+4. **Unregister all subscriptions** owned by the process.
+5. **Resolve any awaiting `watch::Receiver`s** (handled by the `watch::Sender`'s final state plus its Drop).
+6. **Remove the slot** from the process map.
+
+The slot's existence is the ground truth for "process is active." Once removed, a future `await` for that id reads terminal state from the substrate directly.
+
+---
+
 ## Tool Calls Are Just Runs
 
 An agent making a tool call uses the same `run` operation. The engine treats it identically to a top-level run from the host:
@@ -205,7 +365,7 @@ An agent making a tool call uses the same `run` operation. The engine treats it 
 
 The agent separately records its own session-level `tool-call` and `tool-result` chunks for message reconstruction (see [`agent.md`](agent.md)). The process chunk itself is the authoritative trace of what happened; session chunks are the model-facing reconstruction.
 
-Substrate operations (`scope`, `apply`, `search`) from the agent are not tool calls — they go directly through the protocol and do not create process chunks. Only program-to-program runs create processes.
+Substrate operations (`scope`, `commit`, `subscribe`) from the agent are not tool calls — they go directly through the protocol and do not create process chunks. Only program-to-program runs create processes.
 
 ---
 
@@ -241,9 +401,9 @@ Not every error kills a program. Informational errors return as protocol respons
 
 | Condition | Engine response |
 |---|---|
-| Boundary violation (scope, search) | `BOUNDARY_VIOLATION` response; process continues |
-| Boundary violation (apply) | `BOUNDARY_VIOLATION` response; process continues |
-| Spec violation (apply) | `VALIDATION_ERROR` response; process continues |
+| Boundary violation (scope, subscribe) | `BOUNDARY_VIOLATION` response; process continues |
+| Boundary violation (commit) | `BOUNDARY_VIOLATION` response; process continues |
+| Spec violation (commit) | `VALIDATION_ERROR` response; process continues |
 | Write to protected chunk | `BOUNDARY_VIOLATION` response; process continues |
 | Malformed request | `INVALID_REQUEST` response; process continues |
 | Unparseable stdout line | Kill; `status: 'failed'`, `body.error: 'protocol: malformed output'` |
@@ -264,18 +424,17 @@ An explicit `BOUNDARY_VIOLATION` is better than a silently empty read. The engin
 
 ## Client Library
 
-Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `apply`, `run`, `await`. The SDK serializes the call into the protocol's JSON shape and dispatches it through whichever transport the program runs under. Same API surface, two transports:
+Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `commit`, `run`, `await`, `subscribe`. The SDK serializes each call into the protocol's JSON shape and dispatches it through whichever transport the program runs under. Same API surface, two transports:
 
 - **Webview programs** — the SDK calls `window.__wry_ipc.postMessage(...)`. The host's IPC handler deserializes, calls the corresponding engine function, and returns the result through wry's response channel.
 - **Subprocess programs** — the SDK writes a JSON line to stdout. The engine, which spawned the subprocess, reads each line and calls the corresponding engine function.
 
-Both implementations live under [`pilot/sdk/`](sdk/) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
+Implementation lives under [`pilot/sdk/`](sdk/) and is specified in [`pilot/sdk.md`](sdk.md) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
 
 ---
 
 ## What Is Open
 
-- **Reactivity protocol.** How a webview program is notified that a scope it is reading has changed. Engine emits push notifications on the wry channel? Polling? The shape decides what `useScope` looks like in the SDK and is settled in this spec before code.
-- **Run/await mechanism.** Real `await` requires the engine to remember which webview-side or subprocess-side request is blocked on which process, and resolve it on terminal-state transition. The shape is settled here before code.
 - **Named, reusable boundaries.** The pilot creates a fresh boundary chunk per run. A user wanting to reuse a boundary ("my agent-wide boundary") would do so by saving a named chunk and referencing it from multiple runs. The substrate supports this; the engine and UX do not yet.
 - **Services.** A process whose executable lives beyond the completion of a single render or request. Requires lifecycle beyond `pending → running → completed`. Held as a direction; not in the pilot.
+- **Subscription coalescing.** Multiple commits in a tight burst could fire one combined `scope_changed` per subscription instead of one per commit. Deferred until the per-event volume warrants it.

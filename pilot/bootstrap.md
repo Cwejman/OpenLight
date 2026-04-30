@@ -1,6 +1,6 @@
 # Bootstrap
 
-Three `apply()` calls — one per root scope, simulating three peers. Engine and UI chunks come first, as if mounted from external databases. Agent chunks come last, referencing engine contracts by placing instances on them.
+Three `commit()` calls — one per root scope, simulating three peers. Engine and UI chunks come first, as if mounted from external databases. Agent chunks come last, referencing engine contracts by placing instances on them.
 
 ## Commit 1: Engine
 
@@ -30,9 +30,9 @@ Project tools and concrete programs. References engine contracts across the peer
 1. `agent` — root scope
 2. `session` archetype on `agent`: `{ propagate: true, ordered: true, accepts: ['prompt', 'answer', 'tool-call', 'tool-result', 'context'] }`. Distinct from `ui/session` — this is the agent's interaction trace.
 3. Session event types on `agent` (instance) and `session` (relates): `prompt` with `{ required: ['text'] }`, `answer`, `tool-call` with `{ required: ['program'] }`, `tool-result` with `{ required: ['program'] }`, `context` with `{ ordered: true }`.
-4. Tool programs on `agent` (instance) and `program` (instance): `filesystem`, `shell`, `web`. Each declares `{ propagate: true, accepts: [argument-type], surface: 'none' }`, an intrinsic boundary limited to its own process scope, and the executable path. Each argument type is `relates` on its program with `{ required: [...] }` and a schema in body for API tool generation.
-5. `claude` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt'], surface: 'none' }`. `session`, `context`, `prompt` placed `relates` on `claude`. Intrinsic boundary: `open` — defers all restriction to the run.
-6. `echo` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['message'], surface: 'none' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
+4. Tool programs on `agent` (instance) and `program` (instance): `filesystem`, `shell`, `web`. Each declares `{ propagate: true, accepts: [argument-type], runtime: 'subprocess' }`, an intrinsic boundary limited to its own process scope, and the executable path. Each argument type is `relates` on its program with `{ required: [...] }` and a schema in body for API tool generation.
+5. `claude` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt'], runtime: 'subprocess' }`. `session`, `context`, `prompt` placed `relates` on `claude`. Intrinsic boundary: `open` — defers all restriction to the run.
+6. `echo` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['message'], runtime: 'subprocess' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
 
 ---
 

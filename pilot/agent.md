@@ -51,7 +51,7 @@ The session's `context` events are the trace — what the agent was looking at a
 ## The Agent Cycle
 
 1. Receives its process id and engine endpoint. Calls `scope` via protocol to read its own process chunk (session, context, prompt, read-boundary, write-boundary).
-2. Writes the incoming `prompt` and initial `context` onto the session via `apply` (dual placement — session membership plus type membership).
+2. Writes the incoming `prompt` and initial `context` onto the session via `commit` (dual placement — session membership plus type membership).
 3. Each cycle: assembles the knowledge layer (pinned context plus any additions) and the session layer (the dispatch's own tool chain so far). Calls the Anthropic API.
 4. On `tool_use` from the model: calls `run` via protocol with the target program and arguments. The engine creates the tool-call process, spawns it, returns the process id. The agent writes `tool-call` and `tool-result` chunks onto the session referencing the process chunk id.
 5. On scope expansion: writes a `context` event to the session. The engine validates that referenced scopes are reachable from the read boundary.
@@ -86,7 +86,7 @@ Whether the knowledge layer goes into the system prompt (cacheable) or is manufa
 
 Tool definitions sent to the Anthropic API are derived from the substrate. No manual sync.
 
-The agent reads the programs reachable within its read boundary and generates a tool definition for each program that declares `surface: 'none'` (tool-shaped, not view-shaped):
+The agent reads the programs reachable within its read boundary and generates a tool definition for each program that declares `runtime: 'subprocess'` (tool-shaped, not view-shaped):
 
 1. Program `name` → tool `name`
 2. Program `body.text` → tool `description`
@@ -97,7 +97,7 @@ The agent reads the programs reachable within its read boundary and generates a 
 ```
 filesystem (instance of program)
   spec: { propagate: true, accepts: ["fs-command"] }
-  body: { text: "Read and write files", executable: "./programs/filesystem", surface: "none" }
+  body: { text: "Read and write files", executable: "./programs/filesystem", runtime: "subprocess" }
 
 fs-command (relates to filesystem)
   spec: { required: ["operation", "path"] }
