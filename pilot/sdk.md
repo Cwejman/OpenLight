@@ -20,21 +20,19 @@ Both answer to the engine spec. Where they disagree, engine.md is right.
 
 ---
 
-## Two packages
+## One package, runtime-agnostic
 
-The SDK ships as two packages with a clean separation:
+The SDK ships as one package: **`@openlight/sdk`**. Functions only: `scope`, `commit`, `run`, `awaitRun`, `cancel`, `subscribe`. No DOM, no React, no rendering. Imports cleanly in any JS/TS runtime — webview, Bun, future runtimes — because transport is a runtime concern, not the SDK's.
 
-- **`@night/sdk`** — universal substrate access. Functions only: `scope`, `commit`, `run`, `awaitRun`, `cancel`, `subscribe`. No DOM, no React, no rendering. Imports cleanly in any JS/TS runtime — webview, Bun, future runtimes. Eventually adds capability surfaces (fs, network) the same way: typed functions over the IPC bridge.
+The SDK lives in the engine crate (`engine/sdk/`) — it IS the engine's protocol expressed as TypeScript, so it ships where the protocol lives. Future capability surfaces (fs, network) eventually land here the same way: typed functions over the IPC bridge.
 
-- **`@night/sdk-react`** — React helpers built on `@night/sdk`. Hooks for reactive substrate reads. The starting surface is one hook: `useScope`. Richer hooks (`useCommit`, `useRun`, `useSubscribe`) emerge through use. Pulled in only by webview programs that render React.
-
-The split keeps the universal package small and language-extensible. When non-React or non-TS programs eventually exist, `@night/sdk` ports straightforwardly; `@night/sdk-react` is a TS-React-specific helper that other ecosystems can ignore or replace.
+React helpers (`useScope`, future `useCommit`, `useRun`, `useSubscribe`) are not part of the SDK — they're a separate UI library shipped from `host/ui/` (because they're coupled to webview programs that the host renders). Webview programs that render React import the SDK *and* the UI library; VM programs only import the SDK. Non-TS clients eventually exist by reimplementing the SDK against the JSON-lines protocol — they don't see the UI library at all.
 
 ---
 
 ## The Substrate Surface
 
-`@night/sdk` exposes typed functions at the package root.
+`@openlight/sdk` exposes typed functions at the package root.
 
 ### Reads
 
@@ -61,7 +59,7 @@ awaitRun(processIds: ProcessId[]): Promise<Record<ProcessId, ScopeResult>>
 cancel(processId: ProcessId): Promise<void>
 ```
 
-`run` returns the process id immediately. `awaitRun` blocks until each named process reaches a terminal state and returns each one's final scope.
+`run` returns the process id immediately. `awaitRun` resolves when each named process reaches a terminal state and returns each one's final scope — the call suspends the caller's async task, doesn't block other work.
 
 `awaitRun` is named to dodge `await` (a TypeScript reserved word). The engine method is `await_processes`.
 
@@ -85,9 +83,9 @@ The returned thunk unsubscribes. Calling it after a `kind: 'invalid'` is a no-op
 
 ---
 
-## React helpers
+## React helpers (in `host/ui/`)
 
-`@night/sdk-react` exposes hooks. The pilot ships one:
+The host's UI library exposes React hooks built on `@openlight/sdk`. v0.1 ships one:
 
 ```ts
 useScope(scopes: ChunkId[], opts?: ScopeOpts): ScopeResult | undefined
@@ -185,7 +183,14 @@ type EngineError = {
 
 ## Transports
 
-The SDK selects a transport at module-load time by inspecting its environment. Webview programs see `window.__wry_ipc`; VM programs do not (they have stdin/stdout instead). Both transports surface the same internal `Transport` shape — `send(req): Promise<Response>` and `onEvent(handler)` — so the op functions in the surface module remain transport-agnostic.
+The SDK selects a transport at module-load time. Order:
+
+1. **Pre-set:** if `globalThis.__openlight_transport` is set, use it. Future runtimes that don't fit the auto-detected patterns inject a transport here before the SDK loads.
+2. **Webview:** if `window.__wry_ipc` is present, use the wry transport.
+3. **VM:** if `process.stdin` is present, use the stdio transport.
+4. Otherwise: throw — no transport detected.
+
+Both built-in transports surface the same internal `Transport` shape (`send(req): Promise<Response>` and `onEvent(handler)`), so the op functions in the surface module remain transport-agnostic.
 
 ### Webview transport
 
@@ -218,7 +223,7 @@ When the engine fires a `scope_changed` event, the SDK looks up the subscription
 ## Code architecture
 
 ```
-pilot/sdk/                                    — @night/sdk package
+engine/sdk/                                   — @openlight/sdk package
   src/
     index.ts              — public re-exports of the substrate surface
     types.ts              — TS mirror of substrate types
@@ -226,23 +231,24 @@ pilot/sdk/                                    — @night/sdk package
     surface.ts            — scope, get, commit, run, awaitRun, cancel
     subscriptions.ts      — subscribe, registry, event router
     transport.ts          — Transport interface + selection at module load
+                            (globalThis.__openlight_transport > wry > stdio)
     transports/
       wry.ts              — webview transport (window.__wry_ipc + window.__sdk)
       stdio.ts            — VM transport (stdin reader, stdout writer)
   test/
     surface.test.ts       — surface against a mock transport
 
-pilot/sdk-react/                              — @night/sdk-react package
+host/ui/                                      — UI library (React)
   src/
-    index.ts              — public re-exports of hooks
+    index.ts              — public re-exports of hooks and components
     useScope.ts           — the useScope hook
   test/
     useScope.test.ts      — hook semantics
 ```
 
-Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. Comments are reserved for the genuinely non-obvious — the transport's module-load selection (`window.__wry_ipc` present vs falling through to stdio), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription. Names carry the rest.
+Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. Comments are reserved for the genuinely non-obvious — the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription. Names carry the rest.
 
-The hook package depends on `@night/sdk` for transport-aware functions; nothing else.
+`host/ui` depends on `@openlight/sdk` for transport-aware functions; nothing else.
 
 ---
 

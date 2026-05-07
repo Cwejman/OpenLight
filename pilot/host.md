@@ -4,7 +4,7 @@ The host is the native shell. It opens the window. It places tiles inside that w
 
 The host is written in Rust against **tao** (cross-platform windowing) and **wry** (cross-platform webview). These are the libraries that underlie Tauri; the host uses them directly, without adopting the Tauri framework's app-level conventions. Our shape — one window with many tiled webviews, each its own program — fits these primitives more naturally than Tauri's one-webview-per-window default.
 
-The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no separate engine process and no inter-process hop between host and engine. VM programs (tool programs running inside their VM) are spawned by the engine and reach it over stdio JSON-lines.
+The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no separate engine process and no inter-process hop between host and engine. The host also implements and registers the runtime providers (VM and webview) that the engine asks to spawn programs — engine ships no runtime implementations of its own; that machinery lives here. VM programs (tool programs running inside the VM) reach the engine over stdio JSON-lines.
 
 ---
 
@@ -14,7 +14,8 @@ The engine and substrate are Rust crates linked into the host binary. The host c
 - Decides where tiles go within that window — split-tree geometry, padding, spacing, card treatment
 - Creates a webview for each tile that holds a running program with a DOM surface
 - Receives wry IPC messages from webview programs and dispatches them to the engine library
-- Bootstraps the substrate (open the database) and the engine on startup; closes both on exit
+- Bootstraps the substrate (open the active project's database, walk and open mounts cascade) and the engine on startup; closes both on exit
+- Implements and registers the VM and webview runtime providers with the engine; owns the VM lifecycle, including peer FS mounts at `/peers/<project-id>/`
 - Handles visual chrome that's properly the window's concern: padding, background color, shadows under cards, overlay darkening behind modal programs
 
 ## What the Host Does Not Do
@@ -34,7 +35,7 @@ Interface and tool are one kind of thing. A program is a chunk with an executabl
 
 The pilot supports two runtimes:
 
-- `runtime: 'vm'` — the program is an executable spawned as a process inside its own Linux VM (the pilot's containment). A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. A default inspector program can render a VM program's activity in a tile when the user wants to look in.
+- `runtime: 'vm'` — the program is an executable spawned as a process inside the active project's Linux VM (v0.1's containment). A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. Peer projects' filesystems are mounted read-only at `/peers/<project-id>/` inside the same VM, so a program declared in a mounted project resolves its executable path against its peer mount and runs in the same containment. A default inspector program can render a VM program's activity in a tile when the user wants to look in.
 - `runtime: 'webview'` — the program is a JS bundle loaded into a wry-hosted webview. The runtime is the webview's V8 — a sandboxed browser engine with full DOM, full client-side React, and 60fps interactions. The SDK reaches the engine over wry IPC.
 
 Programs of both runtimes use the same SDK surface (`scope`, `commit`, `run`, `awaitRun`, `subscribe`); only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `vm` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
@@ -49,23 +50,23 @@ When future runtimes land (host-rendered DOM from a VM program, GPU-canvas, term
 
 ## The Composition Types
 
-All in the `ui` namespace. Seeded by bootstrap. The host reads these chunks to render.
+All in the `host` namespace (the host project ships these archetypes; project name = scope namespace). Seeded by bootstrap. The host reads these chunks to render.
 
 ```
-ui/session
+host/session
   spec: { propagate: true, accepts: ['tab', 'process'] }
   body: { name?, current-tab? }
   — The outer container. Restorable, shareable. Any process placed on the
     session as instance becomes sidebar-visible. No separate pin archetype —
     session membership is sidebar presence.
 
-ui/tab
+host/tab
   spec: { propagate: true, accepts: ['tile'] }
   body: { name? }
   placements: on session (instance)
   — The root of a tile tree. Workspaces are tabs; one term, one archetype.
 
-ui/tile
+host/tile
   spec: { ordered: true }
   body:
     split node:  { direction: 'horizontal'|'vertical', ratio }
@@ -74,13 +75,13 @@ ui/tile
     on tab or parent-tile (instance, seq chooses split side)
     on engine/process (relates — "this leaf displays this running process")
 
-ui/overlay
+host/overlay
   body: { anchor: 'session'|'tab'|'tile' }
   placements:
     on engine/program (relates — overlay content)
     on anchor target (relates)
 
-ui/recipe
+host/recipe
   spec: { propagate: true, accepts: ['tile'] }
   body: { name?, description? }
   — A tile subtree preserved as a template. Spawning clones the structure
@@ -151,8 +152,8 @@ The host does not interpret substrate operations — it dispatches them. VM prog
 A program imports the SDK and calls the substrate operations it needs directly. Webview programs render with their DOM library of choice — `react-dom/client` for React, anything else otherwise; the SDK has no rendering concerns.
 
 ```tsx
-import { scope, commit, run, awaitRun } from '@night/sdk'
-import { useScope } from '@night/sdk-react'
+import { scope, commit, run, awaitRun } from '@openlight/sdk'
+import { useScope } from '@openlight/ui'
 import { createRoot } from 'react-dom/client'
 
 function ReadTile() {
@@ -164,7 +165,7 @@ function ReadTile() {
 createRoot(document.getElementById('root')!).render(<ReadTile />)
 ```
 
-Operations the SDK exposes (in `@night/sdk`):
+Operations the SDK exposes (in `@openlight/sdk`):
 
 - `scope(ids, opts?)` — read the intersection of scopes.
 - `commit(declaration)` — write.
@@ -172,7 +173,7 @@ Operations the SDK exposes (in `@night/sdk`):
 - `awaitRun(processIds)` — block until processes complete; returns their scopes.
 - `subscribe(ids, callback)` — imperative subscription. Returns an `unsubscribe` thunk. Typically consumed through `useScope`.
 
-React hooks live in a separate package, `@night/sdk-react`. The starting hook is `useScope(ids)` — calls `scope` for initial data, registers a `subscribe`, re-fetches on `scope_changed`, unsubscribes on unmount. A richer hook vocabulary may emerge through use. Full surface in [`pilot/sdk.md`](sdk.md).
+React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/ui`. The starting hook is `useScope(ids)` — calls `scope` for initial data, registers a `subscribe`, re-fetches on `scope_changed`, unsubscribes on unmount. A richer hook vocabulary may emerge through use. Full surface in [`pilot/sdk.md`](sdk.md).
 
 ---
 
@@ -183,7 +184,7 @@ Two shapes for the two kinds.
 **Webview program** (`runtime: 'webview'`). A TSX entry that renders its component tree directly. The host loads the program's bundled JS into a webview that already has `<div id="root"></div>` in the page. No shebang — the file is bundled to JS by the build pipeline, not run directly.
 
 ```tsx
-import { useScope } from '@night/sdk-react'
+import { useScope } from '@openlight/ui'
 import { createRoot } from 'react-dom/client'
 
 function MyProgram() {
@@ -200,7 +201,7 @@ The program is a substrate chunk with `body.executable` pointing at the bundle a
 
 ```ts
 #!/usr/bin/env bun
-import { scope, commit, awaitRun } from '@night/sdk'
+import { scope, commit, awaitRun } from '@openlight/sdk'
 
 const args = await scope([process.env.PROCESS_ID!])
 // ... do work, call APIs, write to substrate ...
@@ -237,9 +238,33 @@ History of what has been run is reachable without a dedicated scope-history chun
 
 ## Command Palette
 
-A program with `runtime: 'webview'` and an `ui/overlay` placed on the current session. Opened by a leader key the host catches and forwards. Sources: available commands, programs in the system, recent processes, substrate search.
+A program with `runtime: 'webview'` and an `host/overlay` placed on the current session. Opened by a leader key the host catches and forwards. Sources: available commands, programs in the system, recent processes, substrate search.
 
 Not a host feature. Just another program, living as an overlay.
+
+---
+
+## Boot sequence
+
+Host startup has a fixed order:
+
+1. **Initialize tokio runtime.** The engine and runtime providers need it; tao's event loop runs on the main thread.
+2. **Resolve active project path.** From CLI args or working directory.
+3. **Walk the mounts cascade.** Read the active project's `.ol/project.toml`; for each `[[mounts]]` entry, read that project's `.ol/project.toml` in turn; recurse. Deduplicate by canonical absolute path. Detect cycles; reject with an error. The host project and engine project must appear in the resolved cascade (most projects' data references their archetypes); if either is missing, refuse with a clear error pointing to the missing entry. v0.1 also refuses any peer whose db schema version differs from the active project's (migration is a v0.2 concern).
+4. **Open all dbs.** `Db::open(<active>/.ol/db)` read-write; `Db::open(<peer>/.ol/db)` read-only for each peer in the resolved cascade.
+5. **Open the engine.** `Engine::open()` returns `(Engine, mpsc::Receiver<HostCmd>)`. Host keeps the receiver to drain on its event loop.
+6. **Register runtime providers.** `engine.register_runtime("vm", Arc::new(VmProvider::new(...)))` and `engine.register_runtime("webview", Arc::new(WebviewProvider::new(host_cmd_tx, ...)))`. Both providers are host-crate types; engine ships no runtime implementations.
+7. **Configure the VM.** Hand the VM provider the FS-mount table: active project at `/active/` read-write, each peer at `/peers/<project-id>/` read-only. The VM starts; programs spawned later run inside it.
+8. **Mount projects.** `engine.mount_project(id, db, ReadOnly, branch)` for each peer; `engine.mount_project(active-id, active-db, ReadWrite, "main")` for the active project. The engine subscribes to the active project's commit broadcast for reactivity; read-only mounts contribute reads but not events (no in-process writer ever fires).
+9. **Boot-time validation.** Ask the engine to validate that every placement in the active project's db has its `scope_id` resolve in some mount. Missing references — most often a missing host or engine mount — return as a list; surface them and refuse to enter the event loop. No half-loaded state.
+10. **Spawn the always-mounted suite.** Sidebar and tab-bar are first-party programs the host references by id and runs at boot via `engine.run(..., Context { process_id: None })`. The command palette is spawned on-demand when the leader key fires. The exact suite and its program contracts are first-party concerns; the host hard-codes the references for v0.1 (a future programs spec pass formalizes the contracts).
+11. **Enter the event loop.** `event_loop.run(...)` on the main thread, draining `HostCmd` events from the engine, wry IPC messages from webviews, and tao's window events.
+
+Shutdown reverses the order: cancel running processes, await `engine.shutdown()`, drop the VM (which unmounts FSes), drop dbs, exit.
+
+**Single-host-per-db.** v0.1 assumes one host process per project. Concurrent read access to a peer's db works at the SQLite level — a second host can read a peer's committed data — but reactive notifications do not propagate between host processes (each `Db` has its own in-process broadcast). Cross-host reactivity is a horizon item; see [`engine.md`](engine.md#engine-api-callable-from-the-host) and [`horizon.md`](../horizon.md).
+
+The cascade walk and FS-mount-table assembly are host code (file-aware). The mount registry and federation are engine concerns. The split is documented in [`engine.md`](engine.md#engine-api-callable-from-the-host).
 
 ---
 
@@ -259,18 +284,21 @@ Not a host feature. Just another program, living as an overlay.
 
 ## Directory
 
-To be built (Rust):
+The host project ships:
 
-- `pilot/host/` — tao + wry. The window + geometry + webview lifecycle + IPC routing.
+```
+host/
+  src/               — Rust source: window/tao/wry, IPC routing, mounts cascade
+                       walker, VM and webview runtime provider implementations.
+  ui/                — TypeScript UI library: React components and hooks
+                       (useScope, future useCommit/useRun) used by webview
+                       programs the host renders. Lives here for v0.1; may
+                       extract to its own project later.
+  programs/          — first-party host-shipped programs:
+                       sidebar, tab-bar, command-palette, dispatcher, read-tile.
+                       (Webview programs in TSX; the host runs them at boot or
+                       on demand depending on each one's lifecycle.)
+  .ol/db, .ol/project.toml
+```
 
-To be built (TypeScript):
-
-- `pilot/sdk/` — the SDK programs import. Spec: [`pilot/sdk.md`](sdk.md).
-- `pilot/programs/` — first-party programs (TSX + React).
-
-Existing:
-
-- `pilot/engine/` — the engine in TypeScript; the porting oracle for the Rust port. Retires once parity holds.
-- `pilot/db/` — the substrate library in TypeScript; same role as engine.
-
-The Rust port lands db, engine, and host as one binary (three crates in a workspace). See [`pilot.md`](../pilot.md#stack).
+The host depends on the `db` and `engine` crates. The runtime-agnostic SDK package (`@openlight/sdk`) lives in the engine crate; the React UI library is host-shipped because it's coupled to webview programs. See [`pilot.md`](../pilot.md#stack) for the full repo layout and [`engine.md`](engine.md) for the SDK and runtime provider contracts.

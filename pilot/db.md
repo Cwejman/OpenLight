@@ -25,7 +25,7 @@ Db::open(project_path: &Path) -> Result<Db, OpenError>
 
 Initializes the SQLite connection (creates the file with migrations if fresh, opens with `journal_mode = WAL` if existing), seeds the minimum the db needs, returns the handle. Closes via `Drop`.
 
-The db's own bootstrap is small: one row in `branches` (the bootstrap branch, `main`) and one initial commit in `commits`. The substrate's archetypes for branches and commits, and the scope-anchors `branches_root` and `commits_root`, are **projected** by the read layer with hardcoded shapes — not stored as chunks. Field content (engine root scope, ui root scope, agent root scope, archetype seeds, etc.) is not the db's concern; the host's bootstrap routine writes those via `db.commit()` after `Db::open` returns.
+The db's own bootstrap is small: one row in `branches` (the bootstrap branch, `main`) and one initial commit in `commits`. The substrate's archetypes for branches and commits, and the scope-anchors `db/branches` and `db/commits`, are **projected** by the read layer with hardcoded shapes — not stored as chunks. Field content (archetypes, user data, project-specific scopes — whatever this particular db holds) is not the db's concern; the host's bootstrap routine writes those via `db.commit()` after `Db::open` returns.
 
 ### Reads
 
@@ -135,11 +135,11 @@ Includes::all()        = every flag
 
 The substrate's discipline is that everything is chunks and placements. Branches and commits are projected by the read layer as virtual chunks — they appear in `scope` and `get` like any other content:
 
-- `db.scope(&[branches_root], opts)` — every branch as a chunk; body carries `{ head: commit_id }`.
-- `db.scope(&[branches_root, branch_id], opts)` — a single branch.
-- `db.scope(&[commits_root, branch_id], opts)` — commits in the branch's ancestry, ordered.
+- `db.scope(&[db/branches], opts)` — every branch as a chunk; body carries `{ head: commit_id }`.
+- `db.scope(&[db/branches, branch_id], opts)` — a single branch.
+- `db.scope(&[db/commits, branch_id], opts)` — commits in the branch's ancestry, ordered.
 
-`branches_root` and `commits_root` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded specs (the `branch` and `commit` archetypes).
+`db/branches` and `db/commits` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded specs (the `branch` and `commit` archetypes).
 
 Virtual chunks are read-only via `scope`/`get`. Writes targeting them are rejected (`WriteToVirtualChunk`). Their state is owned by db-level operations: `commit` (advances a branch's head), `create_branch` / `delete_branch` (manipulate the branch graph).
 
@@ -164,7 +164,7 @@ Declaration
 
 CommitOpts
   branch: BranchName               which branch this commit lands on
-  dispatch_id: Option<String>      engine metadata, propagated to the commit chunk
+  process_id: Option<String>      engine metadata, propagated to the commit chunk
 ```
 
 The whole declaration is one transaction. All writes succeed and a commit is recorded, or all fail and nothing is written.
@@ -173,7 +173,7 @@ The result is the `Commit` itself — a chunk-shaped artifact:
 
 ```
 Commit
-  id, parent_id?, timestamp, message?, dispatch_id?
+  id, parent_id?, timestamp, message?, process_id?
   chunks_modified:     [ChunkId]
   placements_modified: [(ChunkId, ChunkId)]    (chunk_id, scope_id) entered or left
 ```
@@ -204,8 +204,8 @@ A single subscription primitive. Yields commits that touch the named scopes (any
 
 Subscribe at any scope to listen there:
 
-- `subscribe_scope(&[commits_root])` — every new commit.
-- `subscribe_scope(&[branches_root])` — branch graph mutations.
+- `subscribe_scope(&[db/commits])` — every new commit.
+- `subscribe_scope(&[db/branches])` — branch graph mutations.
 - `subscribe_scope(&[my_session])` — changes touching the session's content.
 
 Backpressure: each subscriber has a bounded receiver. On overflow, oldest events drop and a `Lagged` marker is emitted. Subscriptions are tied to the handle's `Db` lifetime; dropping the stream unsubscribes.
@@ -249,7 +249,7 @@ CREATE TABLE commits (
   parent_id    TEXT REFERENCES commits(id),
   timestamp    TEXT NOT NULL,                    -- ISO-8601 UTC
   message      TEXT,
-  dispatch_id  TEXT
+  process_id  TEXT
 );
 
 CREATE TABLE branches (
@@ -345,7 +345,7 @@ The FTS index covers all branches' current state; branch filtering is a JOIN at 
 commit(declaration, opts):
 
   reject if any chunk in the declaration targets a virtual chunk
-    (branches_root, commits_root, branch archetype, commit archetype) → WriteToVirtualChunk
+    (db/branches, db/commits, branch archetype, commit archetype) → WriteToVirtualChunk
 
   BEGIN IMMEDIATE TRANSACTION
 
@@ -353,8 +353,8 @@ commit(declaration, opts):
   let parent    = head_of(opts.branch)
   let timestamp = now_utc()
 
-  INSERT INTO commits (id, parent_id, timestamp, message, dispatch_id)
-  VALUES (commit_id, parent, timestamp, declaration.message, opts.dispatch_id)
+  INSERT INTO commits (id, parent_id, timestamp, message, process_id)
+  VALUES (commit_id, parent, timestamp, declaration.message, opts.process_id)
 
   for each chunk in declaration.chunks:
     resolve id (declared or generated)
@@ -499,7 +499,7 @@ ORDER BY total DESC;
 
 #### Virtual chunks (branches and commits)
 
-When `scope` is called with `branches_root` or `commits_root`, the read layer projects from the underlying tables instead of joining current_chunks:
+When `scope` is called with `db/branches` or `db/commits`, the read layer projects from the underlying tables instead of joining current_chunks:
 
 ```sql
 -- branches projection
@@ -519,14 +519,23 @@ SELECT c.id AS chunk_id, NULL AS name, '{}' AS spec,
        json_object(
          'timestamp',   c.timestamp,
          'message',     c.message,
-         'dispatch_id', c.dispatch_id
+         'process_id', c.process_id
        ) AS body,
        a.depth AS seq
 FROM commits c JOIN ancestry a ON c.id = a.id
 ORDER BY seq;
 ```
 
-Mixing virtual and real scopes in one `scope` call is rejected in the pilot — keeps the projection clean.
+The virtual scope projections accept these parameter shapes:
+
+- `[db/commits]` — every commit
+- `[db/commits, branch_id]` — commits in that branch's ancestry
+- `[db/commits, process_id]` — commits from that process
+- `[db/commits, chunk_id]` — commits that modified that chunk
+- `[db/branches]` — every branch
+- `[db/branches, branch_id]` — that single branch
+
+Shapes the projections don't recognize (additional parameters, scopes not in the table above) just return what falls out of the join — typically nothing matches. `INVALID_REQUEST` is reserved for malformed queries (unknown op, missing fields), not for valid queries that resolve to nothing.
 
 #### Time travel
 
@@ -603,7 +612,7 @@ pilot/db/
     db.rs                  — Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }
                              Db::open, Drop
     validate.rs            — Rule enum + check_commit; effective-contract composition
-    virtual_chunks.rs      — branches_root / commits_root projection (used by ops::scope, ops::get)
+    virtual_chunks.rs      — db/branches / db/commits projection (used by ops::scope, ops::get)
     bootstrap.rs           — initial seed on fresh open (main branch + initial commit)
     ops/                   — public surface; one module per Db method
       mod.rs               — re-exports
@@ -676,7 +685,6 @@ Comments are reserved for the genuinely non-obvious — the post-`tx.commit()` b
 
 - **Cross-call read snapshots** — explicit handles for multi-read consistency.
 - **Branch-meta commits** — whether `create_branch`/`delete_branch` should write commits on a meta-branch for uniform traceability.
-- **Mixing virtual and real scopes** in one `scope` call. Currently rejected.
 - **FTS branch-scoping** — currently FTS holds all branches; branch filter at query time.
 - **Bootstrap IDs** — resolved at the substrate level (lookup-by-name); carries through.
 - **Time-travel query optimization** — recursive ancestry walk is correct but unmeasured.

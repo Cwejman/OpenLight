@@ -1,39 +1,46 @@
 # Bootstrap
 
-Three `commit()` calls — one per root scope (`engine`, `ui`, `agent`; see [`pilot.md`](../pilot.md#three-root-scopes-stand-for-three-peers)). The pilot uses a single database with these three scopes standing in for what a peered system would mount from separate sources. Engine and UI chunks come first, as if mounted from external databases. Agent chunks come last, referencing engine contracts by placing instances on them.
+Each project has its own bootstrap — the initial commit that seeds its substrate when the project is first initialized. v0.1's first-party projects (`engine`, `host`, `agents`) each ship a bootstrap routine; running `ol init` against an empty directory creates the `.ol/db` and runs the appropriate routine.
 
-## Commit 1: Engine
+The three first-party projects' bootstraps below show what each db starts with. In the running system, these three dbs are mounted together (active project + host + engine) and the engine federates queries across them — so an invocable in the active project is `instance` on `engine/program`, with the placement record in the active project's db and the archetype chunk in the engine project's db. Cross-db placements work by virtue of globally-unique ULIDs; see [`engine.md`](engine.md#engine-api-callable-from-the-host).
 
-Runtime contracts and primitives. In a peered system these come from the engine's own database.
+## The engine project's bootstrap
+
+Runtime contracts and primitives. Lives in the engine project's db; mounted by every project that runs anything.
 
 1. `engine` — root scope
-2. `program` archetype on `engine`: `{ required: ['executable', 'runtime'] }`. Any chunk with an executable and a runtime declaration is a program; instances of program are the runnable things in the system. The `runtime` field is `'webview' | 'vm'` (see [`engine.md`](engine.md#program-and-process)); other body fields (`capabilities`, `boundary`, `timeout_ms`) are optional.
+2. `program` archetype on `engine`: `{ required: ['executable', 'runtime'] }`. Any chunk with an executable and a runtime declaration is a program; instances of `engine/program` are the runnable things in the system. The `runtime` field is a string identifying the registered runtime kind (`'webview'`, `'vm'`, future kinds); other body fields (`capabilities`, `boundary`, `timeout_ms`) are optional.
 3. `process` archetype on `engine`: `{ propagate: true }`. A process chunk is the artifact of a run — created by the engine each time a program is invoked. `propagate: true` so any typed arguments placed on a process are validated against the program's `accepts`. The engine writes process state into the body (`status`, `started`, `pid`, `timeout_ms`, `error?` — see [`engine.md`](engine.md#program-and-process)); these are engine-managed, not enforced by the substrate's spec rules.
-4. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
-5. `write-boundary` on `engine` (instance) and `process` (relates).
+4. `mount` archetype on `engine`. The archetype is real and stored; concrete instances are synthesized at query time from the engine's in-memory mount registry — they are not stored in any db.
+5. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
+6. `write-boundary` on `engine` (instance) and `process` (relates).
 
-## Commit 2: UI
+## The host project's bootstrap
 
-Composition primitives for the host's interface layer. In a peered system these come from the host module's own database.
+Composition primitives for the host's interface layer. Lives in the host project's db; mounted by every project a user opens in the host.
 
-1. `ui` — root scope
-2. `session` on `ui`: `{ propagate: true, accepts: ['tab', 'process'] }`. The outer container of the host's interface state — a session holds tabs (current arrangements) and processes (running and completed programs, visible in the sidebar).
-3. `tab` on `ui`: `{ propagate: true, accepts: ['tile'] }`. The root of a tile tree. Workspaces are tabs.
-4. `tile` on `ui`: `{ ordered: true }`. A node in the split tree. Split nodes carry `{ direction, ratio }`; leaf nodes are empty and point at a process through a `relates` placement.
-5. `overlay` on `ui`. A program rendered above its anchor (session, tab, or tile) rather than inside the tile composition.
-6. `recipe` on `ui`: `{ propagate: true, accepts: ['tile'] }`. A preserved tile subtree that can be spawned into a new root.
+1. `host` — root scope
+2. `session` on `host`: `{ propagate: true, accepts: ['tab', 'process'] }`. The outer container of the interface state — a session holds tabs (current arrangements) and processes (running and completed programs, visible in the sidebar).
+3. `tab` on `host`: `{ propagate: true, accepts: ['tile'] }`. The root of a tile tree. Workspaces are tabs.
+4. `tile` on `host`: `{ ordered: true }`. A node in the split tree. Split nodes carry `{ direction, ratio }`; leaf nodes are empty and point at a process through a `relates` placement.
+5. `overlay` on `host`. A program rendered above its anchor (session, tab, or tile) rather than inside the tile composition.
+6. `recipe` on `host`: `{ propagate: true, accepts: ['tile'] }`. A preserved tile subtree that can be spawned into a new root.
 
-## Commit 3: Agent
+## The `agents` project's bootstrap
 
-Project tools and concrete programs. References engine contracts across the peer boundary.
+Concrete programs and the agent's working scopes. Lives in the agents project's db. References engine and host archetypes via cross-db placements (the placement records live in agents' db; the archetype chunks live in the mounted engine and host project dbs).
 
-1. `agent` — root scope
-2. `session` archetype on `agent`: `{ propagate: true, ordered: true, accepts: ['prompt', 'answer', 'tool-call', 'tool-result', 'context'] }`. Distinct from `ui/session` — this is the agent's interaction trace.
-3. Session event types on `agent` (instance) and `session` (relates): `prompt` with `{ required: ['text'] }`, `answer`, `tool-call` with `{ required: ['program'] }`, `tool-result` with `{ required: ['program'] }`, `context` with `{ ordered: true }`.
-4. Tool programs on `agent` (instance) and `program` (instance): `filesystem`, `shell`, `web`. Each declares `{ propagate: true, accepts: [argument-type], runtime: 'vm' }`, an intrinsic boundary limited to its own process scope, and the executable path. Each argument type is `relates` on its program with `{ required: [...] }` and a schema in body for API tool generation.
-5. `claude` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt'], runtime: 'vm' }`. `session`, `context`, `prompt` placed `relates` on `claude`. Intrinsic boundary: `open` — defers all restriction to the run.
-6. `echo` on `agent` (instance) and `program` (instance): `{ propagate: true, accepts: ['message'], runtime: 'vm' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
+1. `agents` — root scope.
+2. `session` archetype on `agents`: `{ propagate: true, ordered: true, accepts: ['prompt', 'answer', 'tool-call', 'tool-result', 'context'] }`. Same conceptual primitive as `host/session` — both are *temporary fields where work happens* (per [`inside.md`](../inside.md#boundary-opening-and-the-rhythm-of-sessions)) — applied to two domains: the host's user-facing workspace state, the agent's working scope. Sequential history is one dimension; context, prompts, and tool exchanges add others. Two namespaces, distinct chunks, no collision.
+3. Session event types on `agents` (instance) and `session` (relates): `prompt` with `{ required: ['text'] }`, `answer`, `tool-call` with `{ required: ['program'] }`, `tool-result` with `{ required: ['program'] }`, `context` with `{ ordered: true }`.
+4. Tool programs on `agents` (instance) and `engine/program` (instance): `filesystem`, `shell`, `web`. Each declares `{ propagate: true, accepts: [argument-type], runtime: 'vm' }`, an intrinsic boundary limited to its own process scope, and the executable path. Each argument type is `relates` on its program with `{ required: [...] }` and a schema in body for API tool generation.
+5. `claude` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt'], runtime: 'vm' }`. `session`, `context`, `prompt` placed `relates` on `claude`. No intrinsic boundary placement — claude is *open*, deferring all restriction to the run.
+6. `echo` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['message'], runtime: 'vm' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
+
+The `engine/program` archetype these programs are placed `instance` on lives in the engine project's db (mounted as a peer). The placement record itself is stored in the agents project's db. Cross-db placements work via globally-unique ULIDs; the engine federates resolution at query time.
 
 ---
 
-**After bootstrap.** The substrate holds the three root scopes with their contracts. Bootstrap doesn't create a `ui/session` or any tabs; the first time the host launches, it creates an initial session and an empty tab for the user to work from. That first action is a program run, not part of the bootstrap commit.
+**After bootstrap.** Each project's db holds its own root scope and contracts. Running the host against the active project mounts host and engine as peers, federates the substrate, and the system is reachable. Bootstrap doesn't create a `host/session` instance or any tabs; the first time the host launches, it creates an initial session and an empty tab for the user to work from. That first action is a program run, not part of any project's bootstrap commit.
+
+The `ol init` CLI for fresh projects is part of host implementation; it writes `.ol/db`, runs the appropriate bootstrap commit, and writes a starter `.ol/project.toml` declaring the host and engine projects as required mounts.
