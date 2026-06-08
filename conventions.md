@@ -2,6 +2,13 @@
 
 Working agreements — how we operate together on this project. The principles that shape *how the work happens* (no mind holds complexity, simple is not easy, prefer data, name what you don't know) live in [`inside.md`](inside.md) under **Principles**, and the values beside them. This file holds the operating rules and code-level expressions that aren't themselves principles or values.
 
+## Hold the bar
+
+The quality standard is yours to hold, not the user's to supply — if you can't recognize good work without being told, the spec-based premise is broken. Judge your own output against the principles; don't make the user your editor or close a turn asking "what's wrong?" — say where it stands, and why, in your own read.
+
+- **Check before you claim.** "Done," "covered," "nothing lost" are claims — verify each against the files before stating it, and show the check. Don't trust one pass of your own reasoning (*No mind holds complexity*).
+- **Say it once, terse.** Less is more, in the specs and in replies alike. Cut what doesn't earn its place; don't hedge, don't credential-drop; describe the embodiable taste and stop.
+
 ## Code
 
 The architecture — prefer data, pure functions, one source, decompose, coherence — lives in [`inside.md`](inside.md) under **Principles**. These are its code-level expressions.
