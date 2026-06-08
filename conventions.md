@@ -1,6 +1,13 @@
 # Conventions
 
-Working principles that shape how the work happens on this project.
+Working agreements — how we operate together on this project. The principles that shape *how the work happens* (no mind holds complexity, simple is not easy, prefer data, name what you don't know) live in [`inside.md`](inside.md) under **Principles**, and the values beside them. This file holds the operating rules and code-level expressions that aren't themselves principles or values.
+
+## Code
+
+The architecture — prefer data, pure functions, one source, decompose, coherence — lives in [`inside.md`](inside.md) under **Principles**. These are its code-level expressions.
+
+- **Vanilla TypeScript, few abstractions.** Keep the abstractions few, so the code is recognizable regardless of a developer's background. JavaScript can be bent fully functional, but we avoid currying, piping, and other FP fancies — reach for the plain construct.
+- **Declarative helpers.** Prefer chainable methods — `map`, `filter`, `reduce`, `some`, `every` — over manually mutating variables through `for`-loops. Prefer a simple ternary over an `if` that mutates, when it doesn't get too complex.
 
 ## Subagent grounding
 

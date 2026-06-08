@@ -20,11 +20,11 @@ This is not a knowledge base an agent queries. It is a computing environment —
 
 > Read in order. Each file below assumes the previous as ground. `pilot/` sub-specs and `research/` are reference depths — descend only when work calls for them.
 
-[`inside.md`](inside.md) — the values and visions, inside-out. Everything else answers to this.
+[`inside.md`](inside.md) — principles, values, and horizon, inside-out. The disciplines the work runs on, what they answer to, and what they reach toward. Everything else answers to this.
 
 [`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate-and-program shape the values demand. The substrate library lives under [`pilot/db/`](pilot/db/).
 
-[`conventions.md`](conventions.md) — working principles that shape how the work happens. Short, hard-earned.
+[`conventions.md`](conventions.md) — working agreements for how we operate together, plus code-level conventions. Short. The principles that shape how the work happens live in `inside.md`.
 
 [`board.md`](board.md) — current state, recent decisions, tracked debt. Where the work stands against the pilot's plan.
 
