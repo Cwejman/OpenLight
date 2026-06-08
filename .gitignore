@@ -30,3 +30,10 @@ _site/
 # SQLite WAL sidecars (the db file itself is tracked)
 db-wal
 db-shm
+
+# macOS
+.DS_Store
+
+# Claude Code local state
+.claude/worktrees/
+.claude/scheduled_tasks.lock
