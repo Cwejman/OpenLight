@@ -76,6 +76,8 @@ branch = "main"
 
 Mounts cascade transitively, deduplicated by canonical path; cycles rejected. Branches pin versions — track `main` to follow upstream, name a stable branch (`v1.2.3`) for predictability. A future `commit` field would route queries through db's existing `at` parameter for frozen snapshots.
 
+**Open: peering fragility.** Cross-mount references across evolving peers carry a fragility — when a peer advances, the active project's reads and validations can shift underneath it in ways that aren't yet fully reasoned about. The shape of this needs to mature with use; v0.1's read-only filesystem-local mounts are the narrow surface from which to learn.
+
 A mount contributes its substrate (federated read-only into the field), its invocables (peer filesystem mounted at `/peers/<id>/` inside the active project's VM), and its archetypes. Federation lives at the engine layer: reads and boundary walks across all mounts, reactivity from the active project only — read-only mounts have no in-process writer in v0.1. Writes referencing a chunk in a read-only mount return `READ_ONLY_MOUNT`. See [`engine.md`](engine.md) for federation mechanics.
 
 **Sharing scopes across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's invocables are placed there and discoverable across the field.
@@ -104,7 +106,7 @@ A program is authored however its runtime allows — TSX + React for the first-p
 
 ### Transport
 
-The program-to-engine protocol is a single JSON-lines shape with operations `scope`, `apply`, `run`, `await`. The shape is the same regardless of where a program runs; the transport differs:
+The program-to-engine protocol is a single JSON-lines shape — see [`engine.md`](pilot/engine.md) for the full operation set. The shape is the same regardless of where a program runs; the transport differs:
 
 - **Webview programs** — the SDK serializes to JSON, the host's wry IPC handler receives the message and calls the engine library directly. One hop, no extra process between.
 - **VM programs** — the SDK writes JSON lines to stdout. The engine spawns the program inside its VM and reads its stdout, processing each line through the same op handlers.
@@ -168,25 +170,25 @@ agents/              — first user-facing project for v0.1. The agent program
 
 `bootstrap.rs` (seed routines) lives inside whichever crate runs them; each project's bootstrap is its own concern (see [`pilot/bootstrap.md`](pilot/bootstrap.md)).
 
-The existing TypeScript db and engine implementations remain as the porting oracle: the Rust ports are validated by running both side by side and diffing outputs against the existing 129-test suite. Once parity holds, the TS sources retire.
+The TypeScript implementations under `pilot/db/` and `pilot/engine/` are legacy archive from earlier evolutions, not a source of truth. The spec is. Rust impl flows from the spec; tests verify against the spec.
 
 ## Build Order
 
 The implemented foundation is drawn whole in `.md` before any of it is coded. The substrate's outward face is already settled, so its conceptual spec can be audited in isolation — but its *implementation drawing* (how the Rust db actually works, both contracts) is its own document. Engine, host, and SDK are mutually-defining and grow as one holistic drawing.
 
-The rule across the spec phase: implementation drawings are derived from the inside — the conceptual spec, plus Rust and SQLite and tao and wry as materials — outward. The existing TypeScript implementation is a **correctness oracle** for the port (it verifies behavior, diff outputs against it). It is not a **design oracle** the Rust copies from. Reading TS to translate it would be outside-to-outside; reading the spec and writing Rust-natural code is inside-out.
+The rule across the spec phase: implementation drawings are derived from the inside — the conceptual spec, plus Rust and SQLite and tao and wry as materials — outward. Inside-out: the spec defines, the implementation flows.
 
 **Spec phase — draw the foundation holistically.**
 
 1. **Substrate component.**
    - **1a.** Audit [`pilot/substrate.md`](pilot/substrate.md) for gaps in the two contracts: consumer ↔ db (the program-facing operations and types), db ↔ sqlite (the schema, indexes, FTS, transaction discipline). Mostly there; small audit.
-   - **1b.** Write a new [`pilot/db.md`](pilot/db.md) — top-to-bottom drawing of how the Rust db actually works. Derived from the substrate spec, Rust idiom, and SQLite idiom. Holistic, not transliterated from the TS source.
+   - **1b.** Write a new [`pilot/db.md`](pilot/db.md) — top-to-bottom drawing of how the Rust db actually works. Derived holistically from the substrate spec, Rust idiom, and SQLite idiom.
 2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`pilot/engine.md`](pilot/engine.md), [`pilot/host.md`](pilot/host.md), and a new [`pilot/sdk.md`](pilot/sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
 
 **Implementation phase — code from the settled drawings.**
 
-3. **Code the db crate** from [`pilot/db.md`](pilot/db.md). TS suite as correctness oracle.
-4. **Code the engine crate** from [`pilot/engine.md`](pilot/engine.md), including `engine/sdk/` (the runtime-agnostic TypeScript package). TS suite as correctness oracle.
+3. **Code the db crate** from [`pilot/db.md`](pilot/db.md).
+4. **Code the engine crate** from [`pilot/engine.md`](pilot/engine.md), including `engine/sdk/` (the runtime-agnostic TypeScript package).
 5. **Scaffold host** — tao + wry, window, one webview, the wry IPC handler dispatching to the engine library; the mounts cascade walk; VM and webview runtime providers; `host/ui/` React library scaffold.
 6. **First program: read tile.** Validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
 7. **Remaining first-party host programs** — sidebar, tab-bar, command-palette, dispatcher.

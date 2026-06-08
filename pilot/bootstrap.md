@@ -11,9 +11,10 @@ Runtime contracts and primitives. Lives in the engine project's db; mounted by e
 1. `engine` — root scope
 2. `program` archetype on `engine`: `{ required: ['executable', 'runtime'] }`. Any chunk with an executable and a runtime declaration is a program; instances of `engine/program` are the runnable things in the system. The `runtime` field is a string identifying the registered runtime kind (`'webview'`, `'vm'`, future kinds); other body fields (`capabilities`, `boundary`, `timeout_ms`) are optional.
 3. `process` archetype on `engine`: `{ propagate: true }`. A process chunk is the artifact of a run — created by the engine each time a program is invoked. `propagate: true` so any typed arguments placed on a process are validated against the program's `accepts`. The engine writes process state into the body (`status`, `started`, `pid`, `timeout_ms`, `error?` — see [`engine.md`](engine.md#program-and-process)); these are engine-managed, not enforced by the substrate's spec rules.
-4. `mount` archetype on `engine`. The archetype is real and stored; concrete instances are synthesized at query time from the engine's in-memory mount registry — they are not stored in any db.
-5. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
-6. `write-boundary` on `engine` (instance) and `process` (relates).
+4. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
+5. `write-boundary` on `engine` (instance) and `process` (relates).
+
+`engine/mount` is not bootstrapped — it is a virtual scope (like `db/commits`, `db/branches`), with both archetype and instances synthesized by the engine from its in-memory mount registry. See [`engine.md`](engine.md).
 
 ## The host project's bootstrap
 

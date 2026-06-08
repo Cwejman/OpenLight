@@ -168,12 +168,14 @@ createRoot(document.getElementById('root')!).render(<ReadTile />)
 Operations the SDK exposes (in `@openlight/sdk`):
 
 - `scope(ids, opts?)` — read the intersection of scopes.
+- `get(id, opts?)` — fetch one chunk by id.
 - `commit(declaration)` — write.
 - `run(programId, args)` — start a new process; returns the process id.
 - `awaitRun(processIds)` — block until processes complete; returns their scopes.
+- `cancel(processId)` — terminate a running process.
 - `subscribe(ids, callback)` — imperative subscription. Returns an `unsubscribe` thunk. Typically consumed through `useScope`.
 
-React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/ui`. The starting hook is `useScope(ids)` — calls `scope` for initial data, registers a `subscribe`, re-fetches on `scope_changed`, unsubscribes on unmount. A richer hook vocabulary may emerge through use. Full surface in [`pilot/sdk.md`](sdk.md).
+React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/ui`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `scope_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
 
 ---
 

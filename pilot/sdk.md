@@ -79,6 +79,8 @@ Imperative subscription. The callback receives:
 - `{ kind: 'lagged' }` when the engine's input channel overflowed and this subscription may have missed events — re-fetch to recover.
 - `{ kind: 'invalid', reason }` when the engine has invalidated and unsubscribed this subscription (a subscribed scope became unreachable). No further events will come; the subscription is dead.
 
+The wire `lagged` event carries `subscriptionIds: string[]` — the SDK matches those against its registered subscriptions and fires `{ kind: 'lagged' }` only on the affected callbacks. Subscribers without an id in the list see nothing.
+
 The returned thunk unsubscribes. Calling it after a `kind: 'invalid'` is a no-op (subscriptions are already gone server-side).
 
 ---
@@ -91,7 +93,9 @@ The host's UI library exposes React hooks built on `@openlight/sdk`. v0.1 ships 
 useScope(scopes: ChunkId[], opts?: ScopeOpts): ScopeResult | undefined
 ```
 
-**Contract.** On mount and on every dependency change: fetch initial state via `scope`, register a `subscribe`, re-fetch on every `scope_changed` or `lagged` event, unmount → unsubscribe. The hook returns the latest fetched result; `undefined` until the first fetch resolves. On `subscription_invalid` (engine-emitted when a subscribed scope becomes unreachable), the hook stops re-fetching and returns `undefined` — the subscription is dead, the data is gone.
+**Contract.** On mount and on every dependency change: register a `subscribe` first, *then* fetch initial state via `scope`, re-fetch on every `scope_changed` or `lagged` event, unmount → unsubscribe. The hook returns the latest fetched result; `undefined` until the first fetch resolves. On `subscription_invalid` (engine-emitted when a subscribed scope becomes unreachable), the hook stops re-fetching and returns `undefined` — the subscription is dead, the data is gone.
+
+**Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `scope` together must follow the same ordering.
 
 **Why re-fetch every event** rather than apply the event's `commit` payload as a delta. Single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available to the callback for delta optimization in custom uses, but the default discards it.
 
@@ -159,20 +163,22 @@ type Commit = {
   id: CommitId
   parent_id?: CommitId
   timestamp: string
+  message?: string
+  process_id?: ProcessId   // which run caused this commit; absent for host-initiated commits
   chunks_modified: ChunkId[]
   placements_modified: [ChunkId, ChunkId][]
 }
 
 type RunArgs = {
   chunks: ChunkDeclaration[]
-  readBoundary: ChunkId[]
-  writeBoundary: ChunkId[]
+  readBoundary: ChunkId[]    // scope roots — the SDK builds a fresh boundary chunk per run
+  writeBoundary: ChunkId[]   // same — programs always supply roots
   timeout_ms?: number
 }
 
 type EngineError = {
-  code: 'BOUNDARY_VIOLATION' | 'VALIDATION_ERROR' | 'NOT_FOUND'
-      | 'RUN_FAILED' | 'INVALID_REQUEST'
+  code: 'BOUNDARY_VIOLATION' | 'READ_ONLY_MOUNT' | 'VALIDATION_ERROR'
+      | 'NOT_FOUND' | 'RUN_FAILED' | 'INVALID_REQUEST' | 'TRANSPORT_CLOSED'
   message: string
 }
 ```
@@ -214,7 +220,7 @@ The SDK does not render. Webview programs that want React render with `createRoo
 
 A subscription registers `(scopes, callback)` with the engine via the `subscribe` op. The engine does a boundary check at registration; out-of-boundary scopes return `BOUNDARY_VIOLATION` and the SDK rejects the call. On success the engine returns a `subscriptionId`, which the SDK keeps in an internal registry mapping ids to callbacks.
 
-When the engine fires a `scope_changed` event, the SDK looks up the subscription and invokes its callback with the commit payload. When the engine fires a `lagged` event, the SDK invokes every named subscription's callback with `null`.
+When the engine fires a `scope_changed` event, the SDK looks up the subscription and invokes its callback with `{ kind: 'changed', commit }`. When the engine fires a `lagged` event (carrying `subscriptionIds`), the SDK invokes only the affected callbacks with `{ kind: 'lagged' }` — subscriptions whose ids are not in the list see nothing.
 
 `unsubscribe` is the returned thunk. It removes the entry from the registry and calls the engine's `unsubscribe` op. Unsubscribing is also automatic when the calling process reaches terminal state — the engine drops all of a process's subscriptions on cleanup.
 

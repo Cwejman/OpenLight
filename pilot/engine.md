@@ -23,10 +23,10 @@ The engine federates across multiple substrate dbs — one read-write **active p
 
 ```
 engine/program
-  spec: { required: ['executable'] }
+  spec: { required: ['executable', 'runtime'] }
 ```
 
-`engine/program` only enforces `executable` via spec. Other body fields a program may carry — `runtime` (the runtime kind to spawn under), `capabilities`, `timeout_ms` — are documented in the archetype's own body content, not in the spec mechanism. The substrate is self-describing: what an instance of `engine/program` "should" carry lives where any reader of the substrate can find it. A program's intrinsic boundary is expressed as a `relates` placement on a boundary chunk, not as a body field — absence of placement means the program defers all boundary concerns to the run.
+`engine/program` enforces `executable` and `runtime` via spec — the engine needs both to dispatch. Other body fields a program may carry — `capabilities`, `timeout_ms` — are optional and documented in the archetype's own body content, not in the spec mechanism. The substrate is self-describing: what an instance of `engine/program` "should" carry lives where any reader of the substrate can find it. A program's intrinsic boundary is expressed as a `relates` placement on a boundary chunk, not as a body field — absence of placement means the program defers all boundary concerns to the run.
 
 Concrete programs — filesystem, shell, claude, echo, read-tile, sidebar — are chunks placed `instance` on `engine/program`.
 
@@ -41,14 +41,38 @@ A process is `instance` on `engine/process` (so every run shows up in the proces
 
 The two boundary chunks for a run (read-boundary and write-boundary) are `relates` on the process; their content (the scope roots they grant reach over) is `relates` placements on each boundary chunk respectively.
 
+Concrete topology for a run with read roots `[R1, R2]` and write roots `[W1]`:
+
 ```
-engine/mount
-  — One per currently-active mount. Synthesized by the engine at query time
+process chunk P
+  placements:
+    instance on engine/process
+    instance on <program>
+    instance on <each caller-supplied scope, e.g. host/session>
+
+read-boundary chunk B_r
+  placements:
+    instance on engine/read-boundary       — typing
+    relates on P                           — execution config of this run
+
+R1, R2 (existing chunks the boundary grants reach over)
+  added placement (per root):
+    relates on B_r
+
+write-boundary chunk B_w  — same shape as B_r
+W1 — same shape as R1, R2 with relates on B_w
+```
+
+Reading the boundary at use time: walk `relates` from the process to find boundary chunks (filtered to those `instance` on the appropriate boundary archetype); walk `relates` from each boundary chunk to find its scope roots.
+
+```
+engine/mount  (virtual)
+  — Both archetype and instances synthesized by the engine at query time
     from its in-memory mount registry; not stored in any db.
   body carries: project_id, branch, mode, commit?
 ```
 
-`engine/mount` is the archetype; concrete instances are synthesized at query time from the engine's mount registry. Every chunk surfaced from mount X carries a synthesized `relates` placement on X's `engine/mount` instance — provenance through native substrate plumbing. Programs can `scope([engine_mount_root])` to list current mounts; intersect any scope with a specific mount instance to narrow to chunks from that mount (e.g., `db/commits ∩ engine/mount[X]` for commits from mount X, or `engine/program ∩ engine/mount[X]` for invocables defined there).
+`engine/mount` is a virtual scope, in the same family as `db/commits` and `db/branches` — neither archetype nor instances live in any db. The engine synthesizes both at query time from its mount registry. Every chunk surfaced from mount X carries a synthesized `relates` placement on X's `engine/mount` instance — provenance through native substrate plumbing. Programs can `scope([engine_mount_root])` to list current mounts; intersect any scope with a specific mount instance to narrow to chunks from that mount (e.g., `db/commits ∩ engine/mount[X]` for commits from mount X, or `engine/program ∩ engine/mount[X]` for invocables defined there).
 
 ---
 
@@ -61,6 +85,7 @@ One JSON-lines protocol serves every program regardless of where it runs.
 | Operation | Description |
 |---|---|
 | `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. FTS filtering via `ScopeOpts.match_`. |
+| `get` | Fetch a single chunk by id. Returns `null` if the chunk does not exist; rejected if the chunk is outside the read boundary. Convenience over `scope([id])` when only the chunk itself is wanted (no placements, no dimensions). |
 | `commit` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. |
 | `run` | Start a new program run. Returns the process id immediately. Used internally by the engine for tool calls. |
 | `await` | Wait for one or more processes to reach a terminal state. Returns each process's final scope. The call resolves when processes terminate; it suspends the calling task in async runtimes, doesn't block other work in the engine. |
@@ -73,16 +98,18 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 
 ```jsonl
 {"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"],"opts":{"match_":"session today"}}
-{"id":2,"op":"commit","declaration":{"chunks":[...]}}
-{"id":3,"op":"run","program":"filesystem","args":{...}}
-{"id":4,"op":"await","processes":["p_1","p_2"]}
-{"id":5,"op":"subscribe","scopes":["my-session"]}
-{"id":6,"op":"unsubscribe","subscriptionId":"sub_1"}
+{"id":2,"op":"get","chunkId":"chunk_abc"}
+{"id":3,"op":"commit","declaration":{"chunks":[...]}}
+{"id":4,"op":"run","program":"filesystem","args":{...}}
+{"id":5,"op":"await","processes":["p_1","p_2"]}
+{"id":6,"op":"subscribe","scopes":["my-session"]}
+{"id":7,"op":"unsubscribe","subscriptionId":"sub_1"}
 ```
 
 | Op | Result shape |
 |---|---|
 | `scope` | `ScopeResult` |
+| `get` | `ChunkItem \| null` |
 | `commit` | `Commit` (id, parent_id, timestamp, chunks_modified, placements_modified) |
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ScopeResult>` — process id → final scope |
@@ -195,6 +222,8 @@ impl Engine {
     // sync — return immediately
     pub fn scope(&self, ctx: &Context, scopes: &[ChunkId], opts: ScopeOpts)
         -> Result<ScopeResult, EngineError>;
+    pub fn get(&self, ctx: &Context, chunk_id: &ChunkId, opts: ReadOpts)
+        -> Result<Option<ChunkItem>, EngineError>;
     pub fn commit(&self, ctx: &Context, decl: Declaration)
         -> Result<Commit, EngineError>;
     pub fn run(&self, ctx: &Context, args: RunArgs)
@@ -211,7 +240,7 @@ impl Engine {
 }
 ```
 
-The engine has no runtime-specific entry points. Readiness signaling (e.g., a webview has been mounted and navigated, a VM child has attached its stdio) is owned by the runtime provider — `spawn` returns a `RuntimeHandle` that includes a `ready` signal the engine awaits to flip the slot phase to `Running`. See *Runtime providers* below.
+The engine has no runtime-specific entry points. Readiness signaling (e.g., a webview has been mounted and navigated, a VM child has attached its stdio) is owned by the runtime provider — `spawn` returns a `RuntimeHandle` that includes a `ready` signal the engine awaits to flip the slot status to `Running`. See *Runtime providers* below.
 
 **Boot lifecycle.** Host opens engine (no db yet), registers runtime providers (`register_runtime`), then mounts projects in any order. The active project is mounted with `ReadWrite`; peers with `ReadOnly`. Reconciliation of zombie processes (`pending|running` from a previous run) happens on `ReadWrite` mounts only; peer dbs may carry stale process chunks but the engine cannot rewrite them.
 
@@ -242,8 +271,8 @@ The engine has no runtime-specific entry points. Readiness signaling (e.g., a we
 A single atomic `db.commit()` creates:
 
 1. **The process chunk.** Empty body except `status: 'pending'`. Placements: `instance` on the program (so the process is listed under the program), `instance` on `engine/process` (so every run is in the process scope), and `instance` on each scope id the caller passed in `RunArgs.placements` (host passes the host/session id at top-level runs; tool calls pass the parent process id; the engine itself doesn't know about host-side scopes).
-2. **A read-boundary chunk** (when `RunArgs.read_boundary` is `BoundarySpec::Roots(_)`). Placements: `instance` on `read-boundary` (type), `relates` on the process (execution configuration, not structural content). Each boundary scope root is placed `relates` on this chunk by identity. When `BoundarySpec::Existing(chunk_id)` is given, the named boundary chunk is `relates` on the process directly — no fresh chunk created.
-3. **A write-boundary chunk.** Same shape for `write-boundary`.
+2. **A read-boundary chunk** (when `RunArgs.read_boundary` is `BoundarySpec::Roots(_)`). Placements: `instance` on `engine/read-boundary` (type), `relates` on the process (execution configuration, not structural content). Each boundary scope root is placed `relates` on this chunk by identity. When `BoundarySpec::Existing(chunk_id)` is given, the named boundary chunk is `relates` on the process directly — no fresh chunk created.
+3. **A write-boundary chunk.** Same shape for `engine/write-boundary`.
 4. **The argument chunks passed by the caller.** Each receives a `{ scope_id: processId, type: 'instance' }` placement added by the engine. The substrate's `accepts` check validates the composed contract.
 
 Pre-generated ids let the engine reference the process from the boundary placements in the same declaration.
@@ -361,6 +390,8 @@ struct ProcessSlot {
 }
 ```
 
+`ProcessStatus` is one enum used both in-memory (slot watcher) and at the substrate body field. Same four variants throughout; one shape, one source of truth.
+
 The process map is `HashMap<ProcessId, ProcessSlot>` guarded by a Mutex. Slots are created on `run` and removed on terminal-state transition.
 
 ### `run`
@@ -369,12 +400,13 @@ The slot is inserted *before* the substrate write so that `cancel` and `timeout`
 
 1. **Generate `process_id`** and compose the declaration. Process chunk + read-boundary chunk + write-boundary chunk + the caller's argument chunks (see *Process Creation*).
 2. **Insert the slot.** Status `pending`. Register the timeout JoinHandle (fires after `timeout_ms`).
-3. **`db.commit(declaration)`** — atomic. If commit fails, remove the slot and return error.
-4. **Look up the runtime provider** for the program's `runtime` field and call `provider.spawn(SpawnContext { process_id, program, request_tx })`. Provider returns a `RuntimeHandle` with `transport`, `ready`, and `terminal` channels. Engine stores them on the slot.
-5. **Wire readiness to phase.** Engine spawns a small task that awaits `handle.ready` and flips slot status to `running` when it resolves; another awaits `handle.terminal` and triggers cleanup. The provider drives both signals on its own schedule.
-6. **Return `process_id`.**
+3. **`db.commit(declaration)`** — atomic. If commit fails, remove the slot and return error. The commit is not interruptible mid-flight; once entered, it runs to completion or rolls back as a unit.
+4. **Status check.** If `cancel` or `timeout` fired between steps 2–3 and flipped the status to `failed`, skip steps 5–6 and run cleanup (which writes the follow-up `status: failed` commit and removes the slot). Cleanup always has a substrate chunk to write to, since step 3 always completes.
+5. **Look up the runtime provider** for the program's `runtime` field and call `provider.spawn(SpawnContext { process_id, program, request_tx })`. Provider returns a `RuntimeHandle` with `transport`, `ready`, and `terminal` channels. Engine stores them on the slot.
+6. **Wire readiness to status.** Engine spawns a small task that awaits `handle.ready` and flips slot status to `running` when it resolves; another awaits `handle.terminal` and triggers cleanup. The provider drives both signals on its own schedule.
+7. **Return `process_id`.**
 
-If `cancel(process_id)` or the timeout fires between any of steps 2–5, the slot's status flips to `failed`. The next step in the run path checks status before proceeding: the spawn step is skipped, the running flip is skipped, and cleanup (below) takes over. The process chunk in the substrate, born `pending`, gets a follow-up commit to status `failed` during cleanup.
+If `cancel(process_id)` or the timeout fires between steps 2–3, the check at step 4 catches it: substrate has the chunk (born pending), cleanup writes the terminal commit, slot is removed. If a cancel fires between steps 5–6 (after spawn), the running-flip / terminal-watcher tasks see the failed status and trigger cleanup directly — cleanup additionally drops the spawn handle (killing the runtime process if still alive). In all cases the substrate carries a complete record (`pending → failed`) and `await_processes` resolves to that terminal state.
 
 `cancel(process_id)` is idempotent. A cancel for a `process_id` whose slot does not exist — either because the slot hasn't been inserted yet, has already been removed, or never existed — returns `Ok`. The desired state ("process is not running") is satisfied; callers don't need to race against terminal cleanup. The same applies to cancel for an already-terminal process.
 
@@ -532,7 +564,7 @@ Programs do not write raw protocol messages. They import the SDK and call typed 
 - **Webview programs** — the SDK calls `window.__wry_ipc.postMessage(...)`. The host's IPC handler deserializes, calls the corresponding engine function, and returns the result through wry's response channel.
 - **VM programs** — the SDK writes a JSON line to stdout. The engine, which spawned the program inside its VM, reads each line and calls the corresponding engine function.
 
-Implementation lives under [`pilot/sdk/`](sdk/) and is specified in [`pilot/sdk.md`](sdk.md) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
+Implementation lives under [`engine/sdk/`](../engine/sdk/) and is specified in [`pilot/sdk.md`](sdk.md) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
 
 ---
 
@@ -545,7 +577,7 @@ pilot/engine/
   src/
     lib.rs              — public re-exports
     types.rs            — Context, RunArgs, ProcessId, SubscriptionId, ProjectId,
-                          MountMode, RuntimeKind, ProcessStatus, SlotPhase, Event,
+                          MountMode, RuntimeKind, ProcessStatus, Event,
                           HostCmd, EffectiveBoundary, plus Display/From impls
     errors.rs           — EngineError (single enum); MountError, RegisterError;
                           From<DbError>, From<ProtocolError>
@@ -558,7 +590,7 @@ pilot/engine/
                           the runtime registry; register_runtime / lookup
     bootstrap.rs        — reconcile_zombies(&Db): one scope query, one declarative
                           commit. Run on read-write mounts only.
-    process.rs          — ProcessSlot { phase: watch::Sender<SlotPhase>,
+    process.rs          — ProcessSlot { status: watch::Sender<ProcessStatus>,
                                         spawn: SpawnHandle, timeout, config };
                           SpawnHandle enum; set_terminal, flip, cascade_children
     subscription.rs     — Subscription, TransportRef, SubscriptionRegistry;
@@ -574,15 +606,16 @@ pilot/engine/
     ops/                — public surface; one module per Engine method
       mod.rs            — re-exports
       scope.rs          — Engine::scope    (reachable check → federated db.scope)
+      get.rs            — Engine::get      (reachable check → federated db.get)
       commit.rs         — Engine::commit   (reachable + protected + read-only-mount
                                             → active db.commit)
       run.rs            — Engine::run      (insert slot → declaration → db.commit →
                                             runtime provider spawn → flip → return)
       cancel.rs         — Engine::cancel   (set_terminal → cleanup)
       subscribe.rs      — Engine::subscribe / unsubscribe
-      await_processes.rs — Engine::await_processes (async; phase watcher with
+      await_processes.rs — Engine::await_processes (async; status watcher with
                                                     substrate fallback)
-  tests/                — integration; oracle-checked against the TS engine
+  tests/                — integration tests against the spec
   Cargo.toml
 ```
 
@@ -602,7 +635,7 @@ Comments are reserved for the genuinely non-obvious — race semantics, ordering
 
 **Runtime registry as plug-in points.** The engine holds `runtimes: HashMap<RuntimeKind, Arc<dyn RuntimeProvider>>`, populated at boot via `register_runtime`. `ops::run` looks up the program's `runtime` field as a key and asks the registered provider to spawn — engine has no built-in runtime knowledge. Adding a new runtime kind is purely additive (implement `RuntimeProvider`, register it).
 
-**State authority follows lifecycle.** A process has two natural homes — its slot (live runtime: spawn handle, phase watcher, timeout) and its substrate chunk (durable: status, error). The slot is authoritative while the process is active; the substrate is authoritative once the slot is gone. Authority transfers in one ordered step at terminal: cleanup writes the terminal status, then drops the slot. `await_processes` resolves either side — slot present, watch the phase; slot absent, read the substrate (always terminal there). One truth at any moment; the seam is the cleanup commit.
+**State authority follows lifecycle.** A process has two natural homes — its slot (live runtime: spawn handle, status watcher, timeout) and its substrate chunk (durable: status, error). The slot is authoritative while the process is active; the substrate is authoritative once the slot is gone. Authority transfers in one ordered step at terminal: cleanup writes the terminal status, then drops the slot. `await_processes` resolves either side — slot present, watch the status; slot absent, read the substrate (always terminal there). One truth at any moment; the seam is the cleanup commit.
 
 **Reactivity owns event emission.** The reactivity task is the engine's only consumer of `db.subscribe_scope(&[db/commits])` and the only emitter of `scope_changed` / `lagged` / `subscription_invalid`. Cleanup paths (cancel, timeout, child exit, parent cascade) trigger reactivity by writing terminal commits; they never emit events directly. This collapses what would otherwise be two writers to the subscription registry: subscription invalidation on terminal is reactivity's job, not cleanup's.
 
@@ -623,7 +656,7 @@ Comments are reserved for the genuinely non-obvious — race semantics, ordering
 - **Federation in Rust, not SQL.** `engine.scope` iterates mounts and unions results in Rust. Each `Db` stays single-file and portable on disk; broadcast channels stay per-db.
 - **Single `EngineError` enum** (not per-op like db). Engine has one wire surface; one vocabulary serves it. Principled divergence from db, justified by surface shape.
 - **`HostCmd` channel** as the host integration seam. Commands as data; engine = producer, host = consumer on its main loop. Honors `!Send` host machinery without leaking it into engine state.
-- **`tokio::sync::watch`** for `SlotPhase`. Multi-awaiter; late readers see the final value via `borrow()` after the sender drops.
+- **`tokio::sync::watch`** for `ProcessStatus`. Multi-awaiter; late readers see the final value via `borrow()` after the sender drops.
 - **`tokio::sync::broadcast::Receiver`** for the db change feed; one receiver, owned by the reactivity task.
 - **`tokio::sync::mpsc`** for `HostCmd` and per-VM stdin event queues. Bounded; drop-on-full surfaces a `lagged` event.
 - **`std::sync::Mutex`** for registries. Never held across `await`.

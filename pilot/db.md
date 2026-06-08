@@ -626,7 +626,7 @@ pilot/db/
         dimensions.rs      — dimensions CTE
         edges.rs           — edges-beyond-adjacency
         time_travel.rs     — `at: Some(commit)` ancestry walk
-  tests/                   — integration tests; oracle-checked vs the TS suite
+  tests/                   — integration tests against the spec
   Cargo.toml
 ```
 
