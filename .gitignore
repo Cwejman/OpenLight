@@ -26,3 +26,7 @@ node_modules/
 
 # Wiki build output
 _site/
+
+# SQLite WAL sidecars (the db file itself is tracked)
+db-wal
+db-shm
