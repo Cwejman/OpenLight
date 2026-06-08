@@ -6,7 +6,9 @@ Current state and what comes next. Updated as things move.
 
 ## Recent
 
-**Spec phase settled as v0.1.** Reframed from "the pilot" to v0.1 — the seed that grows. Architecture is evergreen; feature scope is intentionally narrow. db, engine, host, sdk drawn whole; cross-referenced, stress-tested, and pressure-tested through a long peering/architectural review. Ready for implementation.
+**Spec phase settled as v0.1.** Reframed from "the pilot" to v0.1 — the seed that grows. Architecture is evergreen; feature scope is intentionally narrow. db, engine, host, sdk drawn whole; cross-referenced, stress-tested, and pressure-tested through a long peering/architectural review. Refinement pass next, then implementation.
+
+- **Seed rework + Hickey distillation** (commits `4aef3fc`, `5196bc6`, `308aa89`). `inside.md` reworked into principles / values / horizon — evidence-based, folk, terse. `conventions.md` slimmed to working agreements + a code section; `coding.md` consumed. Ten Rich Hickey talks gathered and distilled through an agent council (`research/rich-hickey/`). Spec refinement: the spec is the source of truth (TS suite demoted to legacy archive), `get`/`cancel` ops added, `SlotPhase` folded into `ProcessStatus`, `engine/mount` fully virtual, subscribe-before-fetch locked.
 
 - **Peering / federation / runtime registry / shape pass** (commit `8959f7c`). Multi-project mounts are first-class in v0.1: read-only filesystem-local mounts, cascading from `.ol/project.toml`, branches as version pins. Engine became runtime-agnostic — trait + registry only; VM and webview providers live in the host crate. Engine federates reads + boundary across mounts; reactivity is single-source (active project's commits only) in v0.1. Boundaries are native placements (not body field references); RunArgs takes `BoundarySpec` (Roots vs Existing) and caller-supplied `placements`. Cross-db placements work via globally-unique ULIDs; brokenness manifests at use time; boot validation refuses half-loaded states. `engine/mount` archetype with synthesized instances. `commits_root → db/commits`, `branches_root → db/branches`, `dispatch_id → process_id`, `ui/* → host/*`. Symmetric peering / remote / sync / package merging / cross-host reactivity → horizon.
 
@@ -29,24 +31,21 @@ Current state and what comes next. Updated as things move.
 ## Tracked debt
 
 - **Bootstrap IDs are hand-picked.** [`substrate.md`](pilot/substrate.md) says chunk IDs are "globally unique, system-generated." Bootstrap and `seedTestDb()` use human-readable strings (`'agent'`, `'program'`, `'session'`) as a pragmatic shortcut so tests and seed code can reference well-known anchors. The aligned fix: switch all bootstrap chunks to generated IDs, have tests look up canonical chunks by name within scope. Carries through to the Rust port; not blocking implementation.
-- **`inside.md` carries one or two "invocable" references** in its values prose. Left alone — the inside text is held with care; touch only if the user asks.
 
 ## Next
 
-Spec phase settled. Implementation phase begins.
+Refinement before implementation — the reworked `inside.md` is the bar to hold the specs to.
 
-1. **Code the db crate** from [`pilot/db.md`](pilot/db.md). Existing TS suite (63 db tests) as correctness oracle.
-2. **Code the engine crate** from [`pilot/engine.md`](pilot/engine.md), including `engine/sdk/` (`@openlight/sdk`, runtime-agnostic, transport via auto-detect or pre-set). Existing TS suite (66 engine tests) as correctness oracle.
-3. **Scaffold host** — tao + wry, window, wry IPC handler dispatching to the engine library; mounts cascade walker; VM and webview runtime providers; `host/ui/` (`@openlight/ui`) React library scaffold.
-4. **First program: read tile** — validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
-5. **Remaining first-party host programs** — sidebar, tab-bar, command-palette, dispatcher.
-6. **Agents project** — claude, echo, tool programs (filesystem, shell, web). Active-project demo working end-to-end.
+1. **Re-read the specs through the new `inside.md`.** Apply the principles and values; tighten where db/engine/host/sdk drifted or over-specified.
+2. **Spec the UI-building programs** — read-tile, sidebar, tab-bar, command-palette, dispatcher. Thin today, and close to the core.
+3. **Spec the `agents` project** — claude, echo, tool programs. Likewise thin and core-adjacent.
+4. **Then implement** — db → engine → host → programs → agents. The spec is the source of truth (no TS oracle).
 
 ---
 
 ## Notes
 
-**The strange (`~/git/agi/`).** Referenced in [`inside.md`](inside.md) as the intellectual parent. Loose exploration — not a source of truth. Sessions should not reach for the strange to resolve questions; if the answer isn't in `inside.md`, the inside is what needs work.
+**The strange (`~/git/agi/`).** The intellectual parent — loose exploration, not a source of truth. `inside.md` no longer cites it directly; still, don't reach for it to resolve questions. If the answer isn't in `inside.md`, the inside is what needs work.
 
 **Research informing the pilot shape.** [`research/ui-landscape-draft.md`](research/ui-landscape-draft.md) (wide survey of UI paradigms), [`research/ui-stacks.md`](research/ui-stacks.md) (technically adoptable shortlist), and [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) (the runtime/surface exploration behind the `runtime: 'webview' | 'vm'` decision and the deferred topologies). Decisions distilled from these live in the pilot specs; the research files stay as reference depth.
 
