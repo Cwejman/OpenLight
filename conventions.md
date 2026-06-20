@@ -15,6 +15,8 @@ The architecture — prefer data, pure functions, one source, decompose, coheren
 
 - **Vanilla TypeScript, few abstractions.** Keep the abstractions few, so the code is recognizable regardless of a developer's background. JavaScript can be bent fully functional, but we avoid currying, piping, and other FP fancies — reach for the plain construct.
 - **Declarative helpers.** Prefer chainable methods — `map`, `filter`, `reduce`, `some`, `every` — over manually mutating variables through `for`-loops. Prefer a simple ternary over an `if` that mutates, when it doesn't get too complex.
+- **Comments for the non-obvious only.** Reserve comments for what names can't carry — race semantics, ordering invariants, primitive quirks. A handful per crate, not a paragraph per file; names carry the rest.
+- **No builders.** Direct struct construction, with free-function helpers where useful.
 
 ## Subagent grounding
 

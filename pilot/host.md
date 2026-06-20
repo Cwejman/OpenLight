@@ -264,7 +264,7 @@ Host startup has a fixed order:
 
 Shutdown reverses the order: cancel running processes, await `engine.shutdown()`, drop the VM (which unmounts FSes), drop dbs, exit.
 
-**Single-host-per-db.** v0.1 assumes one host process per project. Concurrent read access to a peer's db works at the SQLite level — a second host can read a peer's committed data — but reactive notifications do not propagate between host processes (each `Db` has its own in-process broadcast). Cross-host reactivity is a horizon item; see [`engine.md`](engine.md#engine-api-callable-from-the-host) and [`horizon.md`](../horizon.md).
+**Single-host-per-db.** v0.1 assumes one host process per project; concurrent cross-host access and reactive notification across hosts are not implemented. Mechanism and rationale: [`engine.md`](engine.md#engine-api-callable-from-the-host); horizon path: [`horizon.md`](../horizon.md).
 
 The cascade walk and FS-mount-table assembly are host code (file-aware). The mount registry and federation are engine concerns. The split is documented in [`engine.md`](engine.md#engine-api-callable-from-the-host).
 

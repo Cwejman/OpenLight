@@ -627,7 +627,7 @@ The engine crate ships **zero runtime implementations** — `runtime.rs` carries
 
 Each file composes from small named functions. The public method (or task body) reads as a top-to-bottom narrative that calls private helpers, each doing one thing. `reactivity.rs` decomposes into six functions (`loop_task`, `handle_commit`, `compute_touched`, `gather_fanout`, `gather_invalidations`, `apply`) where the orchestrator is ~30 lines and each helper ~30–60. `mounts.rs` decomposes into the registry struct + `mount_project`, `unmount_project`, `is_read_only_chunk`, `iter_mounts`. `ops/run.rs` decomposes into the public `run` method plus `assemble_declaration`, `lookup_runtime`, `cleanup_on_failure`.
 
-Comments are reserved for the genuinely non-obvious — race semantics, ordering invariants, channel-primitive quirks. Expected count across the whole crate: a handful, not a paragraph per file. Names carry the rest.
+What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): race semantics, ordering invariants, channel-primitive quirks.
 
 ### Key mechanics
 
@@ -663,7 +663,6 @@ Comments are reserved for the genuinely non-obvious — race semantics, ordering
 - **`tokio::runtime::Handle`** stored on `Engine` at `open`, used to spawn tasks from sync entry points.
 - **`Engine::shutdown(self)`** consumes self: cancels reactivity via `CancellationToken`, awaits the join, runs terminal cleanup on every active process. `impl Drop` aborts reactivity as best-effort fallback.
 - **Bootstrap as one declarative commit.** `reconcile_zombies` does one `db.scope` for `pending|running` processes, then one commit setting each to `failed` with `error: "engine restart"`.
-- **No builders.** Direct `RunArgs` / `Declaration` construction; free-function helpers where useful.
 - **`thiserror`** for `EngineError`; `From<DbError>` and `From<ProtocolError>` for ergonomic `?`.
 
 ---

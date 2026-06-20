@@ -201,10 +201,10 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 ## Specs
 
 - [`pilot/substrate.md`](pilot/substrate.md) — chunk, placement, spec language, commits, queries. The primitive layer (concept, two contracts).
-- [`pilot/db.md`](pilot/db.md) — implementation drawing of the Rust db. Top-to-bottom, derived holistically from the substrate spec. To be written.
+- [`pilot/db.md`](pilot/db.md) — implementation drawing of the Rust db. Top-to-bottom, derived holistically from the substrate spec.
 - [`pilot/engine.md`](pilot/engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
 - [`pilot/host.md`](pilot/host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
-- [`pilot/sdk.md`](pilot/sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API. To be written.
+- [`pilot/sdk.md`](pilot/sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
 - [`pilot/agent.md`](pilot/agent.md) — the claude agent expressed as a program.
 - [`pilot/bootstrap.md`](pilot/bootstrap.md) — the seed data.
 

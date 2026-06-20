@@ -185,6 +185,8 @@ type EngineError = {
 
 (`Dim`, `Edge`, `Includes`, `ChunkDeclaration`, `PlacementSpec` follow the same direct-mirror pattern.)
 
+**`RunArgs` is the program-facing projection of the engine's `RunArgs`** (see [`engine.md`](engine.md#engine-api-callable-from-the-host)). Two engine fields are absent by design: `program_id` is the first argument to `run`, not part of `args`; `placements` is engine-owned — the engine places a tool-call's process on its parent for trace nesting, which is not a program's concern. Boundaries are roots only: a program always builds a fresh boundary per run. Reusing a named boundary chunk (`BoundarySpec::Existing`) is a host/Rust-API affordance, not exposed over the protocol in v0.1.
+
 ---
 
 ## Transports
@@ -252,7 +254,7 @@ host/ui/                                      — UI library (React)
     useScope.test.ts      — hook semantics
 ```
 
-Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. Comments are reserved for the genuinely non-obvious — the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription. Names carry the rest.
+Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription.
 
 `host/ui` depends on `@openlight/sdk` for transport-aware functions; nothing else.
 

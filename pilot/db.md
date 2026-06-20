@@ -654,7 +654,7 @@ fn row_to_chunk_item(row: &Row) -> Result<ChunkItem> { ... }
 
 The pattern scales by decomposition. When a method outgrows top-to-bottom narrative, it splits into named private helpers in the same file; the public method becomes the orchestrator that reads the helpers in order. `ops/scope/` is the folded form when one method fans into four distinct query paths; inside any single file, no function reads as a wall.
 
-Comments are reserved for the genuinely non-obvious — the post-`tx.commit()` broadcast send is a deliberate ordering (the SQL commit must be durable before subscribers can see the change); `check_commit` reads through the open transaction's view, not a pre-fetched snapshot; the `meta` table check guards against re-seeding on bootstrap. Expected count: a handful per crate. Names carry the rest.
+What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): the post-`tx.commit()` broadcast send is a deliberate ordering (the SQL commit must be durable before subscribers can see the change); `check_commit` reads through the open transaction's view, not a pre-fetched snapshot; the `meta` table check guards against re-seeding on bootstrap.
 
 ### Key mechanics
 
@@ -662,7 +662,7 @@ Comments are reserved for the genuinely non-obvious — the post-`tx.commit()` b
 
 **Transactions.** No custom RAII helper. `conn.transaction_with_behavior(TransactionBehavior::Immediate)?` returns rusqlite's `Transaction` — Drop = ROLLBACK; explicit `tx.commit()` advances. Used directly inside `ops::commit` and `ops::branches`.
 
-**Reactivity push.** After `tx.commit()` returns Ok, the op pushes the resulting `Commit` onto `db.sender`. Three call sites: `ops::commit`, `ops::branches::create_branch`, `ops::branches::delete_branch`. Two lines each; repetition over a wrapper. By the time the push runs, the SQL commit is durable and visible to any subsequent reader.
+**Reactivity push.** Three call sites push the resulting `Commit` onto `db.sender` — `ops::commit`, `ops::branches::create_branch`, `ops::branches::delete_branch` — two lines each, repetition over a wrapper. The post-`tx.commit()` ordering and its durability guarantee are spec'd above under *Reactivity wiring*.
 
 **Validation.** `Rule` enum with one variant per rule (`Ordered`, `Accepts`, `Required`, `Unique`, `NameUnique`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through ordinary SELECTs against the open transaction's connection — no pre-fetch into pure structs.
 
@@ -674,7 +674,6 @@ Comments are reserved for the genuinely non-obvious — the post-`tx.commit()` b
 
 ### Settled choices
 
-- **Direct struct construction for `Declaration`,** with helper free-functions where useful. No builder.
 - **`rusqlite_migration`** with the full schema as the v1 migration.
 - **JSON for body and spec.** Body is `serde_json::Value`. Spec is a typed struct with `#[serde(default)]`.
 - **Bootstrap idempotence.** A `meta` table with a single bootstrap-version row; `open()` checks before seeding.
