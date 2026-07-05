@@ -82,11 +82,14 @@ One JSON-lines protocol serves every program regardless of where it runs.
 
 | Operation | Description |
 |---|---|
-| `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. FTS filtering via `ScopeOpts.match_`. |
-| `get` | Fetch a single chunk by id. Returns `null` if the chunk does not exist; rejected if the chunk is outside the read boundary. Convenience over `scope([id])` when only the chunk itself is wanted (no placements, no dimensions). |
-| `commit` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. |
-| `run` | Start a new program run. Returns the process id immediately. Used internally by the engine for tool calls. |
-| `await` | Wait for one or more processes to reach a terminal state. Returns each process's final scope. The call resolves when processes terminate; it suspends the calling task in async runtimes, doesn't block other work in the engine. |
+| `scope` | Read the intersection of scopes. Filtered by the effective read boundary. Connected scopes outside the boundary appear as visible topology (names, counts) but are not readable. FTS filtering via `ScopeOpts.match_`; an **empty scope list with `match_`** is a whole-field FTS query, boundary-filtered and federated like any read. Negation via `ScopeOpts.exclude` (set difference; excluded roots boundary-checked like positive ones). Pagination and body-less projection per substrate.md (*Pagination and projection*). |
+| `get` | Fetch a single chunk by id. Returns `null` if the chunk does not exist; rejected if the chunk is outside the read boundary. Honors `at` for temporal point reads. Convenience over `scope([id])` when only the chunk itself is wanted (no placements, no dimensions). |
+| `read_batch` | Multiple tagged `scope`/`get` sub-queries resolved together at **one commit snapshot**, each authorized under its own identity (see *Multiplexed transports* below). One request, coherent results — the resolution primitive behind slot-and-hook views (`programs.md` §3.5). |
+| `commit` | Write a Declaration. Rejected if any chunk or placement touches a scope outside the write boundary. `dry_run: true` runs full validation without writing, returning structured errors — the live-form affordance. |
+| `run` | Start a new program run. Returns the process id immediately. `mode: 'child'` (default) nests the process on the caller and enrolls it in the caller's cascade — composed work. `mode: 'launch'` detaches: the process is placed on the caller's session scopes instead and survives the caller — boundaries still intersect with the caller's at spawn, so detachment never escalates. Surfaces and the palette launch; orchestrators and agents run children. |
+| `await` | Wait for one or more processes to reach a terminal state. Returns each process's final scope. `opts.results_only` filters each returned scope to chunks `instance` on result-role archetypes (plus counts). The call suspends the calling task; it doesn't block the engine. |
+| `cancel` | Request a process's terminal transition. Authorized when the target is a descendant of the caller, or the target's process chunk is within the caller's write boundary. Idempotent. |
+| `exit` | The calling program requests its own terminal transition (`completed`) — the self-dismissal path for webview programs; trivially safe. |
 | `subscribe` | Register on a set of scopes; returns a subscription id. The engine pushes `scope_changed` events when commits touch those scopes. |
 | `unsubscribe` | Cancel a subscription by id. |
 
@@ -95,22 +98,28 @@ One JSON-lines protocol serves every program regardless of where it runs.
 Every request has an `op` and a monotonic `id`. Every response pairs the same `id` with either `result` or `error`.
 
 ```jsonl
-{"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"],"opts":{"match_":"session today"}}
+{"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"],"opts":{"match_":"session today","exclude":["chunk_hidden"],"limit":50}}
 {"id":2,"op":"get","chunkId":"chunk_abc"}
-{"id":3,"op":"commit","declaration":{"chunks":[...]}}
-{"id":4,"op":"run","program":"filesystem","args":{...}}
-{"id":5,"op":"await","processes":["p_1","p_2"]}
-{"id":6,"op":"subscribe","scopes":["my-session"]}
-{"id":7,"op":"unsubscribe","subscriptionId":"sub_1"}
+{"id":3,"op":"read_batch","reads":[{"tag":"a","scopes":["s1"]},{"tag":"b","scopes":["s2"],"opts":{...}}]}
+{"id":4,"op":"commit","declaration":{"chunks":[...]},"dry_run":false}
+{"id":5,"op":"run","program":"filesystem","args":{...},"mode":"child"}
+{"id":6,"op":"await","processes":["p_1","p_2"],"opts":{"results_only":true}}
+{"id":7,"op":"cancel","process":"p_1"}
+{"id":8,"op":"exit"}
+{"id":9,"op":"subscribe","scopes":["my-session"]}
+{"id":10,"op":"unsubscribe","subscriptionId":"sub_1"}
 ```
 
 | Op | Result shape |
 |---|---|
 | `scope` | `ScopeResult` |
 | `get` | `ChunkItem \| null` |
-| `commit` | `Commit` |
+| `read_batch` | `{ head: CommitId, results: Record<tag, ScopeResult \| ChunkItem \| null \| EngineError> }` — one snapshot, per-tag results or per-tag boundary errors |
+| `commit` | `Commit` (with `dry_run`: `{ valid: boolean, errors: [...] }`) |
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ScopeResult>` — process id → final scope |
+| `cancel` | `{}` |
+| `exit` | `{}` — terminal transition follows |
 | `subscribe` | `{ subscriptionId: string }` |
 | `unsubscribe` | `{}` |
 
@@ -119,7 +128,7 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 | Code | Meaning |
 |---|---|
 | `BOUNDARY_VIOLATION` | Read or write outside the effective boundary |
-| `READ_ONLY_MOUNT` | Commit references a chunk or scope id resolved from a read-only mount |
+| `READ_ONLY_MOUNT` | Commit modifies a record resident in a read-only mount (reference alone is legal — see *Read-only enforcement*) |
 | `VALIDATION_ERROR` | Declaration fails spec validation |
 | `NOT_FOUND` | Referenced chunk, program, or subscription does not exist |
 | `RUN_FAILED` | A run the program started ended non-zero |
@@ -188,9 +197,20 @@ pub struct RunArgs {
                                                   // the new process on (e.g. host
                                                   // passes the host/session id;
                                                   // tool calls pass parent process)
+    pub mode:            RunMode,                 // child (default) or launch
     pub read_boundary:   BoundarySpec,            // build fresh OR reuse a chunk
     pub write_boundary:  BoundarySpec,
     pub timeout_ms:      Option<u64>,             // overrides program body
+}
+
+pub enum RunMode {
+    /// Composed work: nest instance on the caller's process; cascade on
+    /// the caller's terminal transition. The default.
+    Child,
+    /// Detached: place instance on the caller's session scopes instead;
+    /// survives the caller. Boundaries still intersect with the caller's
+    /// at spawn — detachment never escalates.
+    Launch,
 }
 
 pub enum BoundarySpec {
@@ -227,8 +247,9 @@ impl Engine {
         -> Result<Commit, EngineError>;
     pub fn run(&self, ctx: &Context, args: RunArgs)
         -> Result<ProcessId, EngineError>;
-    pub fn cancel(&self, process_id: &ProcessId)
-        -> Result<(), EngineError>;
+    pub fn cancel(&self, ctx: &Context, process_id: &ProcessId)
+        -> Result<(), EngineError>;   // authorized: descendant of ctx, or target
+                                      // within ctx's write boundary; host (None) unrestricted
     pub fn subscribe(&self, ctx: &Context, scopes: &[ChunkId])
         -> Result<SubscriptionId, EngineError>;
     pub fn unsubscribe(&self, sub_id: SubscriptionId);
@@ -259,7 +280,7 @@ The engine has no runtime-specific entry points. Readiness signaling (e.g., a we
 
 **Boot-time validation.** Before entering the event loop the host asks the engine to validate the active project's substrate: every placement's `scope_id` must resolve in some mounted db. Common failures — host or engine project not mounted, so placements on `host/session` or `engine/program` go unresolved; a peer mount missing a chunk that's been referenced. The engine returns the list of unresolved references; the host surfaces them and refuses to enter the event loop. v0.1 doesn't run in a half-loaded state.
 
-**Read-only enforcement.** Any commit referencing a chunk or scope id resolved from a read-only mount returns `READ_ONLY_MOUNT`. The check happens at commit entry, before validation.
+**Read-only enforcement.** A commit is rejected with `READ_ONLY_MOUNT` only when it **modifies a record resident in** a read-only mount — a chunk's body, spec, or name stored there, or a placement row stored there. Placements stored in the active db whose `scope_id` resolves to a mounted chunk are legal — the federation pattern depends on exactly this (invocables placed `instance` on the mounted `engine/program`, instances on mounted session archetypes). Reference is not modification. The check happens at commit entry, before validation.
 
 **Sync vs async.** The substrate is sync (SQLite is sync), so `scope`, `commit`, `run`, `subscribe`, `unsubscribe`, `cancel`, `mount_project`, `unmount_project` return without awaiting. `await_processes` and `shutdown` are async. Outgoing event delivery to webview subscriptions happens through the `HostCmd` channel returned at `Engine::open`.
 
@@ -277,6 +298,10 @@ A single atomic `db.commit()` creates:
 Pre-generated ids let the engine reference the process from the boundary placements in the same declaration.
 
 **Why boundaries are `relates` on the process, not `instance`:** the process's composed spec (`program.spec ∪ engine/process.spec`) defines what counts as structural content — typed arguments. Boundaries are not content; they are execution configuration the engine needs to read. Placing them `instance` would force them through the `accepts` check and couple the program's typed-argument spec to boundary presence. `relates` keeps the two orthogonal and honors the substrate semantics: boundaries are about the process, they are not a member of it.
+
+**Trace nesting is exempt from typed `accepts`.** A child process is placed `instance` on its parent process (the nested trace), but the parent *program's* propagating spec lists only argument and result types — read literally, it would reject the child placement. The rule: placements of `engine/process` instances onto a process are validated against `engine/process` only, never against the program's `accepts` — they are trace, not content. Without this exemption, typed argument contracts and nested traces would be mutually exclusive; both are load-bearing.
+
+**Terminal cleanup never severs the frame.** A terminal process's argument chunks, boundary chunks, and their root `relates` placements remain readable forever — cleanup writes status, it does not dismantle topology. Recipes re-arm from dead frames, `inspect` autopsies them, and re-run clones them; all three depend on this invariant.
 
 ---
 
@@ -368,7 +393,11 @@ The engine's input from db is a bounded `broadcast::Receiver`. On overflow, a `L
 
 Lagged events for already-unsubscribed subscriptions are dropped the same way as `scope_changed` events (race-tolerant).
 
-Coalescing multiple commits in a tight burst into a single `scope_changed` per subscription is deferred. The pilot fires one event per touching commit; acceptable for expected volumes.
+**Coalescing is required, not deferred.** The sanctioned streaming convention (below) makes commit bursts normal, so the dispatcher coalesces: multiple commits touching a subscription within a short window fire one `scope_changed` (carrying the latest commit). The contract is unchanged — re-fetch on event — so coalescing is invisible to correct clients.
+
+### Streaming convention
+
+Intra-op streaming is not in the protocol and doesn't need to be: **streaming is commits.** A program with incremental output (a model turn's answer) commits partial updates to its output chunk with `body.partial: true` at a throttled cadence (~4/s max), finalizing with `partial: false`. Subscribers re-render per event (coalesced, above). Partial states enter the lossless history; when branch-bound runs land (below), partials on the turn's branch keep main clean. One convention, settled here — not improvised per program.
 
 ---
 
@@ -430,7 +459,7 @@ VM and webview programs reach terminal state differently:
 | Runtime | `completed` signal | `failed` signal |
 |---|---|---|
 | VM | stdout closed AND exit code 0 | stdout closed AND exit code ≠ 0; OR `cancel`; OR timeout; OR malformed output |
-| Webview | The user closes the tile (host unmounts the webview) | `cancel`; OR timeout |
+| Webview | The `exit` op; OR the user closes the tile (host unmounts the webview) | `cancel`; OR timeout |
 
 `cancel(processId)` and timeout both flip the watcher to `failed` and tear down the spawn. Multiple programs may await the same process; `watch::Receiver` broadcasts the terminal state to every awaiter.
 
@@ -513,6 +542,10 @@ pub struct RuntimeHandle {
 
 The provider drives its own readiness and terminal signals; engine just awaits them. There are no runtime-specific entry points on the Engine API.
 
+**Capabilities and secrets.** A program's `body.capabilities` is a small vocabulary — `net[:host]`, `fs`, `exec`, `secret:<NAME>` — **enforced by the runtime provider at spawn**: network egress allowlisted per process, filesystem and exec gated, and each `secret:<NAME>` injected as an environment variable from a host-held keychain. Secrets are **never chunks** — the substrate is lossless, so a committed key would be permanent. The effective capability set is recorded on the process body so inspection surfaces it. The engine stays runtime-agnostic; only providers enforce. (Held open in `programs.md` §6: whether capabilities/secrets and integrations are one family — both declare reach into the world outside the field.)
+
+**Multiplexed transports.** One physical transport may carry several protocol identities: a webview hosting embedded citizens (slot-and-hook, `programs.md` §3.5) tags each request with the originating slot's identity token, and the host's handler maps token → process id before attaching `Context`. Each citizen is its own process to the engine — boundaries and commit attribution hold at slot granularity. Mechanics live in host.md and sdk.md; the engine only requires that `Context` arrives correct.
+
 ## Containment
 
 Containment is the runtime provider's concern, not the engine's — the engine asks the registered provider to spawn and knows runtime kinds only as registry keys (see *What the Engine Owns* and *Runtime providers*). What the engine guarantees regardless of provider: every substrate operation passes the boundary check, so containment and boundary enforcement compose. v0.1's split-containment model and the uniform-VM alternative on the horizon are in [`pilot.md`](../pilot.md#containment) and [`horizon.md`](../horizon.md).
@@ -523,7 +556,7 @@ Containment is the runtime provider's concern, not the engine's — the engine a
 
 ### Timeouts
 
-`run`'s optional `timeout` is written to the process body as `timeout_ms`. If omitted, the engine uses the program's own `body.timeout_ms`. Defaults: tool programs (filesystem, shell, web) 30000 ms; agent programs (claude) 300000 ms. On expiry the engine kills the spawned executable and sets `status: 'failed'` with `body.error: 'timeout'`.
+`run`'s optional `timeout` is written to the process body as `timeout_ms`. If omitted, the engine uses the program's own `body.timeout_ms`. Defaults: tool programs (filesystem, shell, web) 30000 ms; agent programs 300000 ms. On expiry the engine kills the spawned executable and sets `status: 'failed'` with `body.error: 'timeout'`. The clock pauses while the process has a pending `await` on its own children — a turn delegating a ten-minute sub-agent is idle, not hung — and resumes on resolution.
 
 ### Error Classification
 
@@ -657,8 +690,10 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 ## What Is Open
 
-- **Services.** A process whose executable lives beyond the completion of a single render or request. Requires lifecycle beyond `pending → running → completed`. Held as a direction; not in v0.1.
-- **Subscription coalescing.** Multiple commits in a tight burst could fire one combined `scope_changed` per subscription instead of one per commit. Deferred until the per-event volume warrants it.
+- **Branch operations over the protocol.** The substrate is fully branch-aware (fork, per-branch HEADs, two-parent merge commits) and `ScopeOpts.branch` exposes branched reads — but the protocol cannot yet create a branch, commit to a named branch, write a merge, or bind a run to a branch. The settled shape when taken: a `branch` op (`{ create, name, from }`), `Declaration.branch?`, a merge form of `commit` with two parents, and `RunArgs.branch` routing a process (and its children) to a work branch. Unlocks the acceptance workflow — agent works a branch, human reviews, merge is the yes — and branch-parked streaming partials. Boundary model unchanged: branches are field state, not reach. Merge conflict semantics stay above the primitives (substrate.md).
+- **Daemons (services).** A process whose executable stays resident — services, watchers, live integrations. The lifecycle must extend without a new primitive: a daemon is a process whose terminal transition is a *policy* (stop, restart), not the end of a job. Not v0.1 — but v0.1 decisions must not foreclose it, and the engine-as-daemon direction (`horizon.md`) is where resident programs get a home that outlives any window.
+- **Pause/resume.** A control signal honored between cycles of cycle-driven programs (the agent) — program-level convention first (control chunks on the conversation, `agent.md`); promoted to an engine op only if it generalizes.
+- **Reference arguments (`attach`).** `RunArgs.attach: ChunkId[]` — the engine placing existing chunks `instance` on the new process instead of ids-in-body, making hand-off visible in the placement graph. Each attached id must sit within the caller's read boundary; the `accepts` check applies unchanged. A refinement, not a blocker.
 - **Schema version skew on peer mount.** v0.1 refuses to mount peers whose db schema is older or newer than the active project's, with a clear error. Migrating a mounted-but-not-active db is a v0.2 concern. See [`horizon.md`](../horizon.md).
 - **Stale process chunks in peer dbs.** A peer project may carry `pending|running` process chunks from a previous time it was the active project. v0.1 does not reconcile them (peers are read-only). Programs reading peer scopes may see these as artifacts; the engine surfaces them as-is.
 - **Symmetric peering.** v0.1 mounts are read-only and local-filesystem only. Read-write peering, remote mounts, identity/auth, and sync mechanics live on horizon. The boundary mechanism already carries the model for symmetric peering — when it lands, it's a write boundary that names the peer's identity.

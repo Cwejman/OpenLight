@@ -217,12 +217,12 @@ Every model call's context is addressable structure (see [`agent.md`](agent.md))
 
 ## 6. What this layer demands of the foundation
 
-The consolidated list with evidence grades lives in [`rework.md`](../rework.md) §5. Status after rulings:
+The consolidated list with evidence grades lives in [`rework.md`](../rework.md) §5. **Status: folded into the mechanism specs.**
 
-- **Settled by ruling:** R4 → the two run modes (§2); R6 → streaming as throttled partial commits, coalescing required, partials onto turn branches once R1 lands; contract marking → the multi-chunk convention (§1); recipes → identity-based (§3.9).
-- **Fix first (spec bugs):** R5 read-only-mount wording ("modifies," not "references"); R7 trace-nesting vs typed `accepts`.
-- **Blocking the experience above:** R1 branch ops (merge/acceptance, work branches), R2 pagination + body-less probes, R3 cancel authority, R10 whole-field FTS + negation.
-- **Needed for the model programs:** R8 capabilities + secrets (never chunks — a committed key is permanent).
+- **Fixed (spec bugs):** R5 read-only-mount rule now "modifies," not "references" (engine.md); R7 trace-nesting exempt from typed `accepts` (engine.md), plus the terminal-cleanup-never-severs-the-frame invariant.
+- **Landed in the protocol:** R2 pagination + body-less probes (substrate.md, sdk.md); R3 `cancel` with the authority rule; R4 → `mode: child | launch`; R6 → the streaming convention + required coalescing; R9 `results_only` on await; R10 whole-field FTS + `exclude`; R11 `exit`; R12 `dry_run`, timeout-pause-during-await; per-slot identity (engine.md, host.md, sdk.md); `read_batch` — the coalesced multi-identity read (engine.md, sdk.md).
+- **Landed as enforcement:** R8 capabilities vocabulary + secrets-as-env-vars-never-chunks (engine.md, host.md).
+- **Shaped, held open in engine.md:** R1 branch ops (the settled shape is written; merge semantics stay above the primitives); daemons (terminal-transition-as-policy); pause/resume as convention-first; `attach`.
 - **New this round:** *pause/resume* for cycle-driven programs — a control signal honored between cycles; program-level convention first, engine op if it generalizes (see [`agent.md`](agent.md)). *Daemon processes* — the lifecycle extension for resident programs (§2); post-v0.1, but v0.1 decisions must not foreclose it. *Engine as daemon* — hosts as attaching windows (`horizon.md`); the protocol seam already preserves it. *Capabilities/secrets held open* — possibly one family with integrations (declarations about reaching the world outside the field) rather than an isolated host feature; consider together before implementing either.
 - **Per-slot transport identity** (surfaces-embed-surfaces, §3.5): the host's IPC bridge must multiplex identities per embedded citizen — each slot's occupant speaks to the engine as *its own* process, not the embedder's; boundaries and commit attribution hold at slot granularity. Lands in host.md + sdk.md. Companion: the ensemble tile (a leaf relating a group of citizen processes rather than one process) lands in host.md.
 - **Coalesced multi-identity read** (slot-and-hook resolution, §3.5): one protocol read carrying tagged sub-queries, each authorized under its own citizen identity, resolved together at one commit snapshot. Extends R2/R9. Lands in engine protocol + sdk.md.

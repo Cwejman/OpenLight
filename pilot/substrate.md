@@ -250,7 +250,13 @@ Time travel is read-only. Mutations apply to the chosen branch's HEAD; reading t
 
 ### Negation
 
-Everything in scope A except what's also in scope B. Set difference over placements.
+Everything in scope A except what's also in scope B. Set difference over placements. Exposed to programs as `exclude` roots on a scope read — excluded scopes are boundary-checked like positive ones.
+
+### Pagination and projection
+
+Ordered scopes grow large; reads are bounded by default. A scope read takes `limit` and `offset`: for ordered scopes the default window is tail-first (the latest entries — sessions and logs are read from the recent end), `offset` pages backward. `ScopeResult`'s counts (`total`, `in_scope`, …) always describe the full set, so a reader probes shape before pulling data.
+
+Reads also project: `include: { body: false }` returns names, specs, placements, and counts without bodies — the cheap survey read that context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups, same as scope reads.
 
 ## Ingestion
 
@@ -294,7 +300,6 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 
 ## What's Open
 
-- **Scope limit and offset.** Ordered scopes can grow large. A `limit` parameter (from seq tail) and `offset` for pagination prevent overload. Default limit prevents accidental flooding. The scope result already includes counts — agents probe shape before pulling data. Deferred for the pilot but needed soon.
 - **Spec language evolution.** The four fields (ordered, accepts, required, unique) cover the known cases. The vocabulary may grow through use.
 - **Merge semantics.** The structure supports merge commits. Conflict resolution strategy is above the primitives.
 - **Temporal validity.** Event time vs system time is expressible through body properties. Whether `valid_from`/`valid_to` deserve first-class status depends on use.

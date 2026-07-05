@@ -16,6 +16,7 @@ The engine and substrate are Rust crates linked into the host binary. The host c
 - Receives wry IPC messages from webview programs and dispatches them to the engine library
 - Bootstraps the substrate (open the active project's database, walk and open mounts cascade) and the engine on startup; closes both on exit
 - Implements and registers the VM and webview runtime providers with the engine; owns the VM lifecycle, including peer FS mounts at `/peers/<project-id>/`
+- Enforces capabilities at spawn through its providers — `net[:host]` egress allowlists, `fs`/`exec` gating, and `secret:<NAME>` injection as env vars from a host-held keychain (secrets are never chunks; see engine.md, *Capabilities and secrets*)
 - Handles visual chrome that's properly the window's concern: padding, background color, shadows under cards, overlay darkening behind modal programs
 
 ## What the Host Does Not Do
@@ -143,6 +144,8 @@ A webview program calls the SDK; the SDK serializes the call and posts it throug
 
 Unsolicited events from the engine ride the same channel in the other direction: `webview.evaluate_script("__sdk.event(<payload>)")`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape on the JS side. See [`pilot/engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
 
+**Per-slot identity.** One webview may host embedded citizens (slot-and-hook, [`programs.md`](programs.md) §3.5), each its own process. At slot creation the host issues the citizen a slot identity token; every request from that citizen's SDK instance carries it, and the IPC handler maps token → process id before attaching `Context`. The webview→process registry becomes webview→{process, slots}; everything downstream of `Context` is unchanged.
+
 The host does not interpret substrate operations — it dispatches them. VM programs (tool programs running inside their VMs) speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly without going through the host.
 
 ### SDK surface
@@ -189,7 +192,7 @@ The program is a substrate chunk with `body.executable` pointing at the script a
 **Lifecycle differs by kind.**
 
 - *VM programs* end when their process exits (`process.exit()` or stdout closing). Stateless tools naturally exit when work is done; long-running services stay alive in their own loop.
-- *Webview programs* don't end via "JS reaches its last statement" — the webview's runtime keeps the page alive (React is still reconciling, event listeners are still registered). The program ends when the host destroys its webview, which the host does on tile-close, on `cancel`, or on timeout. To dismiss itself, a webview program writes a "done" signal to the substrate; the launcher subscribed to that scope sees it and asks the engine to cancel.
+- *Webview programs* don't end via "JS reaches its last statement" — the webview's runtime keeps the page alive (React is still reconciling, event listeners are still registered). The program ends when the host destroys its webview — on tile-close, on `cancel`, on timeout — or when the program itself calls the `exit` op (engine.md), the standard self-dismissal path: terminal transition `completed`, host unmounts on the terminal signal.
 
 **State lives in the substrate.** Programs use the substrate directly via `scope` and `commit` (and `useScope` for reactive reads in webview programs) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`.
 
@@ -233,7 +236,7 @@ Host startup has a fixed order:
 7. **Configure the VM.** Hand the VM provider the FS-mount table: active project at `/active/` read-write, each peer at `/peers/<project-id>/` read-only. The VM starts; programs spawned later run inside it.
 8. **Mount projects.** `engine.mount_project(id, db, ReadOnly, branch)` for each peer; `engine.mount_project(active-id, active-db, ReadWrite, "main")` for the active project. The engine subscribes to the active project's commit broadcast for reactivity; read-only mounts contribute reads but not events (no in-process writer ever fires).
 9. **Boot-time validation.** Ask the engine to validate that every placement in the active project's db has its `scope_id` resolve in some mount. Missing references — most often a missing host or engine mount — return as a list; surface them and refuse to enter the event loop. No half-loaded state.
-10. **Spawn the always-mounted suite.** Sidebar and tab-bar are first-party programs the host references by id and runs at boot via `engine.run(..., Context { process_id: None })`. The command palette is spawned on-demand when the leader key fires. The exact suite and its program contracts are first-party concerns; the host hard-codes the references for v0.1 (a future programs spec pass formalizes the contracts).
+10. **Spawn the always-mounted suite.** Sidebar and tab-bar are first-party programs the host references by id and runs at boot via `engine.run(..., Context { process_id: None })` — sidebar with read roots `[session, engine/process, engine/program]` and write root `[session]`; tab-bar with read/write `[session]`; both positioned as naked strips on the background, outside tile geometry. The command palette is spawned on-demand when the leader key fires, as a session-anchored overlay with full read reach, writing only through composition (it launches; it doesn't commit structure). Contracts at experience depth: [`programs.md`](programs.md) §3.1–3.3.
 11. **Enter the event loop.** `event_loop.run(...)` on the main thread, draining `HostCmd` events from the engine, wry IPC messages from webviews, and tao's window events.
 
 Shutdown reverses the order: cancel running processes, await `engine.shutdown()`, drop the VM (which unmounts FSes), drop dbs, exit.
@@ -247,8 +250,10 @@ The cascade walk and FS-mount-table assembly are host code (file-aware). The mou
 ## What Is Open
 
 - **React hooks surface.** Starting hook is `useScope(ids)`. Richer vocabulary (for mutations, for subscriptions to typed events, for React Suspense integration) may appear through use. The full surface is specified in [`pilot/sdk.md`](sdk.md).
-- **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Requires write-boundary reach into a parent scope; the mechanics are not specified.
-- **Recipe referencing.** Identity-based (binds specific programs) or slot-based (declares placeholders the user fills). Leaning identity for the pilot.
+- **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Leaning: mediated through the arranger (`programs.md` §3.9) — a request-shaped route rather than boundary escalation; unprivileged programs never need write reach above their tile.
+- **Recipe referencing.** Settled identity-based for v0.1 (`programs.md` §3.9): a leaf records `{ program, argument declarations, boundary roots, view state }`; spawning re-declares fresh. Slot-based recipes (placeholders filled at spawn) are a later layer on the same shape.
+- **The ensemble tile.** A leaf tile relates one process today; citizen ensembles (`programs.md` §3.5, the peer inversion) need a leaf relating a group container of citizen processes — or subtiling within tiles. Settles by building the conversation tile.
+- **Host-native sidebar/tabs.** Held open (`programs.md` §3.1): they stay webview programs for now; going native later would buy visual coherence with the frame's card treatment and performance, when the demand justifies the exception.
 - **Multi-mount of services.** One long-running program mounted in two tiles — shared single surface, or two surfaces over one backing state?
 - **Sidebar disambiguation.** The exact visual scheme for distinguishing multiple processes of the same program with identical arguments.
 - **Color coding.** Whether scopes or programs carry a color attribute, and how it surfaces in the visual language.
