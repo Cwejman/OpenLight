@@ -1,30 +1,43 @@
 # Conventions
 
-Working agreements — how we operate together on this project. The principles that shape *how the work happens* (no mind holds complexity, simple is not easy, prefer data, name what you don't know) live in [`inside.md`](inside.md) under **Principles**, and the values beside them. This file holds the operating rules and code-level expressions that aren't themselves principles or values.
+Principles and working agreements — how we operate together on this project.
+
+## Principles
+
+Universal craft, held short:
+
+- **No mind holds complexity.** Not a person, not a model. Understanding goes outside the mind — written down, taken apart, anchored. Don't trust one pass of any reasoning, your own included.
+- **Simple is not easy.** Simple means nothing tangled together; easy means familiar. The costliest complexity is the kind that feels easy. Prefer plain repetition to a clever abstraction you must carry.
+- **Prefer data; keep functions pure.** Structured data over branching code; pure functions over it; effects real but at the edges.
+- **One source, one direction.** One home per fact; point, don't copy; derive on demand; flat over nested.
+- **Take it apart; keep it coherent.** One concern per part; work in the patterns already there — and when a pattern is wrong, change all of it, not one corner.
+- **Name what you don't know.** Write the problem down: what you know and, kept separate, plain questions. A page with no questions means understanding was skipped, not finished.
+- **Shortest spec that builds.** Far enough that the code could be deleted and rebuilt from the spec in one pass — and no further. Every extra word is weight.
 
 ## Hold the bar
 
-The quality standard is yours to hold, not the user's to supply — if you can't recognize good work without being told, the spec-based premise is broken. Judge your own output against the principles; don't make the user your editor or close a turn asking "what's wrong?" — say where it stands, and why, in your own read.
+The quality standard is yours to hold, not the user's to supply. Judge your own output against the principles; don't make the user your editor or close a turn asking "what's wrong?" — say where it stands, and why, in your own read.
 
-- **Check before you claim.** "Done," "covered," "nothing lost" are claims — verify each against the files before stating it, and show the check. Don't trust one pass of your own reasoning (*No mind holds complexity*).
-- **Say it once, terse.** Less is more, in the specs and in replies alike. Cut what doesn't earn its place; don't hedge, don't credential-drop; describe the embodiable taste and stop.
+- **Check before you claim.** "Done," "covered," "nothing lost" are claims — verify each against the files before stating it, and show the check.
+- **Say it once, terse.** Less is more, in the specs and in replies alike. Cut what doesn't earn its place; don't hedge, don't credential-drop.
+
+## Build on ideas together
+
+Feedback often carries open ideas, not verdicts. Reason them through in conversation *before* folding anything into the specs; fold only what is settled, and record the rest **marked open in place** — *Held open*, *Open*, *direction* — so no later session mistakes an exploration for a decision. The specs must make openness legible; an unmarked statement reads as settled, so the marking is part of the writing, not decoration.
 
 ## Code
 
-The architecture — prefer data, pure functions, one source, decompose, coherence — lives in [`inside.md`](inside.md) under **Principles**. These are its code-level expressions.
-
-- **Vanilla TypeScript, few abstractions.** Keep the abstractions few, so the code is recognizable regardless of a developer's background. JavaScript can be bent fully functional, but we avoid currying, piping, and other FP fancies — reach for the plain construct.
-- **Declarative helpers.** Prefer chainable methods — `map`, `filter`, `reduce`, `some`, `every` — over manually mutating variables through `for`-loops. Prefer a simple ternary over an `if` that mutates, when it doesn't get too complex.
-- **Comments for the non-obvious only.** Reserve comments for what names can't carry — race semantics, ordering invariants, primitive quirks. A handful per crate, not a paragraph per file; names carry the rest.
+- **Languages.** Rust is the platform (host, engine, substrate). TypeScript is the *pilot's* language for programs and the first SDK — a pragmatic choice, not a limit: VM programs declare their own runtimes and dependencies (a program may demand Node, Python, anything its shebang and packages name), and SDKs for other languages follow. Nothing below binds programs to TypeScript.
+- **Vanilla TypeScript, few abstractions.** Where TypeScript is used: recognizable regardless of a developer's background. No currying, piping, or FP fancies — reach for the plain construct.
+- **Declarative helpers.** Prefer `map`/`filter`/`reduce`/`some`/`every` over mutating through `for`-loops; a simple ternary over an `if` that mutates, when it stays readable.
+- **Comments for the non-obvious only.** Race semantics, ordering invariants, primitive quirks — a handful per crate; names carry the rest.
 - **No builders.** Direct struct construction, with free-function helpers where useful.
 
 ## Subagent grounding
 
-A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used for a narrow scoped task where less context is the point.
+A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used where less context is the point (the clean-room passes in `research/cleanroom/` are the precedent).
 
-Without bootstrap context, subagents hallucinate on load-bearing design questions: they produce plausible-sounding answers that contradict the specs because they never saw them.
-
-Even with bootstrap context, verify a subagent's conclusions against the core files before relaying. If a claim doesn't match what's in the files, investigate further or spawn another — don't pass it through.
+Even with bootstrap context, verify a subagent's conclusions against the core files before relaying. If a claim doesn't match the files, investigate or spawn another — don't pass it through.
 
 ## Commit messages
 

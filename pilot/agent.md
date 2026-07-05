@@ -1,174 +1,93 @@
-# The Agent
+# The Model Programs
 
-The claude program is the pilot's concrete agent. It runs as a program like any other — with an executable that the engine spawns, a protocol it speaks to reach the substrate, and a boundary the engine enforces. The agent is not architecturally special; it is one program among many whose work happens to be calling a large language model.
+The programs that carry completion, rebuilt on the clean-room derivation ([`research/cleanroom/bridge.md`](../research/cleanroom/bridge.md)): **`model`** — one completion call per run, the only kind of program that touches a provider — and **`agent`** — the harness that composes context from the field, dispatches tools, and writes the conversation. Neither is architecturally special; the split is the system's own modularity applied to itself, and the harness is expected to decompose further (context assembler, tool dispatcher, renderer as separate programs) as the shape proves out.
 
-Claude calls the Anthropic API directly via the TypeScript SDK. The model is a run-time argument (or `.env` configuration), not hardcoded on the program chunk. There is no framework between the engine protocol and the API.
+The center this serves: **completion from a point in the field.** Context is a scope — addressable, pinned, reproducible — not a pasted transcript.
 
 ---
 
-## Session Types
+## The `model` programs — a family, not a single shape
 
-A session is an ordered scope that holds the trace of an interaction. The agent reads it to reconstruct context for each API call, and writes to it as things happen.
+Providers differ, and will differ more. So `model` is not one rigid program with one request shape — it is a **family**: each provider model is its own program, declaring its own request and output types through the same self-describing interface every program uses (argument chunks: `spec.required` for the mandatory core, `body.schema` for everything the provider supports). A caller reads the model program's interface the same way it reads any tool's. What the family shares is a minimal common core and a set of invariants:
+
+**Common core.** Every model program accepts a request carrying at least `{ kind: "complete" | "embed", model }` plus provider-shaped content (`messages`, `input`, `tools`, `params` — as its own schema declares), and produces an output chunk carrying at least `{ kind, content | vector, usage }`. Provider-specific mechanics (system-prompt conventions, tool-call formats, caching controls) live in that program's declared schema — visible, not hardcoded in callers.
+
+**Invariants (what makes it a model program).**
+
+- **One call per run; frame-only boundary.** It reads nothing but its own frame — the run-level boundary cannot widen an intrinsic floor. A completion sees exactly what was rendered into its request chunk; there is no path to exfiltrate substrate content beyond the caller's explicit rendering. Purity enforced, not promised.
+- **The verbatim request is the artifact.** The byte-exact context window is the process's argument chunk: every prompt ever sent is inspectable, diffable, reproducible.
+- **Output lands on the model's scope.** `instance` on its process and on `model/<name>` — every completion in the system enumerable per model; usage is a scope query, not a metering subsystem.
+- **Egress and secrets concentrate here.** Only model programs (and `web`) hold network capability; only model programs hold provider secrets — injected as env vars from the host keychain at spawn, **never chunks**: a committed key in a lossless substrate is permanent (R8).
+
+**Open — where provider adaptation lives.** The agent must stay provider-generic; *how* is unsettled, with two candidate shapes:
+
+- **(a) The agent reads each provider's schema** and renders context into that shape. Maximally flexible — but constructing rich, provider-shaped structure (message roles, tool-call formats, system conventions) from a declared schema alone is doubtful; schemas describe fields, not mapping semantics. Taken literally this drifts toward per-provider code inside the agent — the rigidity to avoid.
+- **(b) The model program is the adapter.** The family shares one **canonical request archetype** — context items, messages, tool declarations, params — and each provider program maps canonical → provider inside itself. Provider-unique features (cache controls, thinking budgets) surface as documented optional keys the agent passes through opaquely. Adding a provider = writing one program; the agent never changes. The risk: the canonical shape flattening providers toward a lowest common denominator.
+
+Leaning (b) — the adapter belongs with the thing it adapts, and passthrough keys relieve the flattening risk — but this is settled against the *second* provider actually built, not before. The cache-embodiment direction (`horizon.md`) lands inside this family's seam either way.
+
+## Conversation types
+
+**A session is a conversation** — the general primitive (`programs.md` §3.6), not an agent-owned kind. The agent is a participant; its specific event types are citizens of the conversation with first-class renderings, and third-party event types join the same way.
+
+> **Open — the conversation may slim further.** The archetype below still carries `tool-call`/`tool-result`/`context` as conversation events — a shape inherited from how provider APIs work (strict chronological message history), not from what a conversation is. Under discussion: **mechanics live on frames, the conversation references them** — the discourse (messages, gates, controls) stays in the conversation; the turn's answer message references its process frame, where tool runs, context items, and verbatim requests already authoritatively live; drilling and folding follow the reference. If that holds, the event types below shrink to `message`, `gate`, `control`, and the "agent session" is fully gone. The archetype as written is the conservative shape until this settles.
+
+The archetype:
 
 ```
-session
-  spec: { propagate: true, ordered: true,
-          accepts: ["prompt", "answer", "tool-call", "tool-result", "context"] }
-  body (convention, not required): { started: ISO string }
-
-prompt    (placed on agent, instance; placed on session, relates)
-  spec: { required: ["text"] }
-
-answer    (placed on agent, instance; placed on session, relates)
-
-tool-call (placed on agent, instance; placed on session, relates)
-  spec: { required: ["program"] }
-  body also carries: tool_use_id (Anthropic API mapping), input (JSON)
-
-tool-result (placed on agent, instance; placed on session, relates)
-  spec: { required: ["program"] }
-
-context   (placed on agent, instance; placed on session, relates)
-  spec: { ordered: true }
+conversation  spec: { propagate: true, ordered: true,
+                      accepts: ["message", "tool-call", "tool-result", "context", "gate", "control"] }
+message      (relates on conversation)  spec: { required: ["text"] }   body also: from, partial?, refs?
+tool-call    (relates on conversation)  spec: { required: ["program"] }  body also: args?, process?
+tool-result  (relates on conversation)  spec: { required: ["program"] }  body also: process?, output?
+context      (relates on conversation)  spec: { ordered: true }
+gate         (relates on conversation)  spec: { required: ["action", "status"] }
+control      (relates on conversation)  spec: { required: ["signal"] }   — pause | resume | adjust
 ```
 
-Type definitions use `relates`. Content chunks on a session use dual placement — `instance` on the session (with a `seq` for ordering) and `instance` on the type archetype (for `accepts` resolution).
+Content chunks dual-place: `instance` on the conversation (with seq) and `instance` on their type. A conversation is also placed on whatever it is about — aboutness is placement, filled by navigation shortcuts (*talk about this*) or by hand. `message.body.from` carries the participant (human, agent face, another person); prompts and answers are both messages. Conventions: `tool-call.body.process` present ⇔ a program run (absent ⇔ a direct substrate op); `tool-result.body.output` carries the result chunk's id, so the transcript links into the process trace by id, not copied text.
 
-A `context` chunk's children are scope references placed by identity — `context` is `ordered: true` with no `accepts`, so any chunk placed on it IS a scope reference. Writing a `context` event captures exactly what the agent was reading at that turn.
+### Context items — completion from the field, recorded
 
----
-
-## Context, Pinning, Scope Change
-
-The run's `context` argument is the **pinned set** — the user (or parent agent) assembled it when invoking the claude program, and it is immutable for the life of the run. Culture first (seq 0), knowledge scopes after. The agent's process chunk cannot modify this context; it was committed before the program was spawned.
-
-When the agent expands its reading scope mid-run — to look at a scope it wasn't initially given — it writes a new `context` event onto the session. The host assembles the knowledge layer each cycle by reading the pinned context first, then the agent's added contexts. The agent can grow its view but never remove what was pinned. Every addition is checked against the read boundary the engine enforces.
-
-The session's `context` events are the trace — what the agent was looking at at every turn.
-
----
-
-## The Agent Cycle
-
-1. Receives its process id and engine endpoint. Calls `scope` via protocol to read its own process chunk (session, context, prompt, read-boundary, write-boundary).
-2. Writes the incoming `prompt` and initial `context` onto the session via `commit` (dual placement — session membership plus type membership).
-3. Each cycle: assembles the knowledge layer (pinned context plus any additions) and the session layer (the dispatch's own tool chain so far). Calls the Anthropic API.
-4. On `tool_use` from the model: calls `run` via protocol with the target program and arguments. The engine creates the tool-call process, spawns it, returns the process id. The agent writes `tool-call` and `tool-result` chunks onto the session referencing the process chunk id.
-5. On scope expansion: writes a `context` event to the session. The engine validates that referenced scopes are reachable from the read boundary.
-6. On `end_turn`: writes an `answer` onto the session. Exits.
-
-Every step leaves a chunk on the session. The session is the full record.
-
----
-
-## Context Assembly
-
-Two layers per API call:
-
-- **Knowledge layer.** The agent's current scope serialized into the model's context window. Re-built from the substrate each cycle. Culture first (anchors interpretation), then project knowledge, then active scopes.
-- **Session layer.** The current run's tool chain only. This grows within a run because the Anthropic API requires the tool-use/tool-result pairs to appear as message history. Previous sessions are visible only through scope in the knowledge layer; they are not replayed as message history.
-
-Whether the knowledge layer goes into the system prompt (cacheable) or is manufactured as a synthetic message history (more natural continuity) needs empirical testing. The pilot can try both.
-
-### Session chunk → API message mapping
-
-| Chunk type | Becomes |
-|---|---|
-| `prompt` | `{ role: "user", content: body.text }` |
-| `answer` | `{ role: "assistant", content: [{ type: "text", text: body.text }] }` |
-| `tool-call` | `{ type: "tool_use", id: body.tool_use_id, name: body.program, input: body.input }` — grouped into an assistant message |
-| `tool-result` | `{ type: "tool_result", tool_use_id: body.tool_use_id, content: body.text }` — grouped into a user message |
-| `context` | Not sent — traceability metadata |
-
----
-
-## Tool Specs — Substrate to Anthropic API
-
-Tool definitions sent to the Anthropic API are derived from the substrate. No manual sync.
-
-The agent reads the programs reachable within its read boundary and generates a tool definition for each program that declares `runtime: 'vm'` (tool-shaped, not view-shaped):
-
-1. Program `name` → tool `name`
-2. Program `body.text` → tool `description`
-3. For each type in the program's `accepts`: read the type chunk's `spec.required` → `input_schema.required`. Read the type chunk's body for property schemas → `input_schema.properties`.
-
-### Example
+A turn's context is addressable structure, not rendered text:
 
 ```
-filesystem (instance of program)
-  spec: { propagate: true, accepts: ["fs-command"] }
-  body: { text: "Read and write files", executable: "./programs/filesystem", runtime: "vm" }
-
-fs-command (relates to filesystem)
-  spec: { required: ["operation", "path"] }
-  body: {
-    text: "A filesystem operation",
-    schema: {
-      operation: { type: "string", enum: ["read", "write", "edit", "glob", "grep"] },
-      path: { type: "string", description: "File or directory path" }
-    }
-  }
+context chunk   instance on <conversation> (seq); instance on context type
+context item    instance on <context chunk> (seq); relates on <source chunk>
+  body: { source: ChunkId, at: CommitId, projection: "body" | "summary" | "name" }
 ```
 
-generates:
+The `relates` on the source is the load-bearing move: any chunk can answer *which model contexts have included me* — in which conversations, under which harnesses. `at` pins the source at the commit the read resolved against; temporal reads reconstruct exactly what the model saw. Together with the verbatim request on the `model` frame: the reference layer for navigation and staleness, the request chunk for the byte-exact record.
 
-```json
-{
-  "name": "filesystem",
-  "description": "Read and write files",
-  "input_schema": {
-    "type": "object",
-    "properties": {
-      "operation": { "type": "string", "enum": ["read", "write", "edit", "glob", "grep"] },
-      "path": { "type": "string", "description": "File or directory path" }
-    },
-    "required": ["operation", "path"]
-  }
-}
-```
+## The `agent` program
 
-### Translating model responses to runs
+**Not a service.** One run = one turn (or one delegated task); the next message is a fresh run over the same conversation. The *conversation* is the persistent thing; the visual surface is separate (`converse`, a viewer like any other); the agent process is disposable. Cheap, because everything lives in the field, not in process memory.
 
-When the model returns a `tool_use`:
+The cycle:
 
-1. Model produces `{ id: "toolu_abc", name: "filesystem", input: { operation: "read", path: "/foo" } }`.
-2. Agent looks up the `filesystem` program chunk, reads its `accepts`.
-3. Agent calls `run("filesystem", { chunks: [...], readBoundary: [...], writeBoundary: [...] })` via protocol. The argument chunks are built from the model's `input` object against the program's accepted types.
-4. Engine creates the tool-call process, spawns the program, computes the effective boundary as the intersection of the agent's current boundary and the target program's intrinsic boundary.
-5. Agent `await`s the process id. When it completes, the agent writes `tool-call` and `tool-result` chunks on the session. Each references the process chunk id in `body.program`; the process IS the authoritative trace of what happened. `tool_use_id` is stored on the session chunks only for API message reconstruction.
+1. **Orient.** Read own frame: conversation reference, boundary chunks walked to roots — the agent can tell the model, truthfully, what it can see and touch. Subscribe to the conversation: the steering channel.
+2. **Assemble.** Read the conversation (probe counts, then pull — R2); scope the context roots; select. Commit the turn's context chunk + items (pinned, `relates` on sources). Selection policy — recency, FTS, summaries in place of large bodies, budget — is agent code; the *record* of selection is substrate.
+3. **Complete.** Render context items + conversation into the selected model program's request shape (read from its schema), each block prefixed with its chunk id so the model addresses the field by id. Compile tool schemas from the toolset's programs — from their argument chunks, the same structure the launch form renders. Run the model program; await.
+4. **Dispatch.** Substrate ops (`scope`, `get`, `search`, `commit`) execute directly — a `VALIDATION_ERROR` or `BOUNDARY_VIOLATION` renders back as the tool result; **spec enforcement is the model's error signal.** Program tools are `run` (child mode): nested trace, boundaries intersected — the model can never escalate. Parallel calls are parallel runs awaited together. Write `tool-call` / `tool-result` onto the conversation; loop to 2.
+5. **Answer.** Commit the answer message `partial: true`, update on a throttle (R6 — streaming is commits), finalize with `partial: false` and `refs`. Exit 0.
 
----
+### Pause, resume, and context purity
 
-## Sub-agents
+Between every cycle the agent checks its steering channel. A `control { signal: "pause" }` chunk on the conversation halts the loop **before the next cycle** — no process killed, nothing lost, the turn simply holds. While paused you inspect the trace, read what it read, even *discuss the work in the conversation itself*. Then `resume`.
 
-A sub-agent is a run of the claude program from within another run of the claude program — a tool-call that happens to target `claude`. Its process is its own working scope (`ordered: true` via the program's spec). The parent's session records `tool-call` (spawn) and `tool-result` (final answer). Scoping into the child process shows its own internal session and trace. Depth limit: 3 for the pilot.
+The discipline that makes this more than a stop button: **the context stays pure.** Meta-discussion during the pause does not enter the agent's context by default — what enters is only what you choose to hand it: an `adjust` control carrying the distilled correction, or specific chunks added to the context roots. Conventional harnesses swallow the whole intervening transcript; here, because context is assembled from scope each cycle rather than accumulated, steering the next cycle and polluting it are finally separate things. (`cancel` still exists for actually killing a turn; pause is the primary gesture of skepticism.)
 
----
+**Gates** are the agent-initiated mirror: policy makes the agent commit a `gate` chunk and hold on its subscription; the surface renders approve/deny; the decision is permanent history. No engine feature needed for either — both are conversation citizens.
 
-## Culture
+**Sub-agents.** A run of `agent` from within `agent` — child mode, boundaries narrowed, trace nested. An orchestrator is not a framework; it is a program that calls `run` several times.
 
-Not a special type. A chunk the user creates with values, instructions, identity. Placed first in the run's `context` ordering so the model reads it first. Culture is a convention — "this is the scope I anchor my interpretation in" — not a mechanism.
+**Boundary.** Intrinsically open — the run grant is the user's whole decision about reach, made visible as chips before the turn starts (`programs.md` §3.6).
 
----
+**Audit.** `scope([db/commits, P])` — every write. `scope([P])` — args, boundary, nested tool frames, each model call's verbatim request. `scope([conversation], {at})` — the conversation at any moment. No bespoke logging anywhere.
 
-## Knowledge Serialization
+## Open
 
-The agent (or a helper program it uses) assembles the knowledge layer by reading scopes and rendering them as markdown. Starting format:
-
-```
-# [scope-name]
-
-[body.text of scope chunk]
-
-## [child-name] (instance)
-
-[body.text or structured fields]
-
-## [child-name] (relates)
-
-[body.text or structured fields]
-```
-
-Scope headers are section breaks. Culture scope first. Instances before relates within each scope. Chunks without `body.text` render as key-value summaries. Nested scopes indent or use deeper headings.
-
-The exact format will refine through testing — this is the starting point, not the final form.
+- **Harness decomposition.** Context assembler, tool dispatcher, renderer as separate programs the agent composes — likely, not yet forced.
+- **How far conversation-as-primitive carries.** The agent brings many specific citizens (tool calls, gates, controls) to a conversation; whether reading *and interaction* (far beyond typing) stay fully modular as third parties add citizens is to be proven in the building.
+- **Serialization form.** How context items render into each provider's request shape needs empirical testing per provider; the recorded structure is format-independent, so formats can change without losing the record.
+- **Selection policy.** What the assembler chooses under budget is the live research frontier of completion-from-scope.

@@ -92,11 +92,11 @@ A SQLite-backed Rust library. Chunks, placements, commits. See [`pilot/substrate
 
 Sits between the substrate and anything that would run against it. Creates a `process` chunk when a program is run, enforces boundaries, spawns the program's executable, mediates all substrate access the running program attempts. See [`pilot/engine.md`](pilot/engine.md).
 
-A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. There is no separate engine process, no inter-process hop between host and engine.
+A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. In v0.1 there is no separate engine process, no inter-process hop between host and engine — but the protocol seam deliberately preserves the engine-as-daemon direction (hosts as attaching windows, network reach; see [`horizon.md`](horizon.md)).
 
 ### The host
 
-A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. Does not render UI. See [`pilot/host.md`](pilot/host.md).
+A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `pilot/programs.md` §3.1). See [`pilot/host.md`](pilot/host.md).
 
 ### Programs
 
@@ -153,8 +153,10 @@ host/                — Rust binary. tao + wry. Window, tile geometry, webview
   ui/                — TypeScript UI library (React components, hooks like
                        useScope). Used by webview programs that the host renders.
                        Lives here for v0.1; may extract later.
-  programs/          — first-party programs the host runs at boot
-                       (sidebar, tab-bar, command-palette, dispatcher, read-tile).
+  programs/          — first-party programs the host ships (sidebar, tab-bar,
+                       command-palette, read-tile, launch, inspector, …).
+                       The frame machinery itself — window, tiling,
+                       background — is host-native.
   .ol/
     db               — the host project's substrate database
     project.toml     — host project config
@@ -191,7 +193,7 @@ The rule across the spec phase: implementation drawings are derived from the ins
 4. **Code the engine crate** from [`pilot/engine.md`](pilot/engine.md), including `engine/sdk/` (the runtime-agnostic TypeScript package).
 5. **Scaffold host** — tao + wry, window, one webview, the wry IPC handler dispatching to the engine library; the mounts cascade walk; VM and webview runtime providers; `host/ui/` React library scaffold.
 6. **First program: read tile.** Validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
-7. **Remaining first-party host programs** — sidebar, tab-bar, command-palette, dispatcher.
+7. **Remaining first-party host programs** — sidebar, tab-bar, command-palette, launch, inspector.
 8. **Agents project** — claude, echo, and tool programs (filesystem, shell, web). Active-project demo working end-to-end.
 
 The implementation order in 3–6 is sequential because each layer compiles on the one below, but they were drawn as one piece — no design decisions are made in implementation that weren't already made in the spec phase.
@@ -205,7 +207,8 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 - [`pilot/engine.md`](pilot/engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
 - [`pilot/host.md`](pilot/host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
 - [`pilot/sdk.md`](pilot/sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
-- [`pilot/agent.md`](pilot/agent.md) — the claude agent expressed as a program.
+- [`pilot/programs.md`](pilot/programs.md) — the program layer at experience depth: the call frame, lifecycle, the interface concretely (sidebar, palette, launch, viewers), the program set, and the demands returned to the foundation.
+- [`pilot/agent.md`](pilot/agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately.
 - [`pilot/bootstrap.md`](pilot/bootstrap.md) — the seed data.
 
 ## What Is Open

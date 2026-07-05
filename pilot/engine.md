@@ -2,9 +2,7 @@
 
 The engine is the authority on running programs against the substrate. A program is a chunk with an executable; to run one is to create a process. The engine creates processes, enforces boundaries, spawns executables, and mediates every substrate operation a running program attempts. Nothing runs without going through the engine, and no program touches the database directly.
 
-The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no separate engine process and no JSON-lines hop between host and engine. Webview programs send their protocol messages over wry IPC to the host; the host's IPC handler dispatches them to engine functions and returns the results back through wry. VM programs (tool programs running in a containment VM) speak the same protocol over stdio JSON-lines — the engine spawns them inside their VM and reads stdout.
-
-The shape of the program-facing protocol is identical regardless of transport. The SDK hides the difference.
+The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no separate engine process and no JSON-lines hop between host and engine. Programs reach those functions through one protocol over two transports — wry IPC for webview programs, stdio JSON-lines for VM programs — identical in shape regardless of transport; the SDK hides the difference. Mechanics are in *The Program Protocol* below and [`sdk.md`](sdk.md).
 
 The engine federates across multiple substrate dbs — one read-write **active project** plus zero or more read-only **mounts**. Programs see one logical field; the engine routes reads and boundary walks across all mounts transparently. Reactivity flows only from the active project's commits in v0.1 — read-only mounts have no in-process writer to fire events. See [`pilot.md`](../pilot.md#multi-project-mounts) for the project/mount model.
 
@@ -12,7 +10,7 @@ The engine federates across multiple substrate dbs — one read-write **active p
 
 ## What the Engine Owns
 
-- **Process creation.** Running a program creates a `process` chunk. The engine creates it in one atomic `db.commit()`, placing it on the program (so it lists under the program's runs), on `engine/process` (so every run is in the process scope), and on each scope id the caller passes in `RunArgs.placements` (host passes the host/session id at top-level runs; tool calls pass the parent process id). The process chunk is engine-owned — a running program cannot modify its own process chunk or the boundary chunks attached to it.
+- **Process creation.** Running a program creates a `process` chunk in one atomic `db.commit()` — its placements are defined in *Program and Process*. The process chunk is engine-owned: a running program cannot modify its own process chunk or the boundary chunks attached to it.
 - **Boundary enforcement.** Every scope read, every write, every nested program run is checked. The engine computes the effective boundary as the intersection of the program's intrinsic boundary and the boundary the user (or parent process) set at run time. Reads outside the read boundary return `BOUNDARY_VIOLATION`. Writes outside the write boundary are rejected.
 - **Program lifecycle.** The engine spawns the program's executable, tracks its status through `pending → running → completed | failed`, updates the process chunk as state changes, kills on timeout or cancel. The program itself does not set its status — it simply exits.
 - **Protocol mediation.** The engine receives every substrate operation a running program attempts, validates it, executes it via the substrate library, returns the result. Programs do not carry database access; the protocol is the boundary.
@@ -110,7 +108,7 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 |---|---|
 | `scope` | `ScopeResult` |
 | `get` | `ChunkItem \| null` |
-| `commit` | `Commit` (id, parent_id, timestamp, chunks_modified, placements_modified) |
+| `commit` | `Commit` |
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ScopeResult>` — process id → final scope |
 | `subscribe` | `{ subscriptionId: string }` |
@@ -126,6 +124,7 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 | `NOT_FOUND` | Referenced chunk, program, or subscription does not exist |
 | `RUN_FAILED` | A run the program started ended non-zero |
 | `INVALID_REQUEST` | Malformed JSON, unknown op, missing fields |
+| `TRANSPORT_CLOSED` | The program's transport closed mid-response (webview destroyed, VM stdio gone); the pending call rejects on the SDK side |
 
 The types (`ScopeResult`, `ChunkItem`, `Declaration`, `Commit`) are the substrate library's types.
 
@@ -270,7 +269,7 @@ The engine has no runtime-specific entry points. Readiness signaling (e.g., a we
 
 A single atomic `db.commit()` creates:
 
-1. **The process chunk.** Empty body except `status: 'pending'`. Placements: `instance` on the program (so the process is listed under the program), `instance` on `engine/process` (so every run is in the process scope), and `instance` on each scope id the caller passed in `RunArgs.placements` (host passes the host/session id at top-level runs; tool calls pass the parent process id; the engine itself doesn't know about host-side scopes).
+1. **The process chunk.** Empty body except `status: 'pending'`. Placements as defined in *Program and Process*: `instance` on the program, on `engine/process`, and on each scope id in `RunArgs.placements`.
 2. **A read-boundary chunk** (when `RunArgs.read_boundary` is `BoundarySpec::Roots(_)`). Placements: `instance` on `engine/read-boundary` (type), `relates` on the process (execution configuration, not structural content). Each boundary scope root is placed `relates` on this chunk by identity. When `BoundarySpec::Existing(chunk_id)` is given, the named boundary chunk is `relates` on the process directly — no fresh chunk created.
 3. **A write-boundary chunk.** Same shape for `engine/write-boundary`.
 4. **The argument chunks passed by the caller.** Each receives a `{ scope_id: processId, type: 'instance' }` placement added by the engine. The substrate's `accepts` check validates the composed contract.
@@ -481,7 +480,7 @@ Every commit the substrate records carries a `process_id` column — the process
 
 No new tables, no circular placements. Commits look like chunks to readers; they are structurally separate.
 
-A virtual scope can be intersected with the parameters its projection recognizes — see [`db.md`](db.md) for the full list (`[db/commits, branch_id]` for that branch's ancestry, `[db/commits, process_id]` for commits from a run, `[db/commits, chunk_id]` for commits that modified a chunk). Other shapes return what falls out of the join, typically empty.
+A virtual scope can be intersected with the parameters its projection recognizes — see [`db.md`](db.md#virtual-chunks-branches-and-commits) for the full list. Unrecognized shapes return what falls out of the join, typically empty.
 
 ---
 
@@ -516,9 +515,7 @@ The provider drives its own readiness and terminal signals; engine just awaits t
 
 ## Containment
 
-v0.1 uses split containment. Programs that declare broad capabilities — network, filesystem, shell — run inside the active project's Linux VM. Peer projects' filesystems are mounted read-only at `/peers/<project-id>/` inside the same VM, so peer-defined invocables spawn from those paths within the same containment. Programs with only a DOM surface run on the host inside the webview the host gave them. The webview sandbox contains view programs at the OS level; the engine's boundary enforcement contains them at the substrate level. The VM contains tool programs at both levels.
-
-The uniform-VM alternative — every program in one VM with DOM streamed to host webviews — is on the horizon. See [`horizon.md`](../horizon.md). The same protocol, process lifecycle, and boundary enforcement serve either model; only where programs run differs.
+Containment is the runtime provider's concern, not the engine's — the engine asks the registered provider to spawn and knows runtime kinds only as registry keys (see *What the Engine Owns* and *Runtime providers*). What the engine guarantees regardless of provider: every substrate operation passes the boundary check, so containment and boundary enforcement compose. v0.1's split-containment model and the uniform-VM alternative on the horizon are in [`pilot.md`](../pilot.md#containment) and [`horizon.md`](../horizon.md).
 
 ---
 
@@ -559,12 +556,7 @@ An explicit `BOUNDARY_VIOLATION` is better than a silently empty read. The engin
 
 ## Client Library
 
-Programs do not write raw protocol messages. They import the SDK and call typed functions — `scope`, `commit`, `run`, `await`, `subscribe`. The SDK serializes each call into the protocol's JSON shape and dispatches it through whichever transport the program runs under. Same API surface, two transports:
-
-- **Webview programs** — the SDK calls `window.__wry_ipc.postMessage(...)`. The host's IPC handler deserializes, calls the corresponding engine function, and returns the result through wry's response channel.
-- **VM programs** — the SDK writes a JSON line to stdout. The engine, which spawned the program inside its VM, reads each line and calls the corresponding engine function.
-
-Implementation lives under [`engine/sdk/`](../engine/sdk/) and is specified in [`pilot/sdk.md`](sdk.md) — one TypeScript package with two transport modules behind the same surface. The engine itself only exposes Rust functions; it does not ship a TS client.
+The engine exposes only Rust functions; it ships no TS client. Programs reach those functions through the SDK, which serializes each call into the protocol JSON and selects the transport. The SDK ships from the engine crate ([`engine/sdk/`](../engine/sdk/)) because it is the engine's protocol expressed as TypeScript; its surface and the two transports are specified in [`pilot/sdk.md`](sdk.md).
 
 ---
 
@@ -631,21 +623,17 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 ### Key mechanics
 
-**Mount registry as runtime federation.** The engine holds `mounts: Mutex<HashMap<ProjectId, MountedProject { db, mode, branch }>>`. Read paths (scope, boundary walks) iterate this map across all mounts; write paths verify the chunk's resolved mount is `ReadWrite`; reactivity subscribes only to read-write mounts (a `select!` source per — one in v0.1). Adding a `ReadWrite` mount adds a receiver; removing one drops it. Read-only mounts contribute reads but no reactivity. Programs have no notion of mounts — they call `scope([id])` and the engine federates.
-
-**Runtime registry as plug-in points.** The engine holds `runtimes: HashMap<RuntimeKind, Arc<dyn RuntimeProvider>>`, populated at boot via `register_runtime`. `ops::run` looks up the program's `runtime` field as a key and asks the registered provider to spawn — engine has no built-in runtime knowledge. Adding a new runtime kind is purely additive (implement `RuntimeProvider`, register it).
-
 **State authority follows lifecycle.** A process has two natural homes — its slot (live runtime: spawn handle, status watcher, timeout) and its substrate chunk (durable: status, error). The slot is authoritative while the process is active; the substrate is authoritative once the slot is gone. Authority transfers in one ordered step at terminal: cleanup writes the terminal status, then drops the slot. `await_processes` resolves either side — slot present, watch the status; slot absent, read the substrate (always terminal there). One truth at any moment; the seam is the cleanup commit.
 
 **Reactivity owns event emission.** The reactivity task is the engine's only consumer of `db.subscribe_scope(&[db/commits])` and the only emitter of `scope_changed` / `lagged` / `subscription_invalid`. Cleanup paths (cancel, timeout, child exit, parent cascade) trigger reactivity by writing terminal commits; they never emit events directly. This collapses what would otherwise be two writers to the subscription registry: subscription invalidation on terminal is reactivity's job, not cleanup's.
 
 **Webview transport as commands.** The host's wry/tao machinery is main-thread and `!Send`. The engine never holds a `WebView`. `Engine::open` returns `(Engine, mpsc::Receiver<HostCmd>)`; the host drains the receiver on its event loop and translates each `HostCmd` (`MountWebview`, `UnmountWebview`, `EvaluateScript`) into a wry call. The webview runtime provider (in the host crate) sends `MountWebview` from its `spawn` method and includes `ready` and `terminal` oneshot senders that the host fires when the webview has navigated and when it's destroyed. Outgoing events to webview subscriptions are `EvaluateScript` commands emitted by reactivity. This is the engine's only seam to non-`Send` code, expressed as data.
 
-**Errors as one vocabulary.** The engine has one wire surface, so it has one error enum. `EngineError` carries every condition the protocol needs to express (`BoundaryViolation`, `ValidationError`, `InvalidRequest`, `NotFound`, `TransportClosed`, `Db`, `Protocol`). The protocol response builder maps `&EngineError` to a wire code via a single `match`; the VM stdout pump consults the same enum to decide whether parse failures are terminal. Two consumers, one enum — no scattered tables.
+**Errors as one vocabulary.** The engine has one wire surface, so it has one error enum. `EngineError` carries every condition the protocol needs to express (`BoundaryViolation`, `ReadOnlyMount`, `ValidationError`, `NotFound`, `RunFailed`, `InvalidRequest`, `TransportClosed`, `Db`, `Protocol`). The protocol response builder maps `&EngineError` to a wire code via a single `match`; the VM stdout pump consults the same enum to decide whether parse failures are terminal. Two consumers, one enum — no scattered tables.
 
 **Single writer where it matters; locks where it doesn't.** Reactivity is the sole emitter of events and the sole path that drops subscriptions on invalidation. The registry itself is `Mutex<HashMap>` because `ops::subscribe` inserts new entries — the lock is held only for insert/remove, never across an `await`. The processes map follows the same discipline: `ops::run` inserts, terminal triggers remove, `await_processes` clones a watch receiver. Mutex is the dumb-clear choice for shared state with brief critical sections.
 
-**Async surface mirrors db's.** `scope`, `commit`, `run`, `cancel`, `subscribe`, `unsubscribe` are sync (the substrate is sync). `await_processes` and `shutdown` are async. The reactivity task and per-VM stdio pumps run on tokio, spawned via a `tokio::runtime::Handle` stored on `Engine` at `open`. The host calls `Engine::open` from within its tokio runtime context.
+**Async runtime.** The sync/async split mirrors db's (see *Sync vs async*). The reactivity task and per-VM stdio pumps run on tokio, spawned via a `tokio::runtime::Handle` stored on `Engine` at `open`; the host calls `Engine::open` from within its tokio runtime context.
 
 ### Settled choices
 

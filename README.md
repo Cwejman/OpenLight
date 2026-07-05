@@ -4,32 +4,32 @@
 
 > Image from the first pilot (archived)
 
-The art of building software has always been about understanding first. The bottleneck is never typing — it's knowing what to build. Misunderstanding compounds. The best work happens when the understanding is clear enough that implementation feels inevitable rather than forced.
+The way AI is used today is monolithic. A completion model is a closed function: assemble a prompt, pipe in whatever the session has become, hope. The context is crude — a linear transcript — and the results evaporate when the window closes. The model, the person, and ordinary programs live in three disjoint worlds, bridged by paste.
 
-Agents now have the capability to participate deeply in that process — reading, reasoning, generating, refactoring. But what makes a session productive is the same thing that has always made software work: the quality of understanding going in. An agent that starts with clear context — structured knowledge, clear types, honest requirements — produces clear work. An agent that starts cold produces plausible noise.
+OpenLight is built on one claim: **completion should happen from a point in a field, not from a pasted transcript.** When knowledge lives as typed, versioned structure, a model's context is a scope — addressable, reproducible, queryable — and its output lands back as structure the next reader stands on. This blows the completion model's interface to its surroundings open. The monolith becomes a citizen.
 
-The missing piece is not more capability. It's continuity. Understanding built in one session doesn't carry to the next. The work fragments instead of compounding.
+OpenLight is three things:
 
-OpenLight is a substrate where understanding persists and compounds. You structure what you know — types, contracts, relationships — in a field that carries its own structure and enforces its own integrity. An agent reads the field and knows what to do. An interface is projected from it. The next session stands on the ground the last one built. A type placed today is a contract an agent reads tomorrow, a surface someone interacts with the day after.
+- **A substrate** — typed, version-controlled structure. Units of meaning with identity (chunks), placed into scopes; contracts (specs) the substrate enforces on write; every change a commit on a branch.
+- **Programs** — the only unit of execution. A program reads scopes and writes commits inside an enforced boundary. Whether it renders a surface, touches a disk, or calls a model is what its body declares, not a different kind. Programs compose into new programs.
+- **A host** — makes substrate plus programs an operating environment initially built of windows, tiles and tabs with a process/program sidebar, command palette and built in bundle of programs. The interface is purely built on programs itself.
 
-The field grows richer by being worked in.
-
-This is not a knowledge base an agent queries. It is a computing environment — the substrate where knowledge, types, agents, interfaces, and programs all live as one integrated system. A program that reads the filesystem, an agent loop running a completion model, a tile projecting scope onto screen — these are all functions native to the same field, reaching the same contracts, writing back to the same history. The full cycle of a computing environment, not a retrieval layer bolted onto one.
+A model-calling program reads the same typed structure a grep does (or any program of in the substrate), writes the same commits a human does, composes into the same surfaces. Human, classical program, and model in one typed, versioned medium — that bridge does not exist today. And because every write is a commit from a bounded process, trust is native rather than bolted on: boundaries before a run, inspection during, history after. Valuable — and secondary. The center is what completion from the field unlocks but it is of novel value even without models, just inherently expansive with them.
 
 ---
 
-> Read in order. Each file below assumes the previous as ground. `pilot/` sub-specs and `research/` are reference depths — descend only when work calls for them.
+> Read in order. `pilot/` sub-specs and `research/` are reference depths — descend when work calls for them.
 
-[`inside.md`](inside.md) — principles, values, and horizon, inside-out. The disciplines the work runs on, what they answer to, and what they reach toward. Everything else answers to this.
+[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](pilot/substrate.md), [`db.md`](pilot/db.md), [`engine.md`](pilot/engine.md), [`host.md`](pilot/host.md), [`sdk.md`](pilot/sdk.md). Experience: [`programs.md`](pilot/programs.md), [`agent.md`](pilot/agent.md).
 
-[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof. The substrate-and-program shape the values demand. The substrate library lives under [`pilot/db/`](pilot/db/).
+[`conventions.md`](conventions.md) — principles and working agreements. Short.
 
-[`conventions.md`](conventions.md) — working agreements for how we operate together, plus code-level conventions. Short. The principles that shape how the work happens live in `inside.md`.
+[`board.md`](board.md) — current state, recent decisions, tracked debt.
 
-[`board.md`](board.md) — current state, recent decisions, tracked debt. Where the work stands against the pilot's plan.
+[`horizon.md`](horizon.md) — the vision beyond v0.1, by proximity and proof status.
 
-[`horizon.md`](horizon.md) — live ideas being worked on. Not settled into `inside.md`, not committed in `pilot.md`. Open directions held deliberately open.
+[`rework.md`](rework.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
 
-[`research/`](research/) — ecosystem reading, a portrait gallery of software inventors whose work mirrors and pushes back on the values, and the audit trail behind `inside.md`. Reference depth.
+[`research/`](research/) — reference depth. [`research/cleanroom/`](research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.
 
 ![footer](.img/footer.png)

@@ -25,7 +25,7 @@ The engine and substrate are Rust crates linked into the host binary. The host c
 - Hold session state. Session state lives in the substrate.
 - Own program lifecycle. The engine does that.
 
-The host stays small. Rust, a few hundred lines at the core, oriented around window + webviews + the wry IPC dispatch surface. This is not an aesthetic preference — it's the line that keeps interface authorship in the language the substrate's self-description already describes, rather than in a second language that has to keep up.
+The host stays small. Rust, oriented around window + webviews + the wry IPC dispatch surface. This is not an aesthetic preference — it's the line that keeps interface authorship in the language the substrate's self-description already describes, rather than in a second language that has to keep up.
 
 ---
 
@@ -35,10 +35,10 @@ Interface and tool are one kind of thing. A program is a chunk with an executabl
 
 The pilot supports two runtimes:
 
-- `runtime: 'vm'` — the program is an executable spawned as a process inside the active project's Linux VM (v0.1's containment). A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind. Peer projects' filesystems are mounted read-only at `/peers/<project-id>/` inside the same VM, so a program declared in a mounted project resolves its executable path against its peer mount and runs in the same containment. A default inspector program can render a VM program's activity in a tile when the user wants to look in.
+- `runtime: 'vm'` — the program is an executable spawned as a process inside the active project's Linux VM (v0.1's containment). A shebang on the file declares its interpreter; the engine doesn't impose a language. Whatever the interpreter gives the program (fs, network, shell, etc.) is what's available, gated by declared capabilities. No rendering. The agent and tool programs are this kind; a program declared in a mounted project runs its executable from its peer FS mount inside the same VM (boot wires the mount table). A default inspector program can render a VM program's activity in a tile when the user wants to look in.
 - `runtime: 'webview'` — the program is a JS bundle loaded into a wry-hosted webview. The runtime is the webview's V8 — a sandboxed browser engine with full DOM, full client-side React, and 60fps interactions. The SDK reaches the engine over wry IPC.
 
-Programs of both runtimes use the same SDK surface (`scope`, `commit`, `run`, `awaitRun`, `subscribe`); only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `vm` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
+Programs of both runtimes use the same SDK surface; only the transport differs. A complex UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — a `webview` program and a `vm` program — bound by their shared scope, communicating through the substrate. Compositions are the substrate's native shape for what other systems call "islands": independent interactive regions, each with its own runtime, glued by shared state.
 
 The pilot ships a TypeScript SDK only. First-party VM programs use `#!/usr/bin/env bun` so they can import the TS SDK directly; programs in other languages would need their own SDK speaking the same JSON-lines protocol. That is out of scope for the pilot, in scope for the horizon.
 
@@ -89,15 +89,13 @@ host/recipe
     tab. The recipe itself persists separately from any spawned instance.
 ```
 
-A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, a nested tile structure visible as one rounded card on the board (with inner tiles separated by borders rather than padding). Collapsing the container stops its children. Composition is the live form; recipe is the saved template. Spawning instantiates fresh processes from the template; the recipe itself is unchanged.
-
-Compositions are how complex UIs that mix DOM and capabilities get built. A program that needs both a designed UI and direct system access is a composition of a webview program and a VM program, bound by their shared scope. Visually they can read as one designed surface — the host renders inner tiles with no padding when the composition wants seamlessness — even though they're independent runtimes.
+A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, with a nested tile structure on the board. Collapsing the container stops its children. Composition is the live form; recipe is the saved template — spawning instantiates fresh processes, the recipe itself unchanged.
 
 ---
 
 ## View Modes as Lenses
 
-The pilot ships tabs — the geometry described below. That is one lens on what the substrate holds, not the only one. A zoomable canvas is another lens on the same chunks; further geometries are reachable too. Because the host is built by programs themselves, a view mode is just another program working over the composition types — not a different host. Tabs go first; new lenses are additive, not forks.
+v0.1 walks one geometry — tabs (below). It is one lens on the chunks, not the only one: because the host is built by programs, a view mode is itself a program over the composition types, so other lenses (zoomable canvas, outline, graph) are additive, not forks. Directions in [`horizon.md`](../horizon.md#view-modes-beyond-tabs).
 
 ## Tile Geometry
 
@@ -133,7 +131,7 @@ The window is a quiet canvas:
 
 In the sidebar, the same chunk is shown two ways based on its process state. A running process is a card, with the same rounding and shadow as a tile. A completed or failed process is flat — just its content directly on the background. The visual language distinguishes life from rest without a label.
 
-Future visual refinements — glow around cards derived from their content pixels, native backdrop blur, compositor-level effects — live on the direction list. For the pilot, CSS `backdrop-filter` covers the aesthetic; native pixel effects come later.
+For the pilot, CSS covers the aesthetic (`backdrop-filter` for blur); content-derived glow and native compositor effects come later — see *What Is Open*.
 
 ---
 
@@ -149,31 +147,7 @@ The host does not interpret substrate operations — it dispatches them. VM prog
 
 ### SDK surface
 
-A program imports the SDK and calls the substrate operations it needs directly. Webview programs render with their DOM library of choice — `react-dom/client` for React, anything else otherwise; the SDK has no rendering concerns.
-
-```tsx
-import { scope, commit, run, awaitRun } from '@openlight/sdk'
-import { useScope } from '@openlight/ui'
-import { createRoot } from 'react-dom/client'
-
-function ReadTile() {
-  const scopeId = /* from host-provided mount context */
-  const data = useScope([scopeId])
-  return <div>{/* render data */}</div>
-}
-
-createRoot(document.getElementById('root')!).render(<ReadTile />)
-```
-
-Operations the SDK exposes (in `@openlight/sdk`):
-
-- `scope(ids, opts?)` — read the intersection of scopes.
-- `get(id, opts?)` — fetch one chunk by id.
-- `commit(declaration)` — write.
-- `run(programId, args)` — start a new process; returns the process id.
-- `awaitRun(processIds)` — block until processes complete; returns their scopes.
-- `cancel(processId)` — terminate a running process.
-- `subscribe(ids, callback)` — imperative subscription. Returns an `unsubscribe` thunk. Typically consumed through `useScope`.
+A program imports the SDK and calls the substrate operations it needs directly; webview programs render with their DOM library of choice (`react-dom/client` for React) — the SDK has no rendering concerns. The op surface is owned by [`sdk.md`](sdk.md); a worked example is under *Authoring Programs* below.
 
 React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/ui`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `scope_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
 
@@ -219,7 +193,7 @@ The program is a substrate chunk with `body.executable` pointing at the script a
 
 **State lives in the substrate.** Programs use the substrate directly via `scope` and `commit` (and `useScope` for reactive reads in webview programs) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`.
 
-**Process identity.** Each run of a program is a distinct process chunk with a distinct id. Two processes of the same program with the same arguments can coexist — they are different chunks. The sidebar disambiguates them with program name + args + some visual suffix (timestamp, index, or user-assigned name — the scheme is open UX).
+**Process identity.** Each run is a distinct process chunk (see [`engine.md`](engine.md)) — two runs of the same program with identical args coexist as different chunks. The sidebar disambiguates them with program name + args + a visual suffix (timestamp, index, or user-assigned name — scheme is open UX).
 
 ---
 

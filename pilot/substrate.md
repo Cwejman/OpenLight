@@ -118,12 +118,7 @@ For a chunk being placed `instance` on a scope, the **effective contract** is th
 - The scope's own non-propagating spec, if any.
 - The propagating spec of every archetype the scope is itself `instance` of (transitively). `accepts` names from each archetype are resolved within that archetype's own scope.
 
-The chunk must satisfy the union:
-
-- **`ordered`** — the placement carries a `seq`. Auto-assigned to `max(existing seq on scope) + 1` when omitted.
-- **`accepts`** — the chunk is `instance` of at least one of the listed type chunks. A chunk that is `instance` of two of the listed types in the same union contract is rejected (type ambiguity).
-- **`required`** — the chunk's body carries every listed key.
-- **`unique`** — for each listed body key, the chunk's value is unique across all chunks placed `instance` on this scope.
+The chunk must satisfy every field of that union, by the semantics defined under *Spec Language* above: `ordered` (a `seq` on placement, auto-assigned if omitted), `accepts` (instance of at least one listed type — being instance of two is type ambiguity, rejected), `required` (every listed key present in body), `unique` (each listed body value unique across the scope's instances).
 
 Validation runs against the post-write state of the declaration: all placements declared together are recorded before any spec is checked. This lets a chunk and its dual placement (on a scope and on its type) appear in the same declaration without ordering failure.
 
@@ -243,23 +238,9 @@ The FTS index is maintained by the substrate and stays consistent with current s
 
 ### Derived data — summaries, embeddings, and beyond
 
-Summaries, vector embeddings, and other derived data are not special-cased in the substrate. They are chunks, placed using the same primitives as everything else.
+Summaries, vector embeddings, and other derived data are not special-cased — they are chunks placed with the same primitives. A summary `relates` on the scope it summarizes and on a derivation scope like `summaries/opus-4.6`; an embedding carries its vector in body, placed on its source chunk and on `embeddings/text-embedding-3-large`. The derivation scopes are ordinary scopes — queryable, scopeable, navigable like anything else; no special tables.
 
-A summary is a chunk placed on the scope it summarizes (`relates`) and on a derivation scope like `summaries/opus-4.6`. An embedding is a chunk with the vector in its body, placed on its source chunk and on `embeddings/text-embedding-3-large`. Any derived data follows the same pattern.
-
-**Staleness convention.** Derived chunks record what they were derived from in their body:
-
-```json
-{
-  "text": "Summary of the scope...",
-  "source_commit": "c_abc123",
-  "model": "opus-4.6"
-}
-```
-
-`source_commit` is the commit the source scope was at when the derivation was generated. Staleness check: has the source scope been mutated after `source_commit`? If yes, the derived chunk is stale. This is a reader concern — the substrate stores the data, the reader decides when to regenerate.
-
-No `summary_cache` table. No vector table. One primitive handles it all. The derivation scopes (`summaries/...`, `embeddings/...`) are just scopes — queryable, scopeable, navigable like anything else.
+A derived chunk records what it was derived from in its body (e.g. `source_commit`, `model`), so a reader can tell whether the source has moved since. Detecting and regenerating staleness is the reader's concern — the substrate stores the data, not the policy.
 
 ### Temporal scoping
 
@@ -283,27 +264,17 @@ A file reference is a chunk placed on the scopes where it's relevant. Its body c
 
 **Git as first integration driver.** If the referenced file is git-tracked, the substrate commit and the git commit together pin the reference in time. An agent or caretaker can later reconcile: what git commits have touched this file since the reference was made? If the file changed, is the surrounding knowledge still aligned? The substrate stores the fact; the intelligence evaluates it.
 
-Multiple integration types exist — files, API endpoints, audio, video. Each has its own archetype defining required fields (path + commit for git, endpoint + method for REST, etc.). Each has its own resolution logic. The pattern is uniform: a chunk whose body contains resolution parameters, whose archetype defines the contract.
+The pattern generalizes beyond git: any integration type is a chunk whose body carries resolution parameters and whose archetype defines the required fields and resolution logic.
 
 Staleness detection is a reader concern — the database knows when the reference was established (commit), not whether the external world has changed.
 
 ## Peers
 
-A peer is any directory with a substrate database. Multiple peers compose by mounting — declared dependencies or ad-hoc mounts. The entry point is the containment boundary: the directory you start from is read-write, everything peered in is read-only. Nesting can only reduce access.
-
-Peers are separate databases, not partitions of one. Each peer owns its data. The mounting mechanism is runtime — the peer protocol, conflict resolution, and exact mounting mechanics are open.
+Peers are separate databases, not partitions of one — each owns its data. They compose into one field by mounting: chunk ids are globally unique, so a placement in one db can reference a scope chunk in another, and reads union across the mounted set. The substrate makes federation possible; how projects declare and resolve mounts, and the read-write/read-only model, are the engine's — see [`pilot.md`](../pilot.md#multi-project-mounts) and [`engine.md`](engine.md).
 
 ## Logical schema
 
-The field is composed of:
-
-- **Chunks** — id (system-generated, globally unique), optional name, spec (JSON), body (JSON). Identity is the id; name is unique within scope.
-- **Placements** — a chunk placed on a scope (another chunk), typed `instance` or `relates`, optionally carrying `seq` for ordered scopes.
-- **Commits** — forming a DAG via parent links. Each commit groups one declaration of mutations and carries a timestamp and optional message.
-- **Branches** — named pointers to commits.
-- **A full-text index** over chunk names and string values in chunk bodies, native to the substrate.
-
-These are the field's data shape. How they persist — versioned tables for history, materialized current-state tables for read performance, the SQL DDL, indexes, FTS hookup, transaction discipline — is db-level. See [`pilot/db.md`](db.md) for the physical schema and access patterns.
+The field's data shape is five things, each defined above: **chunks**, **placements**, **commits** (a DAG of declarations), **branches** (named pointers to commits), and a **full-text index** over names and body strings. How they persist — versioned tables for history, materialized current-state tables for read performance, the SQL DDL, indexes, FTS hookup, transaction discipline — is db-level. See [`pilot/db.md`](db.md) for the physical schema and access patterns.
 
 ## What This System Is
 
@@ -326,6 +297,5 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 - **Scope limit and offset.** Ordered scopes can grow large. A `limit` parameter (from seq tail) and `offset` for pagination prevent overload. Default limit prevents accidental flooding. The scope result already includes counts — agents probe shape before pulling data. Deferred for the pilot but needed soon.
 - **Spec language evolution.** The four fields (ordered, accepts, required, unique) cover the known cases. The vocabulary may grow through use.
 - **Merge semantics.** The structure supports merge commits. Conflict resolution strategy is above the primitives.
-- **Peer protocol.** Separate databases mounted read-only. The mounting mechanism is runtime, not structural.
 - **Temporal validity.** Event time vs system time is expressible through body properties. Whether `valid_from`/`valid_to` deserve first-class status depends on use.
 - **Views.** Saved scopes with display settings. Drift detection when knowledge changes under an approved view. Concept is clear; mechanics are unbuilt.

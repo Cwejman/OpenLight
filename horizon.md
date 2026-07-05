@@ -1,95 +1,72 @@
 # Horizon
 
-Ideas on the horizon. Recognitions that shape current thinking without yet being committed. Not settled enough for `inside.md`, not concrete enough for `pilot.md`, not edge knowledge for `research/`. This is where live ideas sit — worked on, referenced, allowed to mature or dissolve.
-
-Each entry names a direction, develops what it would mean, and cites what is already real versus what is open. Research files are referenced where the technical ground is worth tracing.
+The vision beyond v0.1, ordered roughly by proximity. Each entry names the direction, what is already real, and what is open. Nothing here blocks the pilot; much of it shaped the pilot's architecture so the path stays reachable.
 
 ---
 
-## The field as cache substrate
+## Integrations — external systems projected into the type system
 
-A novel affordance the substrate opens that conventional agents cannot reach: **the field itself as the cache substrate.** The inference provider is not a stateless function we shovel prompts into each turn — it is infrastructure the field can live on. Part of the substrate resides with the model. Scope resolution targets content that is already there.
+Not everything will be built on the substrate, and nothing has to be. An integration is written as a declaration of how an external system's schema **projects into archetypes**: given a system that stores, say, decisions under its own schema, the integration maps that schema to substrate types, and the external items surface as live chunks — scopeable, connectable, readable by every program and every model. If the external system has atomic temporal storage, its history projects too: external changes inferred at commit level, so temporal scoping reaches through the integration. Naturally any integration that also provides updates, does so programs whoes changes to the integration store is natively reflected as if not external.
 
-The conventional shape is: assemble context into a prompt, send it, hope the provider deduplicates. The shape this opens is: name what lives remote, reference it, send only the delta. For scopes that resolve entirely from cache, the content does not need to travel at all.
+The point is compute, not mirroring: once projected, the AI tooling native to this environment — completion from scope, derivation, reconciliation — runs over data that lives elsewhere. The substrate stores the projection contract and the references; the external system remains the owner.
 
-Three substrate properties make this fit natively, not as an optimization bolted on:
+**Real today:** reference chunks with resolution parameters, the integration-archetype pattern, the git driver, and the `reconcile` program shape (`pilot/programs.md`). **Open:** the driver contract (a driver is a program — what does it declare?), materialized sync versus virtual projection (chunks written and reconciled, or resolved live at query time), freshness semantics, and how projected history composes with the substrate's own commit graph.
 
-- **Chunk identity is stable.** A chunk's canonical serialization is a function of its content. Hashed today is hashed tomorrow. Cache keys are substrate-native — not artifacts of prompt assembly.
-- **Scope resolution is deterministic.** A scope at a given head produces an ordered, stable list of chunks. Cache entries compose the way scopes compose.
-- **Cross-session reuse is natural.** Sessions come and go; the substrate persists. A cache primed in one session is warm for the next, because the field it indexes is the same field.
+## The field as the model's cache — the substrate embodied
 
-This is a concrete instance of "running is learning" and of "the field is where intelligence lives, not any single node." The substrate already treats programs as functions native to the field. The cache turns part of the provider into field residency — not metaphorically, literally. A chunk exists at a scope address, and it also exists at a provider cache handle, and both point to the same thing.
+The inference provider is not a stateless function to shovel prompts into; it is infrastructure the field can live on. Take it to its end: host the model yourself and open direct access to its caching layer — then **make the cache the substrate**. Every context window is always a scope of the cache; the model doesn't receive the field, it *embodies* on lower machine level. Scope resolution targets content that is already resident with the model; only the delta travels.
 
-**Multi-peer implication.** When peers exist, each peer's cache is an addressable surface on the provider. Cross-peer collaboration could target another peer's cache handle directly, without re-shipping content. The field lives in distributed cache handles. The inference provider becomes shared substrate infrastructure between peers — another sense in which the boundary between model and environment is architectural, not categorical.
+Three substrate properties make this native rather than bolted on: chunk identity is stable (cache keys are substrate-native), scope resolution is deterministic (cache entries compose the way scopes compose).
 
-**What is real and what is open.** The provider primitives exist today — Anthropic's `cache_control`, OpenAI's prompt caching, and most structurally, Gemini's explicit cached content API where content is uploaded once and referenced by handle on subsequent requests without re-transmission. These are ours to build on. What is open: TTL management under chunk mutation, cache sizing against provider limits, the substrate-native representation of a cache handle (probably a chunk attribute — the field tracking its own residency). The mechanism is a direction, not a validated design.
+**Real today:** provider primitives exist — Anthropic's `cache_control`, OpenAI prompt caching, and most structurally Gemini's explicit cached-content handles (see [`research/backend.md`](research/backend.md)). The `model` program (`pilot/agent.md`) is the single seam where cache handling would land. **Open:** TTL under chunk mutation, sizing, and the substrate-native representation of residency (probably a chunk attribute — the field tracking where it lives).
 
-For the current state of provider cache primitives, see [`research/backend.md`](research/backend.md).
+## Authoring here, shipping out
 
-**Implication for backend choice.** Gemini's cache shape is the one most aligned with the substrate's own shape. A first-class cache-handle concept on the program contract is worth reaching for early rather than bolting on later.
+The host is a powerful compute environment — and some of what is built in it will leave it. A solution authored here — programs, their scopes, their seed knowledge — is packaged as an app, or shipped to a cloud environment: engine and substrate embedded as libraries, running headless, no host, no tiles (unless the app is actually composed by them). You write the solution in the environment because that is where writing it is tractable; you deploy it where it needs to run.
 
----
+**Real today:** db and engine are libraries by design; one binary already embeds both; programs are executables with declared runtimes. **Open:** the packaging format (programs + snapshot of their scopes + mounts, pinned at commits), secret provisioning outside the host keychain, and the headless lifecycle (what replaces the session).
+
+## The engine as a daemon
+
+v0.1 links the engine into the host binary. The direction: the engine runs as a daemon owning the field, and a host is a **window that attaches** — start a host in your OS, select a session, and you are purely in that session; several windows stand open on one field with no drift of state, because there is only one state. The same move takes the engine over the network — a remote field attached like a local one — and gives daemon *programs* a home: services that outlive any window, which a truly functional compute environment needs (`pilot/programs.md` §2).
+
+**Real today:** the engine sits behind a JSON-lines protocol already — the seam is transport-shaped, so daemonizing is moving the library behind a socket, not a redesign. **Open:** the daemon's own lifecycle, session attach/detach semantics, authentication at the socket, daemon-program start policy, and the reactivity fan-out across attached windows (kin to cross-host reactivity, below).
+
+## Interface inference — the ladder
+
+The substrate is typed, so interface can be inferred from shape — that is a ladder, not a leap:
+
+1. **Inferred browsing (v0.1).** The read-tile derives its default presentation from what a scope structurally is — ordered → sequence, shared archetype with a schema → table, session-typed → transcript ([`pilot/programs.md`](pilot/programs.md), *Viewing the substrate*). Forms for running programs are generated from argument archetypes the same way.
+2. **Authored overrides.** Where inference falls short, a program or a per-archetype hint supplies the form — hand-built views remain first-class, and a powerful UI stays cheap.
+3. **Generated interfaces.** On the far end, AI generates views — more tractable here than in conventional apps, because the substrate separates mechanics from form and the type system constrains what a view must honor.
+
+## The band
+
+Several model programs sharing a field, each with its own face, running in oscillation — one's output enabling what another could not make alone. Kept deliberately, and marked honestly: this is the least proven idea in the project. It depends on completion-model performance over many cycles running together, which no one has demonstrated at this shape.
+
+What makes it worth holding: the mechanical floor already exists and required no new mechanism — delegation as nested runs, siblings coordinating through subscriptions on shared scopes, blackboard scopes with enforced specs, attribution on every commit (`pilot/programs.md`). The band is what may emerge *above* that floor. It is not a mechanism to build first; it is what the working environment makes it possible to attempt.
 
 ## Uniform VM containment via DOM streaming
 
-The pilot uses split containment — tool-programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels. A thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for this same pattern — DOM over a wire.
+The pilot uses split containment — capability-bearing programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels: a thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for the same pattern.
 
-What it buys: uniform security posture across all programs; peer model clarifies (a peer is a VM image); no per-capability execution split; the protocol stays one-shape across tool programs and view programs.
-
-What it costs: VM lifecycle engineering, a small DOM-diff protocol, and the discipline that views don't rely on browser APIs that don't cross the boundary cleanly (local storage, IndexedDB, some media APIs). Cross-platform VM backends differ (macOS Apple Virtualization.framework, Linux QEMU/Firecracker, Windows Hyper-V/Krun) but the DOM-streaming surface above them is consistent.
-
-What stays pilot-deferred: WebGPU-capable views. These need pixel-level passthrough (virtio-gpu, Venus) and are a separate engineering track. DOM streaming covers ordinary UI, which is what pilot views need.
-
-The pilot chose split for simplicity and speed — capability-bearing programs in a VM, surface-only programs on host webviews — which gives an agentic-safe floor without new mechanism. The direction this horizon entry holds: **uniform containment is architecturally cleaner, DOM streaming makes it tractable, and the migration is reachable when the engineering cost is worth paying.**
-
----
+What it buys: uniform security posture, a cleaner peer model (a peer is a VM image), one protocol shape across all programs. What it costs: VM lifecycle engineering, a DOM-diff protocol, and discipline about browser APIs that don't cross cleanly. Cross-platform VM backends differ (Apple Virtualization.framework, QEMU/Firecracker, Hyper-V) but the DOM-streaming surface above them is consistent. The split/uniform choice is a containment detail; the program/process/boundary primitives serve both, so the migration stays reachable.
 
 ## Peering — symmetric, remote, packaged
 
-v0.1 ships read-only filesystem-local mounts: an active project plus zero or more peers, each a directory on disk, joined into one substrate field through the engine's federation layer. This is the simplest shape that unblocks the monorepo + test-isolation pressure. The full peering picture is meaningfully larger, and the v0.1 architecture preserves the path to it without forcing the work to land now.
+v0.1 ships read-only filesystem-local mounts. The full picture is larger; the architecture preserves the path without forcing the work now.
 
-Several distinct dimensions sit here, each with its own engineering character.
-
-**Symmetric peering.** A peer that's read/write rather than read-only. The substrate's existing boundary mechanism already carries this — when the user wants to grant a peer write access into a scope, they author a write boundary chunk that names the peer's identity and the scope they reach. The engine's federation already routes the read side; routing writes follows the same shape (resolve the mount that owns the chunk, dispatch the write there). The work is in the trust and identity layer underneath, not in substrate semantics. The boundary system already being the right place to land symmetric peering is a useful proof that v0.1 didn't paint into a corner — adding write peering is purely additive.
-
-**Remote mounts.** v0.1 mounts are local filesystem paths. The realistic peering scenario reaches across a network — a friend's space, a team's shared substrate, a published cultural seed. The substrate transport here would be zero-trust networking (Tailscale, Iroh, libp2p, etc.) plus a substrate-level sync protocol. The db does not yet have remotes — we have local commits, no replication or push/pull. This is a substantial engineering dimension on its own; the substrate's commit graph is the right primitive to build it on, but the protocols, conflict resolution, and partial-state semantics are not yet sketched.
-
-**Author identity.** v0.1's `[project.author]` block in `.ol/project.toml` is parsed but not enforced. Real peering needs cryptographic identity — keypairs, signed commits, verifiable attribution. The substrate already records `dispatch_id` per commit (which process caused the change); identity layers on as another dimension of commit metadata, signed by the project's author key. Verification at mount time and at sync time is the work.
-
-**Package merging.** v0.1's `[packages]` table in `.ol/project.toml` is parsed but not processed. A project's packages declaration is more than a manifest — it's a declarative system spec describing packages, services, and settings file contents (Nix-flake-flavored). The horizon work: at host launch, resolve all mounted projects' packages tables, compute the merged set, and build the active project's VM image from it. Each peer's invocables run inside a VM that has every peer's declared packages installed. Today the user sets up the VM manually; with package merging the mount cascade fully describes the runtime environment.
-
-**Cross-host reactivity.** Each `Db` instance owns its own in-process `broadcast::Sender<Commit>`. Two host processes opening the same db file each have their own broadcast — not connected. v0.1 supports concurrent reads via SQLite's normal multi-reader semantics, but reactive notifications do not propagate between host processes. The horizon path is some combination of: file-watching the db's WAL via FSEvents/inotify, polling `MAX(commits.id)`, or an out-of-band signal channel. This becomes load-bearing the moment two users (or two devices) share a workspace; trivial-feeling for a solo workflow but real for collaboration.
-
-**Snapshot pinning via `commit`.** v0.1 pins a peer at a branch (path + branch); when the peer's branch advances, the active project sees the new state. For full reproducibility, a `commit` field in the mount declaration would pin a frozen snapshot — the engine routes queries against that mount through db's existing `at: Some(commit_id)` time-travel parameter. Trivial to add (db already supports it); deferred to v0.2 for ergonomic reasons (CLI tooling for "ol pin"-style workflows).
-
-**Scope-filtered mounts.** v0.1 mounts surface every root scope a peer has. A peer with multiple roots — internal versus public, distinct exports — benefits from filtering: the mounter declares which roots to bring in via a `scopes = ["tools", "archetypes"]` field on the `[[mounts]]` entry. The engine federation doesn't change; queries against that mount narrow to chunks reachable from the listed scopes. Architectural cost: trivial. Useful when peers grow beyond the convention of one root per project. A complementary peer-side declaration (the peer marks which roots it considers public) is a separate, related direction; the field name on the peer side is not yet settled.
-
-**Schema migration on peer mount.** v0.1 refuses to mount peers whose db schema version differs from the active project's, with a clear error. Migrating a mounted-but-not-active db is a v0.2 concern — the live path is either an in-memory migration that produces a working copy without touching the on-disk file, or a per-mount transparent translation layer that adapts queries across schema versions. Both are tractable; neither belongs in v0.1.
-
-**Dynamic mount/unmount.** v0.1 resolves mounts at boot and keeps them fixed for the launch. Adding or removing mounts at runtime would require: a substrate signal to subscribed programs (so UI can react), host-side cascade re-walk and dedup, and a VM-internal FS-mount hook on the runtime provider. The engine's `mount_project` API already supports being called post-boot — this is mostly host and UX work.
-
-**Peers as nodes in a coherence-radiating ecology.** Inside-out propagation extends naturally to peers — culture of one peer informs another's agents; archetypes form in the field that no single peer authored. Concrete implications follow from `inside.md`: peers are not federations of services but radiators of coherence, each contributing what it has uncovered to the joint field. This direction wants more grounding before it becomes concrete; it sits underneath all the engineering dimensions above as the question of *what peering is for*.
-
-What is real today: ULIDs are globally unique by construction (no collision across peers); the boundary mechanism is rich enough for symmetric peering once identity lands; the engine's federation already routes reads and boundary walks across multiple dbs (reactivity follows when there's a writer to listen to). What is open: the protocols, the trust layer, the package-merge build, the schema-migration story, cross-host reactive notification, and most of the eventual peering UX.
-
----
+- **Symmetric peering.** Read/write peers. The boundary mechanism already carries the model — a write boundary naming a peer's identity and reach; the engine's federation already routes reads, and routing writes follows the same shape. The work is the trust and identity layer, not substrate semantics.
+- **Remote mounts.** Across a network: zero-trust transport (Tailscale, Iroh, libp2p) plus a substrate-level sync protocol over the commit graph. Replication, conflict resolution, and partial-state semantics are unsketched — a substantial dimension of its own.
+- **Author identity.** Keypairs, signed commits, verifiable attribution; layers onto commit metadata (`process_id` already exists); verification at mount and sync time.
+- **Package merging.** `[packages]` in `.ol/project.toml` as a declarative system spec (Nix-flavored): at launch, resolve all mounted projects' packages, build the active project's VM image from the merged set.
+- **Cross-host reactivity.** Two host processes on one db each have their own broadcast today. WAL watching, `MAX(commits.id)` polling, or an out-of-band channel — load-bearing the moment two devices share a workspace.
+- **Snapshot pinning, scope-filtered mounts, schema migration on mount, dynamic mount/unmount** — each tractable, each deferred; db's `at:` parameter, the federation layer, and `mount_project` already carry the shapes.
 
 ## View modes beyond tabs
 
-The pilot ships tabs — each tab a root of a tile tree, workspaces are tabs. Tabs are one lens on what the substrate holds. Other lenses are reachable on the same chunks.
-
-The most charted alternative: a zoomable canvas where workspaces are nested regions, not discrete containers. Containers expand or abstract based on zoom level; navigation is spatial rather than discrete. Precedents: Figma, tldraw, Muse, Miro, Prezi. Spatial memory becomes a navigation axis. Nested compositions show naturally — zoomed out, they're cards; zoomed in, you're inside them. Looking inside a container = zoom in, not open a new tab.
-
-The substrate type system doesn't forbid this direction — the composition types hold for either geometry. What changes is the layout the view program imposes, and what "current tab" becomes (maybe "current viewport region").
-
-The framing matters: because the host is built by programs themselves, a view mode is a program. Tabs and canvas are two lenses; others — outline, timeline, graph — are reachable in the same way. Tabs ship first; lenses are additive, not forks.
-
----
+Tabs are one lens. A zoomable canvas — workspaces as nested regions, navigation spatial, containers abstracting with zoom — is the most charted alternative (Figma, tldraw, Muse). The composition types hold for either geometry; what changes is the layout a view program imposes and one new host geometry interpreter (rect walk + viewport transform beside the split-tree walk). The clean-room audit confirmed the delta is that small ([`research/cleanroom/composition.md`](research/cleanroom/composition.md) §3.4). Because view modes are programs, lenses — canvas, outline, timeline, graph — are additive, not forks.
 
 ## WebGPU-capable views
 
-Pilot views render DOM. Some views will eventually want direct GPU surfaces — WebGL/WebGPU canvases for visualizations, data renderings, simulations. DOM streaming doesn't help here: you can't stream pixels as DOM ops.
-
-The container shape for these: pixel-level passthrough from the program's rendering context to the host's composited window. Under split containment, the view runs on host and has direct WebGPU access. Under uniform containment, this needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun / Venus for full acceleration).
-
-What makes this a genuine horizon and not just pilot scope: the substrate type system can already accommodate it (`surface: 'wgpu'` on a program body). Implementation is the work. Deferred until a view demands it.
+Pilot views render DOM. Some views will want GPU surfaces — WebGL/WebGPU canvases for visualization and simulation. DOM streaming doesn't help (you can't stream pixels as DOM ops); the shape is pixel-level passthrough, which under uniform containment needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun/Venus). The type system already accommodates it (`surface: 'wgpu'` on a program body). Deferred until a view demands it.

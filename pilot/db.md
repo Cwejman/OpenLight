@@ -55,9 +55,19 @@ ScopeOpts
   include: Includes             what to populate
 ```
 
-`scopes` may be empty. Empty scope means the whole field — every chunk qualifies for the intersection (vacuous truth). Combined with `match_`, it is field-wide search; combined with `Includes::shape()`, it is the browser's starting view (all dims sorted by count); combined with `intersection_chunks` plus `limit`, it enumerates the field. Pagination is the guardrail against unbounded fetches, not a runtime restriction.
+`ReadOpts` is the single-chunk subset — `get` resolves one chunk, so the scope-shaping knobs don't apply:
 
-When `scopes` is empty, vacuous truth applies uniformly: `in_scope = in_scope_instance = in_scope_relates = total`. Every chunk is trivially "placed instance on every queried scope" and "placed relates on every queried scope" when no scopes are queried (the empty conjunction is true). Consumers should treat the instance/relates split as degenerate (uninformative) under empty scope — it is reported for consistency with the non-empty case, not as useful attribution.
+```
+ReadOpts
+  branch: BranchName            default "main"
+  at: Option<CommitId>          time travel
+  include: Includes             only the chunk-self flags (name/spec/body/
+                                placements) apply; scope-level flags are ignored
+```
+
+`scopes` may be empty. Empty scope means the whole field — every chunk qualifies for the intersection (vacuous truth), composed with `match_`, `Includes`, and `limit` like any other scope. Pagination is the guardrail against unbounded fetches, not a runtime restriction.
+
+Under empty scope the counts collapse: `in_scope = in_scope_instance = in_scope_relates = total` (the empty conjunction holds for both placement types). The instance/relates split is degenerate here — reported for consistency with the non-empty case, not as useful attribution.
 
 ### Result
 
@@ -97,11 +107,6 @@ Placement
 Spec
   ordered, accepts, required, unique, propagate
 ```
-
-**Folk reading:**
-- "What's at my intersection?" → `chunks`
-- "What can I add to narrow further?" → `dimensions`
-- "What can I reach from this dim, beyond current adjacency?" → `dim.edges`
 
 **Why dimensions and edges differ:** dimensions are scopes intersection chunks already touch — adding any keeps the intersection non-empty (narrowing). Edges are scopes a dim's chunks (including chunks NOT at the current intersection) touch beyond the current adjacency — reachable only by stepping out of the current scope.
 
@@ -198,6 +203,11 @@ impl Db {
   fn subscribe_scope(&self, scopes: &[ChunkId], opts: SubscribeOpts)
        -> impl Stream<Item = Commit>;
 }
+```
+
+```
+SubscribeOpts
+  branch: BranchName            default "main"   — which branch's commits to watch
 ```
 
 A single subscription primitive. Yields commits that touch the named scopes (any of them). Backed by an internal broadcast channel pushed from Rust right after `tx.commit()` returns Ok (see *Reactivity wiring*); state and event are tightly coupled — by the time the event arrives, the SQL commit is durable and visible to any reader.
@@ -377,7 +387,7 @@ commit(declaration, opts):
   return Commit
 ```
 
-Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would require recursive CTEs over the propagating-archetype graph and lock the rule into SQL; Rust gives clearer code and easier evolution. Rules read through ordinary SELECTs against the open transaction's connection, not pre-fetched into pure structs — the post-write state already lives in `current_chunks` / `current_placements` inside the transaction.
+Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would require recursive CTEs over the propagating-archetype graph and lock the rule into SQL; Rust gives clearer code and easier evolution. Rules read against the open transaction's post-write state (see *Atomicity*), not a pre-fetched snapshot.
 
 ### Current-state transitions
 
@@ -535,7 +545,7 @@ The virtual scope projections accept these parameter shapes:
 - `[db/branches]` — every branch
 - `[db/branches, branch_id]` — that single branch
 
-Shapes the projections don't recognize (additional parameters, scopes not in the table above) just return what falls out of the join — typically nothing matches. `INVALID_REQUEST` is reserved for malformed queries (unknown op, missing fields), not for valid queries that resolve to nothing.
+Shapes the projections don't recognize (additional parameters, scopes not in the table above) just return what falls out of the join — typically nothing matches. An unrecognized shape is an empty result, not an error.
 
 #### Time travel
 
@@ -664,7 +674,7 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 **Reactivity push.** Three call sites push the resulting `Commit` onto `db.sender` — `ops::commit`, `ops::branches::create_branch`, `ops::branches::delete_branch` — two lines each, repetition over a wrapper. The post-`tx.commit()` ordering and its durability guarantee are spec'd above under *Reactivity wiring*.
 
-**Validation.** `Rule` enum with one variant per rule (`Ordered`, `Accepts`, `Required`, `Unique`, `NameUnique`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through ordinary SELECTs against the open transaction's connection — no pre-fetch into pure structs.
+**Validation.** `Rule` enum with one variant per rule (`Ordered`, `Accepts`, `Required`, `Unique`, `NameUnique`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through the open transaction (see *Atomicity*).
 
 **Errors.** `thiserror`. Per-op enums (`OpenError`, `ReadError`, `WriteError`) with shared variants (e.g. `IoError(rusqlite::Error)`) duplicated across them — dumb-but-clear over a single mega-enum.
 

@@ -220,11 +220,7 @@ The SDK does not render. Webview programs that want React render with `createRoo
 
 ## Subscription lifecycle
 
-A subscription registers `(scopes, callback)` with the engine via the `subscribe` op. The engine does a boundary check at registration; out-of-boundary scopes return `BOUNDARY_VIOLATION` and the SDK rejects the call. On success the engine returns a `subscriptionId`, which the SDK keeps in an internal registry mapping ids to callbacks.
-
-When the engine fires a `scope_changed` event, the SDK looks up the subscription and invokes its callback with `{ kind: 'changed', commit }`. When the engine fires a `lagged` event (carrying `subscriptionIds`), the SDK invokes only the affected callbacks with `{ kind: 'lagged' }` — subscriptions whose ids are not in the list see nothing.
-
-`unsubscribe` is the returned thunk. It removes the entry from the registry and calls the engine's `unsubscribe` op. Unsubscribing is also automatic when the calling process reaches terminal state — the engine drops all of a process's subscriptions on cleanup.
+The SDK keeps an internal registry mapping each `subscriptionId` (returned by the engine's `subscribe` op) to its callback, and demultiplexes incoming events to the right callback by id. The returned thunk removes the entry and calls the engine's `unsubscribe`. Engine-side mechanics — boundary check at registration, the `subscriptionId`, auto-drop when the calling process terminates, invalidation — are owned by [`engine.md`](engine.md#reactivity-wiring); the consumer-facing event shapes are under *Reactivity* above.
 
 ---
 
