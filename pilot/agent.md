@@ -4,6 +4,8 @@ The programs that carry completion, rebuilt on the clean-room derivation ([`rese
 
 The center this serves: **completion from a point in the field.** Context is a scope — addressable, pinned, reproducible — not a pasted transcript.
 
+The lived experience of all of this — the session view, the turn renderer, the thinking layers — is specced in [`session.md`](session.md).
+
 ---
 
 ## The `model` programs — a family, not a single shape
@@ -26,38 +28,37 @@ Providers differ, and will differ more. So `model` is not one rigid program with
 
 Leaning (b) — the adapter belongs with the thing it adapts, and passthrough keys relieve the flattening risk — but this is settled against the *second* provider actually built, not before. The cache-embodiment direction (`horizon.md`) lands inside this family's seam either way.
 
-## Conversation types
+## Context and discourse — two roles, named apart
 
-**A session is a conversation** — the general primitive (`programs.md` §3.6), not an agent-owned kind. The agent is a participant; its specific event types are citizens of the conversation with first-class renderings, and third-party event types join the same way.
+The knot that dissolved the agent session for good: **context is per-invocation; discourse is the conversation.** They were fused in the old session shape; they are different things.
 
-> **Open — the conversation may slim further.** The archetype below still carries `tool-call`/`tool-result`/`context` as conversation events — a shape inherited from how provider APIs work (strict chronological message history), not from what a conversation is. Under discussion: **mechanics live on frames, the conversation references them** — the discourse (messages, gates, controls) stays in the conversation; the turn's answer message references its process frame, where tool runs, context items, and verbatim requests already authoritatively live; drilling and folding follow the reference. If that holds, the event types below shrink to `message`, `gate`, `control`, and the "agent session" is fully gone. The archetype as written is the conservative shape until this settles.
-
-The archetype:
+**Context** is the agent's actual argument: an **ordered list of scopes** — guidelines first, then the discourse scope, then the prompt, then whatever this turn adds. It varies per invocation, and it lives on the invocation's *frame* as context items:
 
 ```
-conversation  spec: { propagate: true, ordered: true,
-                      accepts: ["message", "tool-call", "tool-result", "context", "gate", "control"] }
-message      (relates on conversation)  spec: { required: ["text"] }   body also: from, partial?, refs?
-tool-call    (relates on conversation)  spec: { required: ["program"] }  body also: args?, process?
-tool-result  (relates on conversation)  spec: { required: ["program"] }  body also: process?, output?
-context      (relates on conversation)  spec: { ordered: true }
-gate         (relates on conversation)  spec: { required: ["action", "status"] }
-control      (relates on conversation)  spec: { required: ["signal"] }   — pause | resume | adjust
-```
-
-Content chunks dual-place: `instance` on the conversation (with seq) and `instance` on their type. A conversation is also placed on whatever it is about — aboutness is placement, filled by navigation shortcuts (*talk about this*) or by hand. `message.body.from` carries the participant (human, agent face, another person); prompts and answers are both messages. Conventions: `tool-call.body.process` present ⇔ a program run (absent ⇔ a direct substrate op); `tool-result.body.output` carries the result chunk's id, so the transcript links into the process trace by id, not copied text.
-
-### Context items — completion from the field, recorded
-
-A turn's context is addressable structure, not rendered text:
-
-```
-context chunk   instance on <conversation> (seq); instance on context type
+context chunk   instance on <invocation process> (seq); instance on context type
 context item    instance on <context chunk> (seq); relates on <source chunk>
   body: { source: ChunkId, at: CommitId, projection: "body" | "summary" | "name" }
 ```
 
-The `relates` on the source is the load-bearing move: any chunk can answer *which model contexts have included me* — in which conversations, under which harnesses. `at` pins the source at the commit the read resolved against; temporal reads reconstruct exactly what the model saw. Together with the verbatim request on the `model` frame: the reference layer for navigation and staleness, the request chunk for the byte-exact record.
+The `relates` on the source is the load-bearing move: any chunk can answer *which model contexts have included me*. `at` pins the source at the commit the read resolved against; with the verbatim request on the `model` frame, any past completion is exactly reproducible.
+
+**Discourse** is the conversation: a named ordered scope where messages and invocation entities land, in order. Its archetype types the **container, not the content**:
+
+```
+conversation  spec: { ordered: true }        — content deliberately wildcard
+message       spec: { required: ["text"] }   body: from, partial?, refs?
+control       spec: { required: ["signal"] } — pause | resume | adjust
+```
+
+What accumulates on an **agent session**: **turns only** — the invocation's process chunk, dual-placed with seq at dispatch; the prompt is the invocation's argument, the answer a chunk on its frame; mechanics (tool runs, context items, verbatim requests) stay solely on frames, one source, reached by drilling. Plus **summary chunks** (placed on the turns they abstract — the shared chunk *is* the group) and **controls**. `message` chunks belong to human conversations; no tool-call or tool-result event types exist; no separate agent-session type exists. Authority for the experience: [`session.md`](session.md).
+
+So history stays linear while context varies per turn — both recorded: scroll the conversation for what happened, drill any invocation for what it was reading, and the dispatcher's standing selection (a field entity `relates` on the conversation) highlights in the reader what the next turn will include.
+
+**The answer-home is typed; the context list is not.** "Wildcard" applies only to a conversation's *content* — what may be placed into it. What *counts as* a conversation is typed membership, and the agent's discourse target must be a `conversation` instance — the type is the agent session's descendant, the home where agents answer. The context list, by contrast, accepts any scopes at all: a list of people, an email thread projected through an integration, a codebase — all valid context, none a valid answer-home. The dispatcher's argument is placed on `conversation` and nothing else, so it never appears on an email thread (`email/thread` is the integration's type; its reply composer matches there, answering in *that* medium); *talk about this* on the thread bridges — a conversation opens carrying the thread as relation and context, the agent answers there, and actually sending an email is a tool call, not a discourse answer. A headless run has a context list and no discourse home at all.
+
+**Provider-API coherence, reconstructed not stored.** Providers want prior tool exchanges as message history. The current turn's pairs the agent holds while running; previous turns' pairs are recoverable losslessly by walking invocation frames (child processes in order, argument chunks as tool_use, result chunks as tool_result). Replay, summarize, or omit is the serializer's *policy*, not the conversation's shape.
+
+*Open:* whether a pending **gate** is also placed onto the conversation while its invocation runs (so it surfaces in the timeline), or stays frame-only surfaced by the invocation renderer — with the rule either way that a folded invocation's live obligations penetrate the fold.
 
 ## The `agent` program
 
@@ -65,11 +66,11 @@ The `relates` on the source is the load-bearing move: any chunk can answer *whic
 
 The cycle:
 
-1. **Orient.** Read own frame: conversation reference, boundary chunks walked to roots — the agent can tell the model, truthfully, what it can see and touch. Subscribe to the conversation: the steering channel.
-2. **Assemble.** Read the conversation (probe counts, then pull — R2); scope the context roots; select. Commit the turn's context chunk + items (pinned, `relates` on sources). Selection policy — recency, FTS, summaries in place of large bodies, budget — is agent code; the *record* of selection is substrate.
-3. **Complete.** Render context items + conversation into the selected model program's request shape (read from its schema), each block prefixed with its chunk id so the model addresses the field by id. Compile tool schemas from the toolset's programs — from their argument chunks, the same structure the launch form renders. Run the model program; await.
-4. **Dispatch.** Substrate ops (`scope`, `get`, `search`, `commit`) execute directly — a `VALIDATION_ERROR` or `BOUNDARY_VIOLATION` renders back as the tool result; **spec enforcement is the model's error signal.** Program tools are `run` (child mode): nested trace, boundaries intersected — the model can never escalate. Parallel calls are parallel runs awaited together. Write `tool-call` / `tool-result` onto the conversation; loop to 2.
-5. **Answer.** Commit the answer message `partial: true`, update on a throttle (R6 — streaming is commits), finalize with `partial: false` and `refs`. Exit 0.
+1. **Orient.** Read own frame: the ordered context list, the discourse target if any, boundary chunks walked to roots — the agent can tell the model, truthfully, what it can see and touch. Subscribe to the discourse scope: the steering channel.
+2. **Assemble.** Resolve the context list in order (probe counts, then pull — R2); select under budget. Commit the turn's context chunk + items onto its own frame (pinned, `relates` on sources). Selection policy — recency, FTS, summaries in place of large bodies — is agent code; the *record* of selection is substrate.
+3. **Complete.** Render the context into the selected model program's request shape, each block prefixed with its chunk id so the model addresses the field by id. Compile tool schemas from the toolset's programs — from their argument chunks, the same structure the launch form renders. Run the model program; await.
+4. **Dispatch.** Substrate ops (`scope`, `get`, `search`, `commit`) execute directly — a `VALIDATION_ERROR` or `BOUNDARY_VIOLATION` renders back as the tool result; **spec enforcement is the model's error signal.** Program tools are `run` (child mode): nested trace, boundaries intersected — the model can never escalate. Parallel calls are parallel runs awaited together. Nothing is written to the discourse scope — the tool trace *is* the frame; loop to 2.
+5. **Answer.** Commit the answer chunk onto its own frame, `partial: true`, updated on a throttle (R6 — streaming is commits), finalized with `partial: false` and `refs` (inline mentions as `[[chunk-id]]` — the renderer resolves them; the request preamble teaches the model the convention). Exit 0.
 
 ### Pause, resume, and context purity
 
@@ -77,7 +78,7 @@ Between every cycle the agent checks its steering channel. A `control { signal: 
 
 The discipline that makes this more than a stop button: **the context stays pure.** Meta-discussion during the pause does not enter the agent's context by default — what enters is only what you choose to hand it: an `adjust` control carrying the distilled correction, or specific chunks added to the context roots. Conventional harnesses swallow the whole intervening transcript; here, because context is assembled from scope each cycle rather than accumulated, steering the next cycle and polluting it are finally separate things. (`cancel` still exists for actually killing a turn; pause is the primary gesture of skepticism.)
 
-**Gates** are the agent-initiated mirror: policy makes the agent commit a `gate` chunk and hold on its subscription; the surface renders approve/deny; the decision is permanent history. No engine feature needed for either — both are conversation citizens.
+**Gates** are the agent-initiated mirror: policy makes the agent commit a `gate` chunk on its frame and hold on its subscription; the invocation renderer surfaces approve/deny; the decision is permanent history. No engine feature needed for either. (Placement — frame-only vs also onto the conversation while running — is the open noted above.)
 
 **Sub-agents.** A run of `agent` from within `agent` — child mode, boundaries narrowed, trace nested. An orchestrator is not a framework; it is a program that calls `run` several times.
 
