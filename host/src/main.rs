@@ -41,6 +41,7 @@ use host::protocol;
 use host::serve;
 use host::stub::FixtureStub;
 use host::transpile::Transpiler;
+use host::underlay;
 
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
@@ -175,9 +176,11 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         HashMap::new();
     let proxy = event_loop.create_proxy();
 
-    // Every surface owes exactly one report; the deadline is the lane's
-    // honesty — a probe that never completes must fail, not hang.
-    let tally = Arc::new(Mutex::new(probe::Tally::new(program_names.len())));
+    // Every surface owes exactly one report — the underlay among them, since a
+    // shadow that is nobody's program is exactly what an agent cannot otherwise
+    // see. The deadline is the lane's honesty: a probe that never completes
+    // must fail, not hang.
+    let tally = Arc::new(Mutex::new(probe::Tally::new(program_names.len() + 1)));
     if probing {
         let tally = tally.clone();
         runtime.spawn(async move {
@@ -185,6 +188,62 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
             eprintln!("host: probe deadline — {} surfaces answered", tally.lock().expect("tally").seen());
             std::process::exit(2);
         });
+    }
+
+    // The shadow underlay (author ruling, *the depth language*): a tile's aura
+    // cannot be the tile's own — a webview clips it away — so one full-window
+    // webview draws every tile's aura beneath the tiles. Built here, before any
+    // surface mounts, because on macOS a later child view sits above an earlier
+    // one: creation order *is* the z-order. It takes no input (its page turns
+    // pointer events off) and speaks no engine op; the rim tells it rectangles
+    // and nothing else.
+    let underlay_id = ChunkId::from(underlay::PROCESS);
+    {
+        let (_, leaves) = layout(&window, &tree, STRIP);
+        let rects: Vec<Rect> = leaves.into_iter().map(|leaf| leaf.rect).collect();
+        let builder = WebViewBuilder::new()
+            .with_bounds(bounds(&window_rect(&window)))
+            .with_transparent(true)
+            .with_initialization_script(&format!(
+                "{}\n{}",
+                page::init_script(underlay::PROCESS),
+                underlay::init_script(&rects)
+            ))
+            .with_custom_protocol(
+                serve::SCHEME.into(),
+                module_protocol(
+                    transpiler.clone(),
+                    source_root.clone(),
+                    underlay::PROCESS.to_string(),
+                    programs_root.join(underlay::ENTRY),
+                ),
+            )
+            .with_url(serve::shell_url(underlay::PROCESS));
+        // The one thing it ever says back, and only when asked: its DOM.
+        let builder = match probing {
+            false => builder,
+            true => builder.with_ipc_handler(ipc_handler(
+                engine_api.clone(),
+                runtime.handle().clone(),
+                proxy.clone(),
+                Context { process_id: Some(underlay::PROCESS.to_string()) },
+                Some(ProbeSink {
+                    program: underlay::PROGRAM.to_string(),
+                    tally: tally.clone(),
+                    proxy: proxy.clone(),
+                }),
+            )),
+        };
+        webviews.insert(underlay_id.clone(), builder.build_as_child(&window).expect("underlay"));
+        if probing {
+            let probe_proxy = proxy.clone();
+            let pid = underlay_id.clone();
+            runtime.spawn(async move {
+                tokio::time::sleep(PROBE_SETTLE).await;
+                let script = probe::script(probe::HTML_LIMIT, probe::NODE_LIMIT);
+                let _ = probe_proxy.send_event(HostCmd::EvaluateScript { process_id: pid, script });
+            });
+        }
     }
 
     event_loop.run(move |event, _, control_flow| {
@@ -203,10 +262,16 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 if let Some(webview) = webviews.get(&strip_process) {
                     let _ = webview.set_bounds(bounds(&strip_rect));
                 }
-                for leaf in leaves {
+                for leaf in &leaves {
                     if let Some(webview) = webviews.get(&ChunkId::from(leaf.id.as_str())) {
                         let _ = webview.set_bounds(bounds(&leaf.rect));
                     }
+                }
+                // The auras follow the same walk: one layout, one truth.
+                if let Some(webview) = webviews.get(&underlay_id) {
+                    let _ = webview.set_bounds(bounds(&window_rect(&window)));
+                    let rects: Vec<Rect> = leaves.into_iter().map(|leaf| leaf.rect).collect();
+                    let _ = webview.evaluate_script(&underlay::script(&rects));
                 }
             }
             Event::UserEvent(HostCmd::MountWebview { process_id, executable }) => {
@@ -524,10 +589,16 @@ fn deliver(proxy: &EventLoopProxy<HostCmd>, process: &str, outcome: Outcome) {
 /// The window, divided: the naked strip first, then the tile leaves inside what
 /// the strip leaves over. A zero-width strip reserves nothing (the fixture rim).
 fn layout(window: &Window, tree: &Tile, strip: Strip) -> (Rect, Vec<geometry::LeafRect>) {
-    let size: LogicalSize<f64> = window.inner_size().to_logical(window.scale_factor());
-    let viewport = Rect { x: 0.0, y: 0.0, width: size.width, height: size.height };
-    let (strip_rect, tiling) = geometry::reserve(viewport, strip, SPACING);
+    let (strip_rect, tiling) = geometry::reserve(window_rect(window), strip, SPACING);
     (strip_rect, geometry::walk(tree, tiling, SPACING))
+}
+
+/// The whole window in logical coordinates — the viewport everything is divided
+/// out of, and the underlay's own bounds, so its page and the leaf rects it is
+/// given share one coordinate space.
+fn window_rect(window: &Window) -> Rect {
+    let size: LogicalSize<f64> = window.inner_size().to_logical(window.scale_factor());
+    Rect { x: 0.0, y: 0.0, width: size.width, height: size.height }
 }
 
 fn bounds(rect: &Rect) -> wry::Rect {

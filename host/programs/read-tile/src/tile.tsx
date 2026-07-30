@@ -213,14 +213,17 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
   return state
 }
 
-// Layout only — the card's surface, rounding and shadow, the pill, the greys
-// and the scrollbar are tokens and components in @openlight/react.
+// Layout only — the card's surface and rounding, the pill and the greys are
+// tokens and components in @openlight/react. Depth is neither: a tile floats,
+// and its aura is cast beneath it by the host's underlay webview, because a
+// webview clips a shadow its own card would draw (author ruling, *the depth
+// language*). Nothing here lifts, insets, or shadows for room it does not have.
 const CSS = `
-  /* The card fills the viewport the page pins (@openlight/react base) and clips
-     its own corners; \`min-height: 0\` lets the content region be shorter than
-     what it holds, which is what makes the list — and only the list — scroll. */
+  /* The card fills the webview edge to edge and clips its own corners;
+     \`min-height: 0\` lets the content region be shorter than what it holds,
+     which is what makes the list — and only the list — scroll. */
   .tile {
-    position: absolute; inset: var(--ol-lift);
+    position: absolute; inset: 0;
     display: flex; flex-direction: column; overflow: hidden;
   }
   .mono { font-family: var(--ol-mono); font-size: .92em }

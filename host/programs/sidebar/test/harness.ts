@@ -26,7 +26,7 @@ export function useTransport(next: Transport): void {
   next.onEvent((event) => handler?.(event))
 }
 
-export const { Sidebar } = await import('../src/sidebar.tsx')
+export const { Sidebar, edges } = await import('../src/sidebar.tsx')
 
 export type Mounted = { root: Root; container: HTMLElement }
 

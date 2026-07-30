@@ -5,6 +5,7 @@
 import {
   Sidebar,
   click,
+  edges,
   mount,
   settle,
   text,
@@ -262,4 +263,35 @@ test('a run with no session argument says so rather than rendering nothing', asy
   const strip = await show()
 
   expect(text(strip, '.quiet')).toContain('no session argument')
+})
+
+// The edge fades (author ruling, *the depth language*): the strip is flat on
+// the canvas, so it dissolves content at an edge instead of clipping it — but
+// only at an edge that has something past it, and only while it does.
+
+test('at rest at the top the strip fades neither edge', async () => {
+  field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
+  const strip = await show()
+
+  const region = strip.container.querySelector('.strip')!
+  expect(region.getAttribute('data-fade-top')).toBe('false')
+  expect(region.getAttribute('data-fade-bottom')).toBe('false')
+})
+
+test('an edge fades exactly when content runs past it', () => {
+  const box = (scrollTop: number, clientHeight: number, scrollHeight: number) => ({
+    scrollTop,
+    clientHeight,
+    scrollHeight,
+  })
+
+  // Content that fits: neither edge, whatever the strip is asked.
+  expect(edges(box(0, 400, 400))).toEqual({ top: false, bottom: false })
+  // At the top of a longer list: the bottom alone.
+  expect(edges(box(0, 400, 900))).toEqual({ top: false, bottom: true })
+  // Somewhere in the middle: both.
+  expect(edges(box(120, 400, 900))).toEqual({ top: true, bottom: true })
+  // At the end: the top alone — and a sub-pixel remainder is not content.
+  expect(edges(box(500, 400, 900))).toEqual({ top: true, bottom: false })
+  expect(edges(box(499.6, 400, 900))).toEqual({ top: true, bottom: false })
 })

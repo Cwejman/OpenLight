@@ -9,7 +9,7 @@
 // write, and it is not built.
 import type { ChunkId } from '@openlight/sdk'
 import { Menu, StripItem, styles, useScope, type MenuAction } from '@openlight/react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ENGINE_PROGRAM, actions, items, sessionArgument, type Item } from './items.ts'
 
 export function Sidebar({ process }: { process: ChunkId }) {
@@ -81,15 +81,65 @@ function Session({ session }: { session: ChunkId }) {
   )
 }
 
+/** Which edges the strip's content runs past — the only reason to fade one. */
+export type Fade = { top: boolean; bottom: boolean }
+
+/** What a scrolling box's edges say about themselves. Pure; the DOM is data. */
+export function edges(box: {
+  scrollTop: number
+  scrollHeight: number
+  clientHeight: number
+}): Fade {
+  return {
+    top: box.scrollTop > 0,
+    // A sub-pixel remainder is not content below — the same slack the probe's
+    // `scrollable` uses.
+    bottom: box.scrollTop + box.clientHeight < box.scrollHeight - 1,
+  }
+}
+
 /**
  * The strip itself: text on the canvas — no panel, no border (§Visual
  * Language). It is also the scrolling region, and it says so: the page never
- * scrolls (@openlight/react base), and a long session gets a real scrollbar
- * instead of clipping its content at an invisible edge.
+ * scrolls (@openlight/react base), and the platform's overlay scrollbar takes
+ * the affordance from there.
+ *
+ * It has no edge to clip at, so content that runs past one dissolves instead —
+ * but only at an edge it actually runs past, and only while it does. That is a
+ * fact about the live box, not about the markup, so it is read from the box.
  */
 export function Strip({ children, status }: { children?: ReactNode; status?: string }) {
+  const region = useRef<HTMLDivElement>(null)
+  const [fade, setFade] = useState<Fade>({ top: false, bottom: false })
+
+  // No dependency list: the list's own length moves the bottom edge, so every
+  // render re-reads it. The bailout is what keeps that from looping — React
+  // stops when the state object comes back identical.
+  useEffect(() => {
+    const node = region.current
+    if (!node) return
+    const read = () =>
+      setFade((previous) => {
+        const next = edges(node)
+        return previous.top === next.top && previous.bottom === next.bottom ? previous : next
+      })
+    read()
+    node.addEventListener('scroll', read, { passive: true })
+    window.addEventListener('resize', read)
+    return () => {
+      node.removeEventListener('scroll', read)
+      window.removeEventListener('resize', read)
+    }
+  })
+
   return (
-    <div className="strip" data-scroll>
+    <div
+      className="strip"
+      data-scroll
+      data-fade-top={fade.top}
+      data-fade-bottom={fade.bottom}
+      ref={region}
+    >
       <style>{styles + CSS}</style>
       {children ?? <div className="quiet">{status}</div>}
     </div>
@@ -99,18 +149,28 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 // Layout only — surfaces, shadows, greys, and the card-vs-flat rule are tokens
 // and components in @openlight/react.
 const CSS = `
-  /* The right edge belongs to the scrollbar; items keep their own inset.
+  /* The strip *is* the content region — no padding of its own, so the first
+     card sits exactly on the window's padding line. The items' shadow is a
+     contact shadow, drawn inside the box that casts it, so it needs no room. */
+  .strip { height: 100%; padding: 0 }
 
-     The strip is flat on the canvas, so it must not clip: scrolled content
-     dissolves at the top and bottom instead of being cut at a box edge that
-     §Visual Language says is not there. The fade is a fixed mask over the
-     viewport, and the vertical padding matches it — at rest the content starts
-     below the fade and nothing is dimmed; only what scrolls into it goes. */
+  /* The fade, per edge, and only while that edge has something past it. The
+     depth is a registered property so it can be transitioned — a raw custom
+     property is a string to the animation machinery, and \`mask-image\` itself
+     never interpolates. At rest at the top with nothing below, no rule matches
+     and the mask is absent entirely: full opacity, nothing dimmed. */
+  @property --ol-fade-top { syntax: '<length>'; inherits: false; initial-value: 0px }
+  @property --ol-fade-bottom { syntax: '<length>'; inherits: false; initial-value: 0px }
   .strip {
-    height: 100%; padding: var(--ol-fade) 0 var(--ol-fade) var(--ol-lift);
+    --ol-fade-top: 0px; --ol-fade-bottom: 0px;
+    transition: --ol-fade-top 150ms ease, --ol-fade-bottom 150ms ease;
+  }
+  .strip[data-fade-top="true"] { --ol-fade-top: var(--ol-fade) }
+  .strip[data-fade-bottom="true"] { --ol-fade-bottom: var(--ol-fade) }
+  .strip[data-fade-top="true"], .strip[data-fade-bottom="true"] {
     mask-image: linear-gradient(
-      to bottom, transparent 0, #000 var(--ol-fade),
-      #000 calc(100% - var(--ol-fade)), transparent 100%
+      to bottom, transparent 0, #000 var(--ol-fade-top),
+      #000 calc(100% - var(--ol-fade-bottom)), transparent 100%
     );
   }
   .mono { font-family: var(--ol-mono); font-size: .92em }

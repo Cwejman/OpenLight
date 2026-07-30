@@ -12,4 +12,5 @@ pub mod seed;
 pub mod serve;
 pub mod stub;
 pub mod transpile;
+pub mod underlay;
 pub mod webview_runtime;

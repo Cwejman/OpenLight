@@ -30,26 +30,25 @@ export const styles = `
   --ol-radius-small: 8px;
   --ol-radius-round: 999px;
 
-  /* One shadow under a card, wherever a card appears — a tile and a running
-     process in the strip are the same shape (host.md §Visual Language). No
-     border anywhere: definition is the shadow's whole job, so it is layered —
-     a tight contact shadow draws the edge against the canvas, a wider faint one
-     gives the card air. Both alphas stay low; the effect is meant to be felt,
-     not seen. */
-  --ol-shadow: 0 1px 1px rgba(0, 0, 0, .06), 0 3px 10px rgba(0, 0, 0, .05);
+  /* Depth has two registers, and each is clipping-proof by construction — a
+     webview is clipped to its own rect, so a shadow that needs room outside a
+     card can never be the card's own.
+
+     1. An *in-flow* card — a strip item, anything laid out inside a surface —
+        takes the contact shadow alone: a hairline of separation, drawn well
+        inside the box that casts it. No lift, no protective padding.
+     2. A *floating* surface — a tile — takes no shadow of its own at all. Its
+        aura is cast beneath it by the host's underlay webview, which spans the
+        whole window and answers to no clipping rect (--ol-shadow-aura). */
+  --ol-shadow-contact: 0 1px 2px rgba(0, 0, 0, .04);
+  --ol-shadow-aura: 0 0 24px rgba(0, 0, 0, .05);
   /* Only a surface floating *over* another one lifts further. */
   --ol-shadow-over: 0 1px 1px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .16);
-  /* The room a shadow needs to be seen. A webview is clipped to its own rect,
-     so a card drawn edge-to-edge inside one casts into nothing — every card
-     keeps this much canvas around it. */
-  --ol-lift: 6px;
   /* How far a surface that sits *naked* on the canvas fades its scrolled
-     content, top and bottom. A card clips at its own rounded edge; a bare
-     region has no edge to clip at, so it dissolves instead. */
+     content at an edge. A card clips at its own rounded edge; a bare region has
+     no edge to clip at, so it dissolves instead — but only at an edge content
+     actually runs past, and only while it does. */
   --ol-fade: 24px;
-
-  --ol-scroll: #d2d2d7;
-  --ol-scroll-live: #b9b9c0;
 
   --ol-font: 13px/1.55 -apple-system, system-ui, sans-serif;
   --ol-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -74,27 +73,23 @@ html, body {
 body { position: relative }
 * { box-sizing: border-box }
 
-/* A scrolling region says so: macOS's overlay scrollbar reserves no width and
-   shows nothing at rest, so content would just vanish at an invisible edge.
-   The standard \`scrollbar-width\` is deliberately absent — setting it puts
-   WebKit back on the overlay path (measured through the probe). */
+/* A scrolling region says so, and says nothing else: the platform's overlay
+   scrollbar owns the affordance — invisible at rest, a thumb while scrolling.
+   Visual-language pin: a program never styles a scrollbar — neither the
+   pseudo-elements WebKit exposes nor the standard properties. */
 [data-scroll] { overflow-y: auto; overflow-x: hidden; min-height: 0 }
-[data-scroll]::-webkit-scrollbar { width: 9px }
-[data-scroll]::-webkit-scrollbar-track { background: transparent }
-[data-scroll]::-webkit-scrollbar-thumb {
-  background: var(--ol-scroll); border-radius: var(--ol-radius-round);
-  border: 3px solid transparent; background-clip: content-box;
-}
-[data-scroll]:hover::-webkit-scrollbar-thumb {
-  background: var(--ol-scroll-live); background-clip: content-box;
-}
 
-/* A card, and the one form that shares its shape: a running process in the
-   strip. Rest falls flat — no surface, no border, no shadow. */
-[data-ui="card"],
+/* A card: white on the canvas, rounded, and nothing else. Depth is not the
+   card's to draw — a tile's aura comes from the host's underlay beneath it. */
+[data-ui="card"] {
+  background: var(--ol-surface); border-radius: var(--ol-radius);
+}
+/* The one in-flow card: a running process in the strip. It lies *inside* a
+   surface, so it takes the contact shadow. Rest falls flat — no surface, no
+   border, no shadow. */
 [data-ui="item"][data-live="true"] {
   background: var(--ol-surface);
-  border-radius: var(--ol-radius); box-shadow: var(--ol-shadow);
+  border-radius: var(--ol-radius); box-shadow: var(--ol-shadow-contact);
 }
 [data-ui="item"] {
   display: flex; flex-direction: column; gap: 1px;
