@@ -5,14 +5,16 @@
 //! dispatching through the `EngineApi` seam. The rim chooses the implementor at runtime:
 //! the real `engine::Engine` behind `EngineAdapter` by default (the swap,
 //! board.md build track step 5), the `FixtureStub` under `--fixture`.
-//! A program whose bundle is built on disk is loaded into the standard page
-//! shell (`page::shell`); the surfaces without one keep [`demo_page`] until
-//! theirs is written. Everything with logic lives in the pure modules; this
-//! file wires tao/wry.
+//! A program whose source entry exists on disk is served over the `ol://`
+//! custom protocol (`serve`, `transpile`) — the empty shell plus its own
+//! modules, transpiled per file; the surfaces without one keep [`demo_page`]
+//! until theirs is written. Everything with logic lives in the pure modules;
+//! this file wires tao/wry.
 //!
 //! `--probe` runs the same boot and then asks each mounted surface what its
 //! DOM became, one JSON line per webview on stdout, and exits (`probe`).
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -36,7 +38,9 @@ use host::geometry::{self, Rect, Spacing, Strip, Tile};
 use host::page;
 use host::probe;
 use host::protocol;
+use host::serve;
 use host::stub::FixtureStub;
+use host::transpile::Transpiler;
 
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
@@ -96,6 +100,18 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
     };
     let Booted { engine, mut host_rx, provider, session, tiles, strip, programs_root } = booted;
     let engine_api: Arc<dyn EngineApi> = Arc::new(EngineAdapter::new(engine.clone()));
+
+    // The program layer's own boot: one bun process behind `ol://`, and the
+    // tree its modules may come from. A surface cannot render without it, so a
+    // failure here is fatal rather than a window of stand-ins.
+    let source_root = serve::source_root(&programs_root);
+    let transpiler = match Transpiler::start(&serve::cache_dir()) {
+        Ok(transpiler) => Arc::new(transpiler),
+        Err(e) => {
+            eprintln!("host: the module transpiler did not start ({e})\nis `bun` on PATH?");
+            std::process::exit(1);
+        }
+    };
 
     let tree = demo_tree(&tiles);
     let strip_process = strip.process.clone();
@@ -189,18 +205,10 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                     .get(&process_id)
                     .cloned()
                     .unwrap_or_else(|| pending.executable.clone());
-                // A program whose bundle is built loads it into the standard
-                // page shell; the rest keep the rim's demo HTML until theirs
-                // exists (host.md §Authoring Programs).
-                let html = match page::load_bundle(&programs_root, &executable) {
-                    Some(bundle) => page::shell(&bundle),
-                    None => demo_page(&program, process_id.as_str(), session.as_str(), false),
-                };
-                let webview = WebViewBuilder::new()
+                let builder = WebViewBuilder::new()
                     .with_bounds(bounds(&rect))
                     .with_transparent(true)
                     .with_initialization_script(&page::init_script(process_id.as_str()))
-                    .with_html(html)
                     .with_ipc_handler(ipc_handler(
                         engine_api.clone(),
                         runtime.handle().clone(),
@@ -211,9 +219,32 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                             tally: tally.clone(),
                             proxy: proxy.clone(),
                         }),
+                    ));
+                // A program whose entry exists on disk is served over `ol://`;
+                // the rest keep the rim's demo HTML until theirs is written
+                // (host.md §Authoring Programs).
+                let entry = programs_root.join(&executable);
+                let builder = if entry.is_file() {
+                    builder
+                        .with_custom_protocol(
+                            serve::SCHEME.into(),
+                            module_protocol(
+                                transpiler.clone(),
+                                source_root.clone(),
+                                process_id.as_str().to_string(),
+                                entry,
+                            ),
+                        )
+                        .with_url(serve::shell_url(process_id.as_str()))
+                } else {
+                    builder.with_html(demo_page(
+                        &program,
+                        process_id.as_str(),
+                        session.as_str(),
+                        false,
                     ))
-                    .build_as_child(&window)
-                    .expect("webview");
+                };
+                let webview = builder.build_as_child(&window).expect("webview");
                 webviews.insert(process_id.clone(), webview);
                 if probing {
                     // Through the ordinary delivery path, once the surface has
@@ -422,6 +453,33 @@ fn ipc_handler(
             }
             Parsed::Settled(outcome) => deliver(&proxy, &process, outcome),
         }
+    }
+}
+
+/// One webview's `ol://` handler (`serve`). It is bound to that webview's own
+/// process and entry, so a page can only ever ask for its own shell; modules
+/// are shared, and so is the transpiler behind them.
+///
+/// The handler answers on the thread wry calls it from — the event loop's.
+/// A cold module costs one round trip to bun; every later load is a file read
+/// from the cache.
+fn module_protocol(
+    transpiler: Arc<Transpiler>,
+    root: std::path::PathBuf,
+    process: String,
+    entry: std::path::PathBuf,
+) -> impl Fn(wry::WebViewId, wry::http::Request<Vec<u8>>) -> wry::http::Response<Cow<'static, [u8]>>
+{
+    move |_id, request| {
+        let served = serve::serve(&transpiler, &root, &process, &entry, request.uri().path());
+        wry::http::Response::builder()
+            .status(served.status)
+            .header(wry::http::header::CONTENT_TYPE, served.mime)
+            // The shell and its modules share one origin, so this buys nothing
+            // today; it keeps a module fetch honest if the origins ever split.
+            .header("Access-Control-Allow-Origin", "*")
+            .body(Cow::Owned(served.body))
+            .expect("a response is always well-formed")
     }
 }
 

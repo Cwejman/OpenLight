@@ -100,19 +100,19 @@ pub fn demo() -> (Vec<Chunk>, Vec<Placement>) {
             "prog-read-tile",
             Some("read-tile"),
             None,
-            Some(json!({"executable": "programs/read-tile.js", "runtime": "webview"})),
+            Some(json!({"executable": "programs/read-tile/src/index.tsx", "runtime": "webview"})),
         ),
         chunk(
             "prog-sidebar",
             Some("sidebar"),
             None,
-            Some(json!({"executable": "programs/sidebar.js", "runtime": "webview"})),
+            Some(json!({"executable": "programs/sidebar/src/index.tsx", "runtime": "webview"})),
         ),
         chunk(
             "prog-inspector",
             Some("inspector"),
             None,
-            Some(json!({"executable": "programs/inspector.js", "runtime": "webview"})),
+            Some(json!({"executable": "programs/inspector/src/index.tsx", "runtime": "webview"})),
         ),
         // Processes — engine-written body state (engine.md §Program and Process).
         chunk("proc-read-tile-1", None, None, Some(json!({"status": "running", "started": "2026-07-30T09:00:00Z"}))),

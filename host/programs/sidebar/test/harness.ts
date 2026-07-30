@@ -1,5 +1,5 @@
 // The SDK selects its transport once, at module load (sdk.md, *Transports*), and
-// the tile imports it through `@openlight/ui`. So the pre-set transport —
+// the sidebar imports it through `@openlight/react`. So the pre-set transport —
 // selection order 1 — is installed here, and the tile is reached through the
 // dynamic import below, which is what guarantees the ordering.
 import { act, type ReactNode } from 'react'
@@ -26,8 +26,7 @@ export function useTransport(next: Transport): void {
   next.onEvent((event) => handler?.(event))
 }
 
-export const { ReadTile } = await import('../src/read-tile/tile.tsx')
-export const { Sidebar } = await import('../src/sidebar/sidebar.tsx')
+export const { Sidebar } = await import('../src/sidebar.tsx')
 
 export type Mounted = { root: Root; container: HTMLElement }
 
@@ -81,8 +80,4 @@ export function texts(mounted: Mounted, selector: string): string[] {
 
 export function text(mounted: Mounted, selector: string): string {
   return mounted.container.querySelector(selector)?.textContent ?? ''
-}
-
-export function mode(mounted: Mounted): string | null {
-  return mounted.container.querySelector('.content')?.getAttribute('data-mode') ?? null
 }

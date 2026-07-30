@@ -5,7 +5,7 @@
 // It writes nothing. The view-state chunk §3.5 grants it stays unwritten in
 // v0.1: nothing here is switchable yet.
 import { get, type ChunkId, type ChunkItem, type ScopeResult } from '@openlight/sdk'
-import { Card, Pill, styles, useScope } from '@openlight/ui'
+import { Card, Pill, styles, useScope } from '@openlight/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import {
   argumentTarget,
@@ -161,7 +161,7 @@ function Note({ title, children }: { title: string; children: ReactNode }) {
 /**
  * The card the tile lives in, plus the quiet states that replace its content.
  * It fills the webview and never moves: the page itself does not scroll
- * (@openlight/ui base), so the card cannot be dragged out of its own frame —
+ * (@openlight/react base), so the card cannot be dragged out of its own frame —
  * only the member list inside it scrolls.
  */
 export function Frame({
@@ -214,9 +214,9 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
 }
 
 // Layout only — the card's surface, rounding and shadow, the pill, the greys
-// and the scrollbar are tokens and components in @openlight/ui.
+// and the scrollbar are tokens and components in @openlight/react.
 const CSS = `
-  /* The card fills the viewport the page pins (@openlight/ui base) and clips
+  /* The card fills the viewport the page pins (@openlight/react base) and clips
      its own corners; \`min-height: 0\` lets the content region be shorter than
      what it holds, which is what makes the list — and only the list — scroll. */
   .tile {

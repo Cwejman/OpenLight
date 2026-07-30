@@ -8,7 +8,7 @@
 // Its write root (`[session]`, boot step 10) stays unused: *hide* is the first
 // write, and it is not built.
 import type { ChunkId } from '@openlight/sdk'
-import { Menu, StripItem, styles, useScope, type MenuAction } from '@openlight/ui'
+import { Menu, StripItem, styles, useScope, type MenuAction } from '@openlight/react'
 import { useState, type ReactNode } from 'react'
 import { ENGINE_PROGRAM, actions, items, sessionArgument, type Item } from './items.ts'
 
@@ -79,7 +79,7 @@ function Session({ session }: { session: ChunkId }) {
 /**
  * The strip itself: text on the canvas — no panel, no border (§Visual
  * Language). It is also the scrolling region, and it says so: the page never
- * scrolls (@openlight/ui base), and a long session gets a real scrollbar
+ * scrolls (@openlight/react base), and a long session gets a real scrollbar
  * instead of clipping its content at an invisible edge.
  */
 export function Strip({ children, status }: { children?: ReactNode; status?: string }) {
@@ -92,7 +92,7 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 }
 
 // Layout only — surfaces, shadows, greys, and the card-vs-flat rule are tokens
-// and components in @openlight/ui.
+// and components in @openlight/react.
 const CSS = `
   /* The right edge belongs to the scrollbar; items keep their own inset. */
   .strip { position: relative; height: 100%; padding: var(--ol-lift) 0 12px var(--ol-lift) }

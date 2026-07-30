@@ -145,7 +145,7 @@ mod tests {
         let js = script(120, 7);
         assert!(js.contains(".slice(0, 7)"));
         assert!(js.contains("> 120"));
-        assert!(js.contains(r#""html, body, #root"#), "the selector list is a JS string: {js}");
+        assert!(js.contains(r#""html, body, "#), "the selector list is a JS string: {js}");
         assert!(js.contains(r#"[data-ui]"#), "the semantic lane is probed");
         assert!(!js.contains("__SELECTORS__"), "every placeholder filled");
         assert!(!js.contains("__HTML_LIMIT__"));

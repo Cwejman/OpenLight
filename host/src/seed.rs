@@ -159,7 +159,7 @@ pub fn host_declaration() -> Declaration {
             name,
             None,
             json!({
-                "executable": format!("programs/{name}.js"),
+                "executable": format!("programs/{name}/src/index.tsx"),
                 "runtime": "webview",
                 "timeout_ms": SURFACE_TIMEOUT_MS,
                 "text": "First-party demo surface program.",

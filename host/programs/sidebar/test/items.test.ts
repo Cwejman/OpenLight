@@ -2,7 +2,7 @@
 // items that session holds, and the actions each item's state offers
 // (host.md §Sidebar, programs.md §3.2).
 import { describe, expect, test } from 'bun:test'
-import { actions, items, sessionArgument, shortId } from '../src/sidebar/items.ts'
+import { actions, items, sessionArgument, shortId } from '../src/items.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
 function result(chunks: ChunkItem[]): ScopeResult {

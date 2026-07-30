@@ -13,4 +13,3 @@ _site/
 .playwright-mcp/
 .openlight/
 notes/
-host/programs/*.js

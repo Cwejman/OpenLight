@@ -3,14 +3,21 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@openlight/host-ts",
+      "name": "@openlight/workspace",
     },
-    "programs": {
-      "name": "@openlight/programs",
+    "engine/sdk": {
+      "name": "@openlight/sdk",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+      },
+    },
+    "host/programs/read-tile": {
+      "name": "@openlight/read-tile",
       "version": "0.1.0",
       "dependencies": {
-        "@openlight/sdk": "file:../../engine/sdk",
-        "@openlight/ui": "workspace:*",
+        "@openlight/react": "workspace:*",
+        "@openlight/sdk": "workspace:*",
         "react": "^19.2.8",
         "react-dom": "^19.2.8",
       },
@@ -21,11 +28,27 @@
         "@types/react-dom": "^19.2.3",
       },
     },
-    "ui": {
-      "name": "@openlight/ui",
+    "host/programs/sidebar": {
+      "name": "@openlight/sidebar",
       "version": "0.1.0",
       "dependencies": {
-        "@openlight/sdk": "file:../../engine/sdk",
+        "@openlight/react": "workspace:*",
+        "@openlight/sdk": "workspace:*",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+      },
+      "devDependencies": {
+        "@happy-dom/global-registrator": "^20.11.1",
+        "@types/bun": "^1.3.14",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+      },
+    },
+    "host/react": {
+      "name": "@openlight/react",
+      "version": "0.1.0",
+      "dependencies": {
+        "@openlight/sdk": "workspace:*",
         "react": "^19.2.8",
       },
       "devDependencies": {
@@ -40,9 +63,13 @@
   "packages": {
     "@happy-dom/global-registrator": ["@happy-dom/global-registrator@20.11.1", "", { "dependencies": { "@types/node": ">=20.0.0", "happy-dom": "^20.11.1" } }, "sha512-1C0wwHiyMlEdsbrJqff5ORE2PwaXBOam5rMqkZVOReAezd5nt6Tl/WGg28UAo75Ziuwchs0KaF8lvnn2oAtvJA=="],
 
-    "@openlight/programs": ["@openlight/programs@workspace:programs"],
+    "@openlight/react": ["@openlight/react@workspace:host/react"],
 
-    "@openlight/ui": ["@openlight/ui@workspace:ui"],
+    "@openlight/read-tile": ["@openlight/read-tile@workspace:host/programs/read-tile"],
+
+    "@openlight/sdk": ["@openlight/sdk@workspace:engine/sdk"],
+
+    "@openlight/sidebar": ["@openlight/sidebar@workspace:host/programs/sidebar"],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
 
@@ -77,9 +104,5 @@
     "whatwg-mimetype": ["whatwg-mimetype@3.0.0", "", {}, "sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q=="],
 
     "ws": ["ws@8.21.1", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw=="],
-
-    "@openlight/programs/@openlight/sdk": ["@openlight/sdk@file:../engine/sdk", { "devDependencies": { "@types/bun": "^1.3.14" } }],
-
-    "@openlight/ui/@openlight/sdk": ["@openlight/sdk@file:../engine/sdk", { "devDependencies": { "@types/bun": "^1.3.14" } }],
   }
 }

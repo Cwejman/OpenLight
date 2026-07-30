@@ -60,9 +60,10 @@ html, body {
   background: var(--ol-canvas);
   font: var(--ol-font); color: var(--ol-ink);
 }
-/* Positioned so a surface can pin itself to the viewport with \`inset\` — a
-   margin would collapse out of the root and push the page taller than itself. */
-#root { position: relative; height: 100% }
+/* The program mounts the body itself — the host's shell is empty. Positioned so
+   a surface can pin itself to the viewport with \`inset\`; a margin would
+   collapse out of the body and push the page taller than itself. */
+body { position: relative }
 * { box-sizing: border-box }
 
 /* A scrolling region says so: macOS's overlay scrollbar reserves no width and

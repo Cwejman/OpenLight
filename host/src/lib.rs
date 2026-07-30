@@ -9,5 +9,7 @@ pub mod page;
 pub mod probe;
 pub mod protocol;
 pub mod seed;
+pub mod serve;
 pub mod stub;
+pub mod transpile;
 pub mod webview_runtime;

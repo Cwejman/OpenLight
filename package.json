@@ -1,0 +1,14 @@
+{
+  "name": "@openlight/workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The TypeScript twin of the root Cargo workspace: the SDK, the host's React layer, and one package per first-party program. Programs are served from source over ol:// — nothing here is built.",
+  "workspaces": [
+    "engine/sdk",
+    "host/react",
+    "host/programs/*"
+  ],
+  "scripts": {
+    "test": "bun run --filter '*' test"
+  }
+}

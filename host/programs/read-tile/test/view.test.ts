@@ -8,7 +8,7 @@ import {
   infer,
   leadingText,
   shortId,
-} from '../src/read-tile/view.ts'
+} from '../src/view.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
 function result(chunks: ChunkItem[], extra: Partial<ScopeResult> = {}): ScopeResult {

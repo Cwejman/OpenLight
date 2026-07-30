@@ -79,7 +79,7 @@ mod tests {
             process_id: db::ChunkId::from(pid),
             program: ProgramRef {
                 id: db::ChunkId::from("host/read-tile"),
-                executable: "programs/read-tile.js".into(),
+                executable: "programs/read-tile/src/index.tsx".into(),
                 runtime: RuntimeKind::from("webview"),
                 capabilities: vec![],
             },
@@ -97,14 +97,14 @@ mod tests {
         match host_rx.recv().await.unwrap() {
             HostCmd::MountWebview { process_id, executable } => {
                 assert_eq!(process_id.as_str(), "p_1");
-                assert_eq!(executable, "programs/read-tile.js");
+                assert_eq!(executable, "programs/read-tile/src/index.tsx");
             }
             other => panic!("expected MountWebview, got {other:?}"),
         }
 
         // The rim claims the pending handles and fires readiness.
         let pending = provider.take_pending(&db::ChunkId::from("p_1")).unwrap();
-        assert_eq!(pending.executable, "programs/read-tile.js");
+        assert_eq!(pending.executable, "programs/read-tile/src/index.tsx");
         pending.ready.send(()).unwrap();
         handle.ready.await.expect("readiness reaches the engine side");
 
