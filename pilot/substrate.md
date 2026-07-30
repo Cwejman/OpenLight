@@ -280,6 +280,6 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 ## What's Open
 
 - **Spec language evolution.** The four fields (ordered, accepts, required, unique) cover the known cases. The vocabulary may grow through use.
-- **Merge semantics.** The structure supports merge commits. Conflict resolution strategy is above the primitives.
+- **Merge semantics — ruled.** Branches diverge freely; merge auto-takes the union of additions and fails hard only on true collision (the same chunk's body or spec changed on both sides). No conflict-resolution machinery in the primitives: an agent resolves a refused merge with existing tooling, committing the reconciliation as ordinary work. Substrate refuses, intelligence resolves. Protocol shape lands with branch ops (engine.md, *What Is Open*).
 - **Temporal validity.** Event time vs system time is expressible through body properties. Whether `valid_from`/`valid_to` deserve first-class status depends on use.
 - **Views.** Saved scopes with display settings. Drift detection when knowledge changes under an approved view. Concept is clear; mechanics are unbuilt.

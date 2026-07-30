@@ -26,6 +26,9 @@ Composition primitives for the host's interface layer. Lives in the host project
 4. `tile` on `host`: `{ propagate: true, ordered: true }` — propagate so seq orders the children *within* each tile rather than the tiles placed directly on the archetype ([`host.md`](host.md#the-composition-types)). A node in the split tree. Split nodes carry `{ direction, ratio }`; leaf nodes are empty and point at a process through a `relates` placement.
 5. `overlay` on `host`. A program rendered above its anchor (session, tab, or tile) rather than inside the tile composition.
 6. `recipe` on `host`: `{ propagate: true, accepts: ['tile'] }`, with `tile` `relates` on `recipe`. A preserved tile subtree that can be spawned into a new root.
+7. Host-shipped surface programs, seeded as invocables: `read-tile`, `sidebar`, `inspector` — each `instance` on `host` and on the mounted `engine/program` (the cross-db pattern above). Declared is not run: boot runs read-tile and the sidebar strip; `inspector` is declared ahead of its build.
+
+*Open — surface arguments.* The surface programs take typed arguments (the sidebar's is one `request` chunk carrying the session it renders, key `session`), but no `programs/argument` archetype is seeded for them to instance — the argument anatomy of programs.md §1 has no bootstrap home yet.
 
 ## The `agents` project's bootstrap
 
@@ -39,6 +42,8 @@ Concrete programs and the agent's working scopes. Lives in the agents project's 
 6. `agent` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt', 'answer'], runtime: 'vm' }`. `session`, `context`, `prompt`, `answer` placed `relates` on `agent` — `answer` is the chunk the turn commits onto its own frame (body `text`, `partial`, `refs`). No intrinsic boundary placement — the agent is *open*, deferring all restriction to the run. Composes `model`; never touches a provider itself.
 7. `echo` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['message'], runtime: 'vm' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
 
+**Result archetypes — the general rule.** Every program's interface declares its result archetype: the chunk type its run commits onto its own frame, `relates` on the program and named in its `accepts` — the pattern `model` (`output`) and `agent` (`answer`) already carry. `filesystem`, `shell`, `web`, and `echo` gain theirs the same way; without a declared result type, a frame's results reject once federated `accepts` enforcement lands.
+
 The `engine/program` archetype these programs are placed `instance` on lives in the engine project's db (mounted as a peer). The placement record itself is stored in the agents project's db. Cross-db placements work via globally-unique ULIDs; the engine federates resolution at query time.
 
 ---
@@ -46,3 +51,5 @@ The `engine/program` archetype these programs are placed `instance` on lives in 
 **After bootstrap.** Each project's db holds its own root scope and contracts. Running the host against the active project mounts host and engine as peers, federates the substrate, and the system is reachable. Bootstrap doesn't create a `host/session` instance or any tabs; the first time the host launches, it creates an initial session and an empty tab for the user to work from. That first action is a program run, not part of any project's bootstrap commit.
 
 The `ol init` CLI for fresh projects is part of host implementation; it writes `.ol/db`, runs the appropriate bootstrap commit, and writes a starter `.ol/project.toml` declaring the host and engine projects as required mounts.
+
+*Open — no migration path.* Bootstrap is idempotent by marker (db.md, *Bootstrap idempotence*): once a project is seeded, the routine never re-runs, so changed declarations never reach an already-seeded project. Reseeding is the current answer; a real migration path is unruled debt.

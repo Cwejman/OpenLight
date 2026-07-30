@@ -26,7 +26,7 @@ The SDK ships as one package: **`@openlight/sdk`**. Functions only: `scope`, `ge
 
 The SDK lives in the engine crate (`engine/sdk/`) — it IS the engine's protocol expressed as TypeScript, so it ships where the protocol lives. Future capability surfaces (fs, network) eventually land here the same way: typed functions over the IPC bridge.
 
-React helpers (`useScope`, future `useCommit`, `useRun`, `useSubscribe`) are not part of the SDK — they're a separate UI library shipped from `host/ui/` (because they're coupled to webview programs that the host renders). Webview programs that render React import the SDK *and* the UI library; VM programs only import the SDK. Non-TS clients eventually exist by reimplementing the SDK against the JSON-lines protocol — they don't see the UI library at all.
+React helpers (`useScope`, future `useCommit`, `useRun`, `useSubscribe`) are not part of the SDK — they're a separate UI library, `@openlight/react`, shipped from `host/react/` (because they're coupled to webview programs that the host renders). Webview programs that render React import the SDK *and* the UI library; VM programs only import the SDK. Non-TS clients eventually exist by reimplementing the SDK against the JSON-lines protocol — they don't see the UI library at all.
 
 ---
 
@@ -88,7 +88,7 @@ The returned thunk unsubscribes. Calling it after a `kind: 'invalid'` is a no-op
 
 ---
 
-## React helpers (in `host/ui/`)
+## React helpers (in `host/react/`)
 
 The host's UI library exposes React hooks built on `@openlight/sdk`. v0.1 ships one:
 
@@ -99,6 +99,8 @@ useScope(scopes: ChunkId[], opts?: ScopeOpts): ScopeResult | undefined
 **Contract.** On mount and on every dependency change: register a `subscribe` first, *then* fetch initial state via `scope`, re-fetch on every `scope_changed` or `lagged` event, unmount → unsubscribe. The hook returns the latest fetched result; `undefined` until the first fetch resolves. On `subscription_invalid` (engine-emitted when a subscribed scope becomes unreachable), the hook stops re-fetching and returns `undefined` — the subscription is dead, the data is gone.
 
 **Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `scope` together must follow the same ordering.
+
+*Open — no error channel.* `useScope` returns `ScopeResult | undefined`, and `undefined` is its only failure form — a refused scope read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The read-tile's inline-error pin (programs.md §3.5) is unreachable for scope reads until this closes.
 
 **Why re-fetch every event** rather than apply the event's `commit` payload as a delta. Single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available to the callback for delta optimization in custom uses, but the default discards it.
 
@@ -133,7 +135,9 @@ type Spec = {
 
 type Placement = {
   scope_id: ChunkId
-  type_: 'instance' | 'relates'
+  type_: 'instance' | 'relates'   // key asymmetry, pinned: a placement is
+                                  // declared with `type` (writes,
+                                  // PlacementSpec) and read back with `type_`
   seq?: number
 }
 
@@ -157,6 +161,10 @@ type ScopeOpts = {
 
 type ScopeResult = {
   head: CommitId
+  unresolved?: ChunkId[]   // roots resolving in no mount (federated intersection,
+                           // engine.md) — dead references as metadata, not error;
+                           // optional because the engine wire does not carry it
+                           // yet (the db does — recorded, ahead of the wire)
   total: number
   in_scope: number
   in_scope_instance: number
@@ -201,7 +209,9 @@ type EngineError = {
 }
 ```
 
-(`Dim`, `Edge`, `Includes`, `ChunkDeclaration`, `PlacementSpec` follow the same direct-mirror pattern.)
+(`Dim`, `Edge`, `ChunkDeclaration`, `PlacementSpec` follow the same direct-mirror pattern. `Includes` does not: the wire carries only the `{ body?: boolean }` subset of db's `Includes` — `include: { body: false }` is the survey read; the other db-level flags stay behind the engine.)
+
+Ambient globals a runtime installs — `window.__wry_ipc`, `window.__sdk`, `window.__openlight_process`, `globalThis.__openlight_transport` — are typed in one home, the SDK's `globals.d.ts`; no package re-declares them.
 
 **`RunArgs` is the program-facing projection of the engine's `RunArgs`** (see [`engine.md`](engine.md#engine-api-callable-from-the-host)). Two engine fields are absent by design: `program_id` is the first argument to `run`, not part of `args`; `placements` is engine-owned — the engine places a tool-call's process on its parent for trace nesting, which is not a program's concern. Boundaries are roots only: a program always builds a fresh boundary per run. Reusing a named boundary chunk (`BoundarySpec::Existing`) is a host/Rust-API affordance, not exposed over the protocol in v0.1.
 
@@ -234,7 +244,7 @@ VM programs run inside their own VM. Their fs/network/shell access is whatever t
 
 ### What the SDK does not do
 
-The SDK does not render. Webview programs that want React render with `createRoot(document.getElementById('root')!).render(<App />)` directly — `react-dom/client` handles it; no SDK wrapper. VM programs have no DOM and don't render at all. The host injects a `<div id="root">` into every webview before the program loads; that's the only setup the SDK assumes about the page.
+The SDK does not render. Webview programs that want React render with `createRoot(document.body).render(<App />)` directly — `react-dom/client` handles it; no SDK wrapper. VM programs have no DOM and don't render at all. The served shell is empty and programs mount `document.body` (host.md, *Authoring Programs*); the SDK assumes nothing about the page.
 
 ---
 
@@ -250,6 +260,7 @@ The SDK keeps an internal registry mapping each `subscriptionId` (returned by th
 engine/sdk/                                   — @openlight/sdk package
   src/
     index.ts              — public re-exports of the substrate surface
+    globals.d.ts          — ambient runtime globals, typed once for every consumer
     types.ts              — TS mirror of substrate types
     protocol.ts           — Request | Response | Event shapes; id counter
     surface.ts            — scope, get, commit, run, awaitRun, cancel
@@ -262,7 +273,7 @@ engine/sdk/                                   — @openlight/sdk package
   test/
     surface.test.ts       — surface against a mock transport
 
-host/ui/                                      — UI library (React)
+host/react/                                   — UI library (@openlight/react)
   src/
     index.ts              — public re-exports of hooks and components
     useScope.ts           — the useScope hook
@@ -272,7 +283,7 @@ host/ui/                                      — UI library (React)
 
 Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription.
 
-`host/ui` depends on `@openlight/sdk` for transport-aware functions; nothing else.
+`host/react` depends on `@openlight/sdk` for transport-aware functions; nothing else.
 
 ---
 

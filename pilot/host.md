@@ -128,12 +128,14 @@ The window is a quiet canvas:
 - The sidebar lives directly on the background — text on the canvas, no panel, no border
 - Tabs appear at the top as pills
 - Tiles appear as rounded cards with a small gap between them
-- White-first; dark mode is a later refinement, not a day-one requirement
+- A quiet gray canvas — `hsl(0 0% 98%)`; dark mode is a later refinement, not a day-one requirement
 - iOS-flavored rounding — subtle, not dramatic
 
-In the sidebar, the same chunk is shown two ways based on its process state. A running process is a card, with the same rounding and shadow as a tile. A completed or failed process is flat — just its content directly on the background. The visual language distinguishes life from rest without a label.
+Depth speaks in **two registers**. *In-flow cards* — strip items — carry a surface fill and a centered soft glow, in CSS. *Floating surfaces* — tiles — carry no CSS shadow at all: their aura is frame chrome the host casts on the webview's compositor layer, not page style. One convention for rounding: the card radius lives in the rim (`CARD_RADIUS`), and `@openlight/react`'s `--ol-radius` mirrors it.
 
-For the pilot, CSS covers the aesthetic (`backdrop-filter` for blur); content-derived glow and native compositor effects come later — see *What Is Open*.
+In the sidebar, the same chunk is shown two ways based on its process state. A running process is a card, with the same rounding as a tile. A completed or failed process is flat — just its content directly on the background. The visual language distinguishes life from rest without a label.
+
+Programs never style scrollbars — the platform's overlay scrollbars own every surface. Strip edge fades are dynamic per edge: present only where content hides, absent at rest, so the first card sits exactly on the padding line.
 
 ---
 
@@ -153,7 +155,7 @@ The host does not interpret substrate operations — it dispatches them. VM prog
 
 A program imports the SDK and calls the substrate operations it needs directly; webview programs render with their DOM library of choice (`react-dom/client` for React) — the SDK has no rendering concerns. The op surface is owned by [`sdk.md`](sdk.md); a worked example is under *Authoring Programs* below.
 
-React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/ui`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `scope_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
+React hooks live in the host's UI library (`host/react/`), shipped as `@openlight/react`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `scope_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
 
 ---
 
@@ -161,10 +163,10 @@ React hooks live in the host's UI library (`host/ui/`), shipped as `@openlight/u
 
 Two shapes for the two kinds.
 
-**Webview program** (`runtime: 'webview'`). A TSX entry that renders its component tree directly. The host loads the program's bundled JS into a webview that already has `<div id="root"></div>` in the page. No shebang — the file is bundled to JS by the build pipeline, not run directly.
+**Webview program** (`runtime: 'webview'`). A TSX entry that renders its component tree directly. `body.executable` is the entry's path, resolved against the declaring project's root. No shebang, and no build pipeline: the host serves source over its own **`ol://` custom protocol**. The shell a webview navigates to is empty — doctype, charset, one module script (the program's entry), nothing else — and programs mount `document.body`; the host provides no root element. Each requested file is transpiled per file by a persistent bun helper, cached by mtime; every bare specifier resolves bun-style to a canonical URL — no import map, nothing special-cased — and CJS dependencies are ESM-ified once, as the general rule. *Held open:* an `.html` entry as the escape for a program that owns its whole document.
 
 ```tsx
-import { useScope } from '@openlight/ui'
+import { useScope } from '@openlight/react'
 import { createRoot } from 'react-dom/client'
 
 function MyProgram() {
@@ -172,10 +174,10 @@ function MyProgram() {
   return <div>{/* ... */}</div>
 }
 
-createRoot(document.getElementById('root')!).render(<MyProgram />)
+createRoot(document.body).render(<MyProgram />)
 ```
 
-The program is a substrate chunk with `body.executable` pointing at the bundle and `body.runtime: 'webview'`. When the host runs the program, it creates a webview, loads the bundle, the JS runs `createRoot(...).render(...)` against the host-provided root.
+The program is a substrate chunk with `body.executable` pointing at its entry source and `body.runtime: 'webview'`. When the host runs the program, it creates a webview navigated to the program's `ol://` shell; the entry module runs and mounts `document.body`.
 
 **VM program** (`runtime: 'vm'`). An executable file with a shebang. Runs as a standalone process inside its own VM. The shebang determines the interpreter and what APIs the program has access to. The pilot's first-party VM programs use `#!/usr/bin/env bun` because the SDK is TypeScript:
 
@@ -197,15 +199,16 @@ The program is a substrate chunk with `body.executable` pointing at the script a
 
 **State lives in the substrate.** Programs use the substrate directly via `scope` and `commit` (and `useScope` for reactive reads in webview programs) for anything that needs to persist. There is no separate state-persistence API. Per-run state that must separate from shared-program state is passed as a typed argument to `run`.
 
-**Process identity.** Each run is a distinct process chunk (see [`engine.md`](engine.md)) — two runs of the same program with identical args coexist as different chunks. The sidebar disambiguates them with program name + args + a visual suffix (timestamp, index, or user-assigned name — scheme is open UX).
+**Process identity.** A program learns its own process id through its runtime's channel: a VM program reads `process.env.PROCESS_ID`; a webview program reads `window.__openlight_process`, stamped by the host's initialization script before any page code runs (the same script that installs `window.__wry_ipc`). Each run is a distinct process chunk (see [`engine.md`](engine.md)) — two runs of the same program with identical args coexist as different chunks. The sidebar disambiguates them with program name + args + a visual suffix (timestamp, index, or user-assigned name — scheme is open UX).
 
 ---
 
 ## Sidebar
 
-The sidebar is the session's view of itself. Its items are processes placed `instance` on the current session, plus whatever the session explicitly holds.
+The sidebar is the session's view of itself. Its items are processes placed `instance` on the current session, plus whatever the session explicitly holds. Its argument is one `request` chunk carrying the session it renders (key: `session`).
 
-- Running processes render as cards.
+- Ordering is **life before rest, then recency**: running and pending first, terminal newest-first by `started`.
+- Running and pending processes render as cards — pending is life, not rest.
 - Completed or failed processes render flat on the background.
 - Every item responds to click with a **context menu** — the primary interaction for both running and stopped processes. The menu surfaces the actions that fit the item's state: jump to the tile if mounted, terminate a running process, spawn a new process from a stopped one, edit boundaries, remove from sidebar.
 - Shift-click (or equivalent modifier) offers a quick-action shortcut for common operations — for example, immediately launching a new process without opening the menu. This is a power-user convenience layered on top of the foolproof context-menu path; ordinary users find every capability through the menu without needing to know the shortcut exists.
@@ -260,7 +263,8 @@ The cascade walk and FS-mount-table assembly are host code (file-aware). The mou
 - **Color coding.** Whether scopes or programs carry a color attribute, and how it surfaces in the visual language.
 - **Cross-workspace wrap policy.** When wrapping tiles into a composition, if a child is visible in another tab, what happens to the other tab's view.
 - **Selection on padding.** Gesture for selecting a subtree of tiles to wrap, save as recipe, or delete as a group.
-- **Native visual effects.** The pilot uses CSS for blur and glow; native compositor effects (pixel-readback, GPU blur) are later.
+- **Native visual effects.** The tile aura is already native compositor chrome (*Visual Language*); further effects (pixel-readback, GPU blur) are later.
+- **By-eye depth values.** The strip-bleed margins and the aura-truncation-vs-padding trade (a wide aura fades inside the strip's padding; the dials are padding width or aura radius) are by-eye values still settling.
 - **Direct-manipulation grammar.** Drag-to-resize, split creation and removal gestures, minimum tile sizes. pilot.md names the host as owner of tile geometry *and its direct manipulation*, but the gestures are unspecced — no test can be written for them yet. The geometry walk below stands testable without this layer; spec it before coding it.
 - **Visual tokens.** "Light padding," "small gap," and the rounding carry no values. The walk takes them as parameters — a pure function of (tree, viewport, spacing) — so tests parametrize over them; the values themselves settle by eye when the window exists.
 
@@ -274,15 +278,15 @@ The host project ships:
 host/
   src/               — Rust source: window/tao/wry, IPC routing, mounts cascade
                        walker, VM and webview runtime provider implementations.
-  ui/                — TypeScript UI library: React components and hooks
-                       (useScope, future useCommit/useRun) used by webview
-                       programs the host renders. Lives here for v0.1; may
-                       extract to its own project later.
-  programs/          — first-party host-shipped programs:
+  react/             — TypeScript UI library (@openlight/react): React
+                       components, tokens, and hooks (useScope, future
+                       useCommit/useRun) used by webview programs the host
+                       renders. Lives here for v0.1; may extract later.
+  programs/          — first-party host-shipped programs, one package each:
                        sidebar, tab-bar, command-palette, dispatcher, read-tile.
-                       (Webview programs in TSX; the host runs them at boot or
-                       on demand depending on each one's lifecycle.)
+                       (Webview programs in TSX, served from source over ol://;
+                       the host runs them at boot or on demand.)
   .ol/db, .ol/project.toml
 ```
 
-The host depends on the `db` and `engine` crates. The runtime-agnostic SDK package (`@openlight/sdk`) lives in the engine crate; the React UI library is host-shipped because it's coupled to webview programs. See [`pilot.md`](../pilot.md#stack) for the full repo layout and [`engine.md`](engine.md) for the SDK and runtime provider contracts.
+The host depends on the `db` and `engine` crates. The runtime-agnostic SDK package (`@openlight/sdk`) lives in the engine crate; the React UI library (`@openlight/react`) is host-shipped because it's coupled to webview programs. The root bun workspace mirrors the cargo workspace — one package per program. See [`pilot.md`](../pilot.md#stack) for the full repo layout and [`engine.md`](engine.md) for the SDK and runtime provider contracts.

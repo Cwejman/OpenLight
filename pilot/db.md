@@ -61,7 +61,7 @@ ScopeOpts
   include: Includes             what to populate
 ```
 
-`exclude` subtracts: a chunk placed on any excluded scope — either placement type — is out of the intersection and out of its counts (substrate.md, *Negation*).
+`exclude` subtracts: a chunk placed on any excluded scope — either placement type — is out of the intersection and out of its counts (substrate.md, *Negation*). `exclude` shapes results, not dimensions: `dimensions` and `edges` are computed from the unexcluded intersection — pinned as-built for v0.1, honored in dimensions when a surface demands it.
 
 `ReadOpts` is the single-chunk subset — `get` resolves one chunk, so the scope-shaping knobs don't apply:
 
@@ -77,13 +77,15 @@ ReadOpts
 
 Under empty scope the counts collapse: `in_scope = in_scope_instance = in_scope_relates = total` (the empty conjunction holds for both placement types). The instance/relates split is degenerate here — reported for consistency with the non-empty case, not as useful attribution.
 
-**Order and pagination.** When the read names exactly one scope and that scope's effective contract is `ordered`, the window is **tail-first**: the default is the latest entries and `offset` pages backward from the end (`limit: 10, offset: 10` returns the ten entries before the last ten). Within the window the chunks always read ascending by `seq` — the query sorts descending and the window is reversed before it returns. Every other read (empty scope, several scopes, or an unordered one) pages forward in `chunk_id` order. Positions are set positions, not seq values: sparse seqs leave no gaps in a window.
+**Order and pagination.** When the read names exactly one scope and that scope's effective contract is `ordered`, the window is **tail-first**: the default is the latest entries and `offset` pages backward from the end (`limit: 10, offset: 10` returns the ten entries before the last ten). Within the window the chunks always read ascending by `seq` — the query sorts descending and the window is reversed before it returns. Every other read (empty scope, several scopes, or an unordered one) pages forward in `chunk_id` order. Positions are set positions, not seq values: sparse seqs leave no gaps in a window. Duplicate explicit seq values are legal; ties break by commit order — the earlier-committed placement reads first.
 
 ### Result
 
 ```
 ScopeResult
   head                  commit sampled
+  unresolved            input roots with no current chunk — a dead reference
+                        reported as metadata, not an error; the read still runs
   total                 chunks in branch
   in_scope              chunks at intersection
   in_scope_instance     ...via instance on every dim in scope
@@ -133,7 +135,7 @@ Includes                                  default: every flag false
   dimensions                              populate `dimensions`
   edges                                   also populate `Dim.edges`
 
-  rank  snippet                           with match_
+  rank  snippet                           with match_ — declared, deferred: unbuilt in v0.1
 ```
 
 Minimum return when nothing is opted in: `head`, four counts, empty `chunks`, empty `dimensions`.
@@ -183,6 +185,8 @@ CommitOpts
 ```
 
 The whole declaration is one transaction. All writes succeed and a commit is recorded, or all fail and nothing is written.
+
+Placement residency is not checked: neither side of a placement need be resident in this db — chunk ids are globally unique, so a placement may reference a chunk another db owns (substrate.md, *Peers*). A dangling reference surfaces at use, as an unresolved root on a scope read. Removal is the exception: it names a chunk that must be present here to remove.
 
 The result is the `Commit` itself — a chunk-shaped artifact:
 
@@ -236,7 +240,9 @@ Backpressure: each subscriber has a bounded receiver. On overflow, oldest events
 ```
 ValidationError { scope_id, kind }     spec violation; kind = Ordered | Accepts | Required | Unique | AmbiguousType
 NameCollision { scope_id, name }       name uniqueness rule
-NotFound { kind, id }                  chunk, branch, or commit not present
+NotFound { kind, id }                  removal target, branch, or commit not
+                                       present — never a placement side, which
+                                       may dangle by design
 MalformedDeclaration(reason)           declaration self-inconsistent
 WriteToVirtualChunk { id }             declaration targets a projected chunk
 ReadOnly                               write op on a handle from open_read_only
@@ -617,7 +623,7 @@ SQLite in WAL mode gives single-writer, many-reader. The db inherits this; nothi
 ### Module layout
 
 ```
-pilot/db/
+db/
   src/
     lib.rs                 — public re-exports
     types.rs               — ChunkId, CommitId, ChunkItem, Spec, Commit, Includes,
