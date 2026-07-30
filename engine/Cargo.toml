@@ -1,0 +1,19 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2021"
+
+# Standalone until the root workspace assembles (build order: crates first, workspace later).
+[workspace]
+
+[dependencies]
+db = { path = "../db" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+ulid = "1"
+tokio = { version = "1", features = ["sync", "rt", "time", "macros"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["sync", "rt", "rt-multi-thread", "time", "macros"] }

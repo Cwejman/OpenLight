@@ -1,0 +1,206 @@
+[
+  {
+    "case": "federation/get-resolves-across-mounts",
+    "spec": "engine.md#federated-reads — every db.get asks each mount; first hit wins",
+    "mounts": {
+      "peer": [{ "chunks": [{ "id": "peer-arch", "body": { "kind": "archetype" } }] }]
+    },
+    "given": [],
+    "when": { "op": "get", "chunk": "peer-arch" },
+    "then": { "result": { "id": "peer-arch" } }
+  },
+  {
+    "case": "federation/scope-unions-cross-db-placements",
+    "spec": "engine.md#cross-db-placements — placements in the active db referencing a mounted scope surface together with the peer's own instances",
+    "mounts": {
+      "peer": [
+        {
+          "chunks": [{ "id": "peer-arch" }, { "id": "peer-member" }],
+          "placements": [{ "chunk": "peer-member", "scope": "peer-arch", "type": "instance" }]
+        }
+      ]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-member" }],
+        "placements": [{ "chunk": "local-member", "scope": "peer-arch", "type": "instance" }]
+      }
+    ],
+    "when": { "op": "scope", "scopes": ["peer-arch"] },
+    "then": { "result": { "ids": ["peer-member", "local-member"] } }
+  },
+  {
+    "case": "federation/intersection-spans-mounts",
+    "spec": "engine.md#federated-reads — reads union and dedupe across mounts; intersection behaves as one field",
+    "mounts": {
+      "peer": [{ "chunks": [{ "id": "peer-arch" }] }]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-scope" }, { "id": "both" }, { "id": "only-arch" }],
+        "placements": [
+          { "chunk": "both", "scope": "peer-arch", "type": "instance" },
+          { "chunk": "both", "scope": "local-scope", "type": "instance" },
+          { "chunk": "only-arch", "scope": "peer-arch", "type": "instance" }
+        ]
+      }
+    ],
+    "when": { "op": "scope", "scopes": ["peer-arch", "local-scope"] },
+    "then": { "result": { "ids": ["both"] } }
+  },
+  {
+    "case": "federation/mount-scope-lists-registry",
+    "spec": "engine.md#program-and-process — engine/mount instances synthesized at query time from the registry",
+    "mounts": { "peer": [{ "chunks": [{ "id": "peer-thing" }] }] },
+    "given": [],
+    "when": { "op": "scope", "scopes": ["engine/mount"] },
+    "then": { "result": { "counts": { "total": 2 } } }
+  },
+  {
+    "case": "read-only/body-modification-rejected",
+    "spec": "engine.md#read-only-enforcement — a chunk's body stored in a read-only mount cannot be modified",
+    "mounts": {
+      "peer": [{ "chunks": [{ "id": "peer-doc", "body": { "v": 1 } }] }]
+    },
+    "given": [],
+    "when": { "chunks": [{ "id": "peer-doc", "body": { "v": 2 } }] },
+    "then": { "rejected": true, "code": "READ_ONLY_MOUNT" }
+  },
+  {
+    "case": "read-only/removal-rejected",
+    "spec": "engine.md#read-only-enforcement — removal modifies a record resident in the mount",
+    "mounts": {
+      "peer": [{ "chunks": [{ "id": "peer-doc", "body": { "v": 1 } }] }]
+    },
+    "given": [],
+    "when": { "remove": { "chunks": ["peer-doc"] } },
+    "then": { "rejected": true, "code": "READ_ONLY_MOUNT" }
+  },
+  {
+    "case": "read-only/placement-deactivation-rejected",
+    "spec": "engine.md#read-only-enforcement — a placement row stored in a read-only mount cannot be modified",
+    "mounts": {
+      "peer": [
+        {
+          "chunks": [{ "id": "peer-arch" }, { "id": "peer-member" }],
+          "placements": [{ "chunk": "peer-member", "scope": "peer-arch", "type": "instance" }]
+        }
+      ]
+    },
+    "given": [],
+    "when": {
+      "placements": [{ "chunk": "peer-member", "scope": "peer-arch", "type": "instance", "active": false }]
+    },
+    "then": { "rejected": true, "code": "READ_ONLY_MOUNT" }
+  },
+  {
+    "case": "read-only/reference-is-not-modification",
+    "spec": "engine.md#read-only-enforcement — placements stored in the active db whose scope resolves to a mounted chunk are legal",
+    "mounts": {
+      "peer": [{ "chunks": [{ "id": "peer-arch" }] }]
+    },
+    "given": [],
+    "when": {
+      "chunks": [{ "id": "local-invocable" }],
+      "placements": [{ "chunk": "local-invocable", "scope": "peer-arch", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["peer-arch"], "expect": { "contains": ["local-invocable"] } }]
+    }
+  },
+  {
+    "case": "federated-validation/peer-accepts-enforced",
+    "spec": "research/union-accepts.md#consequences-for-code — commit-time validation must not silently skip peer specs; the engine pre-validates federated",
+    "mounts": {
+      "peer": [
+        {
+          "chunks": [
+            { "id": "peer-type", "spec": { "propagate": true, "accepts": ["good"] } },
+            { "id": "good-def", "name": "good" }
+          ],
+          "placements": [{ "chunk": "good-def", "scope": "peer-type", "type": "relates" }]
+        }
+      ]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-scope" }],
+        "placements": [{ "chunk": "local-scope", "scope": "peer-type", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "stray" }],
+      "placements": [{ "chunk": "stray", "scope": "local-scope", "type": "instance" }]
+    },
+    "then": { "rejected": true, "code": "VALIDATION_ERROR" }
+  },
+  {
+    "case": "federated-validation/peer-accepts-satisfied",
+    "spec": "research/union-accepts.md — a chunk passes if it is an instance of at least one type in the union",
+    "mounts": {
+      "peer": [
+        {
+          "chunks": [
+            { "id": "peer-type", "spec": { "propagate": true, "accepts": ["good"] } },
+            { "id": "good-def", "name": "good" }
+          ],
+          "placements": [{ "chunk": "good-def", "scope": "peer-type", "type": "relates" }]
+        }
+      ]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-scope" }],
+        "placements": [{ "chunk": "local-scope", "scope": "peer-type", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "welcome" }],
+      "placements": [
+        { "chunk": "welcome", "scope": "good-def", "type": "instance" },
+        { "chunk": "welcome", "scope": "local-scope", "type": "instance" }
+      ]
+    },
+    "then": { "reads": [{ "scope": ["local-scope"], "expect": { "contains": ["welcome"] } }] }
+  },
+  {
+    "case": "federated-validation/peer-required-enforced",
+    "spec": "research/union-accepts.md — required composes as union of key sets; peer keys bind",
+    "mounts": {
+      "peer": [
+        { "chunks": [{ "id": "peer-type", "spec": { "propagate": true, "required": ["title"] } }] }
+      ]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-scope" }],
+        "placements": [{ "chunk": "local-scope", "scope": "peer-type", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "untitled", "body": { "text": "no title key" } }],
+      "placements": [{ "chunk": "untitled", "scope": "local-scope", "type": "instance" }]
+    },
+    "then": { "rejected": true, "code": "VALIDATION_ERROR" }
+  },
+  {
+    "case": "federated-validation/peer-required-satisfied",
+    "spec": "research/union-accepts.md — obligations bind; honoring them passes",
+    "mounts": {
+      "peer": [
+        { "chunks": [{ "id": "peer-type", "spec": { "propagate": true, "required": ["title"] } }] }
+      ]
+    },
+    "given": [
+      {
+        "chunks": [{ "id": "local-scope" }],
+        "placements": [{ "chunk": "local-scope", "scope": "peer-type", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "titled", "body": { "title": "present" } }],
+      "placements": [{ "chunk": "titled", "scope": "local-scope", "type": "instance" }]
+    },
+    "then": { "reads": [{ "scope": ["local-scope"], "expect": { "contains": ["titled"] } }] }
+  }
+]

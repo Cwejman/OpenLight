@@ -1,0 +1,220 @@
+[
+  {
+    "case": "read/transitive-grant",
+    "spec": "engine.md#boundaries — transitive via instance chains",
+    "given": [
+      {
+        "chunks": [
+          { "id": "agent" },
+          { "id": "session" },
+          { "id": "my-session" },
+          { "id": "note" }
+        ],
+        "placements": [
+          { "chunk": "session", "scope": "agent", "type": "instance" },
+          { "chunk": "my-session", "scope": "session", "type": "instance" },
+          { "chunk": "note", "scope": "my-session", "type": "instance" }
+        ]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "scope", "scopes": ["my-session"] },
+    "then": { "result": { "contains": ["note"] } }
+  },
+  {
+    "case": "read/violation-unreachable",
+    "spec": "engine.md#boundaries — not reachable: BOUNDARY_VIOLATION",
+    "given": [
+      {
+        "chunks": [{ "id": "agent" }, { "id": "elsewhere" }, { "id": "secret" }],
+        "placements": [{ "chunk": "secret", "scope": "elsewhere", "type": "instance" }]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "scope", "scopes": ["elsewhere"] },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "read/opened-scope-shows-relates",
+    "spec": "engine.md#boundaries — once a scope is opened, everything placed on it is visible, instances and relates alike",
+    "given": [
+      {
+        "chunks": [{ "id": "agent" }, { "id": "room" }, { "id": "attachment" }],
+        "placements": [
+          { "chunk": "room", "scope": "agent", "type": "instance" },
+          { "chunk": "attachment", "scope": "room", "type": "relates" }
+        ]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "get", "chunk": "attachment" },
+    "then": { "result": { "id": "attachment" } }
+  },
+  {
+    "case": "read/relates-is-not-a-door",
+    "spec": "engine.md#boundaries — the walk is the instance chain; relates members are visible, not openable (chosen reading)",
+    "given": [
+      {
+        "chunks": [{ "id": "agent" }, { "id": "room" }, { "id": "annex" }, { "id": "annex-content" }],
+        "placements": [
+          { "chunk": "room", "scope": "agent", "type": "instance" },
+          { "chunk": "annex", "scope": "room", "type": "relates" },
+          { "chunk": "annex-content", "scope": "annex", "type": "instance" }
+        ]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "scope", "scopes": ["annex"] },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "read/get-nonexistent-is-null",
+    "spec": "engine.md#the-program-protocol — get returns null if the chunk does not exist",
+    "given": [{ "chunks": [{ "id": "agent" }] }],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "get", "chunk": "ghost" },
+    "then": { "result": { "null": true } }
+  },
+  {
+    "case": "read/get-outside-boundary-rejected",
+    "spec": "engine.md#the-program-protocol — get rejected if the chunk is outside the read boundary",
+    "given": [
+      {
+        "chunks": [{ "id": "agent" }, { "id": "elsewhere" }, { "id": "secret" }],
+        "placements": [{ "chunk": "secret", "scope": "elsewhere", "type": "instance" }]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "get", "chunk": "secret" },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "read/process-scope-always-accessible",
+    "spec": "engine.md#boundaries — the process id is implicitly a boundary root in both boundaries",
+    "given": [{ "chunks": [{ "id": "agent" }] }],
+    "process": { "read": [], "write": [] },
+    "when": { "op": "scope", "scopes": ["$process"] },
+    "then": { "result": {} }
+  },
+  {
+    "case": "read/exclude-roots-boundary-checked",
+    "spec": "engine.md#the-program-protocol — excluded roots boundary-checked like positive ones",
+    "given": [
+      {
+        "chunks": [{ "id": "agent" }, { "id": "elsewhere" }],
+        "placements": []
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "scope", "scopes": ["agent"], "exclude": ["elsewhere"] },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "read/whole-field-fts-boundary-filtered",
+    "spec": "engine.md#the-program-protocol — empty scope list with match_ is whole-field FTS, boundary-filtered",
+    "given": [
+      {
+        "chunks": [
+          { "id": "agent" },
+          { "id": "mine", "body": { "text": "the xylophone plan" } },
+          { "id": "elsewhere" },
+          { "id": "theirs", "body": { "text": "the xylophone secret" } }
+        ],
+        "placements": [
+          { "chunk": "mine", "scope": "agent", "type": "instance" },
+          { "chunk": "theirs", "scope": "elsewhere", "type": "instance" }
+        ]
+      }
+    ],
+    "process": { "read": ["agent"], "write": [] },
+    "when": { "op": "scope", "scopes": [], "fts": "xylophone" },
+    "then": { "result": { "contains": ["mine"], "excludes": ["theirs"] } }
+  },
+  {
+    "case": "write/placement-outside-write-boundary",
+    "spec": "engine.md#the-program-protocol — commit rejected if any placement touches a scope outside the write boundary",
+    "given": [
+      { "chunks": [{ "id": "agent" }, { "id": "workbench" }, { "id": "elsewhere" }] }
+    ],
+    "process": { "read": ["agent", "workbench", "elsewhere"], "write": ["workbench"] },
+    "when": {
+      "chunks": [{ "id": "intruder" }],
+      "placements": [{ "chunk": "intruder", "scope": "elsewhere", "type": "instance" }]
+    },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "write/placement-inside-write-boundary",
+    "spec": "engine.md#boundaries — writes only where the write boundary allows",
+    "given": [
+      {
+        "chunks": [{ "id": "workbench" }, { "id": "drawer" }],
+        "placements": [{ "chunk": "drawer", "scope": "workbench", "type": "instance" }]
+      }
+    ],
+    "process": { "read": ["workbench"], "write": ["workbench"] },
+    "when": {
+      "chunks": [{ "id": "tool" }],
+      "placements": [{ "chunk": "tool", "scope": "drawer", "type": "instance" }]
+    },
+    "then": { "reads": [{ "scope": ["drawer"], "expect": { "contains": ["tool"] } }] }
+  },
+  {
+    "case": "write/chunk-modify-outside-write-boundary",
+    "spec": "engine.md#boundaries — a chunk outside the write boundary cannot be modified",
+    "given": [
+      {
+        "chunks": [{ "id": "workbench" }, { "id": "elsewhere" }, { "id": "ledger", "body": { "v": 1 } }],
+        "placements": [{ "chunk": "ledger", "scope": "elsewhere", "type": "instance" }]
+      }
+    ],
+    "process": { "read": ["workbench", "elsewhere"], "write": ["workbench"] },
+    "when": { "chunks": [{ "id": "ledger", "body": { "v": 2 } }] },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "write/own-process-scope-writable",
+    "spec": "engine.md#boundaries — every program can write within its own process's scope tree",
+    "given": [{ "chunks": [{ "id": "agent" }] }],
+    "process": { "read": [], "write": [] },
+    "when": {
+      "chunks": [{ "id": "my-result", "body": { "ok": true } }],
+      "placements": [{ "chunk": "my-result", "scope": "$process", "type": "instance" }]
+    },
+    "then": { "reads": [{ "scope": ["$process"], "expect": { "contains": ["my-result"] } }] }
+  },
+  {
+    "case": "write/protected-process-chunk",
+    "spec": "engine.md#boundaries — the process chunk is engine domain; programs cannot rewrite status",
+    "given": [{ "chunks": [{ "id": "agent" }] }],
+    "process": { "read": ["agent"], "write": ["agent"] },
+    "when": { "chunks": [{ "id": "$process", "body": { "status": "completed" } }] },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "write/protected-boundary-chunk-widening",
+    "spec": "engine.md#boundaries — boundary chunks are the run's contract, immutable during execution",
+    "given": [{ "chunks": [{ "id": "agent" }, { "id": "elsewhere" }] }],
+    "process": { "read": ["agent"], "write": ["agent"] },
+    "when": {
+      "placements": [{ "chunk": "elsewhere", "scope": "$read_boundary", "type": "relates" }]
+    },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  },
+  {
+    "case": "write/rejected-commit-is-atomic",
+    "spec": "engine.md#the-program-protocol — a rejected write leaves nothing behind",
+    "given": [
+      { "chunks": [{ "id": "workbench" }, { "id": "elsewhere" }] }
+    ],
+    "process": { "read": ["workbench", "elsewhere"], "write": ["workbench"] },
+    "when": {
+      "chunks": [{ "id": "half-a" }, { "id": "half-b" }],
+      "placements": [
+        { "chunk": "half-a", "scope": "workbench", "type": "instance" },
+        { "chunk": "half-b", "scope": "elsewhere", "type": "instance" }
+      ]
+    },
+    "then": { "rejected": true, "code": "BOUNDARY_VIOLATION" }
+  }
+]
