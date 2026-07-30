@@ -1,0 +1,4 @@
+[test]
+# React rendering needs a DOM before `react-dom/client` is imported; a preload
+# is the only hook that runs early enough.
+preload = ["./test/setup.ts"]

@@ -5,6 +5,7 @@ pub mod dispatch;
 pub mod field;
 pub mod geometry;
 pub mod mounts;
+pub mod page;
 pub mod protocol;
 pub mod seed;
 pub mod stub;

@@ -4,7 +4,10 @@
 //! through the `EngineApi` seam. The rim chooses the implementor at runtime:
 //! the real `engine::Engine` behind `EngineAdapter` by default (the swap,
 //! board.md build track step 5), the `FixtureStub` under `--fixture`.
-//! Everything with logic lives in the pure modules; this file wires tao/wry.
+//! A program whose bundle is built on disk is loaded into the standard page
+//! shell (`page::shell`); the surfaces without one keep [`demo_page`] until
+//! theirs is written. Everything with logic lives in the pure modules; this
+//! file wires tao/wry.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -25,17 +28,13 @@ use host::compose::{self, ProcessInfo};
 use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
 use host::geometry::{self, Direction, Rect, Spacing, Tile};
+use host::page;
 use host::protocol;
 use host::stub::FixtureStub;
 
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
 const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
-
-// host.md §Transport names `window.__wry_ipc.postMessage`; wry itself
-// injects `window.ipc` — the host provides the specced name.
-const WRY_IPC_ALIAS: &str =
-    "window.__wry_ipc = { postMessage: (message) => window.ipc.postMessage(message) };";
 
 fn main() {
     // host.md §Boot sequence, step 1: the runtime comes first — the engine
@@ -71,7 +70,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
             }
         }
     };
-    let Booted { engine, mut host_rx, provider, session, tiles } = booted;
+    let Booted { engine, mut host_rx, provider, session, tiles, programs_root } = booted;
     let engine_api: Arc<dyn EngineApi> = Arc::new(EngineAdapter::new(engine.clone()));
 
     let tree = demo_tree(&tiles);
@@ -126,7 +125,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                     }
                 }
             }
-            Event::UserEvent(HostCmd::MountWebview { process_id, .. }) => {
+            Event::UserEvent(HostCmd::MountWebview { process_id, executable }) => {
                 let Some(pending) = provider.take_pending(&process_id) else {
                     return; // unknown or already claimed; nothing to mount
                 };
@@ -142,11 +141,18 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                     .get(&process_id)
                     .cloned()
                     .unwrap_or_else(|| pending.executable.clone());
+                // A program whose bundle is built loads it into the standard
+                // page shell; the rest keep the rim's demo HTML until theirs
+                // exists (host.md §Authoring Programs).
+                let html = match page::load_bundle(&programs_root, &executable) {
+                    Some(bundle) => page::shell(&bundle),
+                    None => demo_page(&program, process_id.as_str(), session.as_str(), false),
+                };
                 let webview = WebViewBuilder::new()
                     .with_bounds(bounds(&rect))
                     .with_transparent(true)
-                    .with_initialization_script(WRY_IPC_ALIAS)
-                    .with_html(demo_page(&program, process_id.as_str(), session.as_str(), false))
+                    .with_initialization_script(&page::init_script(process_id.as_str()))
+                    .with_html(html)
                     .with_ipc_handler(ipc_handler(
                         engine_api.clone(),
                         runtime.handle().clone(),
@@ -240,12 +246,12 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
             field::ENGINE_PROGRAM,
         )
         .expect("every demo leaf displays a process");
-        let page = fixture_page(&info);
+        let html = fixture_page(&info);
         let webview = WebViewBuilder::new()
             .with_bounds(bounds(&leaf.rect))
             .with_transparent(true)
-            .with_initialization_script(WRY_IPC_ALIAS)
-            .with_html(page)
+            .with_initialization_script(&page::init_script(&info.process))
+            .with_html(html)
             .with_ipc_handler(ipc_handler(
                 stub.clone(),
                 runtime.handle().clone(),
@@ -342,7 +348,8 @@ fn bounds(rect: &Rect) -> wry::Rect {
     }
 }
 
-/// A demo tile: names its process, then proves the transport by posting
+/// The rim's stand-in page for a program with no bundle yet: names its
+/// process, then proves the transport by posting
 /// `get`, `scope`, and `subscribe` through `window.__wry_ipc` and rendering
 /// what `__sdk.resolve` delivers. The page's `__sdk` is a minimal stand-in
 /// for the real SDK's hook surface (sdk.md §Webview transport). The engine

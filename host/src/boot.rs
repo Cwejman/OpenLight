@@ -32,6 +32,12 @@ pub struct Booted {
     pub session: ChunkId,
     /// One entry per demo program, in `DEMO_PROGRAMS` order.
     pub tiles: Vec<TileProcess>,
+    /// Where `body.executable` resolves from. Nothing specs the base a
+    /// program's executable path is relative to (host.md §Authoring Programs
+    /// says only "pointing at the bundle") — the declaring project's root is
+    /// the reading taken here, and every program the host runs today is
+    /// declared by the host project. Recorded gap.
+    pub programs_root: PathBuf,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -164,7 +170,7 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
                 &Context::host(),
                 engine::RunArgs {
                     program_id: program,
-                    chunks: vec![],
+                    chunks: arguments_for(name, &session),
                     placements: vec![session.clone()],
                     mode: engine::RunMode::Child,
                     read_boundary: engine::BoundarySpec::Roots(vec![session.clone()]),
@@ -176,7 +182,36 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
         tiles.push(TileProcess { program: name.to_string(), process });
     }
 
-    Ok(Booted { engine, host_rx, provider, session, tiles })
+    let programs_root = project_path(&cascade, "host").expect("the cascade requires host");
+    Ok(Booted { engine, host_rx, provider, session, tiles, programs_root })
+}
+
+/// The typed arguments a demo run receives. `read`'s one required argument is
+/// the scope ids to view (programs.md §3.5) — one argument chunk per role,
+/// keys within it (§1). Id-less, so the engine mints a fresh chunk per run.
+///
+/// **Recorded gap.** The argument *type* chunk this should validate against
+/// (`programs/argument` instance, `relates` on the program, with a
+/// `body.schema` and `spec.required`) has no seeding home: bootstrap.md does
+/// not list the host's own programs at all.
+fn arguments_for(program: &str, session: &ChunkId) -> Vec<db::ChunkDeclaration> {
+    if program != "read-tile" {
+        return vec![];
+    }
+    vec![db::ChunkDeclaration {
+        id: None,
+        name: Some("request".into()),
+        spec: None,
+        body: Some(json!({ "target": [session.as_str()] })),
+        removed: false,
+    }]
+}
+
+fn project_path(cascade: &Cascade, name: &str) -> Option<PathBuf> {
+    std::iter::once(&cascade.active)
+        .chain(cascade.peers.iter())
+        .find(|project| project.name == name)
+        .map(|project| project.path.clone())
 }
 
 fn seed_first_party(cascade: &Cascade) -> Result<(), BootError> {

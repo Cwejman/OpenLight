@@ -156,16 +156,26 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
     .await;
     assert!(running, "readiness flips the slot and the substrate to running");
 
-    let event = tokio::time::timeout(Duration::from_secs(2), pending.events.recv())
-        .await
-        .expect("subscription event within 2s")
-        .expect("transport open");
-    assert_eq!(event["event"], "scope_changed");
-    assert!(event["commit"]["chunks_modified"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|c| c == pid.as_str()));
+    // A subscription can be handed a commit that landed just before it was
+    // registered — the engine's broadcast is at-least-once, and the SDK's
+    // contract is re-fetch-on-event, never trust the payload as a delta. So the
+    // pin is that the readiness commit *arrives*, not that it arrives first.
+    let mut readiness = None;
+    while readiness.is_none() {
+        let event = tokio::time::timeout(Duration::from_secs(2), pending.events.recv())
+            .await
+            .expect("subscription event within 2s")
+            .expect("transport open");
+        assert_eq!(event["event"], "scope_changed");
+        if event["commit"]["chunks_modified"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|c| c == pid.as_str())
+        {
+            readiness = Some(event);
+        }
+    }
 
     // Boundary honesty: the tile cannot read outside its granted roots.
     let (_, reply) = ipc(&api, &ctx, r#"{"id":9,"op":"scope","scopes":["host"]}"#).await;
@@ -293,4 +303,51 @@ async fn boot_refuses_unresolved_placements() {
         Err(other) => panic!("expected unresolved refusal, got {other}"),
         Ok(_) => panic!("expected unresolved refusal, boot succeeded"),
     }
+}
+
+/// `read` is given one required argument — the scope ids to view (programs.md
+/// §3.5) — as a chunk on its own call frame. The program opens its frame to
+/// find it, so the wiring has to hold through the real engine.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_read_tiles_frame_carries_the_scope_it_was_given() {
+    let root = fresh_root("frame");
+    let booted = boot::boot(&root.0.join("agents")).expect("boot");
+    let api = EngineAdapter::new(booted.engine.clone());
+
+    let tile = &booted.tiles[0];
+    assert_eq!(tile.program, "read-tile");
+    let ctx = Context { process_id: Some(tile.process.as_str().to_string()) };
+    let (_, reply) = ipc(
+        &api,
+        &ctx,
+        &format!(r#"{{"id":1,"op":"scope","scopes":["{}"]}}"#, tile.process),
+    )
+    .await;
+
+    let members = reply["result"]["chunks"].as_array().expect("frame members");
+    let argument = members
+        .iter()
+        .find(|chunk| chunk["name"] == "request")
+        .expect("the request argument on the frame");
+    assert_eq!(
+        argument["body"]["target"],
+        serde_json::json!([booted.session.as_str()]),
+        "the tile is pointed at the session"
+    );
+
+    // The other surfaces take no arguments: nothing is handed out by accident.
+    let sidebar = Context { process_id: Some(booted.tiles[1].process.as_str().to_string()) };
+    let (_, reply) = ipc(
+        &api,
+        &sidebar,
+        &format!(r#"{{"id":2,"op":"scope","scopes":["{}"]}}"#, booted.tiles[1].process),
+    )
+    .await;
+    assert!(reply["result"]["chunks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|chunk| chunk["name"] != "request"));
+
+    booted.engine.clone().shutdown().await.unwrap();
 }

@@ -1,0 +1,10 @@
+{
+  "name": "@openlight/host-ts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The host's TypeScript side: the UI library and the first-party programs it renders. A workspace so both resolve one copy of React.",
+  "workspaces": [
+    "ui",
+    "programs"
+  ]
+}
