@@ -99,10 +99,10 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 
 ```jsonl
 {"id":1,"op":"scope","scopes":["chunk_abc","chunk_def"],"opts":{"match_":"session today","exclude":["chunk_hidden"],"limit":50}}
-{"id":2,"op":"get","chunkId":"chunk_abc"}
+{"id":2,"op":"get","chunkId":"chunk_abc","opts":{"at":"...","branch":"...","include":{"body":false}}}   // opts optional
 {"id":3,"op":"read_batch","reads":[{"tag":"a","scopes":["s1"]},{"tag":"b","scopes":["s2"],"opts":{...}}]}
 {"id":4,"op":"commit","declaration":{"chunks":[...]},"dry_run":false}
-{"id":5,"op":"run","program":"filesystem","args":{...},"mode":"child"}
+{"id":5,"op":"run","program":"filesystem","args":{...,"mode":"child"}}
 {"id":6,"op":"await","processes":["p_1","p_2"],"opts":{"results_only":true}}
 {"id":7,"op":"cancel","process":"p_1"}
 {"id":8,"op":"exit"}
