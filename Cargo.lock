@@ -933,6 +933,7 @@ dependencies = [
  "db",
  "engine",
  "objc2",
+ "objc2-foundation",
  "serde",
  "serde_json",
  "tao",

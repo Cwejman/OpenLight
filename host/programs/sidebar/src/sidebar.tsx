@@ -102,11 +102,13 @@ export function edges(box: {
  * The strip itself: text on the canvas — no panel, no border (§Visual
  * Language). It is also the scrolling region, and it says so: the page never
  * scrolls (@openlight/react base), and the platform's overlay scrollbar takes
- * the affordance from there.
+ * the affordance from there — on the webview's own right edge, in the lane the
+ * host's bleed leaves for it.
  *
  * It has no edge to clip at, so content that runs past one dissolves instead —
  * but only at an edge it actually runs past, and only while it does. That is a
  * fact about the live box, not about the markup, so it is read from the box.
+ * The fades are the webview's edges, which is where the bleed put them.
  */
 export function Strip({ children, status }: { children?: ReactNode; status?: string }) {
   const region = useRef<HTMLDivElement>(null)
@@ -141,7 +143,7 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
       ref={region}
     >
       <style>{styles + CSS}</style>
-      {children ?? <div className="quiet">{status}</div>}
+      <div className="column">{children ?? <div className="quiet">{status}</div>}</div>
     </div>
   )
 }
@@ -149,10 +151,14 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 // Layout only — surfaces, shadows, greys, and the card-vs-flat rule are tokens
 // and components in @openlight/react.
 const CSS = `
-  /* The strip *is* the content region — no padding of its own, so the first
-     card sits exactly on the window's padding line. The items' shadow is a
-     contact shadow, drawn inside the box that casts it, so it needs no room. */
+  /* The strip is the whole webview: it scrolls, it fades at its own edges, and
+     the platform's overlay scrollbar rides its right edge. The visible column
+     is inset from it by the host's bleed (\`STRIP\` in the rim) — 14 left, 10
+     top and bottom — which is the room the items' shadow and that scrollbar
+     need and the column does not. Written as padding, not a bottom margin: a
+     scroll container's scrollable overflow ends at the column's border box. */
   .strip { height: 100%; padding: 0 }
+  .column { margin-left: 14px; width: 216px; padding: 10px 0 }
 
   /* The fade, per edge, and only while that edge has something past it. The
      depth is a registered property so it can be transitioned — a raw custom

@@ -34,21 +34,29 @@ use host::boot::{self, Booted, TileProcess};
 use host::compose::{self, ProcessInfo};
 use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
-use host::geometry::{self, Rect, Spacing, Strip, Tile};
+use host::geometry::{self, Bleed, Rect, Spacing, Strip, Tile};
 use host::page;
 use host::probe;
 use host::protocol;
 use host::serve;
 use host::stub::FixtureStub;
 use host::transpile::Transpiler;
-use host::underlay;
 
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
 const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
 /// The sidebar's strip, outside tile geometry (host.md §Sidebar). Fixed for
 /// now: resizing it is direct manipulation, which is spec-gated.
-const STRIP: Strip = Strip { width: 216.0 };
+///
+/// The bleed is the room the column's *surroundings* need and the column
+/// itself does not use: 14 on the left and 10 at each end for the item
+/// shadows, 8 on the right as the overlay scrollbar's lane. The sidebar
+/// program insets its column by the same numbers, so the first card still sits
+/// exactly on the window's padding line.
+const STRIP: Strip = Strip {
+    width: 216.0,
+    bleed: Bleed { left: 14.0, top: 10.0, right: 8.0, bottom: 10.0 },
+};
 /// The window's canvas (host.md §Visual Language): a quiet gray, `hsl(0 0% 98%)`,
 /// that the white cards sit on. Every webview is transparent, so this is the
 /// background the whole surface shows through to.
@@ -81,6 +89,108 @@ fn paint_canvas(window: &Window) {
 
 #[cfg(not(target_os = "macos"))]
 fn paint_canvas(_window: &Window) {}
+
+/// The frame chrome the rim cuts itself, in the same register as [`paint_canvas`]:
+/// values settled by eye (host.md §What Is Open, *Visual tokens*).
+///
+/// A tile floats, and a floating surface casts an aura — but a webview is
+/// clipped to its own rect, so the shadow a program draws inside one is cut
+/// away exactly where it would show. The aura is therefore the host's, hung on
+/// the tile webview's own CoreAnimation layer, which answers to no clipping
+/// rect.
+///
+/// One convention, two homes: `--ol-radius` in @openlight/react must mirror
+/// [`CARD_RADIUS`] — the card's corner and the shadow cut to it are the same
+/// corner (the spec pass owes this rule a home).
+const CARD_RADIUS: f64 = 12.0;
+const AURA_RADIUS: f64 = 24.0;
+const AURA_OPACITY: f32 = 0.05;
+
+/// The two CoreGraphics handles the aura crosses into. They are opaque, but
+/// their objc type encodings are not: the runtime checks the encoding of every
+/// argument a message carries, and a bare pointer is a different type to it.
+#[cfg(target_os = "macos")]
+mod cg {
+    use objc2::encode::{Encoding, RefEncode};
+    use objc2_foundation::CGRect;
+    use std::ffi::c_void;
+
+    #[repr(C)]
+    pub struct CGColor {
+        _opaque: [u8; 0],
+    }
+    unsafe impl RefEncode for CGColor {
+        const ENCODING_REF: Encoding = Encoding::Pointer(&Encoding::Struct("CGColor", &[]));
+    }
+
+    #[repr(C)]
+    pub struct CGPath {
+        _opaque: [u8; 0],
+    }
+    unsafe impl RefEncode for CGPath {
+        const ENCODING_REF: Encoding = Encoding::Pointer(&Encoding::Struct("CGPath", &[]));
+    }
+
+    extern "C" {
+        pub fn CGColorCreateGenericGray(gray: f64, alpha: f64) -> *mut CGColor;
+        pub fn CGColorRelease(color: *mut CGColor);
+        /// CoreGraphics' rounded-rect path; AppKit grew its own only in macOS
+        /// 14. A null transform is the identity.
+        pub fn CGPathCreateWithRoundedRect(
+            rect: CGRect,
+            corner_width: f64,
+            corner_height: f64,
+            transform: *const c_void,
+        ) -> *mut CGPath;
+        pub fn CGPathRelease(path: *mut CGPath);
+    }
+}
+
+/// Hang the aura on one tile webview's layer, cut to the size it now has.
+/// Called at mount and on every resize: a shadow path is geometry, and does not
+/// follow its layer's bounds by itself.
+#[cfg(target_os = "macos")]
+fn cast_aura(webview: &wry::WebView, rect: &Rect) {
+    use objc2::msg_send;
+    use objc2::rc::Retained;
+    use objc2::runtime::{AnyObject, Bool};
+    use objc2_foundation::{CGPoint, CGRect, CGSize};
+    use wry::WebViewExtMacOS;
+
+    let view = webview.webview();
+    let view = Retained::as_ptr(&view) as *mut AnyObject;
+    unsafe {
+        let _: () = msg_send![view, setWantsLayer: Bool::YES];
+        let layer: *mut AnyObject = msg_send![view, layer];
+        if layer.is_null() {
+            return; // no layer, no aura — the surface still renders
+        }
+        // A layer's shadow is painted *outside* the layer; a mask would cut away
+        // precisely the part that shows.
+        let _: () = msg_send![layer, setMasksToBounds: Bool::NO];
+        let black = cg::CGColorCreateGenericGray(0.0, 1.0);
+        let _: () = msg_send![layer, setShadowColor: black];
+        cg::CGColorRelease(black);
+        let _: () = msg_send![layer, setShadowOpacity: AURA_OPACITY];
+        let _: () = msg_send![layer, setShadowRadius: AURA_RADIUS];
+        // Centred: the default offset is (0, -3), which reads as a light source.
+        let _: () = msg_send![layer, setShadowOffset: CGSize::new(0.0, 0.0)];
+        // The path is in the layer's own coordinates, and it is what makes the
+        // aura cheap: without it CoreAnimation blurs the layer's alpha channel
+        // — the live page — every frame.
+        let path = cg::CGPathCreateWithRoundedRect(
+            CGRect::new(CGPoint::new(0.0, 0.0), CGSize::new(rect.width, rect.height)),
+            CARD_RADIUS,
+            CARD_RADIUS,
+            std::ptr::null(),
+        );
+        let _: () = msg_send![layer, setShadowPath: path];
+        cg::CGPathRelease(path);
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn cast_aura(_webview: &wry::WebView, _rect: &Rect) {}
 
 /// `--probe`: how long a surface gets to mount, read its scope and render
 /// before it is asked what its DOM became, and how long the whole run may take.
@@ -176,11 +286,9 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         HashMap::new();
     let proxy = event_loop.create_proxy();
 
-    // Every surface owes exactly one report — the underlay among them, since a
-    // shadow that is nobody's program is exactly what an agent cannot otherwise
-    // see. The deadline is the lane's honesty: a probe that never completes
-    // must fail, not hang.
-    let tally = Arc::new(Mutex::new(probe::Tally::new(program_names.len() + 1)));
+    // Every surface owes exactly one report. The deadline is the lane's
+    // honesty: a probe that never completes must fail, not hang.
+    let tally = Arc::new(Mutex::new(probe::Tally::new(program_names.len())));
     if probing {
         let tally = tally.clone();
         runtime.spawn(async move {
@@ -188,62 +296,6 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
             eprintln!("host: probe deadline — {} surfaces answered", tally.lock().expect("tally").seen());
             std::process::exit(2);
         });
-    }
-
-    // The shadow underlay (author ruling, *the depth language*): a tile's aura
-    // cannot be the tile's own — a webview clips it away — so one full-window
-    // webview draws every tile's aura beneath the tiles. Built here, before any
-    // surface mounts, because on macOS a later child view sits above an earlier
-    // one: creation order *is* the z-order. It takes no input (its page turns
-    // pointer events off) and speaks no engine op; the rim tells it rectangles
-    // and nothing else.
-    let underlay_id = ChunkId::from(underlay::PROCESS);
-    {
-        let (_, leaves) = layout(&window, &tree, STRIP);
-        let rects: Vec<Rect> = leaves.into_iter().map(|leaf| leaf.rect).collect();
-        let builder = WebViewBuilder::new()
-            .with_bounds(bounds(&window_rect(&window)))
-            .with_transparent(true)
-            .with_initialization_script(&format!(
-                "{}\n{}",
-                page::init_script(underlay::PROCESS),
-                underlay::init_script(&rects)
-            ))
-            .with_custom_protocol(
-                serve::SCHEME.into(),
-                module_protocol(
-                    transpiler.clone(),
-                    source_root.clone(),
-                    underlay::PROCESS.to_string(),
-                    programs_root.join(underlay::ENTRY),
-                ),
-            )
-            .with_url(serve::shell_url(underlay::PROCESS));
-        // The one thing it ever says back, and only when asked: its DOM.
-        let builder = match probing {
-            false => builder,
-            true => builder.with_ipc_handler(ipc_handler(
-                engine_api.clone(),
-                runtime.handle().clone(),
-                proxy.clone(),
-                Context { process_id: Some(underlay::PROCESS.to_string()) },
-                Some(ProbeSink {
-                    program: underlay::PROGRAM.to_string(),
-                    tally: tally.clone(),
-                    proxy: proxy.clone(),
-                }),
-            )),
-        };
-        webviews.insert(underlay_id.clone(), builder.build_as_child(&window).expect("underlay"));
-        if probing {
-            let probe_proxy = proxy.clone();
-            let pid = underlay_id.clone();
-            runtime.spawn(async move {
-                tokio::time::sleep(PROBE_SETTLE).await;
-                let script = probe::script(probe::HTML_LIMIT, probe::NODE_LIMIT);
-                let _ = probe_proxy.send_event(HostCmd::EvaluateScript { process_id: pid, script });
-            });
-        }
     }
 
     event_loop.run(move |event, _, control_flow| {
@@ -265,13 +317,9 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 for leaf in &leaves {
                     if let Some(webview) = webviews.get(&ChunkId::from(leaf.id.as_str())) {
                         let _ = webview.set_bounds(bounds(&leaf.rect));
+                        // The aura is cut to the tile, so it is re-cut with it.
+                        cast_aura(webview, &leaf.rect);
                     }
-                }
-                // The auras follow the same walk: one layout, one truth.
-                if let Some(webview) = webviews.get(&underlay_id) {
-                    let _ = webview.set_bounds(bounds(&window_rect(&window)));
-                    let rects: Vec<Rect> = leaves.into_iter().map(|leaf| leaf.rect).collect();
-                    let _ = webview.evaluate_script(&underlay::script(&rects));
                 }
             }
             Event::UserEvent(HostCmd::MountWebview { process_id, executable }) => {
@@ -332,6 +380,10 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                     ))
                 };
                 let webview = builder.build_as_child(&window).expect("webview");
+                // Only a tile floats: the strip is naked on the canvas.
+                if process_id != strip_process {
+                    cast_aura(&webview, &rect);
+                }
                 webviews.insert(process_id.clone(), webview);
                 if probing {
                     // Through the ordinary delivery path, once the surface has
@@ -415,7 +467,7 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
     let mut webviews: HashMap<ProcessId, wry::WebView> = HashMap::new();
     let mut leaf_process: HashMap<String, ProcessId> = HashMap::new();
     // The fixture rim keeps its three-tile demo: no strip, so no reservation.
-    let (_, leaves) = layout(&window, &tree, Strip { width: 0.0 });
+    let (_, leaves) = layout(&window, &tree, Strip { width: 0.0, bleed: Bleed::NONE });
     for leaf in leaves {
         let info = compose::leaf_process(
             &chunks,
@@ -452,7 +504,7 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
                 *control_flow = ControlFlow::Exit;
             }
             Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
-                let (_, leaves) = layout(&window, &tree, Strip { width: 0.0 });
+                let (_, leaves) = layout(&window, &tree, Strip { width: 0.0, bleed: Bleed::NONE });
                 for leaf in leaves {
                     if let Some(webview) = leaf_process.get(&leaf.id).and_then(|p| webviews.get(p)) {
                         let _ = webview.set_bounds(bounds(&leaf.rect));
@@ -593,9 +645,8 @@ fn layout(window: &Window, tree: &Tile, strip: Strip) -> (Rect, Vec<geometry::Le
     (strip_rect, geometry::walk(tree, tiling, SPACING))
 }
 
-/// The whole window in logical coordinates — the viewport everything is divided
-/// out of, and the underlay's own bounds, so its page and the leaf rects it is
-/// given share one coordinate space.
+/// The whole window in logical coordinates — the viewport everything else is
+/// divided out of.
 fn window_rect(window: &Window) -> Rect {
     let size: LogicalSize<f64> = window.inner_size().to_logical(window.scale_factor());
     Rect { x: 0.0, y: 0.0, width: size.width, height: size.height }

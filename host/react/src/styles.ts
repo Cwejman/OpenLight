@@ -26,22 +26,22 @@ export const styles = `
   --ol-pad: 10px;
   --ol-pad-tight: 6px;
   --ol-gap: 6px;
+  /* Mirrors CARD_RADIUS in the rim: the host cuts a tile's aura to this same
+     corner, and the two must be one number. */
   --ol-radius: 12px;
   --ol-radius-small: 8px;
   --ol-radius-round: 999px;
 
-  /* Depth has two registers, and each is clipping-proof by construction — a
-     webview is clipped to its own rect, so a shadow that needs room outside a
-     card can never be the card's own.
+  /* Depth, and where each register is drawn — a webview is clipped to its own
+     rect, so a shadow only belongs to CSS when the room it needs is inside one.
 
      1. An *in-flow* card — a strip item, anything laid out inside a surface —
-        takes the contact shadow alone: a hairline of separation, drawn well
-        inside the box that casts it. No lift, no protective padding.
-     2. A *floating* surface — a tile — takes no shadow of its own at all. Its
-        aura is cast beneath it by the host's underlay webview, which spans the
-        whole window and answers to no clipping rect (--ol-shadow-aura). */
-  --ol-shadow-contact: 0 1px 2px rgba(0, 0, 0, .04);
-  --ol-shadow-aura: 0 0 24px rgba(0, 0, 0, .05);
+        takes the soft shadow: centred, no light source, the same aura a tile
+        has at the scale of a row. The surface it lies in owes it room.
+     2. A *floating* surface — a tile — takes no shadow here at all. Its aura is
+        the host's, hung on the tile webview's own CoreAnimation layer, which
+        answers to no clipping rect (cast_aura in the rim). */
+  --ol-shadow-soft: 0 0 10px rgba(0, 0, 0, .05);
   /* Only a surface floating *over* another one lifts further. */
   --ol-shadow-over: 0 1px 1px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .16);
   /* How far a surface that sits *naked* on the canvas fades its scrolled
@@ -80,16 +80,17 @@ body { position: relative }
 [data-scroll] { overflow-y: auto; overflow-x: hidden; min-height: 0 }
 
 /* A card: white on the canvas, rounded, and nothing else. Depth is not the
-   card's to draw — a tile's aura comes from the host's underlay beneath it. */
+   card's to draw — the host casts a tile's aura on its layer. */
 [data-ui="card"] {
   background: var(--ol-surface); border-radius: var(--ol-radius);
 }
 /* The one in-flow card: a running process in the strip. It lies *inside* a
-   surface, so it takes the contact shadow. Rest falls flat — no surface, no
-   border, no shadow. */
+   surface, so its aura is CSS — the same white fill as a tile, the same corner,
+   and the soft shadow at row scale. Rest falls flat — no surface, no border,
+   no shadow. */
 [data-ui="item"][data-live="true"] {
   background: var(--ol-surface);
-  border-radius: var(--ol-radius); box-shadow: var(--ol-shadow-contact);
+  border-radius: var(--ol-radius); box-shadow: var(--ol-shadow-soft);
 }
 [data-ui="item"] {
   display: flex; flex-direction: column; gap: 1px;

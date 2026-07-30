@@ -4,22 +4,27 @@
 import { expect, test } from 'bun:test'
 import { styles } from '../src/styles.ts'
 
-test('depth has two registers, and each is named once', () => {
-  expect(styles).toContain('--ol-shadow-contact: 0 1px 2px rgba(0, 0, 0, .04)')
-  expect(styles).toContain('--ol-shadow-aura: 0 0 24px rgba(0, 0, 0, .05)')
-  // The old single shadow, and the room it needed, are gone with it.
+test('the shadow CSS may draw is one soft, centred token', () => {
+  expect(styles).toContain('--ol-shadow-soft: 0 0 10px rgba(0, 0, 0, .05)')
+  // The tile's aura is the host's now — no token here casts one.
+  expect(styles).not.toContain('--ol-shadow-aura')
+  expect(styles).not.toContain('--ol-shadow-contact')
   expect(styles).not.toContain('--ol-shadow:')
   expect(styles).not.toContain('--ol-lift')
 })
 
-test('an in-flow card takes the contact shadow; a floating surface takes none', () => {
+test('an in-flow card takes the soft shadow; a floating surface takes none', () => {
   const item = rule('[data-ui="item"][data-live="true"]')
-  expect(item).toContain('box-shadow: var(--ol-shadow-contact)')
+  expect(item).toContain('box-shadow: var(--ol-shadow-soft)')
 
   const card = rule('[data-ui="card"]')
-  expect(card).toContain('background: var(--ol-surface)')
-  expect(card).toContain('border-radius: var(--ol-radius)')
   expect(card).not.toContain('box-shadow')
+
+  // Both card kinds are the same white on the canvas, cut to the same corner.
+  for (const block of [card, item]) {
+    expect(block).toContain('background: var(--ol-surface)')
+    expect(block).toContain('border-radius: var(--ol-radius)')
+  }
 })
 
 test('programs never style a scrollbar — the platform owns the affordance', () => {

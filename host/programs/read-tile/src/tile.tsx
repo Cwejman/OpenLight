@@ -215,7 +215,7 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
 
 // Layout only — the card's surface and rounding, the pill and the greys are
 // tokens and components in @openlight/react. Depth is neither: a tile floats,
-// and its aura is cast beneath it by the host's underlay webview, because a
+// and its aura is hung by the host on this webview's own layer, because a
 // webview clips a shadow its own card would draw (author ruling, *the depth
 // language*). Nothing here lifts, insets, or shadows for room it does not have.
 const CSS = `

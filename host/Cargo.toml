@@ -20,7 +20,11 @@ toml = "0.8"
 # callback hands parsed work here rather than blocking on it.
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
 
-# The window's canvas is set on NSWindow directly — tao 0.30's colour signature
-# cannot express a gray (see `paint_canvas` in main.rs).
+# The frame's chrome is AppKit's: the window's canvas is set on NSWindow
+# directly (tao 0.30's colour signature cannot express a gray), and a tile's
+# aura is hung on its webview's CoreAnimation layer — a shadow no webview can
+# clip. See `paint_canvas` and `cast_aura` in main.rs.
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
+# CGPoint/CGSize/CGRect with their objc encodings — the shadow path's argument.
+objc2-foundation = "0.2"

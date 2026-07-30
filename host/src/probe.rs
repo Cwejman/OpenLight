@@ -25,7 +25,7 @@ pub const DONE: &str = "__probe_done";
 /// a report reads at meaning level rather than as a class soup; the remaining
 /// class names are the surfaces' own layout regions.
 pub const SELECTORS: &str =
-    "html, body, #root, [data-ui], [data-scroll], .strip, .items, .quiet, .tile, .head, .content, .rows, .row, .foot";
+    "html, body, #root, [data-ui], [data-scroll], .strip, .column, .items, .quiet, .tile, .head, .content, .rows, .row, .foot";
 
 /// How much of the serialized DOM a report carries. Scripts and styles are
 /// replaced by their length before trimming, so the budget buys structure.
@@ -64,6 +64,13 @@ const TEMPLATE: &str = r#"(() => {
       overflow_y: s.overflowY,
     };
   };
+  // Where a node actually ended up, in the webview's own coordinates: the rim
+  // places surfaces, the page places what is inside one, and only the live box
+  // knows whether the two agree.
+  const box = (el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  };
   const nodes = [...document.querySelectorAll(__SELECTORS__)]
     .slice(0, __NODE_LIMIT__)
     .map((el) => ({
@@ -71,6 +78,7 @@ const TEMPLATE: &str = r#"(() => {
       class: typeof el.className === 'string' && el.className ? el.className : null,
       id: el.id || null,
       data: { ...el.dataset },
+      rect: box(el),
       client_height: el.clientHeight,
       scroll_height: el.scrollHeight,
       scrollable: el.scrollHeight > el.clientHeight + 1,
@@ -144,6 +152,7 @@ mod tests {
         assert!(js.contains("getComputedStyle"), "styles are the webview's answer, not React's");
         assert!(js.contains("s.boxShadow"), "one shadow token, checkable on every card");
         assert!(js.contains("s.maskImage"), "the naked strip's edge fade is readable");
+        assert!(js.contains("getBoundingClientRect"), "where a node actually landed");
     }
 
     #[test]

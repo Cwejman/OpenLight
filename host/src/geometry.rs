@@ -49,7 +49,27 @@ pub struct Spacing {
 /// the value settles by eye (host.md §What Is Open, *Visual tokens*).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Strip {
+    /// The visible column — what the tiling area is displaced by.
     pub width: f64,
+    pub bleed: Bleed,
+}
+
+/// How far the strip's webview reaches past its visible column. A webview
+/// clips its own content, and two things the strip owns live outside the
+/// column: the shadow each running item casts, and the platform's overlay
+/// scrollbar. So the webview is given that room, and the program insets its
+/// column by the same numbers — the column stays exactly where it was, and the
+/// tiling area never learns about the bleed.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Bleed {
+    pub left: f64,
+    pub top: f64,
+    pub right: f64,
+    pub bottom: f64,
+}
+
+impl Bleed {
+    pub const NONE: Bleed = Bleed { left: 0.0, top: 0.0, right: 0.0, bottom: 0.0 };
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -58,11 +78,13 @@ pub struct LeafRect {
     pub rect: Rect,
 }
 
-/// Reserve the left strip: returns (strip rect, the viewport left for tiling).
-/// The strip sits inside the window's padding — text on the canvas, no panel —
-/// and the tiling viewport begins where it ends, so [`walk`]'s own padding
-/// becomes the gap between the strip and the first tile. A zero-width strip
-/// reserves nothing and leaves the viewport exactly as given.
+/// Reserve the left strip: returns (the strip webview's rect, the viewport left
+/// for tiling). The column sits inside the window's padding — text on the
+/// canvas, no panel — and the tiling viewport begins where the column ends, so
+/// [`walk`]'s own padding becomes the gap between the strip and the first tile.
+/// The returned rect is the column grown by [`Bleed`]: the surface is larger
+/// than the column, the reservation is not. A zero-width strip reserves nothing
+/// and leaves the viewport exactly as given.
 pub fn reserve(viewport: Rect, strip: Strip, spacing: Spacing) -> (Rect, Rect) {
     let width = strip
         .width
@@ -71,12 +93,13 @@ pub fn reserve(viewport: Rect, strip: Strip, spacing: Spacing) -> (Rect, Rect) {
         return (Rect { width: 0.0, height: 0.0, ..viewport }, viewport);
     }
     let taken = spacing.padding + width;
+    let bleed = strip.bleed;
     (
         Rect {
-            x: viewport.x + spacing.padding,
-            y: viewport.y + spacing.padding,
-            width,
-            height: (viewport.height - 2.0 * spacing.padding).max(0.0),
+            x: viewport.x + spacing.padding - bleed.left,
+            y: viewport.y + spacing.padding - bleed.top,
+            width: width + bleed.left + bleed.right,
+            height: (viewport.height - 2.0 * spacing.padding).max(0.0) + bleed.top + bleed.bottom,
         },
         Rect { x: viewport.x + taken, width: viewport.width - taken, ..viewport },
     )
@@ -311,7 +334,7 @@ mod walk_tests {
         assert!(at_one[0].rect.height < 780.0 - SPACING.gap);
     }
 
-    const STRIP: Strip = Strip { width: 200.0 };
+    const STRIP: Strip = Strip { width: 200.0, bleed: Bleed::NONE };
 
     #[test]
     fn the_strip_stands_inside_the_padding_on_the_left() {
@@ -340,8 +363,24 @@ mod walk_tests {
     }
 
     #[test]
+    fn the_webview_grows_past_the_column_but_the_reservation_does_not() {
+        let bleed = Bleed { left: 14.0, top: 10.0, right: 8.0, bottom: 10.0 };
+        let (bled, tiling) = reserve(VIEWPORT, Strip { bleed, ..STRIP }, SPACING);
+        let (column, plain) = reserve(VIEWPORT, STRIP, SPACING);
+
+        // The surface reaches out by exactly the bleed…
+        assert_rect(
+            bled,
+            Rect { x: column.x - 14.0, y: column.y - 10.0, width: 200.0 + 22.0, height: 780.0 + 20.0 },
+        );
+        // …and the tiling area is placed by the column alone, so a tile stands
+        // where it stood before the strip was given room.
+        assert_eq!(tiling, plain);
+    }
+
+    #[test]
     fn no_strip_leaves_the_viewport_untouched() {
-        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 0.0 }, SPACING);
+        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 0.0, bleed: Bleed::NONE }, SPACING);
         assert_eq!(tiling, VIEWPORT, "a program-less strip costs the tiling area nothing");
         assert_eq!(strip.width, 0.0);
         assert_eq!(
@@ -352,7 +391,7 @@ mod walk_tests {
 
     #[test]
     fn a_strip_wider_than_the_window_still_leaves_the_padding() {
-        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 5_000.0 }, SPACING);
+        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 5_000.0, ..STRIP }, SPACING);
         assert_eq!(strip.width, 980.0);
         assert!(tiling.width >= 0.0, "the tiling viewport never inverts: {tiling:?}");
     }
