@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 # Standalone until the root workspace assembles (build order: crates first, workspace later).
-[workspace]
 
 [dependencies]
 db = { path = "../db" }
