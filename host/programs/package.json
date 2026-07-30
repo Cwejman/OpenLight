@@ -5,7 +5,9 @@
   "description": "First-party webview programs the host ships. Each entry bundles to a JS file the program chunk's body.executable names.",
   "type": "module",
   "scripts": {
-    "build": "bun build src/read-tile/index.tsx --outfile read-tile.js --target browser --format iife --define process.env.NODE_ENV='\"production\"'",
+    "build": "bun run build:read-tile && bun run build:sidebar",
+    "build:read-tile": "bun build src/read-tile/index.tsx --outfile read-tile.js --target browser --format iife --define process.env.NODE_ENV='\"production\"'",
+    "build:sidebar": "bun build src/sidebar/index.tsx --outfile sidebar.js --target browser --format iife --define process.env.NODE_ENV='\"production\"'",
     "test": "bun test"
   },
   "dependencies": {

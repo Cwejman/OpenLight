@@ -43,10 +43,43 @@ pub struct Spacing {
     pub gap: f64,
 }
 
+/// A naked surface strip — the sidebar (host.md §Sidebar, boot step 10):
+/// positioned directly on the background, *outside* tile geometry, so the
+/// tiling area shifts to make room. Width is a parameter like [`Spacing`];
+/// the value settles by eye (host.md §What Is Open, *Visual tokens*).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Strip {
+    pub width: f64,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeafRect {
     pub id: String,
     pub rect: Rect,
+}
+
+/// Reserve the left strip: returns (strip rect, the viewport left for tiling).
+/// The strip sits inside the window's padding — text on the canvas, no panel —
+/// and the tiling viewport begins where it ends, so [`walk`]'s own padding
+/// becomes the gap between the strip and the first tile. A zero-width strip
+/// reserves nothing and leaves the viewport exactly as given.
+pub fn reserve(viewport: Rect, strip: Strip, spacing: Spacing) -> (Rect, Rect) {
+    let width = strip
+        .width
+        .clamp(0.0, (viewport.width - 2.0 * spacing.padding).max(0.0));
+    if width == 0.0 {
+        return (Rect { width: 0.0, height: 0.0, ..viewport }, viewport);
+    }
+    let taken = spacing.padding + width;
+    (
+        Rect {
+            x: viewport.x + spacing.padding,
+            y: viewport.y + spacing.padding,
+            width,
+            height: (viewport.height - 2.0 * spacing.padding).max(0.0),
+        },
+        Rect { x: viewport.x + taken, width: viewport.width - taken, ..viewport },
+    )
 }
 
 /// Walk the tree: viewport shrunk by `padding`, each split divided along its
@@ -276,6 +309,52 @@ mod walk_tests {
         assert_eq!(at_one, above, "everything above the bound clamps to the same layout");
         assert!(at_one[1].rect.height > 0.0);
         assert!(at_one[0].rect.height < 780.0 - SPACING.gap);
+    }
+
+    const STRIP: Strip = Strip { width: 200.0 };
+
+    #[test]
+    fn the_strip_stands_inside_the_padding_on_the_left() {
+        let (strip, _) = reserve(VIEWPORT, STRIP, SPACING);
+        assert_rect(strip, Rect { x: 10.0, y: 10.0, width: 200.0, height: 780.0 });
+    }
+
+    #[test]
+    fn the_tiling_area_shifts_right_to_make_room() {
+        let (_, tiling) = reserve(VIEWPORT, STRIP, SPACING);
+        let rects = walk(&leaf("a"), tiling, SPACING);
+        // The strip's right edge is 210; the walk's own padding is the gap.
+        assert_rect(
+            rects[0].rect,
+            Rect { x: 220.0, y: 10.0, width: 1000.0 - 220.0 - 10.0, height: 780.0 },
+        );
+    }
+
+    #[test]
+    fn a_tile_never_overlaps_the_strip() {
+        let (strip, tiling) = reserve(VIEWPORT, STRIP, SPACING);
+        let tree = split("s", Direction::Horizontal, 0.5, leaf("a"), leaf("b"));
+        for rect in walk(&tree, tiling, SPACING) {
+            assert!(rect.rect.x >= strip.x + strip.width, "{:?} runs under the strip", rect);
+        }
+    }
+
+    #[test]
+    fn no_strip_leaves_the_viewport_untouched() {
+        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 0.0 }, SPACING);
+        assert_eq!(tiling, VIEWPORT, "a program-less strip costs the tiling area nothing");
+        assert_eq!(strip.width, 0.0);
+        assert_eq!(
+            walk(&leaf("a"), tiling, SPACING),
+            walk(&leaf("a"), VIEWPORT, SPACING)
+        );
+    }
+
+    #[test]
+    fn a_strip_wider_than_the_window_still_leaves_the_padding() {
+        let (strip, tiling) = reserve(VIEWPORT, Strip { width: 5_000.0 }, SPACING);
+        assert_eq!(strip.width, 980.0);
+        assert!(tiling.width >= 0.0, "the tiling viewport never inverts: {tiling:?}");
     }
 
     #[test]

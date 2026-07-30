@@ -96,8 +96,10 @@ pub fn engine_declaration() -> Declaration {
 }
 
 /// The host project's bootstrap (bootstrap.md §The host project's bootstrap):
-/// composition primitives, plus the demo webview surface programs the rim
-/// mounts (host-shipped programs are unlisted in bootstrap.md — recorded gap).
+/// composition primitives, plus the first-party webview surface programs
+/// (host-shipped programs are unlisted in bootstrap.md — recorded gap). Being
+/// declared is not being run: boot runs the tile programs and the sidebar
+/// strip; `inspector` is declared and bundle-less until it is written.
 pub fn host_declaration() -> Declaration {
     let mut chunks = vec![
         chunk("host", "host", None, json!({ "text": "Root scope of the host project." })),

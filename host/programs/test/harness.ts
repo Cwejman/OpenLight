@@ -27,6 +27,7 @@ export function useTransport(next: Transport): void {
 }
 
 export const { ReadTile } = await import('../src/read-tile/tile.tsx')
+export const { Sidebar } = await import('../src/sidebar/sidebar.tsx')
 
 export type Mounted = { root: Root; container: HTMLElement }
 
@@ -56,6 +57,21 @@ export async function settle(action?: () => void): Promise<void> {
   })
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+}
+
+/** A user's click, at a point — the context menu is positioned from it. */
+export async function click(
+  mounted: Mounted,
+  selector: string,
+  at: { x: number; y: number } = { x: 0, y: 0 },
+): Promise<void> {
+  const node = mounted.container.querySelector(selector)
+  if (!node) throw new Error(`nothing to click at ${selector}`)
+  await settle(() => {
+    node.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, clientX: at.x, clientY: at.y }),
+    )
   })
 }
 

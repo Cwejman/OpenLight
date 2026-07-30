@@ -1,7 +1,8 @@
-//! The host rim — deliberately thin, verified by running. One tao window; a
-//! wry child webview per leaf of the demo tile tree, positioned by
-//! `geometry::walk`; per-webview IPC handlers (host.md §Transport) dispatching
-//! through the `EngineApi` seam. The rim chooses the implementor at runtime:
+//! The host rim — deliberately thin, verified by running. One tao window; the
+//! sidebar as a naked strip beside the tiling area (`geometry::reserve`, host.md
+//! §Sidebar) and a wry child webview per leaf of the demo tile tree inside what
+//! it leaves (`geometry::walk`); per-webview IPC handlers (host.md §Transport)
+//! dispatching through the `EngineApi` seam. The rim chooses the implementor at runtime:
 //! the real `engine::Engine` behind `EngineAdapter` by default (the swap,
 //! board.md build track step 5), the `FixtureStub` under `--fixture`.
 //! A program whose bundle is built on disk is loaded into the standard page
@@ -27,7 +28,7 @@ use host::boot::{self, Booted, TileProcess};
 use host::compose::{self, ProcessInfo};
 use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
-use host::geometry::{self, Direction, Rect, Spacing, Tile};
+use host::geometry::{self, Rect, Spacing, Strip, Tile};
 use host::page;
 use host::protocol;
 use host::stub::FixtureStub;
@@ -35,6 +36,9 @@ use host::stub::FixtureStub;
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
 const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
+/// The sidebar's strip, outside tile geometry (host.md §Sidebar). Fixed for
+/// now: resizing it is direct manipulation, which is spec-gated.
+const STRIP: Strip = Strip { width: 216.0 };
 
 fn main() {
     // host.md §Boot sequence, step 1: the runtime comes first — the engine
@@ -70,12 +74,14 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
             }
         }
     };
-    let Booted { engine, mut host_rx, provider, session, tiles, programs_root } = booted;
+    let Booted { engine, mut host_rx, provider, session, tiles, strip, programs_root } = booted;
     let engine_api: Arc<dyn EngineApi> = Arc::new(EngineAdapter::new(engine.clone()));
 
     let tree = demo_tree(&tiles);
+    let strip_process = strip.process.clone();
     let program_names: HashMap<ProcessId, String> = tiles
         .iter()
+        .chain(std::iter::once(&strip))
         .map(|t| (t.process.clone(), t.program.clone()))
         .collect();
 
@@ -119,7 +125,13 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 *control_flow = ControlFlow::Exit;
             }
             Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
-                for leaf in layout(&window, &tree) {
+                // Strip and tiles move together — the tiling area is defined as
+                // what the strip leaves, so one walk keeps both coherent.
+                let (strip_rect, leaves) = layout(&window, &tree, STRIP);
+                if let Some(webview) = webviews.get(&strip_process) {
+                    let _ = webview.set_bounds(bounds(&strip_rect));
+                }
+                for leaf in leaves {
                     if let Some(webview) = webviews.get(&ChunkId::from(leaf.id.as_str())) {
                         let _ = webview.set_bounds(bounds(&leaf.rect));
                     }
@@ -129,12 +141,14 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 let Some(pending) = provider.take_pending(&process_id) else {
                     return; // unknown or already claimed; nothing to mount
                 };
-                let Some(rect) = layout(&window, &tree)
-                    .into_iter()
-                    .find(|l| l.id == process_id.as_str())
-                    .map(|l| l.rect)
-                else {
-                    eprintln!("host: no tile for process {process_id}; dropping mount");
+                let (strip_rect, leaves) = layout(&window, &tree, STRIP);
+                let placed = if process_id == strip_process {
+                    Some(strip_rect)
+                } else {
+                    leaves.into_iter().find(|l| l.id == process_id.as_str()).map(|l| l.rect)
+                };
+                let Some(rect) = placed else {
+                    eprintln!("host: no surface for process {process_id}; dropping mount");
                     return; // pending drops: engine reads it as killed
                 };
                 let program = program_names
@@ -196,24 +210,11 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
 }
 
 /// The demo tile tree, still composed host-side (the swap unit's sanctioned
-/// remainder): reader | (sidebar / inspector). Leaf ids are the process ids,
-/// so geometry and webview registry share one key.
+/// remainder) — genuine tile content only, the reader as its sole leaf. Leaf
+/// ids are the process ids, so geometry and webview registry share one key.
 fn demo_tree(tiles: &[TileProcess]) -> Tile {
-    assert_eq!(tiles.len(), 3, "demo tree shows the three-surface suite");
-    let leaf = |t: &TileProcess| Box::new(Tile::Leaf { id: t.process.as_str().to_string() });
-    Tile::Split {
-        id: "tile-root".into(),
-        direction: Direction::Horizontal,
-        ratio: 0.55,
-        first: leaf(&tiles[0]),
-        second: Box::new(Tile::Split {
-            id: "tile-right".into(),
-            direction: Direction::Vertical,
-            ratio: 0.5,
-            first: leaf(&tiles[1]),
-            second: leaf(&tiles[2]),
-        }),
-    }
+    assert_eq!(tiles.len(), 1, "the demo tree shows the tile programs");
+    Tile::Leaf { id: tiles[0].process.as_str().to_string() }
 }
 
 // ---- the hollow host, kept runnable for comparison: `--fixture` -------------
@@ -237,7 +238,9 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
     // by; the leaf map is geometry's separate concern.
     let mut webviews: HashMap<ProcessId, wry::WebView> = HashMap::new();
     let mut leaf_process: HashMap<String, ProcessId> = HashMap::new();
-    for leaf in layout(&window, &tree) {
+    // The fixture rim keeps its three-tile demo: no strip, so no reservation.
+    let (_, leaves) = layout(&window, &tree, Strip { width: 0.0 });
+    for leaf in leaves {
         let info = compose::leaf_process(
             &chunks,
             &placements,
@@ -272,7 +275,8 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
                 *control_flow = ControlFlow::Exit;
             }
             Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
-                for leaf in layout(&window, &tree) {
+                let (_, leaves) = layout(&window, &tree, Strip { width: 0.0 });
+                for leaf in leaves {
                     if let Some(webview) = leaf_process.get(&leaf.id).and_then(|p| webviews.get(p)) {
                         let _ = webview.set_bounds(bounds(&leaf.rect));
                     }
@@ -335,10 +339,13 @@ fn deliver(proxy: &EventLoopProxy<HostCmd>, process: &str, outcome: Outcome) {
     }
 }
 
-fn layout(window: &Window, tree: &Tile) -> Vec<geometry::LeafRect> {
+/// The window, divided: the naked strip first, then the tile leaves inside what
+/// the strip leaves over. A zero-width strip reserves nothing (the fixture rim).
+fn layout(window: &Window, tree: &Tile, strip: Strip) -> (Rect, Vec<geometry::LeafRect>) {
     let size: LogicalSize<f64> = window.inner_size().to_logical(window.scale_factor());
     let viewport = Rect { x: 0.0, y: 0.0, width: size.width, height: size.height };
-    geometry::walk(tree, viewport, SPACING)
+    let (strip_rect, tiling) = geometry::reserve(viewport, strip, SPACING);
+    (strip_rect, geometry::walk(tree, tiling, SPACING))
 }
 
 fn bounds(rect: &Rect) -> wry::Rect {

@@ -14,10 +14,16 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-/// The demo surface suite the rim composes host-side, in tile order:
-/// reader | (sidebar / inspector). Content is read from the field; only the
-/// tree layout is still rim-composed (the swap unit's sanctioned remainder).
-pub const DEMO_PROGRAMS: [&str; 3] = ["read-tile", "sidebar", "inspector"];
+/// The programs the rim gives tiles to, in tile order. Genuine tile content
+/// only: the sidebar is not among them — it is a naked surface (below), and the
+/// inspector waits for a program of its own. Content is read from the field;
+/// only the tree layout is still rim-composed (the swap unit's remainder).
+pub const TILE_PROGRAMS: [&str; 1] = ["read-tile"];
+
+/// The naked surface of host.md boot step 10: a webview strip positioned
+/// directly on the background, outside tile geometry. The tab-bar is its
+/// sibling in the spec's suite and unbuilt — recorded deferral.
+pub const STRIP_PROGRAM: &str = "sidebar";
 
 /// The session instance the host creates on first launch (bootstrap.md,
 /// closing note: the first session is a runtime action, never a bootstrap
@@ -30,8 +36,10 @@ pub struct Booted {
     pub host_rx: mpsc::Receiver<HostCmd>,
     pub provider: Arc<WebviewProvider>,
     pub session: ChunkId,
-    /// One entry per demo program, in `DEMO_PROGRAMS` order.
+    /// One entry per program in `TILE_PROGRAMS` order — the tile tree's leaves.
     pub tiles: Vec<TileProcess>,
+    /// The sidebar: a strip on the background, in no tile.
+    pub strip: TileProcess,
     /// Where `body.executable` resolves from. Nothing specs the base a
     /// program's executable path is relative to (host.md §Authoring Programs
     /// says only "pointing at the bundle") — the declaring project's root is
@@ -157,52 +165,92 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
         return Err(BootError::Unresolved(unresolved));
     }
 
-    // Step 10 — the demo suite: an initial session (found by name, created on
-    // first launch) and the three surface processes, reading real chunks.
+    // Step 10 — the always-mounted suite: an initial session (found by name,
+    // created on first launch), the tile programs, and the sidebar as a naked
+    // strip with the read roots step 10 names.
     let session = ensure_session(&engine)?;
     let mut tiles = Vec::new();
-    for name in DEMO_PROGRAMS {
-        let program = engine
-            .resolve_name(&Context::host(), &format!("host/{name}"))
-            .map_err(|e| BootError::Engine(format!("resolving host/{name}: {e}")))?;
-        let process = engine
-            .run(
-                &Context::host(),
-                engine::RunArgs {
-                    program_id: program,
-                    chunks: arguments_for(name, &session),
-                    placements: vec![session.clone()],
-                    mode: engine::RunMode::Child,
-                    read_boundary: engine::BoundarySpec::Roots(vec![session.clone()]),
-                    write_boundary: engine::BoundarySpec::Roots(vec![session.clone()]),
-                    timeout_ms: None,
-                },
-            )
-            .map_err(|e| BootError::Engine(format!("running host/{name}: {e}")))?;
-        tiles.push(TileProcess { program: name.to_string(), process });
+    for name in TILE_PROGRAMS {
+        tiles.push(spawn_surface(&engine, name, &session, vec![session.clone()])?);
     }
+    let strip = spawn_surface(
+        &engine,
+        STRIP_PROGRAM,
+        &session,
+        sidebar_read_roots(&engine, &session)?,
+    )?;
 
     let programs_root = project_path(&cascade, "host").expect("the cascade requires host");
-    Ok(Booted { engine, host_rx, provider, session, tiles, programs_root })
+    Ok(Booted { engine, host_rx, provider, session, tiles, strip, programs_root })
 }
 
-/// The typed arguments a demo run receives. `read`'s one required argument is
-/// the scope ids to view (programs.md §3.5) — one argument chunk per role,
-/// keys within it (§1). Id-less, so the engine mints a fresh chunk per run.
+/// One boot-suite run. The process is placed `instance` on the session, which
+/// *is* sidebar presence (host.md §The Composition Types), and every surface of
+/// the suite writes only the session (step 10).
+fn spawn_surface(
+    engine: &Engine,
+    name: &str,
+    session: &ChunkId,
+    read_roots: Vec<ChunkId>,
+) -> Result<TileProcess, BootError> {
+    let program = engine
+        .resolve_name(&Context::host(), &format!("host/{name}"))
+        .map_err(|e| BootError::Engine(format!("resolving host/{name}: {e}")))?;
+    let process = engine
+        .run(
+            &Context::host(),
+            engine::RunArgs {
+                program_id: program,
+                chunks: arguments_for(name, session),
+                placements: vec![session.clone()],
+                mode: engine::RunMode::Child,
+                read_boundary: engine::BoundarySpec::Roots(read_roots),
+                write_boundary: engine::BoundarySpec::Roots(vec![session.clone()]),
+                timeout_ms: None,
+            },
+        )
+        .map_err(|e| BootError::Engine(format!("running host/{name}: {e}")))?;
+    Ok(TileProcess { program: name.to_string(), process })
+}
+
+/// host.md boot step 10: the sidebar reads `[session, engine/process,
+/// engine/program]`. The two archetypes live in the read-only engine mount —
+/// a boundary root is a reference, never a modification (engine.md, R5).
+fn sidebar_read_roots(engine: &Engine, session: &ChunkId) -> Result<Vec<ChunkId>, BootError> {
+    let mut roots = vec![session.clone()];
+    for path in ["engine/process", "engine/program"] {
+        let id = engine
+            .resolve_name(&Context::host(), path)
+            .map_err(|e| BootError::Engine(format!("resolving {path}: {e}")))?;
+        roots.push(id);
+    }
+    Ok(roots)
+}
+
+/// The typed arguments a boot-suite run receives, one argument chunk per role
+/// with keys within it (programs.md §1). Id-less, so the engine mints a fresh
+/// chunk per run.
 ///
-/// **Recorded gap.** The argument *type* chunk this should validate against
+/// `read`'s one required argument is the scope ids to view (§3.5). The
+/// sidebar's is the session it renders — **recorded gap**: programs.md §3.2
+/// declares no argument type for it, and host.md step 10 gives it boundaries
+/// but no arguments, so the key name `session` is this build's reading.
+///
+/// **Recorded gap.** The argument *type* chunk these should validate against
 /// (`programs/argument` instance, `relates` on the program, with a
 /// `body.schema` and `spec.required`) has no seeding home: bootstrap.md does
 /// not list the host's own programs at all.
 fn arguments_for(program: &str, session: &ChunkId) -> Vec<db::ChunkDeclaration> {
-    if program != "read-tile" {
-        return vec![];
-    }
+    let body = match program {
+        "read-tile" => json!({ "target": [session.as_str()] }),
+        STRIP_PROGRAM => json!({ "session": session.as_str() }),
+        _ => return vec![],
+    };
     vec![db::ChunkDeclaration {
         id: None,
         name: Some("request".into()),
         spec: None,
-        body: Some(json!({ "target": [session.as_str()] })),
+        body: Some(body),
         removed: false,
     }]
 }

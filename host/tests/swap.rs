@@ -95,12 +95,15 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
     let mut booted = boot::boot(&root.0.join("agents")).expect("boot");
     let api = EngineAdapter::new(booted.engine.clone());
 
-    // Step 10 ran: three surface processes, MountWebview command per process.
-    assert_eq!(booted.tiles.len(), 3);
+    // Step 10 ran: the tile programs plus the sidebar strip, one MountWebview
+    // command per process. The strip is not a tile — it is beside the tree.
     let programs: Vec<&str> = booted.tiles.iter().map(|t| t.program.as_str()).collect();
-    assert_eq!(programs, ["read-tile", "sidebar", "inspector"]);
+    assert_eq!(programs, ["read-tile"]);
+    assert_eq!(booted.strip.program, "sidebar");
+    let surfaces: Vec<&host::boot::TileProcess> =
+        booted.tiles.iter().chain(std::iter::once(&booted.strip)).collect();
     let mut mounted = Vec::new();
-    for _ in 0..3 {
+    for _ in 0..surfaces.len() {
         match booted.host_rx.try_recv().expect("a queued MountWebview") {
             engine::HostCmd::MountWebview { process_id, executable } => {
                 assert!(executable.starts_with("programs/"), "{executable}");
@@ -109,8 +112,8 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
             other => panic!("expected MountWebview, got {other:?}"),
         }
     }
-    for tile in &booted.tiles {
-        assert!(mounted.contains(&tile.process), "{} not mounted", tile.process);
+    for surface in &surfaces {
+        assert!(mounted.contains(&surface.process), "{} not mounted", surface.process);
     }
 
     // The demo page's exact traffic, under the first tile's identity.
@@ -123,11 +126,11 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
     assert_eq!(reply["result"]["body"]["status"], "pending");
     assert_eq!(reply["result"]["body"]["timeout_ms"], 86_400_000u64, "surface timeout from the program body");
 
-    // scope(session) → the three processes, at a real commit head.
+    // scope(session) → every surface process, at a real commit head.
     let (_, reply) =
         ipc(&api, &ctx, &format!(r#"{{"id":2,"op":"scope","scopes":["{session}"]}}"#)).await;
     let result = &reply["result"];
-    assert_eq!(result["in_scope"], 3);
+    assert_eq!(result["in_scope"], surfaces.len());
     let head = result["head"].as_str().unwrap();
     assert!(!head.is_empty() && head != "fixture-head", "a real commit id, not the stub's: {head}");
     let ids: Vec<&str> = result["chunks"]
@@ -136,8 +139,8 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
         .iter()
         .map(|c| c["id"].as_str().unwrap())
         .collect();
-    for tile in &booted.tiles {
-        assert!(ids.contains(&tile.process.as_str()), "{} in scope", tile.process);
+    for surface in &surfaces {
+        assert!(ids.contains(&surface.process.as_str()), "{} in scope", surface.process);
     }
 
     // subscribe(session), then let the webview report ready: the engine flips
@@ -221,7 +224,12 @@ async fn a_second_launch_finds_the_field_it_left() {
     let agents = root.0.join("agents");
 
     let first = boot::boot(&agents).expect("first boot");
-    let first_pids: Vec<ChunkId> = first.tiles.iter().map(|t| t.process.clone()).collect();
+    let first_pids: Vec<ChunkId> = first
+        .tiles
+        .iter()
+        .chain(std::iter::once(&first.strip))
+        .map(|t| t.process.clone())
+        .collect();
     let session = first.session.clone();
     first.engine.clone().shutdown().await.unwrap();
     drop(first);
@@ -245,7 +253,7 @@ async fn a_second_launch_finds_the_field_it_left() {
             db::ScopeOpts { include: db::Includes::content(), ..db::ScopeOpts::default() },
         )
         .unwrap();
-    assert_eq!(result.in_scope, 6, "three per launch, history preserved");
+    assert_eq!(result.in_scope, 4, "two surfaces per launch, history preserved");
 
     second.engine.clone().shutdown().await.unwrap();
 }
@@ -335,19 +343,80 @@ async fn the_read_tiles_frame_carries_the_scope_it_was_given() {
         "the tile is pointed at the session"
     );
 
-    // The other surfaces take no arguments: nothing is handed out by accident.
-    let sidebar = Context { process_id: Some(booted.tiles[1].process.as_str().to_string()) };
+    // The sidebar's own frame names the session it renders (its argument is a
+    // recorded gap in programs.md §3.2 — the key is this build's reading).
+    let strip = Context { process_id: Some(booted.strip.process.as_str().to_string()) };
     let (_, reply) = ipc(
         &api,
-        &sidebar,
-        &format!(r#"{{"id":2,"op":"scope","scopes":["{}"]}}"#, booted.tiles[1].process),
+        &strip,
+        &format!(r#"{{"id":2,"op":"scope","scopes":["{}"]}}"#, booted.strip.process),
     )
     .await;
-    assert!(reply["result"]["chunks"]
+    let argument = reply["result"]["chunks"]
         .as_array()
         .unwrap()
         .iter()
-        .all(|chunk| chunk["name"] != "request"));
+        .find(|chunk| chunk["name"] == "request")
+        .expect("the request argument on the sidebar's frame")
+        .clone();
+    assert_eq!(argument["body"]["session"], serde_json::json!(booted.session.as_str()));
+
+    booted.engine.clone().shutdown().await.unwrap();
+}
+
+/// host.md boot step 10 gives the sidebar read roots `[session,
+/// engine/process, engine/program]` and write root `[session]` — the strip
+/// must actually be able to read the two archetypes (they live in the
+/// read-only engine mount), and must not reach past them.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_sidebar_strip_reads_exactly_what_step_ten_grants_it() {
+    let root = fresh_root("strip");
+    let booted = boot::boot(&root.0.join("agents")).expect("boot");
+    let api = EngineAdapter::new(booted.engine.clone());
+    let ctx = Context { process_id: Some(booted.strip.process.as_str().to_string()) };
+
+    // The programs it names its items by, read across the read-only mount.
+    let (_, reply) = ipc(&api, &ctx, r#"{"id":1,"op":"scope","scopes":["engine/program"]}"#).await;
+    let names: Vec<String> = reply["result"]["chunks"]
+        .as_array()
+        .expect("engine/program members")
+        .iter()
+        .filter_map(|chunk| chunk["name"].as_str().map(str::to_string))
+        .collect();
+    assert!(names.contains(&"sidebar".to_string()), "{names:?}");
+    assert!(names.contains(&"read-tile".to_string()), "{names:?}");
+
+    // The process archetype resolves too — the third root.
+    let (_, reply) = ipc(&api, &ctx, r#"{"id":2,"op":"scope","scopes":["engine/process"]}"#).await;
+    assert!(reply["result"]["in_scope"].as_u64().unwrap() >= 2, "every run of this launch");
+
+    // The derivation the strip's items stand on: a session member is a process
+    // by its `instance` placement on the archetype, and names its program by
+    // another (engine.md, *Program and Process*).
+    let (_, reply) = ipc(
+        &api,
+        &ctx,
+        &format!(r#"{{"id":4,"op":"scope","scopes":["{}"]}}"#, booted.session),
+    )
+    .await;
+    for chunk in reply["result"]["chunks"].as_array().expect("session members") {
+        let scopes: Vec<&str> = chunk["placements"]
+            .as_array()
+            .expect("placements come with a content read")
+            .iter()
+            .filter(|p| p["type_"] == "instance")
+            .filter_map(|p| p["scope_id"].as_str())
+            .collect();
+        assert!(scopes.contains(&"engine/process"), "{scopes:?}");
+        assert!(
+            scopes.iter().any(|s| s.starts_with("host/")),
+            "the program it runs: {scopes:?}"
+        );
+    }
+
+    // And nothing beyond the three roots.
+    let (_, reply) = ipc(&api, &ctx, r#"{"id":3,"op":"scope","scopes":["host"]}"#).await;
+    assert_eq!(reply["error"]["code"], "BOUNDARY_VIOLATION");
 
     booted.engine.clone().shutdown().await.unwrap();
 }
