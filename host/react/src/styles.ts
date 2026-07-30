@@ -12,7 +12,7 @@ export const styles = `
 :root {
   --ol-canvas: transparent;
   --ol-surface: #fff;
-  --ol-line: #e6e6ea;
+  /* No card is outlined; a line only ever divides regions *inside* one. */
   --ol-line-soft: #f0f0f3;
   --ol-hover: #f4f4f7;
 
@@ -31,14 +31,22 @@ export const styles = `
   --ol-radius-round: 999px;
 
   /* One shadow under a card, wherever a card appears — a tile and a running
-     process in the strip are the same shape (host.md §Visual Language). */
-  --ol-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+     process in the strip are the same shape (host.md §Visual Language). No
+     border anywhere: definition is the shadow's whole job, so it is layered —
+     a tight contact shadow draws the edge against the canvas, a wider faint one
+     gives the card air. Both alphas stay low; the effect is meant to be felt,
+     not seen. */
+  --ol-shadow: 0 1px 1px rgba(0, 0, 0, .06), 0 3px 10px rgba(0, 0, 0, .05);
   /* Only a surface floating *over* another one lifts further. */
-  --ol-shadow-over: 0 6px 20px rgba(0, 0, 0, .14);
+  --ol-shadow-over: 0 1px 1px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .16);
   /* The room a shadow needs to be seen. A webview is clipped to its own rect,
      so a card drawn edge-to-edge inside one casts into nothing — every card
      keeps this much canvas around it. */
-  --ol-lift: 4px;
+  --ol-lift: 6px;
+  /* How far a surface that sits *naked* on the canvas fades its scrolled
+     content, top and bottom. A card clips at its own rounded edge; a bare
+     region has no edge to clip at, so it dissolves instead. */
+  --ol-fade: 24px;
 
   --ol-scroll: #d2d2d7;
   --ol-scroll-live: #b9b9c0;
@@ -85,7 +93,7 @@ body { position: relative }
    strip. Rest falls flat — no surface, no border, no shadow. */
 [data-ui="card"],
 [data-ui="item"][data-live="true"] {
-  background: var(--ol-surface); border: 1px solid var(--ol-line);
+  background: var(--ol-surface);
   border-radius: var(--ol-radius); box-shadow: var(--ol-shadow);
 }
 [data-ui="item"] {
@@ -106,7 +114,7 @@ body { position: relative }
 [data-ui="backdrop"] { position: fixed; inset: 0; z-index: 1 }
 [data-ui="menu"] {
   position: fixed; z-index: 2; min-width: 168px; padding: 4px;
-  background: var(--ol-surface); border: 1px solid var(--ol-line);
+  background: var(--ol-surface);
   border-radius: var(--ol-radius-small); box-shadow: var(--ol-shadow-over);
 }
 [data-ui="menu-head"] { padding: 5px 9px 6px; color: var(--ol-ink-faint); font-size: 11px }

@@ -19,7 +19,7 @@ const delegate: Transport = {
   },
 }
 
-;(globalThis as Record<string, unknown>).__openlight_transport = delegate
+globalThis.__openlight_transport = delegate
 
 /** Point the SDK at a double for the duration of a test. */
 export function useTransport(next: Transport): void {

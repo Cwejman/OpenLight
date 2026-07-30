@@ -15,15 +15,11 @@ export type Transport = {
   onEvent(handler: (event: Event) => void): void
 }
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __openlight_transport: Transport | undefined
-}
-
 function select(): Transport {
   if (globalThis.__openlight_transport) return globalThis.__openlight_transport
-  const view = (globalThis as { window?: { __wry_ipc?: unknown } }).window
-  if (view?.__wry_ipc) return wryTransport(view as Parameters<typeof wryTransport>[0])
+  // `window` is typed as always present but is absent outside a page.
+  const view = globalThis.window as Window | undefined
+  if (view?.__wry_ipc) return wryTransport(view)
   const runtime = (globalThis as { process?: { stdin?: unknown } }).process
   if (runtime?.stdin) return stdioTransport(runtime as Parameters<typeof stdioTransport>[0])
   throw new EngineError(

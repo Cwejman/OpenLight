@@ -19,7 +19,7 @@ const delegate: Transport = {
   },
 }
 
-;(globalThis as Record<string, unknown>).__openlight_transport = delegate
+globalThis.__openlight_transport = delegate
 
 export function useTransport(next: Transport): void {
   impl = next

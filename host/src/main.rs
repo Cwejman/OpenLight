@@ -48,16 +48,38 @@ const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
 /// The sidebar's strip, outside tile geometry (host.md §Sidebar). Fixed for
 /// now: resizing it is direct manipulation, which is spec-gated.
 const STRIP: Strip = Strip { width: 216.0 };
-/// host.md §Visual Language: white-first. The canvas is the window's own, and
-/// it must not follow the system's dark appearance — the whole language (cards
-/// on a quiet canvas, the naked sidebar) is written against white.
+/// The window's canvas (host.md §Visual Language): a quiet gray, `hsl(0 0% 98%)`,
+/// that the white cards sit on. Every webview is transparent, so this is the
+/// background the whole surface shows through to.
 ///
-/// **The unit is not bytes.** tao 0.30 hands r/g/b straight to
-/// `+[NSColor colorWithRed:green:blue:alpha:]`, which reads 0…1 (only alpha is
-/// divided by 255). A literal `255` lands far outside the gamut and the window
-/// renders near-black — measured, `rgb(1, 1, 1)`. So white is written in the
-/// unit AppKit actually receives. Recheck this line if tao is bumped.
-const CANVAS: tao::window::RGBA = (1, 1, 1, 255);
+/// Set on `NSWindow` directly rather than through
+/// `WindowBuilder::with_background_color`: tao 0.30 types a colour as four
+/// `u8`s and hands r/g/b straight to `+[NSColor colorWithRed:green:blue:alpha:]`,
+/// which reads 0…1 — so through that signature only 0 and 1 survive per channel,
+/// and a gray cannot be said at all. AppKit takes the float this way.
+#[cfg(target_os = "macos")]
+fn paint_canvas(window: &Window) {
+    use objc2::runtime::AnyObject;
+    use objc2::{class, msg_send};
+    use tao::platform::macos::WindowExtMacOS;
+
+    // sRGB, the space the surfaces' CSS is written in — 250/255 is `98%`.
+    const LEVEL: f64 = 250.0 / 255.0;
+    let ns_window = window.ns_window() as *mut AnyObject;
+    unsafe {
+        let color: *mut AnyObject = msg_send![
+            class!(NSColor),
+            colorWithSRGBRed: LEVEL,
+            green: LEVEL,
+            blue: LEVEL,
+            alpha: 1.0f64,
+        ];
+        let _: () = msg_send![ns_window, setBackgroundColor: color];
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn paint_canvas(_window: &Window) {}
 
 /// `--probe`: how long a surface gets to mount, read its scope and render
 /// before it is asked what its DOM became, and how long the whole run may take.
@@ -129,13 +151,13 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
     let window = WindowBuilder::new()
         .with_title("OpenLight")
         .with_inner_size(LogicalSize::new(1280.0, 840.0))
-        // The canvas, forced: on macOS the window otherwise takes the system
-        // appearance and paints itself dark. Light theme goes with it so the
-        // frame's chrome and the webviews' `prefers-color-scheme` agree.
-        .with_background_color(CANVAS)
+        // Light theme, forced: on macOS the window otherwise takes the system
+        // appearance and paints itself dark, and the frame's chrome and the
+        // webviews' `prefers-color-scheme` must agree.
         .with_theme(Some(Theme::Light))
         .build(&event_loop)
         .expect("window");
+    paint_canvas(&window);
 
     // The HostCmd forwarding task: engine's Receiver → EventLoopProxy — the
     // engine side never holds a WebView; commands cross as data (engine.md).
@@ -318,8 +340,10 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
     let window = WindowBuilder::new()
         .with_title("OpenLight — hollow host (fixture)")
         .with_inner_size(LogicalSize::new(1280.0, 840.0))
+        .with_theme(Some(Theme::Light))
         .build(&event_loop)
         .expect("window");
+    paint_canvas(&window);
 
     // Webviews are keyed by process, the identity the engine addresses them
     // by; the leaf map is geometry's separate concern.
@@ -526,8 +550,8 @@ fn demo_page(program: &str, process: &str, session: &str, probe_await: bool) -> 
   html, body { margin: 0; height: 100%; background: transparent;
                font: 13px/1.5 -apple-system, system-ui, sans-serif; color: #1d1d1f; }
   .card { box-sizing: border-box; height: 100%; display: flex; flex-direction: column; gap: 4px;
-          background: #ffffff; border: 1px solid #e3e3e6; border-radius: 12px;
-          padding: 16px 18px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); }
+          background: #ffffff; border-radius: 12px; padding: 16px 18px;
+          box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.05); }
   h1 { margin: 0; font-size: 16px; font-weight: 600; }
   .meta { color: #6e6e73; font-size: 12px; }
   .wire { margin-top: auto; font: 11px ui-monospace, monospace; color: #3a3a3c; white-space: pre-wrap; }

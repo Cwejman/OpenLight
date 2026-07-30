@@ -33,29 +33,36 @@ function Session({ session }: { session: ChunkId }) {
   if (!members) return <Strip status="reading the session…" />
   const list = items(members, programs?.chunks ?? [], session)
 
+  // The menu is raised beside the strip, not inside it: the strip's edge fade is
+  // a mask, and a mask paints its whole subtree — a menu within it would fade
+  // and clip at the strip's box. It is `position: fixed`, so it needs no parent.
   return (
-    <Strip>
-      <ul className="items">
-        {list.map((item) => (
-          <StripItem
-            key={item.process}
-            live={item.live}
-            status={item.status}
-            onClick={(event) => {
-              setNotice(null)
-              setMenu({ item, x: event.clientX, y: event.clientY })
-            }}
-          >
-            <span className="program">{item.program}</span>
-            <span className={item.nameIsId ? 'name mono' : 'name'}>
-              {item.failed ? <span className="mark">failed</span> : null}
-              {item.name}
-            </span>
-          </StripItem>
-        ))}
-      </ul>
+    <>
+      <Strip>
+        <ul className="items">
+          {list.map((item) => (
+            <StripItem
+              key={item.process}
+              live={item.live}
+              status={item.status}
+              onClick={(event) => {
+                setNotice(null)
+                setMenu({ item, x: event.clientX, y: event.clientY })
+              }}
+            >
+              <span className="program">{item.program}</span>
+              <span className={item.nameIsId ? 'name mono' : 'name'}>
+                {item.failed ? <span className="mark">failed</span> : null}
+                {item.name}
+              </span>
+            </StripItem>
+          ))}
+        </ul>
 
-      {list.length === 0 ? <div className="quiet">this session holds no processes</div> : null}
+        {list.length === 0 ? <div className="quiet">this session holds no processes</div> : null}
+
+        {notice ? <div className="notice">{notice}</div> : null}
+      </Strip>
 
       {menu ? (
         <Menu
@@ -70,9 +77,7 @@ function Session({ session }: { session: ChunkId }) {
           }}
         />
       ) : null}
-
-      {notice ? <div className="notice">{notice}</div> : null}
-    </Strip>
+    </>
   )
 }
 
@@ -94,8 +99,20 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 // Layout only — surfaces, shadows, greys, and the card-vs-flat rule are tokens
 // and components in @openlight/react.
 const CSS = `
-  /* The right edge belongs to the scrollbar; items keep their own inset. */
-  .strip { position: relative; height: 100%; padding: var(--ol-lift) 0 12px var(--ol-lift) }
+  /* The right edge belongs to the scrollbar; items keep their own inset.
+
+     The strip is flat on the canvas, so it must not clip: scrolled content
+     dissolves at the top and bottom instead of being cut at a box edge that
+     §Visual Language says is not there. The fade is a fixed mask over the
+     viewport, and the vertical padding matches it — at rest the content starts
+     below the fade and nothing is dimmed; only what scrolls into it goes. */
+  .strip {
+    height: 100%; padding: var(--ol-fade) 0 var(--ol-fade) var(--ol-lift);
+    mask-image: linear-gradient(
+      to bottom, transparent 0, #000 var(--ol-fade),
+      #000 calc(100% - var(--ol-fade)), transparent 100%
+    );
+  }
   .mono { font-family: var(--ol-mono); font-size: .92em }
   .items {
     margin: 0; padding: 0; list-style: none;

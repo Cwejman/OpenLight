@@ -53,8 +53,13 @@ const TEMPLATE: &str = r#"(() => {
       color_scheme: s.colorScheme,
       border_radius: s.borderRadius,
       // §Visual Language puts one shadow under every card — the tile's and the
-      // strip's running items must compute the same value.
+      // strip's running items must compute the same value — and no border: the
+      // shadow carries a card's definition alone.
       box_shadow: s.boxShadow,
+      border: s.border,
+      // A region naked on the canvas fades its scrolled content instead of
+      // clipping it; the mask is the only place that shows.
+      mask_image: s.maskImage || s.webkitMaskImage || 'none',
       position: s.position,
       overflow_y: s.overflowY,
     };
@@ -138,6 +143,7 @@ mod tests {
         assert!(js.contains("probe:"), "the envelope the rim reads back");
         assert!(js.contains("getComputedStyle"), "styles are the webview's answer, not React's");
         assert!(js.contains("s.boxShadow"), "one shadow token, checkable on every card");
+        assert!(js.contains("s.maskImage"), "the naked strip's edge fade is readable");
     }
 
     #[test]

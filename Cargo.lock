@@ -932,6 +932,7 @@ version = "0.1.0"
 dependencies = [
  "db",
  "engine",
+ "objc2",
  "serde",
  "serde_json",
  "tao",

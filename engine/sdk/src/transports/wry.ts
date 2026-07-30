@@ -5,15 +5,10 @@ import { isEvent, type Event, type Request, type Response } from '../protocol.ts
 import type { Transport } from '../transport.ts'
 import { EngineError } from '../types.ts'
 
-export type WryWindow = {
-  __wry_ipc?: { postMessage: (message: string) => void }
-  __sdk?: {
-    resolve: (id: number, payload: unknown) => void
-    event: (payload: unknown) => void
-  }
-}
+/** The two names this transport touches; their shapes live in `globals.d.ts`. */
+export type WryWindow = Pick<Window, '__wry_ipc' | '__sdk'>
 
-export function wryTransport(view: WryWindow = window as unknown as WryWindow): Transport {
+export function wryTransport(view: WryWindow = window): Transport {
   const ipc = view.__wry_ipc
   if (!ipc) throw new EngineError('TRANSPORT_CLOSED', 'window.__wry_ipc is not installed')
 
