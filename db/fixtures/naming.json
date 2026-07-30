@@ -1,0 +1,143 @@
+[
+  {
+    "case": "naming/duplicate-name-in-scope-rejected",
+    "spec": "substrate.md#name-uniqueness — two different chunks may not collide on a name within any single scope; enforced at placement-write time",
+    "given": [
+      {
+        "chunks": [{ "id": "s1", "name": "s1" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "a", "name": "draft" }],
+        "placements": [{ "chunk": "a", "scope": "s1", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "b", "name": "draft" }],
+      "placements": [{ "chunk": "b", "scope": "s1", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "a different chunk named 'draft' is already placed instance on s1"
+    }
+  },
+  {
+    "case": "naming/duplicate-name-in-one-declaration-rejected",
+    "spec": "substrate.md#name-uniqueness + #mutations-and-validation — uniqueness holds against the post-write state of the declaration; the collision fails the whole declaration atomically",
+    "given": [
+      {
+        "chunks": [{ "id": "s1", "name": "s1" }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "a", "name": "draft" },
+        { "id": "b", "name": "draft" }
+      ],
+      "placements": [
+        { "chunk": "a", "scope": "s1", "type": "instance" },
+        { "chunk": "b", "scope": "s1", "type": "instance" }
+      ]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "two different chunks named 'draft' placed instance on s1 in one declaration"
+    }
+  },
+  {
+    "case": "naming/same-name-across-scopes-allowed",
+    "spec": "substrate.md#name-resolution — names are unique within their parent scope, like files in a directory; different scopes may each hold a chunk of the same name",
+    "given": [
+      {
+        "chunks": [
+          { "id": "s1", "name": "s1" },
+          { "id": "s2", "name": "s2" }
+        ],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "a", "name": "prompt" }],
+        "placements": [{ "chunk": "a", "scope": "s1", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "b", "name": "prompt" }],
+      "placements": [{ "chunk": "b", "scope": "s2", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s1"], "expect": { "contains": ["a"], "excludes": ["b"] } },
+        { "scope": ["s2"], "expect": { "contains": ["b"], "excludes": ["a"] } }
+      ]
+    }
+  },
+  {
+    "case": "naming/same-chunk-in-multiple-scopes-allowed",
+    "spec": "substrate.md#name-uniqueness — the same chunk may carry the same name across multiple scopes",
+    "given": [
+      {
+        "chunks": [
+          { "id": "s1", "name": "s1" },
+          { "id": "s2", "name": "s2" }
+        ],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "a", "name": "draft" }],
+      "placements": [
+        { "chunk": "a", "scope": "s1", "type": "instance" },
+        { "chunk": "a", "scope": "s2", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s1"], "expect": { "contains": ["a"] } },
+        { "scope": ["s2"], "expect": { "contains": ["a"] } }
+      ]
+    }
+  },
+  {
+    "case": "naming/nameless-chunks-never-collide",
+    "spec": "substrate.md#name-uniqueness — uniqueness applies when name is non-null; nameless chunks coexist in one scope",
+    "given": [
+      {
+        "chunks": [{ "id": "s1", "name": "s1" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "a", "body": { "text": "first nameless" } }],
+        "placements": [{ "chunk": "a", "scope": "s1", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "b", "body": { "text": "second nameless" } }],
+      "placements": [{ "chunk": "b", "scope": "s1", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["s1"], "expect": { "contains": ["a", "b"] } }]
+    }
+  },
+  {
+    "case": "naming/relates-placement-exempt-from-uniqueness",
+    "spec": "substrate.md#name-uniqueness — the rule binds the names of chunks placed instance on the scope; a relates-placed chunk of the same name does not collide",
+    "given": [
+      {
+        "chunks": [{ "id": "s1", "name": "s1" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "t", "name": "kind" }],
+        "placements": [{ "chunk": "t", "scope": "s1", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c", "name": "kind" }],
+      "placements": [{ "chunk": "c", "scope": "s1", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["s1"], "expect": { "contains": ["t", "c"] } }]
+    }
+  }
+]

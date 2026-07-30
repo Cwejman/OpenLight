@@ -1,0 +1,296 @@
+[
+  {
+    "case": "scope/single-scope-returns-everything-placed",
+    "spec": "substrate.md#scope — scoping returns all chunks placed on the scope; instance and relates placements both count as placed",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "member", "body": { "text": "an instance member" } }],
+        "placements": [{ "chunk": "member", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "note", "body": { "text": "a relates note about s" } }],
+      "placements": [{ "chunk": "note", "scope": "s", "type": "relates" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["s"], "expect": { "contains": ["member", "note"] } }]
+    }
+  },
+  {
+    "case": "scope/intersection-narrows",
+    "spec": "substrate.md#scope — scoping a set of chunks returns all chunks placed on every one of them; add a scope to narrow",
+    "given": [
+      {
+        "chunks": [
+          { "id": "turing", "name": "turing" },
+          { "id": "cambridge", "name": "cambridge" }
+        ],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "solo", "body": { "text": "placed on turing only" } }],
+        "placements": [{ "chunk": "solo", "scope": "turing", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "bridge", "body": { "text": "the relationship between turing and cambridge" } }],
+      "placements": [
+        { "chunk": "bridge", "scope": "turing", "type": "relates" },
+        { "chunk": "bridge", "scope": "cambridge", "type": "relates" }
+      ]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["turing"], "expect": { "contains": ["solo", "bridge"] } },
+        { "scope": ["turing", "cambridge"], "expect": { "contains": ["bridge"], "excludes": ["solo"] } }
+      ]
+    }
+  },
+  {
+    "case": "scope/unresolved-root-is-metadata-not-error",
+    "spec": "substrate.md#scope — a scope read names root ids; a root that resolves to nothing is a dead reference, reported back as unresolved metadata rather than an error, so an empty result from a real scope stays distinguishable from one from a dead root",
+    "given": [
+      {
+        "chunks": [{ "id": "real-but-empty", "name": "real-but-empty" }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "as": "now",
+      "chunks": [{ "id": "elsewhere", "body": { "text": "placed on nothing" } }],
+      "placements": []
+    },
+    "then": {
+      "reads": [
+        { "scope": ["real-but-empty"], "expect": { "ids": [], "unresolved": [] } },
+        { "scope": ["ghost"], "expect": { "ids": [], "unresolved": ["ghost"] } },
+        { "scope": ["ghost"], "at": "now", "expect": { "ids": [], "unresolved": ["ghost"] } }
+      ]
+    }
+  },
+  {
+    "case": "scope/unresolved-names-only-the-dead-roots",
+    "spec": "substrate.md#scope — the intersection still composes over the roots that do resolve; unresolved carries exactly the roots that do not",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "a member of s" } }],
+      "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "expect": { "ids": ["c1"], "unresolved": [] } },
+        { "scope": ["s", "ghost"], "expect": { "ids": [], "unresolved": ["ghost"] } }
+      ]
+    }
+  },
+  {
+    "case": "scope/removed-scope-reads-as-unresolved",
+    "spec": "substrate.md#lossless — a removed chunk drops out of current state; #scope — reads still rooted on it report it unresolved rather than failing",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "as": "alive",
+        "chunks": [{ "id": "c1", "body": { "text": "a member of s" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "remove": { "chunks": ["s"] }
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "expect": { "ids": [], "unresolved": ["s"] } },
+        { "scope": ["s"], "at": "alive", "expect": { "ids": ["c1"], "unresolved": [] } }
+      ]
+    }
+  },
+  {
+    "case": "negation/exclude-is-set-difference",
+    "spec": "substrate.md#negation — everything in scope A except what's also in scope B; set difference over placements, exposed as exclude roots on a scope read",
+    "given": [
+      {
+        "chunks": [
+          { "id": "a", "name": "a" },
+          { "id": "b", "name": "b" }
+        ],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "only in a" } }],
+        "placements": [{ "chunk": "c1", "scope": "a", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c2", "body": { "text": "in a and in b" } }],
+      "placements": [
+        { "chunk": "c2", "scope": "a", "type": "instance" },
+        { "chunk": "c2", "scope": "b", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["a"], "exclude": ["b"], "expect": { "contains": ["c1"], "excludes": ["c2"] } }]
+    }
+  },
+  {
+    "case": "pagination/tail-first-default-window",
+    "spec": "substrate.md#pagination-and-projection — for ordered scopes the default window is tail-first (the latest entries); counts always describe the full set",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "e1", "body": { "text": "one" } },
+        { "id": "e2", "body": { "text": "two" } },
+        { "id": "e3", "body": { "text": "three" } },
+        { "id": "e4", "body": { "text": "four" } },
+        { "id": "e5", "body": { "text": "five" } }
+      ],
+      "placements": [
+        { "chunk": "e1", "scope": "log", "type": "instance", "seq": 1 },
+        { "chunk": "e2", "scope": "log", "type": "instance", "seq": 2 },
+        { "chunk": "e3", "scope": "log", "type": "instance", "seq": 3 },
+        { "chunk": "e4", "scope": "log", "type": "instance", "seq": 4 },
+        { "chunk": "e5", "scope": "log", "type": "instance", "seq": 5 }
+      ]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["log"], "limit": 2, "expect": { "ordered_ids": ["e4", "e5"], "counts": { "total": 5 } } }
+      ]
+    }
+  },
+  {
+    "case": "pagination/offset-pages-backward",
+    "spec": "substrate.md#pagination-and-projection — offset pages backward from the tail; counts still describe the full set",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "e1", "body": { "text": "one" } },
+        { "id": "e2", "body": { "text": "two" } },
+        { "id": "e3", "body": { "text": "three" } },
+        { "id": "e4", "body": { "text": "four" } },
+        { "id": "e5", "body": { "text": "five" } }
+      ],
+      "placements": [
+        { "chunk": "e1", "scope": "log", "type": "instance", "seq": 1 },
+        { "chunk": "e2", "scope": "log", "type": "instance", "seq": 2 },
+        { "chunk": "e3", "scope": "log", "type": "instance", "seq": 3 },
+        { "chunk": "e4", "scope": "log", "type": "instance", "seq": 4 },
+        { "chunk": "e5", "scope": "log", "type": "instance", "seq": 5 }
+      ]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["log"], "limit": 2, "offset": 2, "expect": { "ordered_ids": ["e2", "e3"], "counts": { "total": 5 } } },
+        { "scope": ["log"], "limit": 2, "offset": 4, "expect": { "ordered_ids": ["e1"], "counts": { "total": 5 } } }
+      ]
+    }
+  },
+  {
+    "case": "projection/body-false-survey-read",
+    "spec": "substrate.md#pagination-and-projection — include body:false returns names, specs, placements, and counts without bodies; the cheap survey read",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "name": "heavy", "body": { "text": "a large body that the survey read must not carry" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c2", "body": { "text": "another member" } }],
+      "placements": [{ "chunk": "c2", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        {
+          "scope": ["s"],
+          "include": { "body": false },
+          "expect": { "contains": ["c1", "c2"], "has_body": false, "counts": { "total": 2 } }
+        }
+      ]
+    }
+  },
+  {
+    "case": "fts/body-string-values-indexed",
+    "spec": "substrate.md#full-text-search — the index covers string values in chunk bodies; find chunks by keyword",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "c1", "body": { "text": "notes on quantum entanglement experiments" } },
+        { "id": "c2", "body": { "text": "grocery list" } }
+      ],
+      "placements": [
+        { "chunk": "c1", "scope": "s", "type": "instance" },
+        { "chunk": "c2", "scope": "s", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [{ "fts": "entanglement", "expect": { "contains": ["c1"], "excludes": ["c2"] } }]
+    }
+  },
+  {
+    "case": "fts/chunk-names-indexed",
+    "spec": "substrate.md#full-text-search — the index covers chunk names",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "name": "heliotrope", "body": { "text": "a named chunk" } }],
+      "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "fts": "heliotrope", "expect": { "contains": ["c1"] } }]
+    }
+  },
+  {
+    "case": "fts/stays-consistent-with-current-state",
+    "spec": "substrate.md#full-text-search — the FTS index is maintained by the substrate and stays consistent with current state on each commit; #lossless — a removed chunk drops out of current-state reads",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "notes on quantum entanglement experiments" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "remove": { "chunks": ["c1"] }
+    },
+    "then": {
+      "reads": [{ "fts": "entanglement", "expect": { "excludes": ["c1"] } }]
+    }
+  }
+]

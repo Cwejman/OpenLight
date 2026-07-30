@@ -1,0 +1,172 @@
+[
+  {
+    "case": "lossless/removed-chunk-drops-from-current-reads",
+    "spec": "substrate.md#lossless — removal is logical: a removed chunk drops out of current-state reads",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c", "body": { "text": "to be removed" } }],
+        "placements": [{ "chunk": "c", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "remove": { "chunks": ["c"] }
+    },
+    "then": {
+      "reads": [{ "scope": ["s"], "expect": { "excludes": ["c"] } }]
+    }
+  },
+  {
+    "case": "lossless/placements-involving-removed-scope-drop",
+    "spec": "substrate.md#lossless — placements involving a removed chunk drop out, whether the chunk is the scope or the chunk being placed; other placements of the surviving chunk stand",
+    "given": [
+      {
+        "chunks": [
+          { "id": "s", "name": "s" },
+          { "id": "t", "name": "t" }
+        ],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c", "body": { "text": "placed on both s and t" } }],
+        "placements": [
+          { "chunk": "c", "scope": "s", "type": "instance" },
+          { "chunk": "c", "scope": "t", "type": "instance" }
+        ]
+      }
+    ],
+    "when": {
+      "remove": { "chunks": ["s"] }
+    },
+    "then": {
+      "reads": [
+        { "scope": ["t"], "expect": { "contains": ["c"] } },
+        { "scope": ["s"], "expect": { "ids": [] } }
+      ]
+    }
+  },
+  {
+    "case": "lossless/past-state-intact-after-removal",
+    "spec": "substrate.md#lossless — the version history retains everything as it was; time-travel reads see the past state intact; removal is itself a mutation recorded in a commit",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c", "body": { "text": "present, then removed" } }],
+        "placements": [{ "chunk": "c", "scope": "s", "type": "instance" }],
+        "as": "with-c"
+      }
+    ],
+    "when": {
+      "remove": { "chunks": ["c"] }
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "expect": { "excludes": ["c"] } },
+        { "scope": ["s"], "at": "with-c", "expect": { "contains": ["c"] } }
+      ]
+    }
+  },
+  {
+    "case": "temporal/scope-read-at-commit",
+    "spec": "substrate.md#temporal-scoping — a scope read at a commit resolves all chunks and placements as of that point in history",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "first" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }],
+        "as": "one"
+      },
+      {
+        "chunks": [{ "id": "c2", "body": { "text": "second" } }],
+        "placements": [{ "chunk": "c2", "scope": "s", "type": "instance" }],
+        "as": "two"
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c3", "body": { "text": "third" } }],
+      "placements": [{ "chunk": "c3", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "at": "one", "expect": { "contains": ["c1"], "excludes": ["c2", "c3"] } },
+        { "scope": ["s"], "at": "two", "expect": { "contains": ["c1", "c2"], "excludes": ["c3"] } },
+        { "scope": ["s"], "expect": { "contains": ["c1", "c2", "c3"] } }
+      ]
+    }
+  },
+  {
+    "case": "branches/writes-isolated-per-branch",
+    "spec": "substrate.md#branches — every read and every write specifies a branch; branches fork as a new pointer from any commit",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "shared base" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }],
+        "as": "base"
+      },
+      {
+        "fork": { "branch": "dev", "at": "base" }
+      },
+      {
+        "chunks": [{ "id": "c2", "body": { "text": "committed on the default branch" } }],
+        "placements": [{ "chunk": "c2", "scope": "s", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "branch": "dev",
+      "chunks": [{ "id": "c3", "body": { "text": "committed on dev" } }],
+      "placements": [{ "chunk": "c3", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "branch": "dev", "expect": { "contains": ["c1", "c3"], "excludes": ["c2"] } },
+        { "scope": ["s"], "expect": { "contains": ["c1", "c2"], "excludes": ["c3"] } }
+      ]
+    }
+  },
+  {
+    "case": "branches/fork-from-past-commit-mutates-forward",
+    "spec": "substrate.md#temporal-scoping — time travel is read-only; to work from a past state, fork a new branch from that commit and mutate forward",
+    "given": [
+      {
+        "chunks": [{ "id": "s", "name": "s" }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "first" } }],
+        "placements": [{ "chunk": "c1", "scope": "s", "type": "instance" }],
+        "as": "one"
+      },
+      {
+        "chunks": [{ "id": "c2", "body": { "text": "second, only on the default branch" } }],
+        "placements": [{ "chunk": "c2", "scope": "s", "type": "instance" }]
+      },
+      {
+        "fork": { "branch": "redo", "at": "one" }
+      }
+    ],
+    "when": {
+      "branch": "redo",
+      "chunks": [{ "id": "c3", "body": { "text": "forked forward from the past" } }],
+      "placements": [{ "chunk": "c3", "scope": "s", "type": "instance" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["s"], "branch": "redo", "expect": { "contains": ["c1", "c3"], "excludes": ["c2"] } },
+        { "scope": ["s"], "expect": { "contains": ["c1", "c2"], "excludes": ["c3"] } }
+      ]
+    }
+  }
+]

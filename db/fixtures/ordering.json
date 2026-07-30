@@ -1,0 +1,156 @@
+[
+  {
+    "case": "ordered/seq-auto-assigned-on-append",
+    "spec": "substrate.md#spec-language — ordered: every instance placement must have a seq value; auto-assigned on append if omitted",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "e1", "body": { "text": "first entry" } }],
+        "placements": [{ "chunk": "e1", "scope": "log", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "e2", "body": { "text": "second entry" } }],
+      "placements": [{ "chunk": "e2", "scope": "log", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["log"], "expect": { "ordered_ids": ["e1", "e2"] } }]
+    }
+  },
+  {
+    "case": "ordered/explicit-seq-positions",
+    "spec": "substrate.md#spec-language — ordered: explicit seq for specific positioning; position is relative to the scope",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "e1", "body": { "text": "declared first, positioned second" } },
+        { "id": "e2", "body": { "text": "declared second, positioned first" } }
+      ],
+      "placements": [
+        { "chunk": "e1", "scope": "log", "type": "instance", "seq": 2 },
+        { "chunk": "e2", "scope": "log", "type": "instance", "seq": 1 }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["log"], "expect": { "ordered_ids": ["e2", "e1"] } }]
+    }
+  },
+  {
+    "case": "ordered/duplicate-explicit-seq-ties-by-commit-order",
+    "spec": "substrate.md#spec-language — ordered: explicit seq positions instances; two placements may hold the same seq — both stand, and the tie reads back in commit order",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      },
+      {
+        "chunks": [
+          { "id": "zeta", "body": { "text": "committed first at seq 1" } },
+          { "id": "e1", "body": { "text": "committed first at seq 2" } }
+        ],
+        "placements": [
+          { "chunk": "zeta", "scope": "log", "type": "instance", "seq": 1 },
+          { "chunk": "e1", "scope": "log", "type": "instance", "seq": 2 }
+        ]
+      }
+    ],
+    "when": {
+      "as": "tied",
+      "chunks": [
+        { "id": "alpha", "body": { "text": "committed second, tying zeta at seq 1" } },
+        { "id": "e2", "body": { "text": "committed second, tying e1 at seq 2" } }
+      ],
+      "placements": [
+        { "chunk": "alpha", "scope": "log", "type": "instance", "seq": 1 },
+        { "chunk": "e2", "scope": "log", "type": "instance", "seq": 2 }
+      ]
+    },
+    "then": {
+      "reads": [
+        {
+          "scope": ["log"],
+          "expect": {
+            "ordered_ids": ["zeta", "alpha", "e1", "e2"],
+            "counts": { "total": 4 }
+          }
+        },
+        {
+          "scope": ["log"],
+          "at": "tied",
+          "expect": { "ordered_ids": ["zeta", "alpha", "e1", "e2"] }
+        }
+      ]
+    }
+  },
+  {
+    "case": "ordered/append-lands-after-explicit-seq",
+    "spec": "substrate.md#spec-language — ordered: auto-assigned on append — an omitted seq appends after existing positions",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "e1", "body": { "text": "explicitly at position 5" } }],
+        "placements": [{ "chunk": "e1", "scope": "log", "type": "instance", "seq": 5 }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "e2", "body": { "text": "appended without seq" } }],
+      "placements": [{ "chunk": "e2", "scope": "log", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["log"], "expect": { "ordered_ids": ["e1", "e2"] } }]
+    }
+  },
+  {
+    "case": "ordered/relates-needs-no-seq",
+    "spec": "substrate.md#archetypes — type definitions use relates: this keeps them out of ordered content (no seq required); #spec-language — ordered binds instance placements",
+    "given": [
+      {
+        "chunks": [{ "id": "log", "name": "log", "spec": { "ordered": true } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "about", "body": { "text": "a note about the log, not an entry in it" } }],
+      "placements": [{ "chunk": "about", "scope": "log", "type": "relates" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["log"], "expect": { "contains": ["about"] } }]
+    }
+  },
+  {
+    "case": "ordered/propagated-ordering-on-instance-children",
+    "spec": "substrate.md#spec-language — ordered can propagate: ordered content on instances (e.g. session); the archetype's direct placements need no seq, its instances' children are ordered",
+    "given": [
+      {
+        "chunks": [{ "id": "session", "name": "session", "spec": { "propagate": true, "ordered": true } }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "my-session", "name": "my-session", "body": { "text": "placed without seq — propagate exempts direct placements" } }],
+        "placements": [{ "chunk": "my-session", "scope": "session", "type": "instance" }]
+      },
+      {
+        "chunks": [{ "id": "ev1", "body": { "text": "first event" } }],
+        "placements": [{ "chunk": "ev1", "scope": "my-session", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "ev2", "body": { "text": "second event" } }],
+      "placements": [{ "chunk": "ev2", "scope": "my-session", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["my-session"], "expect": { "ordered_ids": ["ev1", "ev2"] } }]
+    }
+  }
+]

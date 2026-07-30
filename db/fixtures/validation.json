@@ -1,0 +1,467 @@
+[
+  {
+    "case": "atomicity/partial-failure-rejects-all",
+    "spec": "substrate.md#mutations-and-validation — a declaration succeeds entirely or fails entirely; if any part fails validation, none of it is recorded",
+    "given": [
+      {
+        "chunks": [{ "id": "tools", "name": "tools", "spec": { "required": ["program"] } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [
+        { "id": "t-ok", "body": { "program": "grep" } },
+        { "id": "t-bad", "body": { "note": "missing the program key" } }
+      ],
+      "placements": [
+        { "chunk": "t-ok", "scope": "tools", "type": "instance" },
+        { "chunk": "t-bad", "scope": "tools", "type": "instance" }
+      ]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "t-bad misses required key 'program'; the declaration fails atomically — t-ok must not be readable afterward either"
+    }
+  },
+  {
+    "case": "accepts/conforming-instance-accepted",
+    "spec": "substrate.md#spec-language — accepts: instances must be instance of one of the listed types",
+    "given": [
+      {
+        "chunks": [
+          { "id": "list", "name": "list", "spec": { "accepts": ["item"] } },
+          { "id": "item", "name": "item", "body": { "text": "a list item type" } }
+        ],
+        "placements": [{ "chunk": "item", "scope": "list", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "first item" } }],
+      "placements": [
+        { "chunk": "c1", "scope": "item", "type": "instance" },
+        { "chunk": "c1", "scope": "list", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["list"], "expect": { "contains": ["c1"] } }]
+    }
+  },
+  {
+    "case": "accepts/non-member-rejected",
+    "spec": "substrate.md#spec-language — accepts: instance chunks must themselves be instance of one of the listed types; non-conforming writes are rejected",
+    "given": [
+      {
+        "chunks": [
+          { "id": "list", "name": "list", "spec": { "accepts": ["item"] } },
+          { "id": "item", "name": "item", "body": { "text": "a list item type" } }
+        ],
+        "placements": [{ "chunk": "item", "scope": "list", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "not an item" } }],
+      "placements": [{ "chunk": "c1", "scope": "list", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "c1 is not an instance of any type listed in list's accepts"
+    }
+  },
+  {
+    "case": "accepts/names-resolve-within-scope",
+    "spec": "substrate.md#spec-language — accepts names are resolved within this chunk's scope: 'note' means the note chunk placed on this scope, not a global note",
+    "given": [
+      {
+        "chunks": [
+          { "id": "note-root", "name": "note", "body": { "text": "an unrelated root-level chunk that happens to be named note" } },
+          { "id": "album", "name": "album", "spec": { "accepts": ["note"] } },
+          { "id": "note-album", "name": "note", "body": { "text": "the note type that album's accepts refers to" } }
+        ],
+        "placements": [{ "chunk": "note-album", "scope": "album", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "instance of the wrong note" } }],
+      "placements": [
+        { "chunk": "c1", "scope": "note-root", "type": "instance" },
+        { "chunk": "c1", "scope": "album", "type": "instance" }
+      ]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "album's accepts resolves 'note' to note-album (placed on album), not to the root-level note-root; c1 is only an instance of note-root"
+    }
+  },
+  {
+    "case": "accepts/type-ambiguity-same-declaration-rejected",
+    "spec": "substrate.md#spec-language — a chunk must not be an instance of two types that both appear in the same scope's accepts list; rejected on write",
+    "given": [
+      {
+        "chunks": [
+          { "id": "events", "name": "events", "spec": { "accepts": ["prompt", "answer"] } },
+          { "id": "prompt", "name": "prompt", "body": { "text": "a user message" } },
+          { "id": "answer", "name": "answer", "body": { "text": "an agent response" } }
+        ],
+        "placements": [
+          { "chunk": "prompt", "scope": "events", "type": "relates" },
+          { "chunk": "answer", "scope": "events", "type": "relates" }
+        ]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "both prompt and answer" } }],
+      "placements": [
+        { "chunk": "c1", "scope": "prompt", "type": "instance" },
+        { "chunk": "c1", "scope": "answer", "type": "instance" },
+        { "chunk": "c1", "scope": "events", "type": "instance" }
+      ]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "c1 would be an instance of both prompt and answer, which both appear in events' accepts — type ambiguity"
+    }
+  },
+  {
+    "case": "accepts/type-ambiguity-on-later-write-rejected",
+    "spec": "substrate.md#spec-language — the system rejects on write any state where a chunk is instance of two types in the same scope's accepts, even when the second membership arrives later",
+    "given": [
+      {
+        "chunks": [
+          { "id": "events", "name": "events", "spec": { "accepts": ["prompt", "answer"] } },
+          { "id": "prompt", "name": "prompt", "body": { "text": "a user message" } },
+          { "id": "answer", "name": "answer", "body": { "text": "an agent response" } }
+        ],
+        "placements": [
+          { "chunk": "prompt", "scope": "events", "type": "relates" },
+          { "chunk": "answer", "scope": "events", "type": "relates" }
+        ]
+      },
+      {
+        "chunks": [{ "id": "c1", "body": { "text": "a valid prompt event" } }],
+        "placements": [
+          { "chunk": "c1", "scope": "prompt", "type": "instance" },
+          { "chunk": "c1", "scope": "events", "type": "instance" }
+        ]
+      }
+    ],
+    "when": {
+      "chunks": [],
+      "placements": [{ "chunk": "c1", "scope": "answer", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "the new membership would make c1 an instance of both prompt and answer while placed on events — type ambiguity created by a later write"
+    }
+  },
+  {
+    "case": "required/missing-key-rejected",
+    "spec": "substrate.md#spec-language — required: instance chunks must have these keys present in their body",
+    "given": [
+      {
+        "chunks": [{ "id": "tool-call", "name": "tool-call", "spec": { "required": ["program"] } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "t1", "body": { "text": "grep the sources" } }],
+      "placements": [{ "chunk": "t1", "scope": "tool-call", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "t1's body lacks the required key 'program'"
+    }
+  },
+  {
+    "case": "required/keys-present-accepted",
+    "spec": "substrate.md#spec-language — required: instances carrying the listed body keys conform",
+    "given": [
+      {
+        "chunks": [{ "id": "tool-call", "name": "tool-call", "spec": { "required": ["program"] } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "t1", "body": { "text": "grep the sources", "program": "filesystem" } }],
+      "placements": [{ "chunk": "t1", "scope": "tool-call", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["tool-call"], "expect": { "contains": ["t1"] } }]
+    }
+  },
+  {
+    "case": "unique/duplicate-body-value-rejected",
+    "spec": "substrate.md#spec-language — unique: these body keys must have values unique across all instances of this scope",
+    "given": [
+      {
+        "chunks": [{ "id": "registry", "name": "registry", "spec": { "unique": ["path"] } }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "r1", "body": { "path": "/bin/grep" } }],
+        "placements": [{ "chunk": "r1", "scope": "registry", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "r2", "body": { "path": "/bin/grep" } }],
+      "placements": [{ "chunk": "r2", "scope": "registry", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "r2's body value for 'path' duplicates r1's across registry's instances"
+    }
+  },
+  {
+    "case": "unique/distinct-values-accepted",
+    "spec": "substrate.md#spec-language — unique: distinct values across instances conform",
+    "given": [
+      {
+        "chunks": [{ "id": "registry", "name": "registry", "spec": { "unique": ["path"] } }],
+        "placements": []
+      },
+      {
+        "chunks": [{ "id": "r1", "body": { "path": "/bin/grep" } }],
+        "placements": [{ "chunk": "r1", "scope": "registry", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "r2", "body": { "path": "/bin/sed" } }],
+      "placements": [{ "chunk": "r2", "scope": "registry", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["registry"], "expect": { "contains": ["r1", "r2"] } }]
+    }
+  },
+  {
+    "case": "propagate/not-enforced-on-direct-placement",
+    "spec": "substrate.md#spec-language — propagate: when true, the spec is not enforced on direct placements on this chunk",
+    "given": [
+      {
+        "chunks": [
+          { "id": "session", "name": "session", "spec": { "propagate": true, "ordered": true, "accepts": ["prompt"] } },
+          { "id": "prompt", "name": "prompt", "body": { "text": "a user message" } }
+        ],
+        "placements": [{ "chunk": "prompt", "scope": "session", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "my-session", "name": "my-session", "body": { "text": "a working session" } }],
+      "placements": [{ "chunk": "my-session", "scope": "session", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["session"], "expect": { "contains": ["my-session"] } }]
+    }
+  },
+  {
+    "case": "propagate/enforced-on-instance-children",
+    "spec": "substrate.md#spec-language — propagate: the spec propagates to instances — anything placed on an instance of this archetype is checked against this spec",
+    "given": [
+      {
+        "chunks": [
+          { "id": "session", "name": "session", "spec": { "propagate": true, "ordered": true, "accepts": ["prompt"] } },
+          { "id": "prompt", "name": "prompt", "body": { "text": "a user message" } }
+        ],
+        "placements": [{ "chunk": "prompt", "scope": "session", "type": "relates" }]
+      },
+      {
+        "chunks": [{ "id": "my-session", "name": "my-session", "body": { "text": "a working session" } }],
+        "placements": [{ "chunk": "my-session", "scope": "session", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "ev1", "body": { "text": "not typed as a prompt" } }],
+      "placements": [{ "chunk": "ev1", "scope": "my-session", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "session's propagating accepts applies to my-session's children; ev1 is not an instance of prompt"
+    }
+  },
+  {
+    "case": "propagate/conforming-child-accepted",
+    "spec": "substrate.md#spec-language — propagate: a child conforming to the propagated contract is accepted; accepts names resolved within the archetype's own scope",
+    "given": [
+      {
+        "chunks": [
+          { "id": "session", "name": "session", "spec": { "propagate": true, "ordered": true, "accepts": ["prompt"] } },
+          { "id": "prompt", "name": "prompt", "body": { "text": "a user message" } }
+        ],
+        "placements": [{ "chunk": "prompt", "scope": "session", "type": "relates" }]
+      },
+      {
+        "chunks": [{ "id": "my-session", "name": "my-session", "body": { "text": "a working session" } }],
+        "placements": [{ "chunk": "my-session", "scope": "session", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "ev1", "body": { "text": "why does the query return duplicates?" } }],
+      "placements": [
+        { "chunk": "ev1", "scope": "prompt", "type": "instance" },
+        { "chunk": "ev1", "scope": "my-session", "type": "instance", "seq": 1 }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["my-session"], "expect": { "contains": ["ev1"] } }]
+    }
+  },
+  {
+    "case": "propagate/union-required-composes",
+    "spec": "substrate.md#spec-language — multiple propagating archetypes compose by union; the effective contract on the chunk's children is the union of both specs",
+    "given": [
+      {
+        "chunks": [
+          { "id": "logged", "name": "logged", "spec": { "propagate": true, "required": ["ts"] } },
+          { "id": "attributed", "name": "attributed", "spec": { "propagate": true, "required": ["author"] } },
+          { "id": "journal", "name": "journal", "body": { "text": "instance of both archetypes" } }
+        ],
+        "placements": [
+          { "chunk": "journal", "scope": "logged", "type": "instance" },
+          { "chunk": "journal", "scope": "attributed", "type": "instance" }
+        ]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "e1", "body": { "ts": "2026-07-30T10:00Z" } }],
+      "placements": [{ "chunk": "e1", "scope": "journal", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "the union contract requires both 'ts' and 'author'; e1 lacks 'author'"
+    }
+  },
+  {
+    "case": "propagate/union-required-satisfied-accepted",
+    "spec": "substrate.md#spec-language — multiple propagating archetypes compose by union; a child satisfying every field of the union conforms",
+    "given": [
+      {
+        "chunks": [
+          { "id": "logged", "name": "logged", "spec": { "propagate": true, "required": ["ts"] } },
+          { "id": "attributed", "name": "attributed", "spec": { "propagate": true, "required": ["author"] } },
+          { "id": "journal", "name": "journal", "body": { "text": "instance of both archetypes" } }
+        ],
+        "placements": [
+          { "chunk": "journal", "scope": "logged", "type": "instance" },
+          { "chunk": "journal", "scope": "attributed", "type": "instance" }
+        ]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "e1", "body": { "ts": "2026-07-30T10:00Z", "author": "jc" } }],
+      "placements": [{ "chunk": "e1", "scope": "journal", "type": "instance" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["journal"], "expect": { "contains": ["e1"] } }]
+    }
+  },
+  {
+    "case": "propagate/union-accepts-merges-across-archetypes",
+    "spec": "substrate.md#spec-language — union composition: each archetype's accepts names are resolved within that archetype's own scope; the effective contract is the union of both specs",
+    "given": [
+      {
+        "chunks": [
+          { "id": "arch-a", "name": "arch-a", "spec": { "propagate": true, "accepts": ["x"] } },
+          { "id": "x", "name": "x", "body": { "text": "type x, defined on arch-a" } },
+          { "id": "arch-b", "name": "arch-b", "spec": { "propagate": true, "accepts": ["y"] } },
+          { "id": "y", "name": "y", "body": { "text": "type y, defined on arch-b" } },
+          { "id": "box", "name": "box", "body": { "text": "instance of both archetypes" } }
+        ],
+        "placements": [
+          { "chunk": "x", "scope": "arch-a", "type": "relates" },
+          { "chunk": "y", "scope": "arch-b", "type": "relates" },
+          { "chunk": "box", "scope": "arch-a", "type": "instance" },
+          { "chunk": "box", "scope": "arch-b", "type": "instance" }
+        ]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "an instance of y only" } }],
+      "placements": [
+        { "chunk": "c1", "scope": "y", "type": "instance" },
+        { "chunk": "c1", "scope": "box", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["box"], "expect": { "contains": ["c1"] } }]
+    }
+  },
+  {
+    "case": "validation/effective-contract-own-plus-propagated",
+    "spec": "substrate.md#spec-validation — the effective contract is the union of the scope's own non-propagating spec and the propagating spec of every archetype the scope is instance of",
+    "given": [
+      {
+        "chunks": [
+          { "id": "base", "name": "base", "spec": { "propagate": true, "required": ["b"] } },
+          { "id": "holder", "name": "holder", "spec": { "required": ["a"] } }
+        ],
+        "placements": [{ "chunk": "holder", "scope": "base", "type": "instance" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "a": "present" } }],
+      "placements": [{ "chunk": "c1", "scope": "holder", "type": "instance" }]
+    },
+    "then": {
+      "rejected": true,
+      "reason": "the effective contract on holder's children unions holder's own required ['a'] with base's propagated required ['b']; c1 lacks 'b'"
+    }
+  },
+  {
+    "case": "dual-placement/same-declaration-two-pass",
+    "spec": "substrate.md#archetypes + #mutations-and-validation — validation runs against the post-write state: a chunk and its dual placement (scope + type) may appear in the same declaration without ordering failure",
+    "given": [
+      {
+        "chunks": [
+          { "id": "list", "name": "list", "spec": { "ordered": true, "accepts": ["item"] } },
+          { "id": "item", "name": "item", "body": { "text": "a list item type" } }
+        ],
+        "placements": [{ "chunk": "item", "scope": "list", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "c1", "body": { "text": "scope placement listed before the type placement, deliberately" } }],
+      "placements": [
+        { "chunk": "c1", "scope": "list", "type": "instance", "seq": 1 },
+        { "chunk": "c1", "scope": "item", "type": "instance" }
+      ]
+    },
+    "then": {
+      "reads": [{ "scope": ["list"], "expect": { "contains": ["c1"] } }]
+    }
+  },
+  {
+    "case": "peers/placement-onto-non-resident-scope-commits",
+    "spec": "substrate.md#peers — chunk ids are globally unique, so a placement in one db can reference a scope chunk in another; residency is not a write requirement, the db contributes its own chunks placed on that root, and the root's absence here surfaces as read metadata",
+    "given": [
+      {
+        "chunks": [{ "id": "note", "name": "note", "body": { "text": "lives here, points at a peer's scope" } }],
+        "placements": []
+      }
+    ],
+    "when": {
+      "placements": [{ "chunk": "note", "scope": "peer-scope", "type": "relates" }]
+    },
+    "then": {
+      "reads": [
+        { "scope": ["peer-scope"], "expect": { "ids": ["note"], "unresolved": ["peer-scope"] } }
+      ]
+    }
+  },
+  {
+    "case": "peers/non-resident-scope-holds-the-placement-until-it-resolves",
+    "spec": "substrate.md#peers — the placement is recorded whether or not the referenced chunk is resident; once the scope resolves, the read composes normally and nothing is unresolved",
+    "given": [
+      {
+        "chunks": [{ "id": "note", "name": "note", "body": { "text": "placed before the scope exists here" } }],
+        "placements": []
+      },
+      {
+        "placements": [{ "chunk": "note", "scope": "peer-scope", "type": "relates" }]
+      }
+    ],
+    "when": {
+      "chunks": [{ "id": "peer-scope", "name": "peer-scope" }]
+    },
+    "then": {
+      "reads": [{ "scope": ["peer-scope"], "expect": { "ids": ["note"], "unresolved": [] } }]
+    }
+  }
+]
