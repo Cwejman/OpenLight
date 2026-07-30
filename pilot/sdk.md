@@ -147,9 +147,11 @@ type ScopeOpts = {
   branch?: string
   at?: CommitId
   match_?: string
-  exclude?: ChunkId[]   // negation — set difference; roots boundary-checked
-  limit?: number        // ordered scopes default tail-first (substrate.md)
-  offset?: number
+  exclude?: ChunkId[]   // negation — set difference, either placement type;
+                        // roots boundary-checked
+  limit?: number        // a single ordered scope reads tail-first: latest
+  offset?: number       // entries by default, offset pages backward, the
+                        // window itself ascending by seq (db.md)
   include?: Includes    // { body: false } = survey read, no bodies
 }
 
@@ -169,6 +171,7 @@ type Commit = {
   timestamp: string
   message?: string
   process_id?: ProcessId   // which run caused this commit; absent for host-initiated commits
+  branch: string           // which branch it landed on — the event's only carrier
   chunks_modified: ChunkId[]
   placements_modified: [ChunkId, ChunkId][]
 }

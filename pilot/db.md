@@ -20,10 +20,15 @@ Methods on the `Db` handle. Synchronous in surface (SQLite calls block); change 
 ### Lifecycle
 
 ```rust
-Db::open(project_path: &Path) -> Result<Db, OpenError>
+Db::open(project_path: &Path)           -> Result<Db, OpenError>
+Db::open_read_only(project_path: &Path) -> Result<Db, OpenError>
 ```
 
-Initializes the SQLite connection (creates the file with migrations if fresh, opens with `journal_mode = WAL` if existing), seeds the minimum the db needs, returns the handle. Closes via `Drop`.
+Both take the *project* path; the database file is `<project>/.ol/db`. Closes via `Drop`.
+
+`open` initializes the SQLite connection (creates the file with migrations if fresh, opens with `journal_mode = WAL` if existing), seeds the minimum the db needs, returns the handle.
+
+`open_read_only` is the peer-mount open ([`host.md`](host.md#boot-sequence) boot step 4). It opens with `SQLITE_OPEN_READ_ONLY` and **never creates, migrates, or seeds**: a missing file is `MissingDatabase`, a file whose schema version differs from this build's is `SchemaVersionSkew` (peer migration is a v0.2 concern — see *Settled choices*), and every write op refuses with `ReadOnly` before reaching SQLite — the open flag is the backstop, the explicit refusal is the legible error. The handle carries a change stream that never fires: a read-only mount contributes reads, not events.
 
 The db's own bootstrap is small: one row in `branches` (the bootstrap branch, `main`) and one initial commit in `commits`. The substrate's archetypes for branches and commits, and the scope-anchors `db/branches` and `db/commits`, are **projected** by the read layer with hardcoded shapes — not stored as chunks. Field content (archetypes, user data, project-specific scopes — whatever this particular db holds) is not the db's concern; the host's bootstrap routine writes those via `db.commit()` after `Db::open` returns.
 
@@ -41,7 +46,7 @@ impl Db {
 }
 ```
 
-`scope` returns the intersection of the named scopes — chunks placed on every one of them. `get` returns a single chunk by id, or `None` if not present in current state.
+`scope` returns the intersection of the named scopes — chunks placed on every one of them, by either placement type: a chunk placed `relates` on every named scope is at the intersection like an `instance` one (substrate.md, *Scope*). The `in_scope_instance` / `in_scope_relates` counts report the split. `get` returns a single chunk by id, or `None` if not present in current state.
 
 `ScopeOpts`:
 
@@ -50,10 +55,13 @@ ScopeOpts
   branch: BranchName            default "main"
   at: Option<CommitId>          time travel
   match_: Option<String>        FTS5 filter applied within the intersection
+  exclude: Vec<ChunkId>         negation — scope roots subtracted
   limit: Option<usize>          pagination
   offset: Option<usize>
   include: Includes             what to populate
 ```
+
+`exclude` subtracts: a chunk placed on any excluded scope — either placement type — is out of the intersection and out of its counts (substrate.md, *Negation*).
 
 `ReadOpts` is the single-chunk subset — `get` resolves one chunk, so the scope-shaping knobs don't apply:
 
@@ -68,6 +76,8 @@ ReadOpts
 `scopes` may be empty. Empty scope means the whole field — every chunk qualifies for the intersection (vacuous truth), composed with `match_`, `Includes`, and `limit` like any other scope. Pagination is the guardrail against unbounded fetches, not a runtime restriction.
 
 Under empty scope the counts collapse: `in_scope = in_scope_instance = in_scope_relates = total` (the empty conjunction holds for both placement types). The instance/relates split is degenerate here — reported for consistency with the non-empty case, not as useful attribution.
+
+**Order and pagination.** When the read names exactly one scope and that scope's effective contract is `ordered`, the window is **tail-first**: the default is the latest entries and `offset` pages backward from the end (`limit: 10, offset: 10` returns the ten entries before the last ten). Within the window the chunks always read ascending by `seq` — the query sorts descending and the window is reversed before it returns. Every other read (empty scope, several scopes, or an unordered one) pages forward in `chunk_id` order. Positions are set positions, not seq values: sparse seqs leave no gaps in a window.
 
 ### Result
 
@@ -179,11 +189,12 @@ The result is the `Commit` itself — a chunk-shaped artifact:
 ```
 Commit
   id, parent_id?, timestamp, message?, process_id?
+  branch: BranchName                           which branch the commit landed on
   chunks_modified:     [ChunkId]
   placements_modified: [(ChunkId, ChunkId)]    (chunk_id, scope_id) entered or left
 ```
 
-`chunks_modified` and `placements_modified` are the deltas — for caller convenience and for filtering on the change stream.
+`chunks_modified` and `placements_modified` are the deltas — for caller convenience and for filtering on the change stream. `branch` is the event's only carrier of where the commit landed, so `SubscribeOpts.branch` has something to filter on.
 
 ### Branch operations
 
@@ -194,7 +205,7 @@ impl Db {
 }
 ```
 
-`create_branch` makes a new branch pointer at an existing commit. `delete_branch` removes the pointer; commits remain (lossless). Both emit on the change stream — branch graph mutations surface alongside commits.
+`create_branch` makes a new branch pointer at an existing commit and **materializes the branch's current state**: the version walk at the fork commit (the same ancestry replay `at:` reads use) is written into `current_chunks` and `current_placements` under the new name, in the same transaction as the pointer — reads on the fresh branch work immediately, without a first commit. `delete_branch` removes the pointer and drops that branch's current-state rows; commits remain (lossless). Both emit on the change stream — branch graph mutations surface alongside commits.
 
 ### The change stream
 
@@ -228,6 +239,9 @@ NameCollision { scope_id, name }       name uniqueness rule
 NotFound { kind, id }                  chunk, branch, or commit not present
 MalformedDeclaration(reason)           declaration self-inconsistent
 WriteToVirtualChunk { id }             declaration targets a projected chunk
+ReadOnly                               write op on a handle from open_read_only
+MissingDatabase { path }               read-only open found no file (never creates)
+SchemaVersionSkew { found, expected }  read-only open found another version
 IoError(SqliteError)                   underlying SQLite error
 ```
 
@@ -413,33 +427,29 @@ Removal is per-branch.
 
 #### Intersection (the chunks)
 
+Membership is a subquery over `current_placements` with no type filter — `relates` places a chunk at the intersection like `instance` does:
+
 ```sql
 SELECT cc.*
 FROM current_chunks cc
-JOIN current_placements cp
-  ON cp.chunk_id = cc.chunk_id AND cp.branch = cc.branch
 WHERE cc.branch = :branch
-  AND cp.scope_id IN (:scope_ids)
-  AND cp.type = 'instance'
-GROUP BY cc.chunk_id
-HAVING COUNT(DISTINCT cp.scope_id) = :n_scopes;
+  AND cc.chunk_id IN (
+    SELECT cp.chunk_id FROM current_placements cp
+    WHERE cp.branch = :branch AND cp.scope_id IN (:scope_ids)
+    GROUP BY cp.chunk_id
+    HAVING COUNT(DISTINCT cp.scope_id) = :n_scopes);
 ```
 
-With `match_`, intersect against FTS:
+The same shape with `AND cp.type = :type` inside the subquery gives `in_scope_instance` and `in_scope_relates`.
+
+`exclude` and `match_` append conditions to the same WHERE — one filter chain, shared by the counts and the chunk fetch:
 
 ```sql
-SELECT cc.*, fts.rank
-FROM chunk_fts fts
-JOIN current_chunks cc ON cc.rowid = fts.rowid
-JOIN current_placements cp
-  ON cp.chunk_id = cc.chunk_id AND cp.branch = cc.branch
-WHERE chunk_fts MATCH :query
-  AND cc.branch = :branch
-  AND cp.scope_id IN (:scope_ids)
-  AND cp.type = 'instance'
-GROUP BY cc.chunk_id
-HAVING COUNT(DISTINCT cp.scope_id) = :n_scopes
-ORDER BY fts.rank;
+  AND cc.chunk_id NOT IN (
+    SELECT chunk_id FROM current_placements
+    WHERE branch = :branch AND scope_id IN (:exclude_ids))     -- exclude
+  AND cc.rowid IN (
+    SELECT rowid FROM chunk_fts WHERE chunk_fts MATCH :query)   -- match_
 ```
 
 **Empty scope.** When `scopes` is empty, `in_scope` is "every chunk on this branch" — the placement join is dropped:
@@ -451,9 +461,9 @@ WHERE cc.branch = :branch
 LIMIT :limit OFFSET :offset;
 ```
 
-With `match_` added, intersect against FTS as above but again without the placement join.
+With `match_` added, intersect against FTS as above but again without the membership subquery.
 
-For ordered scopes (non-empty case), `ORDER BY cp.seq` with `LIMIT/OFFSET`. Pagination is position-based on the ordered result set, not seq-value-based: `LIMIT 10 OFFSET 20` returns the chunks at positions 21–30 in the seq order, regardless of how sparse seq values are.
+**Ordered window.** For a single ordered scope, the chunk fetch joins that scope's placement and pages from the tail — `ORDER BY ord.seq DESC` with `LIMIT/OFFSET`, the returned rows reversed in Rust so the window reads ascending. Every other fetch orders by `cc.chunk_id`. Pagination is position-based on the ordered result set, not seq-value-based: `LIMIT 10 OFFSET 20` returns the chunks at positions 21–30 counted back from the latest, regardless of how sparse seq values are.
 
 #### Dimensions
 
@@ -465,7 +475,6 @@ WITH in_scope AS (
   FROM current_placements cp
   WHERE cp.branch = :branch
     AND cp.scope_id IN (:scope_ids)
-    AND cp.type = 'instance'
   GROUP BY cp.chunk_id
   HAVING COUNT(DISTINCT cp.scope_id) = :n_scopes
 )
@@ -616,11 +625,13 @@ pilot/db/
                              Declaration, ChunkDeclaration, PlacementSpec,
                              ReadOpts, CommitOpts, BranchName, Branch, SubscribeOpts
     errors.rs              — per-op error enums (OpenError, ReadError, WriteError, ...) via thiserror
-    schema.rs              — embedded DDL via include_str! + rusqlite_migration list
+    schema.rs              — embedded DDL via include_str! + rusqlite_migration list;
+                             latest_version() derives this build's user_version
     schema.sql             — DDL: tables, indexes, FTS triggers
     id.rs                  — ULID-shaped id generation (`ulid` crate)
-    db.rs                  — Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit> }
-                             Db::open, Drop
+    db.rs                  — Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit>,
+                                  read_only: bool }
+                             Db::open, Db::open_read_only, require_writable, Drop
     validate.rs            — Rule enum + check_commit; effective-contract composition
     virtual_chunks.rs      — db/branches / db/commits projection (used by ops::scope, ops::get)
     bootstrap.rs           — initial seed on fresh open (main branch + initial commit)
@@ -685,6 +696,7 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 ### Settled choices
 
 - **`rusqlite_migration`** with the full schema as the v1 migration.
+- **Schema version = `user_version`.** The migration list owns SQLite's `user_version` pragma; that number is the db's schema version. The version this build writes is derived by running the list against an in-memory db (`schema::latest_version()`) — no constant duplicating the DDL. `open_read_only` compares a peer's file against it and refuses skew; the host refuses the same mismatch a step earlier, at cascade-walk time ([`host.md`](host.md#boot-sequence) steps 3–4).
 - **JSON for body and spec.** Body is `serde_json::Value`. Spec is a typed struct with `#[serde(default)]`.
 - **Bootstrap idempotence.** A `meta` table with a single bootstrap-version row; `open()` checks before seeding.
 

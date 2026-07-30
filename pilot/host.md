@@ -68,7 +68,8 @@ host/tab
   — The root of a tile tree. Workspaces are tabs; one term, one archetype.
 
 host/tile
-  spec: { ordered: true }
+  spec: { propagate: true, ordered: true }   — propagate so seq orders children
+                                               within each tile, per substrate.md
   body:
     split node:  { direction: 'horizontal'|'vertical', ratio }
     leaf node:   (empty; mount expressed through placement)
@@ -102,7 +103,7 @@ v0.1 walks one geometry — tabs (below). It is one lens on the chunks, not the 
 
 Binary split tree. Same primitive the earlier pilot used; the model survived the redesign because it is the right one.
 
-- A **split** tile holds two children — ordered by `seq`. Direction and ratio live in its body.
+- A **split** tile holds two children — ordered by `seq`. Direction and ratio live in its body; `direction: 'horizontal'` divides the width (children side by side), `'vertical'` divides the height (children stacked); `ratio` is the seq-first child's share of the split axis, clamped inside (0, 1).
 - A **leaf** tile holds no children. Its rendering is derived from whichever process is placed `relates` on it.
 
 The host walks the tree of the active tab, positions webviews as rectangles inside the window, draws rounded-corner cards around each leaf. A composition (a container process with nested tiles) renders as an outer rounded card; its inner tiles render with borders only. Tiling never happens inside a webview. The host owns every rectangle.
@@ -140,7 +141,7 @@ For the pilot, CSS covers the aesthetic (`backdrop-filter` for blur); content-de
 
 One hop. One protocol shape.
 
-A webview program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel via `window.__wry_ipc.postMessage(<json>)`. The host registers `WebView::set_ipc_handler` per webview at mount time; each invocation parses the JSON, attaches a `Context { process_id }` from the host's webview→process registry, calls the matching engine function, and resolves the call by injecting `webview.evaluate_script("__sdk.resolve(<id>, <payload>)")`.
+A webview program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel via `window.__wry_ipc.postMessage(<json>)`. The host registers `WebView::set_ipc_handler` per webview at mount time; each invocation parses the JSON, attaches a `Context { process_id }` from the host's webview→process registry, calls the matching engine function, and resolves the call by injecting `webview.evaluate_script("__sdk.resolve(<id>, <payload>)")`. The host installs the `window.__wry_ipc` name itself — an initialization-script alias over the `window.ipc.postMessage` wry injects. `<payload>` is the full response envelope (`{id, result|error}`), so the SDK's shape-based demultiplexing holds on both channels.
 
 Unsolicited events from the engine ride the same channel in the other direction: `webview.evaluate_script("__sdk.event(<payload>)")`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape on the JS side. See [`pilot/engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
 
@@ -230,7 +231,7 @@ Host startup has a fixed order:
 1. **Initialize tokio runtime.** The engine and runtime providers need it; tao's event loop runs on the main thread.
 2. **Resolve active project path.** From CLI args or working directory.
 3. **Walk the mounts cascade.** Read the active project's `.ol/project.toml`; for each `[[mounts]]` entry, read that project's `.ol/project.toml` in turn; recurse. Deduplicate by canonical absolute path. Detect cycles; reject with an error. The host project and engine project must appear in the resolved cascade (most projects' data references their archetypes); if either is missing, refuse with a clear error pointing to the missing entry. v0.1 also refuses any peer whose db schema version differs from the active project's (migration is a v0.2 concern).
-4. **Open all dbs.** `Db::open(<active>/.ol/db)` read-write; `Db::open(<peer>/.ol/db)` read-only for each peer in the resolved cascade.
+4. **Open all dbs.** `Db::open(<active>)` read-write; `Db::open_read_only(<peer>)` for each peer in the resolved cascade. Both take the *project* path — the db resolves `.ol/db` beneath it. The read-only open never creates, migrates, or seeds, and refuses a schema version other than this build's — step 3's rule, enforced again at the file ([`db.md`](db.md#lifecycle)).
 5. **Open the engine.** `Engine::open()` returns `(Engine, mpsc::Receiver<HostCmd>)`. Host keeps the receiver to drain on its event loop.
 6. **Register runtime providers.** `engine.register_runtime("vm", Arc::new(VmProvider::new(...)))` and `engine.register_runtime("webview", Arc::new(WebviewProvider::new(host_cmd_tx, ...)))`. Both providers are host-crate types; engine ships no runtime implementations.
 7. **Configure the VM.** Hand the VM provider the FS-mount table: active project at `/active/` read-write, each peer at `/peers/<project-id>/` read-only. The VM starts; programs spawned later run inside it.
@@ -260,6 +261,8 @@ The cascade walk and FS-mount-table assembly are host code (file-aware). The mou
 - **Cross-workspace wrap policy.** When wrapping tiles into a composition, if a child is visible in another tab, what happens to the other tab's view.
 - **Selection on padding.** Gesture for selecting a subtree of tiles to wrap, save as recipe, or delete as a group.
 - **Native visual effects.** The pilot uses CSS for blur and glow; native compositor effects (pixel-readback, GPU blur) are later.
+- **Direct-manipulation grammar.** Drag-to-resize, split creation and removal gestures, minimum tile sizes. pilot.md names the host as owner of tile geometry *and its direct manipulation*, but the gestures are unspecced — no test can be written for them yet. The geometry walk below stands testable without this layer; spec it before coding it.
+- **Visual tokens.** "Light padding," "small gap," and the rounding carry no values. The walk takes them as parameters — a pure function of (tree, viewport, spacing) — so tests parametrize over them; the values themselves settle by eye when the window exists.
 
 ---
 

@@ -85,13 +85,15 @@ A chunk's spec defines the structural contract for its instances. The system enf
 
 **`ordered`** — when true, every instance placement on this scope must have a seq value. Auto-assigned on append if omitted. Explicit seq for specific positioning.
 
-**`accepts`** — instance chunks must themselves be instance of one of the listed types. Names are resolved within the scope — `prompt` means the `prompt` chunk placed on this scope, not a global `prompt`. A chunk must not be an instance of two types that both appear in the same scope's `accepts` list — the system rejects this on write to prevent type ambiguity.
+**`accepts`** — instance chunks must themselves be instance of one of the listed types. Names are resolved within the scope — `prompt` means the `prompt` chunk placed on this scope, not a global `prompt`. A chunk must not be an instance of two types that both appear in the same `accepts` list — the system rejects this on write to prevent type ambiguity; when several specs compose, each list is judged on its own.
 
 **`required`** — instance chunks must have these keys present in their body.
 
 **`unique`** — these body keys must have values that are unique across all instances of this scope.
 
-**`propagate`** — when true, the spec is not enforced on direct placements on this chunk. Instead, it propagates to instances: anything placed on an instance of this archetype is checked against this spec. Multiple propagating archetypes compose by union — if a chunk is an instance of two archetypes that both have `propagate: true`, the effective contract on that chunk's children is the union of both specs. Each archetype's `accepts` names are resolved within that archetype's own scope.
+**`propagate`** — when true, the spec is not enforced on direct placements on this chunk. Instead, it propagates to instances: anything placed on an instance of this archetype is checked against this spec.
+
+**Composition of propagating specs.** The effective contract for chunks placed `instance` on a scope is one merged spec, folded **field-wise** from the scope's own non-propagating spec and the propagating spec of every archetype the scope is transitively `instance` of. A field absent from every contributing spec is unconstrained. `accepts` composes as the union of the contributing specs' resolved type sets — a chunk passes if it is an instance of at least one type in the union; a spec that omits `accepts` contributes no restriction, and `accepts` is enforced only when at least one contributing spec declares it. Type ambiguity is judged per contributing spec's list, not across the merged union. `required` and `unique` compose as the union of key sets — every key binds. `ordered` composes as logical OR. The asymmetry is by design: `accepts` is a license (∃ over types), the others are obligations (∀ over keys); a scope carrying several archetypes plays several roles, and children need only be legitimate content of *some* role while honoring every role's obligations.
 
 The distinction: **`required` describes what instances ARE** (self-enforcement, no propagate). **`accepts` describes what instances CONTAIN** (content contract, propagate). `ordered` can be either — ordered direct members (no propagate, e.g. `context`) or ordered content on instances (propagate, e.g. `session`).
 
@@ -101,7 +103,7 @@ An archetype is a chunk whose spec defines a type contract. There is no "archety
 
 Archetypes enable typed interfaces. The shell can require "I need an instance of session" — meaning a chunk placed on the `session` archetype, conforming to its spec.
 
-**Type definitions use `relates`.** Type-defining chunks (like `prompt` on `session`) are placed as `relates`, not `instance`. This keeps them out of ordered content (no seq required) while remaining resolvable for `accepts` name resolution. Content chunks use `instance` with dual placement — on the scope (with seq) and on the archetype (for type membership).
+**Type definitions use `relates`.** Type-defining chunks (like `control` on `session`) are placed as `relates`, not `instance`. This keeps them out of ordered content (no seq required) while remaining resolvable for `accepts` name resolution. Content chunks use `instance` with dual placement — on the scope (with seq) and on the archetype (for type membership).
 
 **Dual placement enforcement.** A chunk with dual placement (scope + type) needs its type-membership placement visible before its scope placement is enforced — otherwise the `accepts` check can't find the type membership. The substrate's two-pass write-then-validate (see [Mutations and validation](#mutations-and-validation)) makes this work.
 
@@ -113,50 +115,31 @@ Mutations are atomic. A declaration — one or many chunks, with their placement
 
 The spec language defines what conformance means; the substrate enforces conformance at write time.
 
-For a chunk being placed `instance` on a scope, the **effective contract** is the union of:
+For a chunk being placed `instance` on a scope, the **effective contract** is composed as described under *Composition of propagating specs* above — the scope's own non-propagating spec folded with the propagating spec of every archetype the scope is itself `instance` of (transitively), each archetype's `accepts` names resolved within that archetype's own scope.
 
-- The scope's own non-propagating spec, if any.
-- The propagating spec of every archetype the scope is itself `instance` of (transitively). `accepts` names from each archetype are resolved within that archetype's own scope.
-
-The chunk must satisfy every field of that union, by the semantics defined under *Spec Language* above: `ordered` (a `seq` on placement, auto-assigned if omitted), `accepts` (instance of at least one listed type — being instance of two is type ambiguity, rejected), `required` (every listed key present in body), `unique` (each listed body value unique across the scope's instances).
+The chunk must satisfy every field the contract carries — a field absent from every contributing spec is unconstrained: `ordered` (a `seq` on placement, auto-assigned if omitted), `accepts` (instance of at least one type in the union — being instance of two types from the same contributing spec's list is type ambiguity, rejected), `required` (every listed key present in body), `unique` (each listed body value unique across the scope's instances).
 
 Validation runs against the post-write state of the declaration: all placements declared together are recorded before any spec is checked. This lets a chunk and its dual placement (on a scope and on its type) appear in the same declaration without ordering failure.
 
 #### Name uniqueness
 
-Within a scope, the names of all chunks placed `instance` on it — when name is non-null — are unique. The same chunk may carry the same name across multiple scopes; two different chunks may not collide on a name within any single scope. Enforced at placement-write time.
+Within a scope, the names of all chunks placed `instance` on it — when name is non-null — are unique. The same chunk may carry the same name across multiple scopes; two different chunks may not collide on a name within any single scope. `relates` placements are exempt: a type-defining chunk placed `relates` may share its name with instance content of the same scope without collision. Enforced at placement-write time.
 
 ### Example: Session archetype
 
 ```
 chunk: session
   name: "session"
-  spec: { propagate: true, ordered: true, accepts: ["prompt", "answer", "tool-call", "tool-result", "context"] }
-  body: { text: "A sequence of agent interaction events" }
+  spec: { propagate: true, ordered: true }
+  body: { text: "An ordered sequence of agent turns" }
 
-chunk: prompt (placed on session, relates)
-  name: "prompt"
-  body: { text: "A user message to an agent" }
-
-chunk: answer (placed on session, relates)
-  name: "answer"
-  body: { text: "An agent response" }
-
-chunk: tool-call (placed on session, relates)
-  name: "tool-call"
-  spec: { required: ["program"] }
-  body: { text: "An agent invoking a tool" }
-
-chunk: tool-result (placed on session, relates)
-  name: "tool-result"
-  spec: { required: ["program"] }
-  body: { text: "The result of a tool invocation" }
-
-chunk: context (placed on session, relates)
-  name: "context"
-  spec: { ordered: true }
-  body: { text: "The knowledge context for a turn" }
+chunk: control (placed on session, relates)
+  name: "control"
+  spec: { required: ["signal"] }
+  body: { text: "A steering signal — pause, resume, adjust" }
 ```
+
+The session declares no `accepts`: its content is deliberately wildcard (see [`session.md`](session.md)). An `accepts` list here is how a scope would restrict what may enter it.
 
 An actual session instance:
 
@@ -165,18 +148,14 @@ chunk: my-session (placed on session, instance)
   name: "my-session"
   body: { text: "Debugging the scope algorithm", started: "2026-04-04T10:00Z", agent: "claude" }
 
-chunk: (placed on my-session, instance, seq: 1; placed on prompt, instance)
-  body: { text: "Why is the scope query returning duplicates?" }
+chunk: (placed on my-session, instance, seq: 1)
+  body: { program: "agent", status: "done" }
 
-chunk: (placed on my-session, instance, seq: 2; placed on tool-call, instance)
-  body: { text: "grep -n 'active' src/commands/scope.zig", program: "filesystem" }
-
-chunk: (placed on my-session, instance, seq: 3; placed on tool-result, instance)
-  body: { text: "src/commands/scope.zig:42: if (active) ...", program: "filesystem" }
-
-chunk: (placed on my-session, instance, seq: 4; placed on answer, instance)
-  body: { text: "The scope query wasn't filtering by active=1. Fixed." }
+chunk: (placed on my-session, instance, seq: 2; placed on control, instance)
+  body: { signal: "pause" }
 ```
+
+The seq-1 chunk is a **turn** — the agent invocation itself. Its prompt is an argument on it and its answer a chunk on its frame, so neither is placed on the session. The seq-2 control shows dual placement: on the session (with `seq`, since the session is `ordered`) and on its type, whose non-propagating `required` checks the chunk itself.
 
 ## History
 

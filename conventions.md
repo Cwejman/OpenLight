@@ -32,6 +32,7 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 - **Declarative helpers.** Prefer `map`/`filter`/`reduce`/`some`/`every` over mutating through `for`-loops; a simple ternary over an `if` that mutates, when it stays readable.
 - **Comments for the non-obvious only.** Race semantics, ordering invariants, primitive quirks — a handful per crate; names carry the rest.
 - **No builders.** Direct struct construction, with free-function helpers where useful.
+- **TDD, explicit.** Every build unit is planned before coded, and driven by tests written from the spec first — the suite is the spec's enforcement arm. If a test can't be written from the spec, the spec is what needs work; code never advances past what the spec carries, so the two cannot diverge silently.
 
 ## Subagent grounding
 

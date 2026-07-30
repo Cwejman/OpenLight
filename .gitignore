@@ -1,39 +1,8 @@
-# Build artifacts
-browser/olb
-openlight/zig-out/
-openlight/zig-cache/
-
-# IDE
-.idea/
-
-# Client state (active branch is per-user)
-.openlight/config.json
-
-# Generated caches (summaries are regenerable)
-.openlight/cache/
-
-# Zig cache
-.zig-cache/
-
-# Playwright
-.playwright-mcp/
-
-# Dependencies
+target/
 node_modules/
-
-# Emacs
-.#*
-
-# Wiki build output
-_site/
-
-# SQLite WAL sidecars (the db file itself is tracked)
-db-wal
-db-shm
-
-# macOS
 .DS_Store
-
-# Claude Code local state
-.claude/worktrees/
-.claude/scheduled_tasks.lock
+.#*
+*.db-shm
+*.db-wal
+db-shm
+db-wal
