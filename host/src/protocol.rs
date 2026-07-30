@@ -228,6 +228,16 @@ pub fn event_script(event_json: &str) -> String {
     format!("__sdk.event({});", escape_for_js(event_json))
 }
 
+/// Route an engine transport payload to its delivery script by message shape
+/// (sdk.md: responses carry `id`, events carry `event` and no `id`).
+pub fn delivery_script(payload: &Value) -> String {
+    let json = payload.to_string();
+    match payload.get("id").and_then(Value::as_u64) {
+        Some(id) => resolve_script(id, &json),
+        None => event_script(&json),
+    }
+}
+
 // JSON is a valid JS expression except U+2028/U+2029, which are literal
 // line terminators in JS source — escape them before script injection.
 fn escape_for_js(json: &str) -> String {
@@ -500,6 +510,14 @@ mod tests {
             event_script(r#"{"event":"scope_changed","subscriptionId":"sub_1"}"#),
             r#"__sdk.event({"event":"scope_changed","subscriptionId":"sub_1"});"#
         );
+    }
+
+    #[test]
+    fn delivery_routes_by_message_shape() {
+        let response = json!({"id": 3, "result": {}});
+        assert!(delivery_script(&response).starts_with("__sdk.resolve(3, "));
+        let event = json!({"event": "scope_changed", "subscriptionId": "sub_1"});
+        assert!(delivery_script(&event).starts_with("__sdk.event("));
     }
 
     #[test]

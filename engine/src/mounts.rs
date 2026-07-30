@@ -15,7 +15,7 @@ use std::sync::{Arc, Mutex};
 /// for every federation-referenced id, and treating anchors as non-resident on
 /// every federated read. Recorded as spec drift (engine.md "dbs are dumb" vs
 /// db.md storage-time integrity) in the build report.
-pub(crate) const ANCHOR_KEY: &str = "engine/anchor";
+pub const ANCHOR_KEY: &str = "engine/anchor";
 
 pub(crate) fn is_anchor(item: &ChunkItem) -> bool {
     item.body

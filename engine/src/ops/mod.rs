@@ -3,6 +3,7 @@ mod cancel;
 mod commit;
 mod get;
 mod read_batch;
+mod resolve;
 mod run;
 mod scope;
 mod subscribe;

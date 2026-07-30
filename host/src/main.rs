@@ -1,8 +1,10 @@
-//! The hollow host rim — deliberately thin, verified by running. One tao
-//! window; a wry child webview per leaf of the demo tile tree, positioned by
-//! `geometry::walk`; per-webview IPC handlers (host.md §Transport)
-//! dispatching to the `FixtureStub`. Everything with logic lives in the pure
-//! modules; this file only wires tao/wry to them.
+//! The host rim — deliberately thin, verified by running. One tao window; a
+//! wry child webview per leaf of the demo tile tree, positioned by
+//! `geometry::walk`; per-webview IPC handlers (host.md §Transport) dispatching
+//! through the `EngineApi` seam. The rim chooses the implementor at runtime:
+//! the real `engine::Engine` behind `EngineAdapter` by default (the swap,
+//! board.md build track step 5), the `FixtureStub` under `--fixture`.
+//! Everything with logic lives in the pure modules; this file wires tao/wry.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -10,29 +12,25 @@ use std::sync::Arc;
 use tao::{
     dpi::{LogicalPosition, LogicalSize},
     event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoopBuilder, EventLoopProxy},
+    event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopProxy},
     window::{Window, WindowBuilder},
 };
 use wry::WebViewBuilder;
 
+use db::ChunkId;
+use engine::{HostCmd, ProcessId, TerminalReason};
+use host::adapter::EngineAdapter;
+use host::boot::{self, Booted, TileProcess};
 use host::compose::{self, ProcessInfo};
-use host::dispatch::{self, Context, Outcome, Parsed};
+use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
-use host::geometry::{self, Rect, Spacing, Tile};
+use host::geometry::{self, Direction, Rect, Spacing, Tile};
 use host::protocol;
 use host::stub::FixtureStub;
 
 // Visual tokens are an open (host.md §What Is Open) — parameters here,
 // values settled by eye.
 const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
-
-/// engine.md §Key mechanics: the engine side never holds a `WebView`; script
-/// evaluation crosses to the main loop as data, addressed by process. Same
-/// shape and key as the engine's `HostCmd::EvaluateScript`; the real engine's
-/// set adds webview mount and unmount.
-enum HostCmd {
-    EvaluateScript { process_id: String, script: String },
-}
 
 // host.md §Transport names `window.__wry_ipc.postMessage`; wry itself
 // injects `window.ipc` — the host provides the specced name.
@@ -41,30 +39,198 @@ const WRY_IPC_ALIAS: &str =
 
 fn main() {
     // host.md §Boot sequence, step 1: the runtime comes first — the engine
-    // seam's ops run on it, tao's event loop stays on the main thread.
+    // runs on it, tao's event loop stays on the main thread.
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .expect("tokio runtime");
 
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.iter().any(|a| a == "--fixture") {
+        fixture_main(runtime);
+    } else {
+        engine_main(runtime, &args);
+    }
+}
+
+// ---- the real thing: webviews reading seeded substrate through the engine --
+
+fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
+    let cwd = std::env::current_dir().expect("cwd");
+    let active = boot::resolve_active_path(args, &cwd);
+
+    // Boot steps 2–10 inside the runtime context (Engine::open reads
+    // Handle::try_current); the event loop below is step 11.
+    let booted = {
+        let _guard = runtime.enter();
+        match boot::boot(&active) {
+            Ok(booted) => booted,
+            Err(e) => {
+                eprintln!("host: boot failed\n{e}");
+                std::process::exit(1);
+            }
+        }
+    };
+    let Booted { engine, mut host_rx, provider, session, tiles } = booted;
+    let engine_api: Arc<dyn EngineApi> = Arc::new(EngineAdapter::new(engine.clone()));
+
+    let tree = demo_tree(&tiles);
+    let program_names: HashMap<ProcessId, String> = tiles
+        .iter()
+        .map(|t| (t.process.clone(), t.program.clone()))
+        .collect();
+
+    let event_loop: EventLoop<HostCmd> = EventLoopBuilder::with_user_event().build();
+    let window = WindowBuilder::new()
+        .with_title("OpenLight")
+        .with_inner_size(LogicalSize::new(1280.0, 840.0))
+        .build(&event_loop)
+        .expect("window");
+
+    // The HostCmd forwarding task: engine's Receiver → EventLoopProxy — the
+    // engine side never holds a WebView; commands cross as data (engine.md).
+    let forward_proxy = event_loop.create_proxy();
+    runtime.spawn(async move {
+        while let Some(cmd) = host_rx.recv().await {
+            if forward_proxy.send_event(cmd).is_err() {
+                return; // event loop gone; shutdown owns the rest
+            }
+        }
+    });
+
+    let mut webviews: HashMap<ProcessId, wry::WebView> = HashMap::new();
+    let mut terminals: HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>> =
+        HashMap::new();
+    let proxy = event_loop.create_proxy();
+
+    event_loop.run(move |event, _, control_flow| {
+        // Moved in so the runtime outlives the loop that feeds it — a
+        // `Handle` alone does not keep its workers alive.
+        let _runtime = &runtime;
+        *control_flow = ControlFlow::Wait;
+        match event {
+            Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
+                // Shutdown reverses boot (host.md): drop the surfaces, then
+                // await the engine's async shutdown, then exit.
+                webviews.clear();
+                terminals.clear();
+                if let Err(e) = runtime.block_on(engine.clone().shutdown()) {
+                    eprintln!("host: engine shutdown: {e}");
+                }
+                *control_flow = ControlFlow::Exit;
+            }
+            Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
+                for leaf in layout(&window, &tree) {
+                    if let Some(webview) = webviews.get(&ChunkId::from(leaf.id.as_str())) {
+                        let _ = webview.set_bounds(bounds(&leaf.rect));
+                    }
+                }
+            }
+            Event::UserEvent(HostCmd::MountWebview { process_id, .. }) => {
+                let Some(pending) = provider.take_pending(&process_id) else {
+                    return; // unknown or already claimed; nothing to mount
+                };
+                let Some(rect) = layout(&window, &tree)
+                    .into_iter()
+                    .find(|l| l.id == process_id.as_str())
+                    .map(|l| l.rect)
+                else {
+                    eprintln!("host: no tile for process {process_id}; dropping mount");
+                    return; // pending drops: engine reads it as killed
+                };
+                let program = program_names
+                    .get(&process_id)
+                    .cloned()
+                    .unwrap_or_else(|| pending.executable.clone());
+                let webview = WebViewBuilder::new()
+                    .with_bounds(bounds(&rect))
+                    .with_transparent(true)
+                    .with_initialization_script(WRY_IPC_ALIAS)
+                    .with_html(demo_page(&program, process_id.as_str(), session.as_str(), false))
+                    .with_ipc_handler(ipc_handler(
+                        engine_api.clone(),
+                        runtime.handle().clone(),
+                        proxy.clone(),
+                        Context { process_id: Some(process_id.as_str().to_string()) },
+                    ))
+                    .build_as_child(&window)
+                    .expect("webview");
+                webviews.insert(process_id.clone(), webview);
+                let _ = pending.ready.send(());
+                terminals.insert(process_id.clone(), pending.terminal);
+                // Outgoing engine traffic (subscription events) becomes
+                // delivery scripts; a closed channel is the engine's kill
+                // signal — unmount follows.
+                let mut events = pending.events;
+                let drain_proxy = proxy.clone();
+                runtime.spawn(async move {
+                    while let Some(payload) = events.recv().await {
+                        let script = protocol::delivery_script(&payload);
+                        let cmd =
+                            HostCmd::EvaluateScript { process_id: process_id.clone(), script };
+                        if drain_proxy.send_event(cmd).is_err() {
+                            return;
+                        }
+                    }
+                    let _ = drain_proxy.send_event(HostCmd::UnmountWebview { process_id });
+                });
+            }
+            Event::UserEvent(HostCmd::UnmountWebview { process_id }) => {
+                webviews.remove(&process_id);
+                terminals.remove(&process_id);
+            }
+            Event::UserEvent(HostCmd::EvaluateScript { process_id, script }) => {
+                if let Some(webview) = webviews.get(&process_id) {
+                    let _ = webview.evaluate_script(&script);
+                }
+            }
+            _ => {}
+        }
+    });
+}
+
+/// The demo tile tree, still composed host-side (the swap unit's sanctioned
+/// remainder): reader | (sidebar / inspector). Leaf ids are the process ids,
+/// so geometry and webview registry share one key.
+fn demo_tree(tiles: &[TileProcess]) -> Tile {
+    assert_eq!(tiles.len(), 3, "demo tree shows the three-surface suite");
+    let leaf = |t: &TileProcess| Box::new(Tile::Leaf { id: t.process.as_str().to_string() });
+    Tile::Split {
+        id: "tile-root".into(),
+        direction: Direction::Horizontal,
+        ratio: 0.55,
+        first: leaf(&tiles[0]),
+        second: Box::new(Tile::Split {
+            id: "tile-right".into(),
+            direction: Direction::Vertical,
+            ratio: 0.5,
+            first: leaf(&tiles[1]),
+            second: leaf(&tiles[2]),
+        }),
+    }
+}
+
+// ---- the hollow host, kept runnable for comparison: `--fixture` -------------
+
+fn fixture_main(runtime: tokio::runtime::Runtime) {
     let (chunks, placements) = field::demo();
-    let stub = Arc::new(FixtureStub::new(chunks.clone(), placements.clone()));
+    let stub: Arc<dyn EngineApi> = Arc::new(FixtureStub::new(chunks.clone(), placements.clone()));
 
     let (tiles, tree_placements) =
         compose::tile_inputs(&chunks, &placements, field::HOST_TILE).expect("demo tile bodies");
     let tree = geometry::parse(field::DEMO_TAB, &tiles, &tree_placements).expect("demo tile tree");
 
-    let event_loop = EventLoopBuilder::<HostCmd>::with_user_event().build();
+    let event_loop: EventLoop<HostCmd> = EventLoopBuilder::with_user_event().build();
     let window = WindowBuilder::new()
-        .with_title("OpenLight — hollow host")
+        .with_title("OpenLight — hollow host (fixture)")
         .with_inner_size(LogicalSize::new(1280.0, 840.0))
         .build(&event_loop)
         .expect("window");
 
     // Webviews are keyed by process, the identity the engine addresses them
     // by; the leaf map is geometry's separate concern.
-    let mut webviews: HashMap<String, wry::WebView> = HashMap::new();
-    let mut leaf_process: HashMap<String, String> = HashMap::new();
+    let mut webviews: HashMap<ProcessId, wry::WebView> = HashMap::new();
+    let mut leaf_process: HashMap<String, ProcessId> = HashMap::new();
     for leaf in layout(&window, &tree) {
         let info = compose::leaf_process(
             &chunks,
@@ -74,11 +240,12 @@ fn main() {
             field::ENGINE_PROGRAM,
         )
         .expect("every demo leaf displays a process");
+        let page = fixture_page(&info);
         let webview = WebViewBuilder::new()
             .with_bounds(bounds(&leaf.rect))
             .with_transparent(true)
             .with_initialization_script(WRY_IPC_ALIAS)
-            .with_html(demo_page(&info))
+            .with_html(page)
             .with_ipc_handler(ipc_handler(
                 stub.clone(),
                 runtime.handle().clone(),
@@ -87,13 +254,11 @@ fn main() {
             ))
             .build_as_child(&window)
             .expect("webview");
-        leaf_process.insert(leaf.id, info.process.clone());
-        webviews.insert(info.process, webview);
+        leaf_process.insert(leaf.id, ChunkId::from(info.process.as_str()));
+        webviews.insert(ChunkId::from(info.process.as_str()), webview);
     }
 
     event_loop.run(move |event, _, control_flow| {
-        // Moved in so the runtime outlives the loop that feeds it — a
-        // `Handle` alone does not keep its workers alive.
         let _runtime = &runtime;
         *control_flow = ControlFlow::Wait;
         match event {
@@ -117,13 +282,19 @@ fn main() {
     });
 }
 
+fn fixture_page(info: &ProcessInfo) -> String {
+    demo_page(&info.program, &info.process, field::DEMO_SESSION, true)
+}
+
+// ---- shared wiring -----------------------------------------------------------
+
 /// host.md §Transport: per-webview `set_ipc_handler`; each message is parsed,
 /// gets the webview's `Context { process_id }` attached, dispatches to the
 /// engine seam, and resolves via `__sdk.resolve` on the main loop. Parsing is
 /// all that happens on wry's callback thread — the engine call goes to the
 /// runtime, because `await` suspends until the awaited processes end.
 fn ipc_handler(
-    stub: Arc<FixtureStub>,
+    engine: Arc<dyn EngineApi>,
     runtime: tokio::runtime::Handle,
     proxy: EventLoopProxy<HostCmd>,
     ctx: Context,
@@ -133,10 +304,10 @@ fn ipc_handler(
     let process = ctx.process_id.clone().expect("webview context names a process");
     move |message| match dispatch::parse(message.body()) {
         Parsed::Execute(request) => {
-            let (stub, ctx, proxy, process) =
-                (stub.clone(), ctx.clone(), proxy.clone(), process.clone());
+            let (engine, ctx, proxy, process) =
+                (engine.clone(), ctx.clone(), proxy.clone(), process.clone());
             runtime.spawn(async move {
-                let outcome = dispatch::execute(stub.as_ref(), &ctx, &request).await;
+                let outcome = dispatch::execute(engine.as_ref(), &ctx, &request).await;
                 deliver(&proxy, &process, outcome);
             });
         }
@@ -150,7 +321,7 @@ fn deliver(proxy: &EventLoopProxy<HostCmd>, process: &str, outcome: Outcome) {
         Outcome::Reply { id, response } => {
             let script = protocol::resolve_script(id, &response);
             let _ = proxy.send_event(HostCmd::EvaluateScript {
-                process_id: process.to_string(),
+                process_id: ChunkId::from(process),
                 script,
             });
         }
@@ -174,8 +345,10 @@ fn bounds(rect: &Rect) -> wry::Rect {
 /// A demo tile: names its process, then proves the transport by posting
 /// `get`, `scope`, and `subscribe` through `window.__wry_ipc` and rendering
 /// what `__sdk.resolve` delivers. The page's `__sdk` is a minimal stand-in
-/// for the real SDK's hook surface (sdk.md §Webview transport).
-fn demo_page(info: &ProcessInfo) -> String {
+/// for the real SDK's hook surface (sdk.md §Webview transport). The engine
+/// path skips the `await` probe — awaiting one's own long-lived process
+/// would suspend forever; the stub path keeps it to prove the honest refusal.
+fn demo_page(program: &str, process: &str, session: &str, probe_await: bool) -> String {
     const TEMPLATE: &str = r#"<!doctype html>
 <html><head><meta charset="utf-8"><style>
   html, body { margin: 0; height: 100%; background: transparent;
@@ -188,7 +361,7 @@ fn demo_page(info: &ProcessInfo) -> String {
   .wire { margin-top: auto; font: 11px ui-monospace, monospace; color: #3a3a3c; white-space: pre-wrap; }
 </style></head><body><div class="card">
   <h1>__PROGRAM__</h1>
-  <div class="meta">process __PROCESS__ · __STATUS__</div>
+  <div class="meta">process __PROCESS__</div>
   <div class="wire" id="wire">reaching the field…</div>
 </div><script>
   const PROC = __PROC_JS__;
@@ -213,15 +386,13 @@ fn demo_page(info: &ProcessInfo) -> String {
   post({ id: 1, op: 'get', chunkId: PROC });
   post({ id: 2, op: 'scope', scopes: [SESSION] });
   post({ id: 3, op: 'subscribe', scopes: [SESSION] });
-  // The suspending op: parsed on the IPC thread, run on the tokio runtime,
-  // resolved back through the event loop. The stub refuses it, honestly.
-  post({ id: 4, op: 'await', processes: [PROC] });
+  if (__AWAIT_JS__) post({ id: 4, op: 'await', processes: [PROC] });
 </script></body></html>"#;
 
     TEMPLATE
-        .replace("__PROGRAM__", &info.program)
-        .replace("__PROCESS__", &info.process)
-        .replace("__STATUS__", info.status.as_deref().unwrap_or("unknown"))
-        .replace("__PROC_JS__", &serde_json::to_string(&info.process).expect("json string"))
-        .replace("__SESSION_JS__", &serde_json::to_string(field::DEMO_SESSION).expect("json string"))
+        .replace("__PROGRAM__", program)
+        .replace("__PROCESS__", process)
+        .replace("__PROC_JS__", &serde_json::to_string(process).expect("json string"))
+        .replace("__SESSION_JS__", &serde_json::to_string(session).expect("json string"))
+        .replace("__AWAIT_JS__", if probe_await { "true" } else { "false" })
 }

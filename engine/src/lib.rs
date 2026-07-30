@@ -20,7 +20,11 @@ mod validate;
 
 pub use engine::Engine;
 pub use errors::{EngineError, MountError, OpenError, RegisterError, ShutdownError, SpawnError};
-pub use protocol::{dispatch_request, Response};
+pub use mounts::ANCHOR_KEY;
+pub use protocol::{
+    batch_json, chunk_item_json, commit_json, dispatch_request, dry_run_json, parse_declaration,
+    scope_result_json, Response,
+};
 pub use runtime::{
     ProgramRef, RequestTx, RuntimeHandle, RuntimeProvider, SpawnContext, TerminalReason,
     TransportRef,

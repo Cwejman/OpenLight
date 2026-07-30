@@ -5,8 +5,8 @@
 use crate::engine::{Engine, Inner};
 use crate::errors::EngineError;
 use crate::types::{
-    AwaitOpts, BatchEntry, BoundarySpec, Context, DryRunResult, ProcessId, ReadTarget, RunArgs,
-    RunMode, SubscriptionId, TaggedRead,
+    AwaitOpts, BatchEntry, BoundarySpec, Context, DryRunResult, ReadTarget, RunArgs, RunMode,
+    SubscriptionId, TaggedRead,
 };
 use db::{
     BranchName, ChunkDeclaration, ChunkId, ChunkItem, Commit, CommitId, Declaration, Includes,
@@ -268,7 +268,7 @@ fn parse_tagged_reads(value: Option<&Value>) -> Result<Vec<TaggedRead>, EngineEr
         .collect()
 }
 
-pub(crate) fn parse_declaration(value: Option<&Value>) -> Result<Declaration, EngineError> {
+pub fn parse_declaration(value: Option<&Value>) -> Result<Declaration, EngineError> {
     let decl = value.ok_or_else(|| EngineError::InvalidRequest("missing declaration".into()))?;
     let chunks = decl
         .get("chunks")
@@ -373,7 +373,7 @@ pub(crate) fn placement_json(p: &Placement) -> Value {
     Value::Object(map)
 }
 
-pub(crate) fn chunk_item_json(item: &ChunkItem) -> Value {
+pub fn chunk_item_json(item: &ChunkItem) -> Value {
     let mut map = serde_json::Map::new();
     map.insert("id".into(), json!(item.id.as_str()));
     if let Some(name) = &item.name {
@@ -394,7 +394,7 @@ pub(crate) fn chunk_item_json(item: &ChunkItem) -> Value {
     Value::Object(map)
 }
 
-pub(crate) fn scope_result_json(result: &ScopeResult) -> Value {
+pub fn scope_result_json(result: &ScopeResult) -> Value {
     json!({
         "head": result.head.as_str(),
         "total": result.total,
@@ -412,7 +412,7 @@ pub(crate) fn scope_result_json(result: &ScopeResult) -> Value {
     })
 }
 
-pub(crate) fn commit_json(commit: &Commit) -> Value {
+pub fn commit_json(commit: &Commit) -> Value {
     json!({
         "id": commit.id.as_str(),
         "parent_id": commit.parent_id.as_ref().map(|p| p.as_str()),
@@ -426,7 +426,7 @@ pub(crate) fn commit_json(commit: &Commit) -> Value {
     })
 }
 
-pub(crate) fn dry_run_json(result: &DryRunResult) -> Value {
+pub fn dry_run_json(result: &DryRunResult) -> Value {
     json!({
         "valid": result.valid,
         "errors": result.errors.iter()
@@ -435,7 +435,7 @@ pub(crate) fn dry_run_json(result: &DryRunResult) -> Value {
     })
 }
 
-pub(crate) fn batch_json(batch: &crate::types::BatchResult) -> Value {
+pub fn batch_json(batch: &crate::types::BatchResult) -> Value {
     let mut results = serde_json::Map::new();
     for (tag, entry) in &batch.results {
         let value = match entry {

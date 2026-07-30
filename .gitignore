@@ -6,3 +6,10 @@ node_modules/
 *.db-wal
 db-shm
 db-wal
+**/.ol/db
+.claude/
+.idea/
+_site/
+.playwright-mcp/
+.openlight/
+notes/

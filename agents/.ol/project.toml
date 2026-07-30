@@ -1,0 +1,10 @@
+[project]
+name = "agents"
+
+[[mounts]]
+path = "../host"
+branch = "main"
+
+[[mounts]]
+path = "../engine"
+branch = "main"
