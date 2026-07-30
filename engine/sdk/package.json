@@ -1,0 +1,21 @@
+{
+  "name": "@openlight/sdk",
+  "version": "0.1.0",
+  "description": "The engine's program protocol expressed as TypeScript — the surface programs import to reach the substrate.",
+  "type": "module",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fixture": "./src/transports/fixture.ts"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
+  "files": [
+    "src"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  }
+}
