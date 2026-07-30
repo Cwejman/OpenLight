@@ -5,7 +5,7 @@
 // It writes nothing. The view-state chunk §3.5 grants it stays unwritten in
 // v0.1: nothing here is switchable yet.
 import { get, type ChunkId, type ChunkItem, type ScopeResult } from '@openlight/sdk'
-import { useScope } from '@openlight/ui'
+import { Card, Pill, styles, useScope } from '@openlight/ui'
 import { useEffect, useState, type ReactNode } from 'react'
 import {
   argumentTarget,
@@ -55,9 +55,7 @@ function Scope({ roots }: { roots: ChunkId[] }) {
       <header className="head">
         <div className="chips">
           {roots.map((id) => (
-            <span className="chip" key={id}>
-              {shortId(id, 24)}
-            </span>
+            <Pill key={id}>{shortId(id, 24)}</Pill>
           ))}
         </div>
         <h1 className={subject && !subject.name ? 'mono' : undefined}>
@@ -68,7 +66,7 @@ function Scope({ roots }: { roots: ChunkId[] }) {
         ) : null}
       </header>
 
-      <div className="content" data-mode={view.mode}>
+      <div className="content" data-scroll data-mode={view.mode}>
         {view.mode === 'unresolved' ? (
           <Note title="Unresolved reference">
             {view.roots.map((id) => (
@@ -141,10 +139,10 @@ function Document({ member }: { member: Member }) {
       </dl>
       <div className="chips">
         {(member.chunk.placements ?? []).map((placement) => (
-          <span className="chip" key={`${placement.type_}:${placement.scope_id}`}>
+          <Pill key={`${placement.type_}:${placement.scope_id}`}>
             {placement.type_ === 'instance' ? 'instance of' : 'placed on'}{' '}
             <span className="mono">{shortId(placement.scope_id, 24)}</span>
-          </span>
+          </Pill>
         ))}
       </div>
     </article>
@@ -160,7 +158,12 @@ function Note({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-/** The card the tile lives in, plus the quiet states that replace its content. */
+/**
+ * The card the tile lives in, plus the quiet states that replace its content.
+ * It fills the webview and never moves: the page itself does not scroll
+ * (@openlight/ui base), so the card cannot be dragged out of its own frame —
+ * only the member list inside it scrolls.
+ */
 export function Frame({
   children,
   status,
@@ -171,14 +174,14 @@ export function Frame({
   error?: string
 }) {
   return (
-    <div className="tile">
-      <style>{CSS}</style>
+    <Card className="tile">
+      <style>{styles + CSS}</style>
       {children ?? (
         <div className="quiet">
           {error ? <span className="error">{error}</span> : <span>{status}</span>}
         </div>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -210,68 +213,49 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
   return state
 }
 
-// host.md §Visual Language: white-first, quiet, iOS-flavored rounding. The
-// tokens themselves are an open there — these are defaults, settled by eye.
+// Layout only — the card's surface, rounding and shadow, the pill, the greys
+// and the scrollbar are tokens and components in @openlight/ui.
 const CSS = `
-  /* No \`color-scheme\` here: declaring one makes WebKit paint its own base
-     colour *below* the DOM, opaque even under a transparent webview — and the
-     card's rounded corners must meet the window's canvas (§Visual Language).
-     The host forces the frame's light appearance. */
-  html, body { margin: 0; height: 100%; background: transparent }
-  * { box-sizing: border-box }
+  /* The card fills the viewport the page pins (@openlight/ui base) and clips
+     its own corners; \`min-height: 0\` lets the content region be shorter than
+     what it holds, which is what makes the list — and only the list — scroll. */
   .tile {
-    height: 100%; display: flex; flex-direction: column;
-    background: #fff; border: 1px solid #e6e6ea; border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden;
-    font: 13px/1.55 -apple-system, system-ui, sans-serif; color: #1d1d1f;
+    position: absolute; inset: var(--ol-lift);
+    display: flex; flex-direction: column; overflow: hidden;
   }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em }
-  .head { padding: 16px 18px 12px; border-bottom: 1px solid #f0f0f3 }
+  .mono { font-family: var(--ol-mono); font-size: .92em }
+  .head { padding: 16px 18px 12px; border-bottom: 1px solid var(--ol-line-soft) }
   .head h1 { margin: 6px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em }
   .prose { margin: 4px 0 0; color: #4b4b50 }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px }
-  .chip {
-    padding: 2px 8px; border-radius: 999px; background: #f4f4f7;
-    color: #6e6e73; font-size: 11px; white-space: nowrap;
-  }
-  /* The member list scrolls within the card: \`min-height: 0\` so the flex item
-     may be shorter than its content, and a styled scrollbar so the cut edge
-     says so — macOS's overlay scrollbar leaves no affordance at rest. */
-  /* The standard \`scrollbar-width\` is deliberately absent: setting it puts
-     WebKit on the overlay path, which reserves no width and shows nothing at
-     rest (measured through the probe). The \`::-webkit-scrollbar\` rules below
-     lay a real one out instead. */
-  .content { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 10px }
-  .content::-webkit-scrollbar { width: 9px }
-  .content::-webkit-scrollbar-track { background: transparent }
-  .content::-webkit-scrollbar-thumb {
-    background: #d2d2d7; border-radius: 999px;
-    border: 3px solid transparent; background-clip: content-box;
-  }
-  .content:hover::-webkit-scrollbar-thumb { background: #b9b9c0; background-clip: content-box }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--ol-gap) }
+  .content { flex: 1; padding: 8px var(--ol-pad) }
   .rows { margin: 0; padding: 0; list-style: none }
-  .row { display: flex; gap: 10px; padding: 9px 8px; border-radius: 8px }
-  .row + .row { border-top: 1px solid #f4f4f7 }
+  .row { display: flex; gap: var(--ol-pad); padding: 9px 8px; border-radius: var(--ol-radius-small) }
+  .row + .row { border-top: 1px solid var(--ol-hover) }
   .row:hover { background: #fafafc }
-  .seq { min-width: 20px; color: #a1a1a6; text-align: right }
+  .seq { min-width: 20px; color: var(--ol-ink-ghost); text-align: right }
   .row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
   .name { font-weight: 550 }
-  .text { color: #6e6e73; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-  .document { padding: 6px 8px }
+  .text { color: var(--ol-ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+  .document { padding: var(--ol-pad-tight) 8px }
   .document h2 { margin: 0; font-size: 14px; font-weight: 600 }
-  .fields { margin: 10px 0 0; display: grid; gap: 4px }
-  .field { display: grid; grid-template-columns: 120px 1fr; gap: 10px }
-  .field dt { color: #8e8e93 }
+  .fields { margin: var(--ol-pad) 0 0; display: grid; gap: 4px }
+  .field { display: grid; grid-template-columns: 120px 1fr; gap: var(--ol-pad) }
+  .field dt { color: var(--ol-ink-faint) }
   .field dd { margin: 0; overflow-wrap: anywhere }
   .document .chips { margin-top: 12px }
-  .note { padding: 12px; border-radius: 8px; background: #fafafc; color: #6e6e73 }
-  .note strong { display: block; color: #1d1d1f; font-weight: 600 }
-  .note-body { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px }
-  .note code { font-family: ui-monospace, Menlo, monospace }
-  .foot {
-    display: flex; justify-content: space-between; gap: 10px;
-    padding: 9px 18px; border-top: 1px solid #f0f0f3; color: #8e8e93; font-size: 11px;
+  .note {
+    padding: 12px; border-radius: var(--ol-radius-small);
+    background: #fafafc; color: var(--ol-ink-soft);
   }
-  .quiet { flex: 1; display: grid; place-items: center; color: #a1a1a6 }
-  .error { color: #9a3b3b }
+  .note strong { display: block; color: var(--ol-ink); font-weight: 600 }
+  .note-body { margin-top: 4px; display: flex; flex-wrap: wrap; gap: var(--ol-gap) }
+  .note code { font-family: var(--ol-mono) }
+  .foot {
+    display: flex; justify-content: space-between; gap: var(--ol-pad);
+    padding: 9px 18px; border-top: 1px solid var(--ol-line-soft);
+    color: var(--ol-ink-faint); font-size: 11px;
+  }
+  .quiet { flex: 1; display: grid; place-items: center; color: var(--ol-ink-ghost) }
+  .error { color: var(--ol-ink-error) }
 `

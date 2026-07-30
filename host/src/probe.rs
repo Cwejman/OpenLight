@@ -20,10 +20,12 @@ use serde_json::{json, Value};
 pub const DONE: &str = "__probe_done";
 
 /// The nodes worth a computed style: the page's own frame, then the shapes
-/// host.md §Visual Language rules on — the naked strip, its items (card vs
-/// flat), the tile card and its scrolling content.
+/// host.md §Visual Language rules on. `[data-ui]` is the semantic lane —
+/// every component @openlight/ui owns stamps one (card, item, pill, menu), so
+/// a report reads at meaning level rather than as a class soup; the remaining
+/// class names are the surfaces' own layout regions.
 pub const SELECTORS: &str =
-    "html, body, #root, .strip, .items, .item, .quiet, .tile, .head, .content, .rows, .row, .foot";
+    "html, body, #root, [data-ui], [data-scroll], .strip, .items, .quiet, .tile, .head, .content, .rows, .row, .foot";
 
 /// How much of the serialized DOM a report carries. Scripts and styles are
 /// replaced by their length before trimming, so the budget buys structure.
@@ -50,6 +52,9 @@ const TEMPLATE: &str = r#"(() => {
       color: s.color,
       color_scheme: s.colorScheme,
       border_radius: s.borderRadius,
+      // §Visual Language puts one shadow under every card — the tile's and the
+      // strip's running items must compute the same value.
+      box_shadow: s.boxShadow,
       position: s.position,
       overflow_y: s.overflowY,
     };
@@ -132,6 +137,7 @@ mod tests {
         assert!(js.contains("window.__wry_ipc.postMessage"), "{js}");
         assert!(js.contains("probe:"), "the envelope the rim reads back");
         assert!(js.contains("getComputedStyle"), "styles are the webview's answer, not React's");
+        assert!(js.contains("s.boxShadow"), "one shadow token, checkable on every card");
     }
 
     #[test]
@@ -140,6 +146,7 @@ mod tests {
         assert!(js.contains(".slice(0, 7)"));
         assert!(js.contains("> 120"));
         assert!(js.contains(r#""html, body, #root"#), "the selector list is a JS string: {js}");
+        assert!(js.contains(r#"[data-ui]"#), "the semantic lane is probed");
         assert!(!js.contains("__SELECTORS__"), "every placeholder filled");
         assert!(!js.contains("__HTML_LIMIT__"));
         assert!(!js.contains("__NODE_LIMIT__"));

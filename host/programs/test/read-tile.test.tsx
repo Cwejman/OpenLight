@@ -107,7 +107,7 @@ test('a single member renders as a document, placement type visible', async () =
   expect(text(tile, '.document h2')).toBe('note')
   expect(text(tile, '.document .prose')).toBe('the note')
   expect(texts(tile, '.field dt')).toEqual(['status'])
-  expect(texts(tile, '.document .chip')).toEqual(['placed on plan'])
+  expect(texts(tile, '.document [data-ui="pill"]')).toEqual(['placed on plan'])
 })
 
 test('an empty scope invites what its spec accepts', async () => {

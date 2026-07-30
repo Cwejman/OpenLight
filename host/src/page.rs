@@ -24,13 +24,17 @@ pub fn init_script(process: &str) -> String {
 }
 
 /// The standard shell: transparent background (the window owns the canvas), a
-/// full-height root, the bundle inline.
+/// full-height root, the bundle inline. The page is the webview's viewport and
+/// nothing more — it never scrolls, so a surface can never be dragged out of
+/// its own frame; a program scrolls the region that owns the scrolling.
+/// @openlight/ui's base restates this for programs mounted outside the shell.
 pub fn shell(bundle: &str) -> String {
     format!(
         "<!doctype html>\n\
          <html><head><meta charset=\"utf-8\">\n\
-         <style>html, body {{ margin: 0; height: 100%; background: transparent }}\n\
-         #root {{ height: 100% }}</style>\n\
+         <style>html, body {{ margin: 0; height: 100%; overflow: hidden;\n\
+         overscroll-behavior: none; background: transparent }}\n\
+         #root {{ position: relative; height: 100% }}</style>\n\
          </head><body><div id=\"root\"></div>\n\
          <script>{}</script></body></html>",
         escape_script(bundle)
@@ -62,6 +66,8 @@ mod tests {
         let page = shell("console.log(1)");
         assert!(page.contains(r#"<div id="root"></div>"#), "{page}");
         assert!(page.contains("console.log(1)"));
+        // The viewport is pinned: only a program's own region may scroll.
+        assert!(page.contains("overflow: hidden"), "the page itself never scrolls: {page}");
     }
 
     #[test]

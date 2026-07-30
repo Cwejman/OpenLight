@@ -108,14 +108,14 @@ test('the built sidebar renders the session as its processes', async () => {
 
   const root = await load('sidebar.js', 'p_2', engine)
 
-  expect([...root.querySelectorAll('.item .program')].map((n) => n.textContent)).toEqual([
+  expect([...root.querySelectorAll('[data-ui="item"] .program')].map((n) => n.textContent)).toEqual([
     'sidebar',
     'read-tile',
   ])
-  expect([...root.querySelectorAll('.item.card .program')].map((n) => n.textContent)).toEqual([
+  expect([...root.querySelectorAll('[data-ui="item"][data-live="true"] .program')].map((n) => n.textContent)).toEqual([
     'sidebar',
   ])
-  expect([...root.querySelectorAll('.item.flat .program')].map((n) => n.textContent)).toEqual([
+  expect([...root.querySelectorAll('[data-ui="item"][data-live="false"] .program')].map((n) => n.textContent)).toEqual([
     'read-tile',
   ])
 })
