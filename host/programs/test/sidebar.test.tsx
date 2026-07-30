@@ -86,16 +86,46 @@ test('running processes are cards, terminal ones flat, each named by its program
   field([
     ground(),
     frame(),
-    process(SIDEBAR, 'host/sidebar', { status: 'running' }),
-    process('p_read', 'host/read-tile', { status: 'running' }),
-    process('p_old', 'host/read-tile', { status: 'completed' }),
+    process(SIDEBAR, 'host/sidebar', { status: 'running', started: 2 }),
+    process('p_read', 'host/read-tile', { status: 'running', started: 3 }),
+    process('p_old', 'host/read-tile', { status: 'completed', started: 1 }),
   ])
   const strip = await show()
 
-  // Order is the engine's — nothing specs the sidebar's sort (see items.ts).
-  expect(texts(strip, '.item .program')).toEqual(['read-tile', 'read-tile', 'sidebar'])
+  // Life before rest, then recency (items.ts — the steward's ordering pin).
+  expect(texts(strip, '.item .program')).toEqual(['read-tile', 'sidebar', 'read-tile'])
   expect(texts(strip, '.item.card .program')).toEqual(['read-tile', 'sidebar'])
   expect(texts(strip, '.item.flat .program')).toEqual(['read-tile'])
+})
+
+test('a stale session opens on what is alive: the running cards lead the strip', async () => {
+  const stale = Array.from({ length: 12 }, (_, index) =>
+    process(`p_stale_${index}`, 'host/read-tile', {
+      status: 'failed',
+      error: 'engine shutdown',
+      started: 100 + index,
+    }),
+  )
+  field([
+    ground(),
+    frame(),
+    ...stale,
+    process(SIDEBAR, 'host/sidebar', { status: 'running', started: 900 }),
+    process('p_read', 'host/read-tile', { status: 'running', started: 901 }),
+  ])
+  const strip = await show()
+
+  const listed = [...strip.container.querySelectorAll('.item')]
+  expect(listed.length).toBe(14)
+  expect(listed.slice(0, 2).map((node) => node.getAttribute('data-status'))).toEqual([
+    'running',
+    'running',
+  ])
+  expect(listed.slice(0, 2).map((node) => node.className)).toEqual(['item card', 'item card'])
+  // Then the rest, newest first — nothing alive is ever below something stopped.
+  expect(listed.slice(2).every((node) => node.className === 'item flat')).toBe(true)
+  expect(listed[2]!.textContent).toContain('failed')
+  expect(strip.container.querySelector('.item')!.textContent).toContain('read-tile')
 })
 
 test('a pending process has not come to rest — it renders as a card', async () => {

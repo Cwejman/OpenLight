@@ -213,7 +213,10 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
 // host.md §Visual Language: white-first, quiet, iOS-flavored rounding. The
 // tokens themselves are an open there — these are defaults, settled by eye.
 const CSS = `
-  :root { color-scheme: light }
+  /* No \`color-scheme\` here: declaring one makes WebKit paint its own base
+     colour *below* the DOM, opaque even under a transparent webview — and the
+     card's rounded corners must meet the window's canvas (§Visual Language).
+     The host forces the frame's light appearance. */
   html, body { margin: 0; height: 100%; background: transparent }
   * { box-sizing: border-box }
   .tile {
@@ -231,7 +234,21 @@ const CSS = `
     padding: 2px 8px; border-radius: 999px; background: #f4f4f7;
     color: #6e6e73; font-size: 11px; white-space: nowrap;
   }
-  .content { flex: 1; overflow: auto; padding: 8px 10px }
+  /* The member list scrolls within the card: \`min-height: 0\` so the flex item
+     may be shorter than its content, and a styled scrollbar so the cut edge
+     says so — macOS's overlay scrollbar leaves no affordance at rest. */
+  /* The standard \`scrollbar-width\` is deliberately absent: setting it puts
+     WebKit on the overlay path, which reserves no width and shows nothing at
+     rest (measured through the probe). The \`::-webkit-scrollbar\` rules below
+     lay a real one out instead. */
+  .content { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 10px }
+  .content::-webkit-scrollbar { width: 9px }
+  .content::-webkit-scrollbar-track { background: transparent }
+  .content::-webkit-scrollbar-thumb {
+    background: #d2d2d7; border-radius: 999px;
+    border: 3px solid transparent; background-clip: content-box;
+  }
+  .content:hover::-webkit-scrollbar-thumb { background: #b9b9c0; background-clip: content-box }
   .rows { margin: 0; padding: 0; list-style: none }
   .row { display: flex; gap: 10px; padding: 9px 8px; border-radius: 8px }
   .row + .row { border-top: 1px solid #f4f4f7 }

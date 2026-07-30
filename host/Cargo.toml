@@ -7,11 +7,15 @@ edition = "2021"
 db = { path = "../db" }
 engine = { path = "../engine" }
 tao = "0.30"
-wry = "0.47"
+# `transparent` is *not* in wry's default feature set: without it
+# `with_transparent(true)` is silently a no-op and every webview paints an
+# opaque base over the window's canvas (host.md §Visual Language wants tiles
+# as cards *on* the background, and the sidebar naked on it).
+wry = { version = "0.47", features = ["transparent"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Mount declarations live in .ol/project.toml (pilot.md, Multi-project mounts).
 toml = "0.8"
 # host.md boot step 1: the runtime the engine and its providers need. wry's IPC
 # callback hands parsed work here rather than blocking on it.
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync"] }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }

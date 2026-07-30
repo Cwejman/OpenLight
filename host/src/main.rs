@@ -9,15 +9,19 @@
 //! shell (`page::shell`); the surfaces without one keep [`demo_page`] until
 //! theirs is written. Everything with logic lives in the pure modules; this
 //! file wires tao/wry.
+//!
+//! `--probe` runs the same boot and then asks each mounted surface what its
+//! DOM became, one JSON line per webview on stdout, and exits (`probe`).
 
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use tao::{
     dpi::{LogicalPosition, LogicalSize},
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopProxy},
-    window::{Window, WindowBuilder},
+    window::{Theme, Window, WindowBuilder},
 };
 use wry::WebViewBuilder;
 
@@ -30,6 +34,7 @@ use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
 use host::geometry::{self, Rect, Spacing, Strip, Tile};
 use host::page;
+use host::probe;
 use host::protocol;
 use host::stub::FixtureStub;
 
@@ -39,6 +44,21 @@ const SPACING: Spacing = Spacing { padding: 14.0, gap: 10.0 };
 /// The sidebar's strip, outside tile geometry (host.md §Sidebar). Fixed for
 /// now: resizing it is direct manipulation, which is spec-gated.
 const STRIP: Strip = Strip { width: 216.0 };
+/// host.md §Visual Language: white-first. The canvas is the window's own, and
+/// it must not follow the system's dark appearance — the whole language (cards
+/// on a quiet canvas, the naked sidebar) is written against white.
+///
+/// **The unit is not bytes.** tao 0.30 hands r/g/b straight to
+/// `+[NSColor colorWithRed:green:blue:alpha:]`, which reads 0…1 (only alpha is
+/// divided by 255). A literal `255` lands far outside the gamut and the window
+/// renders near-black — measured, `rgb(1, 1, 1)`. So white is written in the
+/// unit AppKit actually receives. Recheck this line if tao is bumped.
+const CANVAS: tao::window::RGBA = (1, 1, 1, 255);
+
+/// `--probe`: how long a surface gets to mount, read its scope and render
+/// before it is asked what its DOM became, and how long the whole run may take.
+const PROBE_SETTLE: Duration = Duration::from_millis(2500);
+const PROBE_DEADLINE: Duration = Duration::from_secs(20);
 
 fn main() {
     // host.md §Boot sequence, step 1: the runtime comes first — the engine
@@ -85,10 +105,19 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         .map(|t| (t.process.clone(), t.program.clone()))
         .collect();
 
+    // The probe lane (board.md's layout-as-data jewel, thin end): boot whole,
+    // then ask each surface what its DOM became. Nothing else changes.
+    let probing = args.iter().any(|a| a == "--probe");
+
     let event_loop: EventLoop<HostCmd> = EventLoopBuilder::with_user_event().build();
     let window = WindowBuilder::new()
         .with_title("OpenLight")
         .with_inner_size(LogicalSize::new(1280.0, 840.0))
+        // The canvas, forced: on macOS the window otherwise takes the system
+        // appearance and paints itself dark. Light theme goes with it so the
+        // frame's chrome and the webviews' `prefers-color-scheme` agree.
+        .with_background_color(CANVAS)
+        .with_theme(Some(Theme::Light))
         .build(&event_loop)
         .expect("window");
 
@@ -108,6 +137,18 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         HashMap::new();
     let proxy = event_loop.create_proxy();
 
+    // Every surface owes exactly one report; the deadline is the lane's
+    // honesty — a probe that never completes must fail, not hang.
+    let tally = Arc::new(Mutex::new(probe::Tally::new(program_names.len())));
+    if probing {
+        let tally = tally.clone();
+        runtime.spawn(async move {
+            tokio::time::sleep(PROBE_DEADLINE).await;
+            eprintln!("host: probe deadline — {} surfaces answered", tally.lock().expect("tally").seen());
+            std::process::exit(2);
+        });
+    }
+
     event_loop.run(move |event, _, control_flow| {
         // Moved in so the runtime outlives the loop that feeds it — a
         // `Handle` alone does not keep its workers alive.
@@ -115,14 +156,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         *control_flow = ControlFlow::Wait;
         match event {
             Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
-                // Shutdown reverses boot (host.md): drop the surfaces, then
-                // await the engine's async shutdown, then exit.
-                webviews.clear();
-                terminals.clear();
-                if let Err(e) = runtime.block_on(engine.clone().shutdown()) {
-                    eprintln!("host: engine shutdown: {e}");
-                }
-                *control_flow = ControlFlow::Exit;
+                shutdown(&runtime, &engine, &mut webviews, &mut terminals, control_flow);
             }
             Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
                 // Strip and tiles move together — the tiling area is defined as
@@ -172,10 +206,26 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                         runtime.handle().clone(),
                         proxy.clone(),
                         Context { process_id: Some(process_id.as_str().to_string()) },
+                        probing.then(|| ProbeSink {
+                            program: program.clone(),
+                            tally: tally.clone(),
+                            proxy: proxy.clone(),
+                        }),
                     ))
                     .build_as_child(&window)
                     .expect("webview");
                 webviews.insert(process_id.clone(), webview);
+                if probing {
+                    // Through the ordinary delivery path, once the surface has
+                    // had time to read its scope and render.
+                    let (pid, probe_proxy) = (process_id.clone(), proxy.clone());
+                    runtime.spawn(async move {
+                        tokio::time::sleep(PROBE_SETTLE).await;
+                        let script = probe::script(probe::HTML_LIMIT, probe::NODE_LIMIT);
+                        let _ = probe_proxy
+                            .send_event(HostCmd::EvaluateScript { process_id: pid, script });
+                    });
+                }
                 let _ = pending.ready.send(());
                 terminals.insert(process_id.clone(), pending.terminal);
                 // Outgoing engine traffic (subscription events) becomes
@@ -196,6 +246,12 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 });
             }
             Event::UserEvent(HostCmd::UnmountWebview { process_id }) => {
+                // The probe lane's one seam into the loop: no process is named
+                // this, so the ordinary unmount stays what it was.
+                if process_id.as_str() == probe::DONE {
+                    shutdown(&runtime, &engine, &mut webviews, &mut terminals, control_flow);
+                    return;
+                }
                 webviews.remove(&process_id);
                 terminals.remove(&process_id);
             }
@@ -260,6 +316,7 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
                 runtime.handle().clone(),
                 event_loop.create_proxy(),
                 Context { process_id: Some(info.process.clone()) },
+                None,
             ))
             .build_as_child(&window)
             .expect("webview");
@@ -298,6 +355,33 @@ fn fixture_page(info: &ProcessInfo) -> String {
 
 // ---- shared wiring -----------------------------------------------------------
 
+/// Shutdown reverses boot (host.md): drop the surfaces, then await the
+/// engine's async shutdown, then exit. Reached from the window's close button
+/// and from the probe lane's completion alike.
+fn shutdown(
+    runtime: &tokio::runtime::Runtime,
+    engine: &engine::Engine,
+    webviews: &mut HashMap<ProcessId, wry::WebView>,
+    terminals: &mut HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>>,
+    control_flow: &mut ControlFlow,
+) {
+    webviews.clear();
+    terminals.clear();
+    if let Err(e) = runtime.block_on(engine.clone().shutdown()) {
+        eprintln!("host: engine shutdown: {e}");
+    }
+    *control_flow = ControlFlow::Exit;
+}
+
+/// What one webview's probe answer needs: whose DOM it is, and the shared
+/// count that says when the run is done.
+#[derive(Clone)]
+struct ProbeSink {
+    program: String,
+    tally: Arc<Mutex<probe::Tally>>,
+    proxy: EventLoopProxy<HostCmd>,
+}
+
 /// host.md §Transport: per-webview `set_ipc_handler`; each message is parsed,
 /// gets the webview's `Context { process_id }` attached, dispatches to the
 /// engine seam, and resolves via `__sdk.resolve` on the main loop. Parsing is
@@ -308,20 +392,36 @@ fn ipc_handler(
     runtime: tokio::runtime::Handle,
     proxy: EventLoopProxy<HostCmd>,
     ctx: Context,
+    probe_sink: Option<ProbeSink>,
 ) -> impl Fn(wry::http::Request<String>) + 'static {
     // Checked at mount, never inside the callback: a webview always speaks as
     // its process (host.md §Transport, the webview→process registry).
     let process = ctx.process_id.clone().expect("webview context names a process");
-    move |message| match dispatch::parse(message.body()) {
-        Parsed::Execute(request) => {
-            let (engine, ctx, proxy, process) =
-                (engine.clone(), ctx.clone(), proxy.clone(), process.clone());
-            runtime.spawn(async move {
-                let outcome = dispatch::execute(engine.as_ref(), &ctx, &request).await;
-                deliver(&proxy, &process, outcome);
-            });
+    move |message| {
+        // The probe answer rides the same channel, read before dispatch and
+        // recognized by its envelope alone — ordinary traffic never matches.
+        if let Some(sink) = &probe_sink {
+            if let Some(report) = probe::parse(message.body()) {
+                println!("{}", probe::line(&process, &sink.program, &report));
+                if sink.tally.lock().expect("tally").record() {
+                    let _ = sink.proxy.send_event(HostCmd::UnmountWebview {
+                        process_id: ChunkId::from(probe::DONE),
+                    });
+                }
+                return;
+            }
         }
-        Parsed::Settled(outcome) => deliver(&proxy, &process, outcome),
+        match dispatch::parse(message.body()) {
+            Parsed::Execute(request) => {
+                let (engine, ctx, proxy, process) =
+                    (engine.clone(), ctx.clone(), proxy.clone(), process.clone());
+                runtime.spawn(async move {
+                    let outcome = dispatch::execute(engine.as_ref(), &ctx, &request).await;
+                    deliver(&proxy, &process, outcome);
+                });
+            }
+            Parsed::Settled(outcome) => deliver(&proxy, &process, outcome),
+        }
     }
 }
 

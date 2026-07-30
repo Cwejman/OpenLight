@@ -40,6 +40,7 @@ function Session({ session }: { session: ChunkId }) {
           <li
             className={`item ${item.live ? 'card' : 'flat'}`}
             key={item.process}
+            data-status={item.status}
             onClick={(event) => {
               setNotice(null)
               setMenu({ item, x: event.clientX, y: event.clientY })
@@ -98,7 +99,10 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 // running process is a card with the same rounding and shadow as a tile. Token
 // values are an open there — these are defaults, settled by eye.
 const CSS = `
-  :root { color-scheme: light }
+  /* No \`color-scheme\` here: declaring one makes WebKit paint its own base
+     colour *below* the DOM, which is opaque even when the webview is
+     transparent — and the strip must be naked on the window's canvas
+     (§Visual Language). The host forces the frame's light appearance. */
   html, body { margin: 0; height: 100%; background: transparent }
   * { box-sizing: border-box }
   .strip {

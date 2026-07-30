@@ -21,6 +21,8 @@ export type Item = {
   failed: boolean
   /** `body.error` on a failed process (engine.md, *Terminal cleanup*). */
   error?: string
+  /** `body.started` — epoch ms, written at run (engine.md). Recency sorts by it. */
+  started?: number
 }
 
 /**
@@ -48,18 +50,21 @@ export function sessionArgument(frame: ScopeResult): ChunkId | null {
 }
 
 /**
- * The session's processes, in the order the engine returns them.
+ * The session's processes: **life before rest, then recency** — running and
+ * pending first, terminal ones newest-first beneath them (steward pin against
+ * host.md §Sidebar, which rules on the two *forms* but named no order; a
+ * session accumulates its past runs forever, so the engine's raw order buries
+ * what is alive).
  *
- * **Recorded gap.** Nothing specs the sidebar's ordering — `host/session` is
- * unordered, so no placement carries a seq, and neither host.md §Sidebar nor
- * programs.md §3.2 names a sort. The engine's order stands rather than an
- * invented one.
+ * Recency is `body.started`; a process without one keeps the engine's order
+ * within its group (stable), never jumping ahead of a dated sibling.
  */
 export function items(session: ScopeResult, programs: ChunkItem[], root: ChunkId): Item[] {
   const names = new Map(programs.map((program) => [program.id, program.name]))
-  return session.chunks.filter(isProcess).map((chunk) => {
+  const list = session.chunks.filter(isProcess).map((chunk) => {
     const status = typeof chunk.body?.status === 'string' ? chunk.body.status : 'unknown'
     const error = typeof chunk.body?.error === 'string' ? chunk.body.error : undefined
+    const started = typeof chunk.body?.started === 'number' ? chunk.body.started : undefined
     return {
       process: chunk.id,
       name: chunk.name ?? shortId(chunk.id),
@@ -69,8 +74,23 @@ export function items(session: ScopeResult, programs: ChunkItem[], root: ChunkId
       live: !TERMINAL.includes(status),
       failed: status === 'failed',
       ...(error === undefined ? {} : { error }),
+      ...(started === undefined ? {} : { started }),
     }
   })
+  return order(list)
+}
+
+/** Life before rest, then newest first; ties keep the order they arrived in. */
+export function order(list: Item[]): Item[] {
+  return list
+    .map((item, index) => ({ item, index }))
+    .sort(
+      (a, b) =>
+        Number(b.item.live) - Number(a.item.live) ||
+        (b.item.started ?? 0) - (a.item.started ?? 0) ||
+        a.index - b.index,
+    )
+    .map((entry) => entry.item)
 }
 
 function isProcess(chunk: ChunkItem): boolean {

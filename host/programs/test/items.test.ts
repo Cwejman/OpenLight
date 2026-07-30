@@ -68,6 +68,56 @@ describe('the session as items', () => {
     expect(list.map((item) => item.failed)).toEqual([false, false, false, true])
     expect(list[3]!.error).toBe('timeout')
   })
+})
+
+describe('the order: life before rest, then recency', () => {
+  test('the living rise above the stopped, however the field returns them', () => {
+    const list = listed([
+      process('p_dead_1', 'host/read-tile', { status: 'failed', started: 30 }),
+      process('p_live', 'host/read-tile', { status: 'running', started: 10 }),
+      process('p_dead_2', 'host/read-tile', { status: 'completed', started: 40 }),
+      process('p_pending', 'host/read-tile', { status: 'pending', started: 20 }),
+    ])
+    expect(list.map((item) => item.process)).toEqual([
+      'p_pending',
+      'p_live',
+      'p_dead_2',
+      'p_dead_1',
+    ])
+  })
+
+  test('within a group, newest first', () => {
+    const list = listed([
+      process('p_old', 'host/read-tile', { status: 'failed', started: 1 }),
+      process('p_new', 'host/read-tile', { status: 'failed', started: 3 }),
+      process('p_mid', 'host/read-tile', { status: 'failed', started: 2 }),
+    ])
+    expect(list.map((item) => item.process)).toEqual(['p_new', 'p_mid', 'p_old'])
+    expect(list[0]!.started).toBe(3)
+  })
+
+  test('a process with no start keeps the order it arrived in, under the dated ones', () => {
+    const list = listed([
+      process('p_undated_1', 'host/read-tile', { status: 'failed' }),
+      process('p_dated', 'host/read-tile', { status: 'failed', started: 5 }),
+      process('p_undated_2', 'host/read-tile', { status: 'failed' }),
+    ])
+    expect(list.map((item) => item.process)).toEqual(['p_dated', 'p_undated_1', 'p_undated_2'])
+    expect(list[1]!.started).toBeUndefined()
+  })
+
+  test('a long-stale session still opens on its two running processes', () => {
+    const stale = Array.from({ length: 17 }, (_, index) =>
+      process(`p_stale_${index}`, 'host/read-tile', { status: 'failed', started: 100 + index }),
+    )
+    const list = listed([
+      ...stale,
+      process('p_sidebar', 'host/sidebar', { status: 'running', started: 900 }),
+      process('p_read', 'host/read-tile', { status: 'running', started: 901 }),
+    ])
+    expect(list.slice(0, 2).map((item) => item.process)).toEqual(['p_read', 'p_sidebar'])
+    expect(list.slice(2).every((item) => !item.live)).toBe(true)
+  })
 
   test('the program is the instance placement the program scope also holds', () => {
     const list = listed([
