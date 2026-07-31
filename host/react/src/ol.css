@@ -1,0 +1,181 @@
+/* The one stylesheet every surface loads — compiled on demand by the `ol://`
+   helper and linked by the shell as `ol://app/<process>/styles.css`. Nothing is
+   generated into the source tree; nothing is inlined into a page.
+
+   Two halves, and the line between them is the point:
+
+   1. **Tailwind**, for layout, spacing and typography. The `--ol-*` tokens below
+      stay the single source; `@theme` only *maps* them into Tailwind's
+      namespaces, so a utility and a token can never drift apart.
+   2. **The semantic layer**, plain CSS keyed on the `data-ui` markers
+      `components.tsx` stamps: the surface registers host.md §Visual Language
+      rules on (card fill, radius, the two depth registers), the page base, and
+      the strip's edge-fade machinery. It lives in `@layer base`/`components`, so
+      a utility written on the markup always wins over it. */
+
+@import "tailwindcss" source(none);
+
+/* What is scanned for classes: this layer's own components. The program's `src`
+   is appended by the compiler, one `@source` per surface. */
+@source "./";
+
+/* The tokens mapped into Tailwind's namespaces. Every default palette, type
+   scale and font is cleared first: the visual language is a closed set, and a
+   stray `text-blue-500` should not compile. */
+@theme {
+  --color-*: initial;
+  --color-surface: var(--ol-surface);
+  --color-line: var(--ol-line-soft);
+  --color-hover: var(--ol-hover);
+  --color-ink: var(--ol-ink);
+  --color-ink-soft: var(--ol-ink-soft);
+  --color-ink-faint: var(--ol-ink-faint);
+  --color-ink-ghost: var(--ol-ink-ghost);
+  --color-ink-off: var(--ol-ink-off);
+  /* The one accent: a failure, and nothing else, may reach for it. */
+  --color-error: var(--ol-ink-error);
+
+  --text-*: initial;
+  --text-micro: 10px;
+  --text-micro--line-height: 1.4;
+  --text-small: 11px;
+  --text-small--line-height: 1.45;
+  --text-meta: 12px;
+  --text-meta--line-height: 1.5;
+  --text-base: 13px;
+  --text-base--line-height: 1.55;
+  --text-sub: 14px;
+  --text-sub--line-height: 1.4;
+  --text-title: 17px;
+  --text-title--line-height: 1.3;
+
+  --font-*: initial;
+  --font-sans: var(--ol-sans);
+  --font-mono: var(--ol-mono);
+
+  --radius-*: initial;
+  --radius-soft: var(--ol-radius-small);
+  --radius-card: var(--ol-radius);
+
+  /* The rhythm: one 2px grid, so `px-5` is the 10px token and `gap-3` the 6px
+     one. Every spacing utility in the surfaces lands on it. */
+  --spacing: 2px;
+}
+
+/* Values are settled by eye; host.md §Visual Language rules on the *shapes*
+   (rounded cards, an aura under a floating one, naked text on the canvas) and
+   leaves the numbers open. */
+:root {
+  --ol-canvas: transparent;
+  --ol-surface: #fff;
+  /* No card is outlined; a line only ever divides regions *inside* one. */
+  --ol-line-soft: #f0f0f3;
+  --ol-hover: #f4f4f7;
+
+  --ol-ink: #1d1d1f;
+  --ol-ink-soft: #6e6e73;
+  --ol-ink-faint: #8e8e93;
+  --ol-ink-ghost: #a1a1a6;
+  --ol-ink-off: #c4c4c8;
+  --ol-ink-error: #9a3b3b;
+
+  /* Mirrors CARD_RADIUS in the rim: the host cuts a tile's aura to this same
+     corner, and the two must be one number. */
+  --ol-radius: 12px;
+  --ol-radius-small: 8px;
+
+  /* Depth, and where each register is drawn — a webview is clipped to its own
+     rect, so a shadow only belongs to CSS when the room it needs is inside one.
+
+     1. An *in-flow* card — a strip item, anything laid out inside a surface —
+        takes the soft shadow: centred, no light source, the same aura a tile
+        has at the scale of a row. The surface it lies in owes it room.
+     2. A *floating* surface — a tile — takes no shadow here at all. Its aura is
+        the host's, hung on the tile webview's own CoreAnimation layer, which
+        answers to no clipping rect (cast_aura in the rim). */
+  --ol-shadow-soft: 0 0 10px rgba(0, 0, 0, .05);
+  /* Only a surface floating *over* another one lifts further. */
+  --ol-shadow-over: 0 1px 1px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .16);
+  /* How far a surface that sits *naked* on the canvas fades its scrolled
+     content at an edge. A card clips at its own rounded edge; a bare region has
+     no edge to clip at, so it dissolves instead — but only at an edge content
+     actually runs past, and only while it does. */
+  --ol-fade: 24px;
+
+  --ol-sans: -apple-system, system-ui, sans-serif;
+  --ol-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ol-font: 13px/1.55 var(--ol-sans);
+}
+
+/* The edge fade's depth is a registered property so it can be transitioned — a
+   raw custom property is a string to the animation machinery, and `mask-image`
+   itself never interpolates. Registration is top-level: `@property` is not a
+   style rule and does not belong to a cascade layer. */
+@property --ol-fade-top { syntax: '<length>'; inherits: false; initial-value: 0px }
+@property --ol-fade-bottom { syntax: '<length>'; inherits: false; initial-value: 0px }
+
+@layer base {
+  /* The page is the webview's viewport and nothing more: it never scrolls, so a
+     surface can never be dragged out of its own frame. Scrolling belongs to the
+     region that owns it, marked `data-scroll` below.
+
+     No `color-scheme` anywhere: declaring one makes WebKit paint its own base
+     colour *below* the DOM, which is opaque even when the webview is transparent
+     — and a surface must meet the window's canvas (§Visual Language). The host
+     forces the frame's light appearance. */
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none;
+    background: var(--ol-canvas);
+    font: var(--ol-font); color: var(--ol-ink);
+  }
+  /* The program mounts the body itself — the host's shell is empty. Positioned
+     so a surface can pin itself to the viewport with `inset`; a margin would
+     collapse out of the body and push the page taller than itself. */
+  body { position: relative }
+
+  /* A scrolling region says so, and says nothing else: the platform's overlay
+     scrollbar owns the affordance — invisible at rest, a thumb while scrolling.
+     Visual-language pin: a program never styles a scrollbar — neither the
+     pseudo-elements WebKit exposes nor the standard properties. */
+  [data-scroll] { overflow-y: auto; overflow-x: hidden; min-height: 0 }
+}
+
+@layer components {
+  /* A card: white on the canvas, rounded, and nothing else. Depth is not the
+     card's to draw — the host casts a tile's aura on its layer. */
+  [data-ui="card"] {
+    background: var(--ol-surface); border-radius: var(--ol-radius);
+  }
+
+  /* The one in-flow card: a running process in the strip. It lies *inside* a
+     surface, so its aura is CSS — the same white fill as a tile, the same
+     corner, and the soft shadow at row scale. Rest falls flat — no surface, no
+     border, no shadow. */
+  [data-ui="item"][data-live="true"] {
+    background: var(--ol-surface);
+    border-radius: var(--ol-radius); box-shadow: var(--ol-shadow-soft);
+  }
+  [data-ui="item"][data-live="false"] { color: var(--ol-ink-soft) }
+
+  /* The menu floats over the surface that raised it — the second register. */
+  [data-ui="menu"] {
+    background: var(--ol-surface);
+    border-radius: var(--ol-radius-small); box-shadow: var(--ol-shadow-over);
+  }
+
+  /* The fade, per edge, and only while that edge has something past it. At rest
+     at the top with nothing below, no rule matches and the mask is absent
+     entirely: full opacity, nothing dimmed. */
+  [data-fade-top][data-fade-bottom] {
+    --ol-fade-top: 0px; --ol-fade-bottom: 0px;
+    transition: --ol-fade-top 150ms ease, --ol-fade-bottom 150ms ease;
+  }
+  [data-fade-top="true"] { --ol-fade-top: var(--ol-fade) }
+  [data-fade-bottom="true"] { --ol-fade-bottom: var(--ol-fade) }
+  [data-fade-top="true"], [data-fade-bottom="true"] {
+    mask-image: linear-gradient(
+      to bottom, transparent 0, #000 var(--ol-fade-top),
+      #000 calc(100% - var(--ol-fade-bottom)), transparent 100%
+    );
+  }
+}

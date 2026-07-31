@@ -7,7 +7,9 @@ import {
   displayName,
   infer,
   leadingText,
+  meta,
   shortId,
+  stamp,
 } from '../src/view.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
@@ -116,10 +118,39 @@ describe('display', () => {
     expect(leadingText({ id: 'a' })).toBe('')
   })
 
-  test('a body without text shows its scalar keys, containers dropped', () => {
-    expect(leadingText({ id: 'a', body: { status: 'running', capabilities: [], started: 12 } })).toBe(
-      'status running · started 12',
-    )
+  test('a body without text shows its scalar keys — containers and the promoted ones dropped', () => {
+    expect(
+      leadingText({ id: 'a', body: { status: 'running', capabilities: [], started: 12, kind: 'run' } }),
+    ).toBe('kind run')
+  })
+
+  test('engine bookkeeping is not resting content — the failure reason is', () => {
+    expect(
+      leadingText({
+        id: 'a',
+        body: { status: 'failed', error: 'engine shutdown', pid: 4711, timeout_ms: 86_400_000 },
+      }),
+    ).toBe('error engine shutdown')
+  })
+
+  test('state and time are read out of the body for slots of their own', () => {
+    expect(meta({ id: 'a', body: { status: 'running', started: 1_700_000_000_000 } })).toEqual({
+      status: 'running',
+      time: stamp(1_700_000_000_000),
+    })
+    // Nothing to say is said as nothing — never as an empty slot.
+    expect(meta({ id: 'a', body: { text: 'prose' } })).toEqual({})
+    expect(meta({ id: 'a' })).toEqual({})
+  })
+
+  test('a stamp is a clock today and a day otherwise — shape, whatever the zone', () => {
+    const now = new Date(2026, 6, 31, 14, 5).getTime()
+    expect(stamp(now, now)).toMatch(/^\d\d:\d\d$/)
+    // Same day, other hour: still the clock.
+    expect(stamp(new Date(2026, 6, 31, 3, 9).getTime(), now)).toMatch(/^\d\d:\d\d$/)
+    // Two days back, and last year: the day, never a bare time.
+    expect(stamp(new Date(2026, 6, 29, 14, 5).getTime(), now)).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/)
+    expect(stamp(new Date(2025, 6, 31, 14, 5).getTime(), now)).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/)
   })
 
   test('body entries drop the prose key and stringify the rest', () => {

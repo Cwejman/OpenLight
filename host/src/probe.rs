@@ -20,12 +20,15 @@ use serde_json::{json, Value};
 pub const DONE: &str = "__probe_done";
 
 /// The nodes worth a computed style: the page's own frame, then the shapes
-/// host.md §Visual Language rules on. `[data-ui]` is the semantic lane —
-/// every component @openlight/ui owns stamps one (card, item, pill, menu), so
-/// a report reads at meaning level rather than as a class soup; the remaining
-/// class names are the surfaces' own layout regions.
-pub const SELECTORS: &str =
-    "html, body, #root, [data-ui], [data-scroll], .strip, .column, .items, .quiet, .tile, .head, .content, .rows, .row, .foot";
+/// host.md §Visual Language rules on. Both lanes are semantic, which is what
+/// keeps a report readable now that presentation is Tailwind classes:
+/// `[data-ui]` is a shared component's meaning (card, item, pill, menu) and
+/// `[data-part]` is one of a surface's own regions. Only the structural parts
+/// are listed — a report is about where a surface's regions landed, not about
+/// every span inside a row.
+pub const SELECTORS: &str = "html, body, [data-ui], [data-scroll], \
+     [data-part=strip], [data-part=column], [data-part=items], [data-part=quiet], \
+     [data-part=head], [data-part=content], [data-part=rows], [data-part=row], [data-part=foot]";
 
 /// How much of the serialized DOM a report carries. Scripts and styles are
 /// replaced by their length before trimming, so the budget buys structure.

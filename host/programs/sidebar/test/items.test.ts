@@ -2,7 +2,7 @@
 // items that session holds, and the actions each item's state offers
 // (host.md §Sidebar, programs.md §3.2).
 import { describe, expect, test } from 'bun:test'
-import { actions, items, sessionArgument, shortId } from '../src/items.ts'
+import { actions, items, sessionArgument, shortId, stamp } from '../src/items.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
 function result(chunks: ChunkItem[]): ScopeResult {
@@ -177,4 +177,12 @@ describe('the context menu', () => {
 
 test('short ids are shown whole', () => {
   expect(shortId('p_1')).toBe('p_1')
+})
+
+test('when a run began: a clock today, the day itself otherwise', () => {
+  const now = new Date(2026, 6, 31, 14, 5).getTime()
+  expect(stamp(now, now)).toMatch(/^\d\d:\d\d$/)
+  expect(stamp(new Date(2026, 6, 31, 0, 1).getTime(), now)).toMatch(/^\d\d:\d\d$/)
+  expect(stamp(new Date(2026, 6, 29, 14, 5).getTime(), now)).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/)
+  expect(stamp(new Date(2025, 11, 31, 23, 59).getTime(), now)).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/)
 })

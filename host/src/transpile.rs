@@ -1,7 +1,8 @@
-//! The transpile lane behind `ol://`: one long-lived `bun` process running
+//! The compile lane behind `ol://`: one long-lived `bun` process running
 //! [`serve.ts`](serve.ts), plus a cache on disk. The host asks it for one file
 //! at a time and gets back an ES module whose bare imports are already `ol://`
-//! URLs.
+//! URLs — or for a surface's stylesheet, and gets back the Tailwind build of
+//! `@openlight/react/ol.css` against that program's own sources.
 //!
 //! A persistent process rather than a `bun` invocation per file: resolution and
 //! the TSX transform are both bun's, and one start-up (~40 ms) amortized over a
@@ -69,34 +70,66 @@ impl Transpiler {
     /// The module for one file: from cache when it is newer than the source,
     /// from bun otherwise.
     pub fn module(&self, path: &Path) -> Result<String, String> {
-        let cached = self.cache_path(path);
+        let cached = self.cache_path(path, "js");
         if is_fresh(&cached, path) {
             if let Ok(code) = std::fs::read_to_string(&cached) {
                 return Ok(code);
             }
         }
-        let code = self.ask(path)?;
-        if let Some(parent) = cached.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        let _ = std::fs::write(&cached, &code);
+        let answer = self.ask("module", path)?;
+        let code = text(&answer, "code")?;
+        write_cache(&cached, &code);
         Ok(code)
     }
 
-    fn cache_path(&self, path: &Path) -> PathBuf {
+    /// The stylesheet for one program, by the directory its sources live in.
+    ///
+    /// A sheet is compiled from every class written in that tree, so it is
+    /// cached against *all* of them: bun answers with the files it read, they
+    /// are kept beside the sheet, and the sheet is used only while it is newer
+    /// than every one. (A file added to the tree is not itself a change to any
+    /// listed file — but a class is only ever *written* from a file the program
+    /// imports, and importing it edits one.)
+    pub fn styles(&self, source: &Path) -> Result<String, String> {
+        let cached = self.cache_path(source, "css");
+        let manifest = cached.with_extension("css.files");
+        if let Ok(list) = std::fs::read_to_string(&manifest) {
+            if list.lines().all(|file| is_fresh(&cached, Path::new(file))) {
+                if let Ok(sheet) = std::fs::read_to_string(&cached) {
+                    return Ok(sheet);
+                }
+            }
+        }
+        let answer = self.ask("styles", source)?;
+        let sheet = text(&answer, "code")?;
+        write_cache(&cached, &sheet);
+        let files: Vec<&str> =
+            answer["files"].as_array().map_or(Vec::new(), |files| {
+                files.iter().filter_map(serde_json::Value::as_str).collect()
+            });
+        let _ = std::fs::write(&manifest, files.join("\n"));
+        Ok(sheet)
+    }
+
+    /// Where one answer is kept: the source tree mirrored under the cache root,
+    /// with the artifact's own extension appended — so a file and a directory
+    /// of the same name never collide, and neither do two files that differ
+    /// only in extension.
+    fn cache_path(&self, path: &Path, extension: &str) -> PathBuf {
         let relative = path.strip_prefix("/").unwrap_or(path);
         let mut cached = self.cache.join(relative);
         let name = format!(
-            "{}.js",
+            "{}.{extension}",
             cached.file_name().unwrap_or_default().to_string_lossy()
         );
         cached.set_file_name(name);
         cached
     }
 
-    fn ask(&self, path: &Path) -> Result<String, String> {
+    fn ask(&self, op: &str, path: &Path) -> Result<serde_json::Value, String> {
         let id = self.next_id.fetch_add(1, Ordering::Relaxed);
-        let request = serde_json::json!({ "id": id, "path": path.to_string_lossy() }).to_string();
+        let request =
+            serde_json::json!({ "id": id, "op": op, "path": path.to_string_lossy() }).to_string();
 
         let mut pipe = self.pipe.lock().map_err(|_| "transpiler poisoned".to_string())?;
         writeln!(pipe.stdin, "{request}").map_err(|e| format!("bun stdin: {e}"))?;
@@ -105,21 +138,32 @@ impl Transpiler {
         let mut line = String::new();
         let read = pipe.stdout.read_line(&mut line).map_err(|e| format!("bun stdout: {e}"))?;
         if read == 0 {
-            return Err("the transpiler exited".into());
+            return Err("the compiler exited".into());
         }
         let answer: serde_json::Value =
-            serde_json::from_str(&line).map_err(|e| format!("transpiler answer: {e}"))?;
+            serde_json::from_str(&line).map_err(|e| format!("compiler answer: {e}"))?;
         if answer["id"].as_u64() != Some(id) {
-            return Err("transpiler answered out of order".into());
+            return Err("the compiler answered out of order".into());
         }
         if answer["ok"] == serde_json::Value::Bool(true) {
-            return answer["code"]
-                .as_str()
-                .map(str::to_string)
-                .ok_or_else(|| "transpiler answered without code".to_string());
+            return Ok(answer);
         }
-        Err(answer["error"].as_str().unwrap_or("unknown transpile failure").to_string())
+        Err(answer["error"].as_str().unwrap_or("unknown compile failure").to_string())
     }
+}
+
+fn text(answer: &serde_json::Value, key: &str) -> Result<String, String> {
+    answer[key]
+        .as_str()
+        .map(str::to_string)
+        .ok_or_else(|| format!("the compiler answered without {key}"))
+}
+
+fn write_cache(cached: &Path, body: &str) {
+    if let Some(parent) = cached.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    let _ = std::fs::write(cached, body);
 }
 
 impl Drop for Transpiler {
@@ -157,10 +201,15 @@ mod tests {
     fn the_cache_mirrors_the_source_tree_under_one_root() {
         let dir = temp("cache");
         let transpiler = Transpiler::start(&dir).expect("bun on PATH");
-        let cached = transpiler.cache_path(Path::new("/a/b/index.tsx"));
+        let cached = transpiler.cache_path(Path::new("/a/b/index.tsx"), "js");
         assert_eq!(cached, dir.join("a/b/index.tsx.js"));
         // Two files that differ only in extension never share a cache entry.
-        assert_ne!(cached, transpiler.cache_path(Path::new("/a/b/index.ts")));
+        assert_ne!(cached, transpiler.cache_path(Path::new("/a/b/index.ts"), "js"));
+        // A program's stylesheet is kept against the directory it was built
+        // from, beside the manifest of every file that went into it.
+        let sheet = transpiler.cache_path(Path::new("/a/b/src"), "css");
+        assert_eq!(sheet, dir.join("a/b/src.css"));
+        assert_eq!(sheet.with_extension("css.files"), dir.join("a/b/src.css.files"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -201,8 +250,37 @@ mod tests {
         assert!(!code.contains(": number"), "{code}");
 
         // The second read comes from the cache, not from bun.
-        assert!(transpiler.cache_path(&source).exists());
+        assert!(transpiler.cache_path(&source, "js").exists());
         assert_eq!(transpiler.module(&source).unwrap(), code);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// The stylesheet a surface links: Tailwind's build of the shared
+    /// `ol.css`, against the classes this program actually writes.
+    #[test]
+    fn a_program_s_sources_become_one_stylesheet_cached_against_them() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("programs/sidebar/src");
+        let dir = temp("styles");
+        let transpiler = Transpiler::start(&dir).expect("bun on PATH");
+
+        let sheet = transpiler.styles(&source).expect("a stylesheet");
+        // The semantic layer, the tokens it stands on, and Tailwind's own
+        // build — one sheet, no `@import` left for the webview to chase.
+        assert!(sheet.contains("--ol-radius: 12px"), "the tokens: {sheet}");
+        assert!(sheet.contains(r#"[data-ui="item"][data-live="true"]"#), "the registers");
+        assert!(sheet.contains("mask-image"), "the strip's edge fade");
+        assert!(sheet.contains("tailwindcss v4"), "Tailwind compiled it");
+        assert!(!sheet.contains("@import"), "every import is resolved: {sheet}");
+
+        // Cached against every file that went into it — the sources included.
+        let manifest = std::fs::read_to_string(
+            transpiler.cache_path(&source, "css").with_extension("css.files"),
+        )
+        .expect("the manifest");
+        assert!(manifest.contains("react/src/ol.css"), "{manifest}");
+        assert!(manifest.contains("sidebar/src/sidebar.tsx"), "{manifest}");
+        assert_eq!(transpiler.styles(&source).unwrap(), sheet, "the second read is the cache");
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -215,7 +293,7 @@ mod tests {
         let transpiler = Transpiler::start(&dir.join("cache")).expect("bun on PATH");
         let error = transpiler.module(&source).expect_err("a syntax error is an error");
         assert!(!error.is_empty(), "the failure carries a message");
-        assert!(!transpiler.cache_path(&source).exists(), "a failure is never cached");
+        assert!(!transpiler.cache_path(&source, "js").exists(), "a failure is never cached");
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

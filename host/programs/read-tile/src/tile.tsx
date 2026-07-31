@@ -4,8 +4,14 @@
 //
 // It writes nothing. The view-state chunk §3.5 grants it stays unwritten in
 // v0.1: nothing here is switchable yet.
+//
+// Presentation is Tailwind over the tokens `@openlight/react/ol.css` maps — the
+// host compiles that sheet against this program's own sources and the shell
+// links it, so nothing here carries CSS. Two markers survive the classes, and
+// they are what the tests and the probe read: `data-ui` for a shared
+// component's meaning, `data-part` for one of this surface's own regions.
 import { get, type ChunkId, type ChunkItem, type ScopeResult } from '@openlight/sdk'
-import { Card, Pill, styles, useScope } from '@openlight/react'
+import { Card, Pill, Status, useScope } from '@openlight/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import {
   argumentTarget,
@@ -13,6 +19,7 @@ import {
   displayName,
   infer,
   leadingText,
+  meta,
   shortId,
   type Member,
 } from './view.ts'
@@ -49,28 +56,43 @@ function Scope({ roots }: { roots: ChunkId[] }) {
   }
   const view = infer(roots, present, seen)
   const subject = present[0]
+  const title = subject ? displayName(subject) : { text: shortId(roots[0] ?? '', 24), isId: true }
 
   return (
     <Frame>
-      <header className="head">
-        <div className="chips">
+      {/* Context first: the ids the scope was opened by are the breadcrumb the
+          subject hangs under, so they lead — then the subject, then its prose. */}
+      <header data-part="head" className="border-b border-line px-9 pt-7 pb-5">
+        <div data-part="chips" className="flex flex-wrap gap-2">
           {roots.map((id) => (
             <Pill key={id}>{shortId(id, 24)}</Pill>
           ))}
         </div>
-        <h1 className={subject && !subject.name ? 'mono' : undefined}>
-          {subject ? displayName(subject).text : shortId(roots[0] ?? '', 24)}
+        <h1
+          data-part="title"
+          data-id={title.isId}
+          className={
+            title.isId
+              ? 'mt-3 truncate font-mono text-sub font-semibold'
+              : 'mt-3 truncate text-title font-semibold tracking-[-0.01em]'
+          }
+        >
+          {title.text}
         </h1>
         {subject && typeof subject.body?.text === 'string' ? (
-          <p className="prose">{subject.body.text}</p>
+          <p data-part="prose" className="mt-2 text-ink-soft">
+            {subject.body.text}
+          </p>
         ) : null}
       </header>
 
-      <div className="content" data-scroll data-mode={view.mode}>
+      <div data-part="content" data-scroll data-mode={view.mode} className="flex-1 px-5 py-3">
         {view.mode === 'unresolved' ? (
           <Note title="Unresolved reference">
             {view.roots.map((id) => (
-              <code key={id}>{id}</code>
+              <code key={id} className="font-mono">
+                {id}
+              </code>
             ))}
           </Note>
         ) : null}
@@ -78,7 +100,7 @@ function Scope({ roots }: { roots: ChunkId[] }) {
           <Note title="Empty scope">
             {view.accepts.length > 0 ? (
               <span>
-                accepts <em>{view.accepts.join(', ')}</em>
+                accepts <em className="text-ink not-italic">{view.accepts.join(', ')}</em>
               </span>
             ) : (
               <span>accepts anything</span>
@@ -90,29 +112,89 @@ function Scope({ roots }: { roots: ChunkId[] }) {
         {view.mode === 'cards' ? <Rows members={view.members} /> : null}
       </div>
 
-      <footer className="foot">
+      <footer
+        data-part="foot"
+        className="flex items-baseline justify-between gap-5 border-t border-line px-9 py-4 text-small text-ink-faint"
+      >
         <span>
           {result.in_scope} {result.in_scope === 1 ? 'member' : 'members'}
         </span>
-        <span className="mono">{shortId(result.head, 10)}</span>
+        <span className="font-mono">{shortId(result.head, 10)}</span>
       </footer>
     </Frame>
   )
 }
 
-/** Cards and Sequence share a row: name, leading text, seq when it orders. */
+/**
+ * Cards and Sequence share a row, and the row is a hierarchy: the name carries
+ * it, the id sits beside it at half the weight, and the state follows them
+ * inline — it belongs to the member, not to the far edge of a wide tile. Only
+ * the time holds that edge, and whatever prose the member has runs underneath.
+ */
 function Rows({ members, numbered = false }: { members: Member[]; numbered?: boolean }) {
   return (
-    <ul className="rows">
+    <ul data-part="rows" className="divide-y divide-line">
       {members.map((member) => {
         const name = displayName(member.chunk)
         const text = leadingText(member.chunk)
+        const { status, time } = meta(member.chunk)
         return (
-          <li className="row" key={member.chunk.id}>
-            {numbered ? <span className="seq mono">{member.seq ?? '—'}</span> : null}
-            <div className="row-body">
-              <span className={name.isId ? 'name mono' : 'name'}>{name.text}</span>
-              {text ? <span className="text">{text}</span> : null}
+          <li
+            data-part="row"
+            className="flex items-baseline gap-4 rounded-soft px-4 py-3 hover:bg-hover"
+            key={member.chunk.id}
+          >
+            {numbered ? (
+              <span
+                data-part="seq"
+                className="w-6 shrink-0 text-right font-mono text-small tabular-nums text-ink-ghost"
+              >
+                {member.seq ?? '—'}
+              </span>
+            ) : null}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-3">
+                <span
+                  data-part="name"
+                  data-id={name.isId}
+                  className={
+                    name.isId
+                      ? 'min-w-0 truncate font-mono font-medium'
+                      : 'min-w-0 truncate font-medium'
+                  }
+                >
+                  {name.text}
+                </span>
+                {name.isId ? null : (
+                  <span data-part="id" className="truncate font-mono text-small text-ink-ghost">
+                    {shortId(member.chunk.id, 10)}
+                  </span>
+                )}
+                {/* Quietly: the word in the same grey as the rest of the meta,
+                    and one small mark of the single accent when it is a
+                    failure. A dozen failed runs should read as a list, not as
+                    an alarm. */}
+                {status ? (
+                  <Status
+                    part="status"
+                    status={status}
+                    dot={status === 'failed' ? 'error' : undefined}
+                  />
+                ) : null}
+                {time ? (
+                  <span
+                    data-part="time"
+                    className="ml-auto shrink-0 pl-4 font-mono text-small tabular-nums text-ink-ghost"
+                  >
+                    {time}
+                  </span>
+                ) : null}
+              </div>
+              {text ? (
+                <div data-part="text" className="mt-1 truncate text-meta text-ink-soft">
+                  {text}
+                </div>
+              ) : null}
             </div>
           </li>
         )
@@ -126,22 +208,36 @@ function Document({ member }: { member: Member }) {
   const name = displayName(member.chunk)
   const prose = typeof member.chunk.body?.text === 'string' ? member.chunk.body.text : null
   return (
-    <article className="document">
-      <h2 className={name.isId ? 'mono' : undefined}>{name.text}</h2>
-      {prose ? <p className="prose">{prose}</p> : null}
-      <dl className="fields">
+    <article data-part="document" className="px-4 py-3">
+      <h2
+        data-part="title"
+        data-id={name.isId}
+        className={name.isId ? 'font-mono text-sub font-semibold' : 'text-sub font-semibold'}
+      >
+        {name.text}
+      </h2>
+      {prose ? (
+        <p data-part="prose" className="mt-2 text-ink-soft">
+          {prose}
+        </p>
+      ) : null}
+      <dl data-part="fields" className="mt-5 grid gap-2">
         {bodyEntries(member.chunk).map(([key, value]) => (
-          <div className="field" key={key}>
-            <dt>{key}</dt>
-            <dd className="mono">{value}</dd>
+          <div
+            data-part="field"
+            className="grid grid-cols-[104px_1fr] items-baseline gap-4"
+            key={key}
+          >
+            <dt className="truncate text-ink-faint">{key}</dt>
+            <dd className="font-mono break-words">{value}</dd>
           </div>
         ))}
       </dl>
-      <div className="chips">
+      <div data-part="chips" className="mt-6 flex flex-wrap gap-2">
         {(member.chunk.placements ?? []).map((placement) => (
           <Pill key={`${placement.type_}:${placement.scope_id}`}>
             {placement.type_ === 'instance' ? 'instance of' : 'placed on'}{' '}
-            <span className="mono">{shortId(placement.scope_id, 24)}</span>
+            <span className="ml-1 font-mono">{shortId(placement.scope_id, 24)}</span>
           </Pill>
         ))}
       </div>
@@ -151,9 +247,11 @@ function Document({ member }: { member: Member }) {
 
 function Note({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="note">
-      <strong>{title}</strong>
-      <div className="note-body">{children}</div>
+    <div data-part="note" className="rounded-soft bg-hover/60 px-6 py-5 text-ink-soft">
+      <strong className="block font-semibold text-ink">{title}</strong>
+      <div data-part="note-body" className="mt-2 flex flex-wrap gap-3">
+        {children}
+      </div>
     </div>
   )
 }
@@ -161,8 +259,12 @@ function Note({ title, children }: { title: string; children: ReactNode }) {
 /**
  * The card the tile lives in, plus the quiet states that replace its content.
  * It fills the webview and never moves: the page itself does not scroll
- * (@openlight/react base), so the card cannot be dragged out of its own frame —
- * only the member list inside it scrolls.
+ * (@openlight/react's base layer), so the card cannot be dragged out of its own
+ * frame — only the member list inside it scrolls.
+ *
+ * Depth is not drawn here: a tile floats, and its aura is hung by the host on
+ * this webview's own layer, because a webview clips a shadow its own card would
+ * draw (author ruling, *the depth language*).
  */
 export function Frame({
   children,
@@ -174,11 +276,16 @@ export function Frame({
   error?: string
 }) {
   return (
-    <Card className="tile">
-      <style>{styles + CSS}</style>
+    <Card className="absolute inset-0 flex flex-col overflow-hidden">
       {children ?? (
-        <div className="quiet">
-          {error ? <span className="error">{error}</span> : <span>{status}</span>}
+        <div data-part="quiet" className="grid flex-1 place-items-center text-ink-ghost">
+          {error ? (
+            <span data-part="error" className="text-error">
+              {error}
+            </span>
+          ) : (
+            <span>{status}</span>
+          )}
         </div>
       )}
     </Card>
@@ -212,53 +319,3 @@ function useChunks(ids: ChunkId[], head: string | undefined): Read {
 
   return state
 }
-
-// Layout only — the card's surface and rounding, the pill and the greys are
-// tokens and components in @openlight/react. Depth is neither: a tile floats,
-// and its aura is hung by the host on this webview's own layer, because a
-// webview clips a shadow its own card would draw (author ruling, *the depth
-// language*). Nothing here lifts, insets, or shadows for room it does not have.
-const CSS = `
-  /* The card fills the webview edge to edge and clips its own corners;
-     \`min-height: 0\` lets the content region be shorter than what it holds,
-     which is what makes the list — and only the list — scroll. */
-  .tile {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .mono { font-family: var(--ol-mono); font-size: .92em }
-  .head { padding: 16px 18px 12px; border-bottom: 1px solid var(--ol-line-soft) }
-  .head h1 { margin: 6px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em }
-  .prose { margin: 4px 0 0; color: #4b4b50 }
-  .chips { display: flex; flex-wrap: wrap; gap: var(--ol-gap) }
-  .content { flex: 1; padding: 8px var(--ol-pad) }
-  .rows { margin: 0; padding: 0; list-style: none }
-  .row { display: flex; gap: var(--ol-pad); padding: 9px 8px; border-radius: var(--ol-radius-small) }
-  .row + .row { border-top: 1px solid var(--ol-hover) }
-  .row:hover { background: #fafafc }
-  .seq { min-width: 20px; color: var(--ol-ink-ghost); text-align: right }
-  .row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
-  .name { font-weight: 550 }
-  .text { color: var(--ol-ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-  .document { padding: var(--ol-pad-tight) 8px }
-  .document h2 { margin: 0; font-size: 14px; font-weight: 600 }
-  .fields { margin: var(--ol-pad) 0 0; display: grid; gap: 4px }
-  .field { display: grid; grid-template-columns: 120px 1fr; gap: var(--ol-pad) }
-  .field dt { color: var(--ol-ink-faint) }
-  .field dd { margin: 0; overflow-wrap: anywhere }
-  .document .chips { margin-top: 12px }
-  .note {
-    padding: 12px; border-radius: var(--ol-radius-small);
-    background: #fafafc; color: var(--ol-ink-soft);
-  }
-  .note strong { display: block; color: var(--ol-ink); font-weight: 600 }
-  .note-body { margin-top: 4px; display: flex; flex-wrap: wrap; gap: var(--ol-gap) }
-  .note code { font-family: var(--ol-mono) }
-  .foot {
-    display: flex; justify-content: space-between; gap: var(--ol-pad);
-    padding: 9px 18px; border-top: 1px solid var(--ol-line-soft);
-    color: var(--ol-ink-faint); font-size: 11px;
-  }
-  .quiet { flex: 1; display: grid; place-items: center; color: var(--ol-ink-ghost) }
-  .error { color: var(--ol-ink-error) }
-`

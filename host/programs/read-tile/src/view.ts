@@ -68,15 +68,61 @@ export function shortId(id: ChunkId, keep = 12): string {
   return id.length > keep ? `${id.slice(0, keep)}…` : id
 }
 
-/** `body.text` as prose; anything else as its scalar keys, compactly. */
+/**
+ * The body keys a row shows in slots of their own — state and time read as
+ * hierarchy, not as another run of text (author review, *make the rows read*).
+ */
+const PROMOTED = ['text', 'status', 'started', 'created', 'updated']
+
+/**
+ * Engine bookkeeping a reader never asked for (engine.md, *Program and
+ * Process*). A resting row says what a run *was*, not what the machinery wrote
+ * on it — `error` is not here, because a failure's reason is content.
+ */
+const INTERNAL = ['pid', 'timeout_ms']
+
+/** `body.text` as prose; anything else as its remaining scalar keys, compactly. */
 export function leadingText(chunk: ChunkItem, limit = 160): string {
   const body = chunk.body
   if (!body) return ''
   if (typeof body.text === 'string') return truncate(body.text, limit)
   const pairs = Object.entries(body)
+    .filter(([key]) => !PROMOTED.includes(key) && !INTERNAL.includes(key))
     .filter(([, value]) => value === null || typeof value !== 'object')
     .map(([key, value]) => `${key} ${value}`)
   return truncate(pairs.join(' · '), limit)
+}
+
+/** What a row says about a member beside its name: its state, and when. */
+export type Meta = { status?: string; time?: string }
+
+export function meta(chunk: ChunkItem): Meta {
+  const body = chunk.body ?? {}
+  const status = typeof body.status === 'string' ? body.status : undefined
+  const at = ['started', 'created', 'updated']
+    .map((key) => body[key])
+    .find((value) => typeof value === 'number' && Number.isFinite(value))
+  return {
+    ...(status === undefined ? {} : { status }),
+    ...(at === undefined ? {} : { time: stamp(at as number) }),
+  }
+}
+
+/**
+ * An epoch-millisecond mark as the shortest thing that still places it: today
+ * is a wall clock, any other day is that day. A row shows when, not how long —
+ * and a time alone lies about a run from last week.
+ */
+export function stamp(ms: number, now = Date.now()): string {
+  const at = new Date(ms)
+  const today = new Date(now)
+  const sameDay =
+    at.getFullYear() === today.getFullYear() &&
+    at.getMonth() === today.getMonth() &&
+    at.getDate() === today.getDate()
+  return sameDay
+    ? `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`
+    : at.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export function bodyEntries(chunk: ChunkItem): [string, string][] {

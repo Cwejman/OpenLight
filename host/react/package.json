@@ -2,12 +2,13 @@
   "name": "@openlight/react",
   "version": "0.1.0",
   "private": true,
-  "description": "The host's React layer over @openlight/sdk — hooks, style tokens, and the semantic components its surfaces share.",
+  "description": "The host's React layer over @openlight/sdk — hooks, the shared stylesheet (tokens, Tailwind theme, semantic layer), and the components its surfaces share.",
   "type": "module",
   "module": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./ol.css": "./src/ol.css"
   },
   "scripts": {
     "test": "bun test"
@@ -17,7 +18,8 @@
   ],
   "dependencies": {
     "@openlight/sdk": "workspace:*",
-    "react": "^19.2.8"
+    "react": "^19.2.8",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.0.0",

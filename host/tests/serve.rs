@@ -79,10 +79,10 @@ fn one_import(code: &str, ending: &str) -> String {
         .unwrap_or_else(|| panic!("no import ending {ending} among {:?}", imports(code)))
 }
 
-/// The page a webview is given holds the program's entry and nothing else: no
-/// root element, no styles, no inlined code.
+/// The page a webview is given holds one stylesheet and the program's entry:
+/// no root element, no inline style, no inlined code.
 #[test]
-fn the_shell_names_the_program_s_own_entry_and_holds_nothing_else() {
+fn the_shell_names_the_program_s_own_entry_and_one_stylesheet() {
     let host = Host::start();
     let entry = host.entry(READ_TILE);
     let Answer::Ready(served) = serve::respond(&host.root, "p_1", &entry, "/p_1") else {
@@ -92,8 +92,36 @@ fn the_shell_names_the_program_s_own_entry_and_holds_nothing_else() {
 
     assert_eq!(served.mime, "text/html");
     assert!(page.contains(&format!(r#"<script type="module" src="{}""#, serve::module_url(&entry))), "{page}");
+    assert!(page.contains(&format!(r#"<link rel="stylesheet" href="{}">"#, serve::styles_url("p_1"))), "{page}");
     assert!(page.contains("<body></body>"), "{page}");
     assert!(!page.contains("id=\"root\""), "the program mounts the body: {page}");
+    assert!(!page.contains("<style"), "no page carries CSS in its markup: {page}");
+}
+
+/// The stylesheet the shell links, asked for the way the webview asks: one
+/// sheet, compiled for this program — Tailwind's build of the classes it
+/// actually writes, over the shared semantic layer and its tokens.
+#[test]
+fn a_surface_s_stylesheet_is_compiled_from_its_own_sources() {
+    let host = Host::start();
+    let entry = host.entry(SIDEBAR);
+
+    let served = host.get("p_2", &entry, &serve::styles_url("p_2"));
+    assert_eq!((served.status, served.mime), (200, "text/css"));
+    let sheet = String::from_utf8(served.body).expect("a stylesheet is text");
+
+    // The semantic layer and the tokens it stands on.
+    assert!(sheet.contains(r#"[data-ui="item"][data-live="true"]"#), "the depth registers");
+    assert!(sheet.contains("--ol-radius: 12px"), "the tokens");
+    // A utility this program writes, and one it does not.
+    assert!(sheet.contains(".w-\\[216px\\]"), "the strip's own column width: {sheet}");
+    assert!(!sheet.contains("grid-cols-"), "nothing the sidebar never writes");
+    // Nothing is left for the webview to chase, and no scrollbar is styled.
+    assert!(!sheet.contains("@import"), "every import is resolved");
+    assert!(!sheet.contains("::-webkit-scrollbar"));
+
+    // Another process's sheet is refused, exactly as its shell would be.
+    assert_eq!(host.get("p_2", &entry, &serve::styles_url("p_9")).status, 404);
 }
 
 /// The chain the brief walks: the entry, the React layer it imports by name,

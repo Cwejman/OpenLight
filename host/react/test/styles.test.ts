@@ -1,8 +1,11 @@
 // The visual-language pins the shared stylesheet is answerable for (author
 // ruling, *the depth language*). Everything here is a rule about what a program
-// may draw, so it is checked in the one place every program inlines.
+// may draw, so it is checked in the one place every surface loads: `ol.css` —
+// the sheet the host compiles per surface and the shell links.
 import { expect, test } from 'bun:test'
-import { styles } from '../src/styles.ts'
+import { readFileSync } from 'node:fs'
+
+const styles = readFileSync(new URL('../src/ol.css', import.meta.url), 'utf8')
 
 test('the shadow CSS may draw is one soft, centred token', () => {
   expect(styles).toContain('--ol-shadow-soft: 0 0 10px rgba(0, 0, 0, .05)')
@@ -35,9 +38,33 @@ test('programs never style a scrollbar — the platform owns the affordance', ()
   expect(rule('[data-scroll]')).toContain('overflow-y: auto')
 })
 
-/** The declaration block of the first rule with this exact selector. */
+test('the tokens stay the one source: @theme maps them and defines nothing', () => {
+  const theme = rule('@theme')
+  // Every colour, radius and font Tailwind knows points back at a token.
+  for (const [, value] of theme.matchAll(/--(?:color|radius|font)-[\w*-]+: ([^;]+);/g)) {
+    expect(value).toMatch(/^var\(--ol-|^initial$/)
+  }
+  // And the defaults a closed visual language must not inherit are cleared.
+  for (const namespace of ['--color-*', '--text-*', '--font-*', '--radius-*']) {
+    expect(theme).toContain(`${namespace}: initial`)
+  }
+})
+
+test('the semantic layer sits under the utilities, so a class always wins', () => {
+  // Everything keyed on a `data-ui` marker lives in `@layer components`; an
+  // unlayered rule would outrank every utility written on the markup.
+  const components = styles.indexOf('@layer components')
+  expect(components).toBeGreaterThan(0)
+  expect(styles.indexOf('[data-ui=')).toBeGreaterThan(components)
+})
+
+/** The block of the first rule with this exact selector, at any indent. */
 function rule(selector: string): string {
-  const at = styles.indexOf(`\n${selector}`)
+  const at = styles.search(new RegExp(`\\n *${escape(selector)}[ ,{]`))
   if (at < 0) throw new Error(`no rule for ${selector}`)
   return styles.slice(styles.indexOf('{', at), styles.indexOf('}', at))
+}
+
+function escape(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

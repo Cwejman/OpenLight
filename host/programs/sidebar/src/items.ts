@@ -151,3 +151,21 @@ export function actions(item: Item): Action[] {
 export function shortId(id: ChunkId, keep = 14): string {
   return id.length > keep ? `${id.slice(0, keep)}…` : id
 }
+
+/**
+ * When a run started, as the shortest thing that still places it: today is a
+ * wall clock, any other day is that day. A session accumulates runs forever, so
+ * a bare `18:00` on a row from last week is a lie the strip must not tell.
+ * (The read-tile's rows say it the same way — one vocabulary, two surfaces.)
+ */
+export function stamp(ms: number, now = Date.now()): string {
+  const at = new Date(ms)
+  const today = new Date(now)
+  const sameDay =
+    at.getFullYear() === today.getFullYear() &&
+    at.getMonth() === today.getMonth() &&
+    at.getDate() === today.getDate()
+  return sameDay
+    ? `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`
+    : at.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}

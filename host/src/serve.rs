@@ -1,11 +1,19 @@
 //! The `ol://` protocol — what a webview program is served, in place of a
 //! bundle inlined into a page (host.md §Authoring Programs).
 //!
-//! One custom protocol per webview, two routes under one origin (same origin,
+//! One custom protocol per webview, three routes under one origin (same origin,
 //! so a module script is never a cross-origin fetch):
 //!
-//!   `ol://app/<process id>`   the empty shell — the program's own entry as the
-//!                             page's one module script, and nothing else.
+//!   `ol://app/<process id>`   the shell — the program's own entry as the
+//!                             page's one module script, and the one stylesheet
+//!                             link, and nothing else.
+//!   `ol://app/<pid>/styles.css`
+//!                             that surface's whole stylesheet: Tailwind
+//!                             compiled against the program's own sources, over
+//!                             the shared `@openlight/react/ol.css` (tokens,
+//!                             `@theme` mapping, semantic layer). Compiled on
+//!                             demand and cached under `target/`, exactly like a
+//!                             module — nothing is generated into the tree.
 //!   `ol://app/mod/<path>`     one file, transpiled. The URL *is* the file's
 //!                             absolute path, so a relative import resolves to
 //!                             the right file with no rewriting at all, and one
@@ -23,6 +31,8 @@ use std::path::{Path, PathBuf};
 pub const SCHEME: &str = "ol";
 const ORIGIN: &str = "ol://app";
 const MODULE_PREFIX: &str = "/mod";
+/// What a process's own path ends with when the stylesheet is what is wanted.
+const STYLES: &str = "/styles.css";
 
 /// The extensions the transpiler owns. Anything else is served as it lies.
 const TRANSPILED: [&str; 7] = ["ts", "tsx", "js", "jsx", "mjs", "cjs", "json"];
@@ -35,6 +45,8 @@ const CANDIDATES: [&str; 8] =
 pub enum Route {
     /// The shell for a process.
     Shell(String),
+    /// The stylesheet for a process's surface.
+    Styles(String),
     /// A file, by absolute path.
     Module(PathBuf),
     Unknown,
@@ -49,13 +61,21 @@ pub fn route(path: &str) -> Route {
     }
     match path.trim_start_matches('/') {
         "" => Route::Unknown,
-        process => Route::Shell(percent_decode(process)),
+        rest => match rest.strip_suffix(STYLES).filter(|process| !process.is_empty()) {
+            Some(process) => Route::Styles(percent_decode(process)),
+            None => Route::Shell(percent_decode(rest)),
+        },
     }
 }
 
 /// The URL a process's shell is loaded from.
 pub fn shell_url(process: &str) -> String {
     format!("{ORIGIN}/{}", encode_segment(process))
+}
+
+/// The URL a process's shell links its stylesheet from.
+pub fn styles_url(process: &str) -> String {
+    format!("{ORIGIN}/{}{STYLES}", encode_segment(process))
 }
 
 /// The canonical URL of a file — the same one `serve.ts` builds, so the two
@@ -111,6 +131,14 @@ impl Served {
     fn missing(what: &str) -> Served {
         Served { status: 404, mime: "text/plain", body: format!("ol: no {what}").into_bytes() }
     }
+
+    /// A stylesheet that did not compile. It is still served as CSS — a page
+    /// with no rules is legible enough to read the failure on, and a dead
+    /// stylesheet fetch would say nothing at all.
+    fn unstyled(what: &str, message: &str) -> Served {
+        let sheet = format!("/* ol: {what}\n{message} */\n");
+        Served { status: 200, mime: "text/css", body: sheet.into_bytes() }
+    }
 }
 
 /// What a request resolves to before anything is read: either the whole answer
@@ -120,6 +148,8 @@ impl Served {
 pub enum Answer {
     Ready(Served),
     Module(PathBuf),
+    /// The stylesheet for the program whose sources live in this directory.
+    Styles(PathBuf),
 }
 
 /// Read one request for one webview. `process` and `entry` are that webview's
@@ -127,10 +157,17 @@ pub enum Answer {
 /// tree modules may come from.
 pub fn respond(root: &Path, process: &str, entry: &Path, uri_path: &str) -> Answer {
     match route(uri_path) {
-        Route::Shell(who) if who == process => {
-            Answer::Ready(Served::ok("text/html", shell(&module_url(entry)).into_bytes()))
-        }
+        Route::Shell(who) if who == process => Answer::Ready(Served::ok(
+            "text/html",
+            shell(&styles_url(process), &module_url(entry)).into_bytes(),
+        )),
         Route::Shell(who) => Answer::Ready(Served::missing(&format!("shell for {who}"))),
+        // A surface's stylesheet is compiled from the tree its entry lies in.
+        Route::Styles(who) if who == process => match entry.parent() {
+            Some(source) => Answer::Styles(source.to_path_buf()),
+            None => Answer::Ready(Served::missing("source tree for the stylesheet")),
+        },
+        Route::Styles(who) => Answer::Ready(Served::missing(&format!("stylesheet for {who}"))),
         Route::Module(path) if !path.starts_with(root) => Answer::Ready(Served::missing(&format!(
             "module outside {}: {}",
             root.display(),
@@ -155,6 +192,13 @@ pub fn serve(
     match respond(root, process, entry, uri_path) {
         Answer::Ready(served) => served,
         Answer::Module(file) => module(transpiler, &file),
+        Answer::Styles(source) => match transpiler.styles(&source) {
+            Ok(sheet) => Served::ok("text/css", sheet.into_bytes()),
+            Err(message) => {
+                eprintln!("ol: compiling styles for {}\n{message}", source.display());
+                Served::unstyled(&format!("styles for {}", source.display()), &message)
+            }
+        },
     }
 }
 
@@ -175,16 +219,18 @@ fn module(transpiler: &Transpiler, file: &Path) -> Served {
     }
 }
 
-/// The empty shell (host.md §Authoring Programs): a charset, the program's
-/// entry as a module, nothing else. There is no root element — the program
-/// mounts the body, and every rule the page needs comes from the styles it
-/// injects itself (`@openlight/react`).
-pub fn shell(entry_url: &str) -> String {
+/// The shell (host.md §Authoring Programs): a charset, one stylesheet, the
+/// program's entry as a module, nothing else. There is no root element — the
+/// program mounts the body — and no inline style: every rule the page needs
+/// arrives through the one link, so a surface never carries CSS in its markup.
+pub fn shell(styles_url: &str, entry_url: &str) -> String {
     format!(
         "<!doctype html>\n\
          <html><head><meta charset=\"utf-8\">\n\
+         <link rel=\"stylesheet\" href=\"{}\">\n\
          <script type=\"module\" src=\"{}\"></script>\n\
          </head><body></body></html>",
+        escape_attribute(styles_url),
         escape_attribute(entry_url)
     )
 }
@@ -280,10 +326,19 @@ mod tests {
     #[test]
     fn a_process_id_routes_to_its_shell_and_a_path_to_its_file() {
         assert_eq!(route("/p_1"), Route::Shell("p_1".into()));
+        assert_eq!(route("/p_1/styles.css"), Route::Styles("p_1".into()));
         assert_eq!(route("/mod/Users/a/index.tsx"), Route::Module(PathBuf::from("/Users/a/index.tsx")));
         assert_eq!(route("/"), Route::Unknown);
         // A module path is always absolute; anything else is not a module.
         assert_eq!(route("/modest"), Route::Shell("modest".into()));
+        // A file called `styles.css` inside the tree is still a module.
+        assert_eq!(
+            route("/mod/Users/a/styles.css"),
+            Route::Module(PathBuf::from("/Users/a/styles.css"))
+        );
+        // The shell's own URL round-trips through the stylesheet it links.
+        let uri = styles_url("p_1");
+        assert_eq!(route(uri.strip_prefix(ORIGIN).expect("one origin")), Route::Styles("p_1".into()));
     }
 
     #[test]
@@ -299,28 +354,39 @@ mod tests {
     }
 
     #[test]
-    fn the_shell_is_empty_but_for_the_program_s_entry() {
-        let page = shell("ol://app/mod/x/index.tsx");
+    fn the_shell_is_one_stylesheet_and_the_program_s_entry() {
+        let page = shell("ol://app/p_1/styles.css", "ol://app/mod/x/index.tsx");
         assert!(page.contains(r#"<script type="module" src="ol://app/mod/x/index.tsx"></script>"#), "{page}");
+        assert!(page.contains(r#"<link rel="stylesheet" href="ol://app/p_1/styles.css">"#), "{page}");
         assert!(page.contains("<body></body>"), "nothing is mounted for the program: {page}");
-        assert!(!page.contains("root"), "the program mounts the body itself: {page}");
-        assert!(!page.contains("<style"), "styling is the program's, from @openlight/react: {page}");
+        assert!(!page.contains("id=\"root\""), "the program mounts the body itself: {page}");
+        assert!(!page.contains("<style"), "every rule arrives through the link: {page}");
     }
 
     #[test]
-    fn a_shell_is_served_only_to_the_process_it_belongs_to() {
+    fn a_shell_and_its_stylesheet_are_served_only_to_the_process_they_belong_to() {
         let dir = std::env::temp_dir().join("ol-serve-shell");
-        let entry = dir.join("index.tsx");
+        let entry = dir.join("src").join("index.tsx");
         let Answer::Ready(mine) = respond(&dir, "p_1", &entry, "/p_1") else {
             panic!("a shell is answered whole");
         };
         assert_eq!((mine.status, mine.mime), (200, "text/html"));
-        assert!(String::from_utf8(mine.body).unwrap().contains(&module_url(&entry)));
+        let page = String::from_utf8(mine.body).unwrap();
+        assert!(page.contains(&module_url(&entry)));
+        assert!(page.contains(&styles_url("p_1")), "the shell links its own stylesheet: {page}");
 
-        let Answer::Ready(other) = respond(&dir, "p_1", &entry, "/p_2") else {
-            panic!("another process's shell is refused, not looked up");
+        // The stylesheet is compiled from the tree the entry lies in.
+        let Answer::Styles(source) = respond(&dir, "p_1", &entry, "/p_1/styles.css") else {
+            panic!("a stylesheet is compiled, not read off disk");
         };
-        assert_eq!(other.status, 404);
+        assert_eq!(source, dir.join("src"));
+
+        for other in ["/p_2", "/p_2/styles.css"] {
+            let Answer::Ready(refused) = respond(&dir, "p_1", &entry, other) else {
+                panic!("another process's page is refused, not looked up");
+            };
+            assert_eq!(refused.status, 404, "{other}");
+        }
     }
 
     #[test]

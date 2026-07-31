@@ -68,5 +68,5 @@ export function text(mounted: Mounted, selector: string): string {
 }
 
 export function mode(mounted: Mounted): string | null {
-  return mounted.container.querySelector('.content')?.getAttribute('data-mode') ?? null
+  return mounted.container.querySelector('[data-part="content"]')?.getAttribute('data-mode') ?? null
 }

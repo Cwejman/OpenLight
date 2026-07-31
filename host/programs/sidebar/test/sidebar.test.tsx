@@ -94,9 +94,9 @@ test('running processes are cards, terminal ones flat, each named by its program
   const strip = await show()
 
   // Life before rest, then recency (items.ts — the steward's ordering pin).
-  expect(texts(strip, '[data-ui="item"] .program')).toEqual(['read-tile', 'sidebar', 'read-tile'])
-  expect(texts(strip, '[data-ui="item"][data-live="true"] .program')).toEqual(['read-tile', 'sidebar'])
-  expect(texts(strip, '[data-ui="item"][data-live="false"] .program')).toEqual(['read-tile'])
+  expect(texts(strip, '[data-ui="item"] [data-part="program"]')).toEqual(['read-tile', 'sidebar', 'read-tile'])
+  expect(texts(strip, '[data-ui="item"][data-live="true"] [data-part="program"]')).toEqual(['read-tile', 'sidebar'])
+  expect(texts(strip, '[data-ui="item"][data-live="false"] [data-part="program"]')).toEqual(['read-tile'])
 })
 
 test('a stale session opens on what is alive: the running cards lead the strip', async () => {
@@ -136,7 +136,7 @@ test('a pending process has not come to rest — it renders as a card', async ()
   field([ground(), frame(), process('p_new', 'host/read-tile', { status: 'pending' })])
   const strip = await show()
 
-  expect(texts(strip, '[data-ui="item"][data-live="true"] .program')).toEqual(['read-tile'])
+  expect(texts(strip, '[data-ui="item"][data-live="true"] [data-part="program"]')).toEqual(['read-tile'])
 })
 
 test('a failed process falls flat, carrying an error mark', async () => {
@@ -147,15 +147,48 @@ test('a failed process falls flat, carrying an error mark', async () => {
   ])
   const strip = await show()
 
-  expect(texts(strip, '[data-ui="item"][data-live="false"] .program')).toEqual(['read-tile'])
-  expect(text(strip, '[data-ui="item"] .mark')).toBe('failed')
+  expect(texts(strip, '[data-ui="item"][data-live="false"] [data-part="program"]')).toEqual(['read-tile'])
+  expect(text(strip, '[data-ui="item"] [data-part="mark"]')).toBe('failed')
+  // The mark rides the program's line; the id that truncates has its own,
+  // so the two can never meet.
+  expect(strip.container.querySelector('[data-part="mark"]')!.parentElement).not.toBe(
+    strip.container.querySelector('[data-part="name"]')!.parentElement,
+  )
+  expect(text(strip, '[data-ui="item"] [data-part="process"]')).toBe('p_dead')
+})
+
+test('a live card says as much about itself as a dead row: state and when it began', async () => {
+  field([
+    ground(),
+    frame(),
+    process('p_read', 'host/read-tile', { status: 'running', started: Date.now() }),
+    process('p_old', 'host/read-tile', { status: 'completed', started: Date.now() }),
+  ])
+  const strip = await show()
+
+  expect(texts(strip, '[data-ui="item"][data-live="true"] [data-part="mark"]')).toEqual(['running'])
+  expect(texts(strip, '[data-ui="item"][data-live="false"] [data-part="mark"]')).toEqual([
+    'completed',
+  ])
+  // Both carry a time, in the same shape — today as a clock, older as its day.
+  expect(texts(strip, '[data-ui="item"] [data-part="time"]')).toEqual([
+    expect.stringMatching(/^\d\d:\d\d$/),
+    expect.stringMatching(/^\d\d:\d\d$/),
+  ])
+})
+
+test('a process the engine never dated shows no time rather than a false one', async () => {
+  field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
+  const strip = await show()
+
+  expect(texts(strip, '[data-ui="item"] [data-part="time"]')).toEqual([])
 })
 
 test('a process carries its own identity beside its program', async () => {
   field([ground(), frame(), process('01K9ZQ2M4V8N7B3C5D6E7F8G9H', 'host/read-tile', { status: 'running' })])
   const strip = await show()
 
-  expect(texts(strip, '[data-ui="item"] .name.mono')).toEqual(['01K9ZQ2M4V8N7B…'])
+  expect(texts(strip, '[data-ui="item"] [data-part="name"][data-id="true"]')).toEqual(['01K9ZQ2M4V8N7B…'])
 })
 
 test('members of the session that are not processes are not sidebar items', async () => {
@@ -170,7 +203,7 @@ test('members of the session that are not processes are not sidebar items', asyn
   ])
   const strip = await show()
 
-  expect(texts(strip, '[data-ui="item"] .program')).toEqual(['read-tile'])
+  expect(texts(strip, '[data-ui="item"] [data-part="program"]')).toEqual(['read-tile'])
 })
 
 test('a click answers with the context menu, positioned at the point', async () => {
@@ -226,30 +259,30 @@ test('picking an action says it is not built rather than pretending', async () =
   await click(strip, '[data-ui="menu"] [data-ui="action"]:nth-of-type(3)')
 
   expect(strip.container.querySelector('[data-ui="menu"]')).toBe(null)
-  expect(text(strip, '.notice')).toBe('Terminate — not built yet')
+  expect(text(strip, '[data-part="notice"]')).toBe('Terminate — not built yet')
 })
 
 test('a commit on the session re-renders the strip', async () => {
   const handle = field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
   const strip = await show()
-  expect(texts(strip, '[data-ui="item"][data-live="true"] .program')).toEqual(['read-tile'])
+  expect(texts(strip, '[data-ui="item"][data-live="true"] [data-part="program"]')).toEqual(['read-tile'])
 
   await settle(() => handle.commitAsHost(process('p_two', 'host/sidebar', { status: 'running' })))
-  expect(texts(strip, '[data-ui="item"] .program')).toEqual(['read-tile', 'sidebar'])
+  expect(texts(strip, '[data-ui="item"] [data-part="program"]')).toEqual(['read-tile', 'sidebar'])
 
   // And the same for a status change: the card falls flat where it stands.
   await settle(() =>
     handle.commitAsHost({ chunks: [{ id: 'p_read', body: { status: 'completed' } }], placements: [] }),
   )
-  expect(texts(strip, '[data-ui="item"][data-live="false"] .program')).toEqual(['read-tile'])
-  expect(texts(strip, '[data-ui="item"][data-live="true"] .program')).toEqual(['sidebar'])
+  expect(texts(strip, '[data-ui="item"][data-live="false"] [data-part="program"]')).toEqual(['read-tile'])
+  expect(texts(strip, '[data-ui="item"][data-live="true"] [data-part="program"]')).toEqual(['sidebar'])
 })
 
 test('a session holding no processes says so rather than rendering nothing', async () => {
   field([ground(), frame()])
   const strip = await show()
 
-  expect(text(strip, '.quiet')).toContain('no processes')
+  expect(text(strip, '[data-part="quiet"]')).toContain('no processes')
 })
 
 test('a run with no session argument says so rather than rendering nothing', async () => {
@@ -262,7 +295,7 @@ test('a run with no session argument says so rather than rendering nothing', asy
   ])
   const strip = await show()
 
-  expect(text(strip, '.quiet')).toContain('no session argument')
+  expect(text(strip, '[data-part="quiet"]')).toContain('no session argument')
 })
 
 // The edge fades (author ruling, *the depth language*): the strip is flat on
@@ -273,7 +306,7 @@ test('at rest at the top the strip fades neither edge', async () => {
   field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
   const strip = await show()
 
-  const region = strip.container.querySelector('.strip')!
+  const region = strip.container.querySelector('[data-part="strip"]')!
   expect(region.getAttribute('data-fade-top')).toBe('false')
   expect(region.getAttribute('data-fade-bottom')).toBe('false')
 })

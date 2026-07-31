@@ -7,10 +7,16 @@
 // with the context menu the spec names — positioned and listed. No action runs.
 // Its write root (`[session]`, boot step 10) stays unused: *hide* is the first
 // write, and it is not built.
+//
+// Presentation is Tailwind over the tokens `@openlight/react/ol.css` maps; the
+// shell links the compiled sheet, so nothing here carries CSS. The strip's own
+// geometry (the bleed the host leaves it, the column's width) and its edge
+// fades are the two things the rim depends on, and they are written out as
+// exact lengths for that reason.
 import type { ChunkId } from '@openlight/sdk'
-import { Menu, StripItem, styles, useScope, type MenuAction } from '@openlight/react'
+import { Menu, Status, StripItem, useScope, type MenuAction } from '@openlight/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ENGINE_PROGRAM, actions, items, sessionArgument, type Item } from './items.ts'
+import { ENGINE_PROGRAM, actions, items, sessionArgument, stamp, type Item } from './items.ts'
 
 export function Sidebar({ process }: { process: ChunkId }) {
   const frame = useScope([process])
@@ -39,29 +45,69 @@ function Session({ session }: { session: ChunkId }) {
   return (
     <>
       <Strip>
-        <ul className="items">
+        <ul data-part="items" className="flex flex-col gap-3">
           {list.map((item) => (
             <StripItem
               key={item.process}
               live={item.live}
               status={item.status}
+              className="flex cursor-default flex-col gap-px px-[11px] py-4"
               onClick={(event) => {
                 setNotice(null)
                 setMenu({ item, x: event.clientX, y: event.clientY })
               }}
             >
-              <span className="program">{item.program}</span>
-              <span className={item.nameIsId ? 'name mono' : 'name'}>
-                {item.failed ? <span className="mark">failed</span> : null}
-                {item.name}
+              {/* Two lines, one shape for every state: what a run *is* with how
+                  it stands, then which run it was and when it began. The state
+                  rides the name line so the id below it — the one thing that
+                  truncates — never meets the mark's dot. A live card says as
+                  much about itself as a dead row does. */}
+              <span className="flex items-baseline gap-2 leading-tight">
+                <span data-part="program" className="min-w-0 truncate font-medium">
+                  {item.program}
+                </span>
+                <Status
+                  part="mark"
+                  status={item.status}
+                  dot={item.failed ? 'error' : 'quiet'}
+                  className="ml-auto"
+                />
+              </span>
+              <span
+                data-part="process"
+                className="flex items-baseline gap-2 text-small leading-tight text-ink-ghost"
+              >
+                <span
+                  data-part="name"
+                  data-id={item.nameIsId}
+                  className={item.nameIsId ? 'min-w-0 truncate font-mono' : 'min-w-0 truncate'}
+                >
+                  {item.name}
+                </span>
+                {item.started === undefined ? null : (
+                  <span
+                    data-part="time"
+                    className="ml-auto shrink-0 font-mono tabular-nums"
+                  >
+                    {stamp(item.started)}
+                  </span>
+                )}
               </span>
             </StripItem>
           ))}
         </ul>
 
-        {list.length === 0 ? <div className="quiet">this session holds no processes</div> : null}
+        {list.length === 0 ? (
+          <div data-part="quiet" className="px-[11px] py-5 text-ink-ghost">
+            this session holds no processes
+          </div>
+        ) : null}
 
-        {notice ? <div className="notice">{notice}</div> : null}
+        {notice ? (
+          <div data-part="notice" className="mt-5 px-[11px] text-small text-ink-faint">
+            {notice}
+          </div>
+        ) : null}
       </Strip>
 
       {menu ? (
@@ -101,14 +147,20 @@ export function edges(box: {
 /**
  * The strip itself: text on the canvas — no panel, no border (§Visual
  * Language). It is also the scrolling region, and it says so: the page never
- * scrolls (@openlight/react base), and the platform's overlay scrollbar takes
- * the affordance from there — on the webview's own right edge, in the lane the
- * host's bleed leaves for it.
+ * scrolls (@openlight/react's base layer), and the platform's overlay scrollbar
+ * takes the affordance from there — on the webview's own right edge, in the
+ * lane the host's bleed leaves for it.
+ *
+ * The visible column is inset from the webview by that bleed (`STRIP` in the
+ * rim) — 14 left, 10 top and bottom — which is the room the items' shadow and
+ * that scrollbar need and the column does not. The inset is written as padding,
+ * not as a bottom margin: a scroll container's scrollable overflow ends at the
+ * column's border box.
  *
  * It has no edge to clip at, so content that runs past one dissolves instead —
  * but only at an edge it actually runs past, and only while it does. That is a
- * fact about the live box, not about the markup, so it is read from the box.
- * The fades are the webview's edges, which is where the bleed put them.
+ * fact about the live box, not about the markup, so it is read from the box;
+ * the mask itself is the semantic layer's (`data-fade-*` in `ol.css`).
  */
 export function Strip({ children, status }: { children?: ReactNode; status?: string }) {
   const region = useRef<HTMLDivElement>(null)
@@ -136,57 +188,20 @@ export function Strip({ children, status }: { children?: ReactNode; status?: str
 
   return (
     <div
-      className="strip"
+      data-part="strip"
       data-scroll
       data-fade-top={fade.top}
       data-fade-bottom={fade.bottom}
+      className="h-full"
       ref={region}
     >
-      <style>{styles + CSS}</style>
-      <div className="column">{children ?? <div className="quiet">{status}</div>}</div>
+      <div data-part="column" className="ml-[14px] w-[216px] py-5">
+        {children ?? (
+          <div data-part="quiet" className="px-[11px] py-5 text-ink-ghost">
+            {status}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
-
-// Layout only — surfaces, shadows, greys, and the card-vs-flat rule are tokens
-// and components in @openlight/react.
-const CSS = `
-  /* The strip is the whole webview: it scrolls, it fades at its own edges, and
-     the platform's overlay scrollbar rides its right edge. The visible column
-     is inset from it by the host's bleed (\`STRIP\` in the rim) — 14 left, 10
-     top and bottom — which is the room the items' shadow and that scrollbar
-     need and the column does not. Written as padding, not a bottom margin: a
-     scroll container's scrollable overflow ends at the column's border box. */
-  .strip { height: 100%; padding: 0 }
-  .column { margin-left: 14px; width: 216px; padding: 10px 0 }
-
-  /* The fade, per edge, and only while that edge has something past it. The
-     depth is a registered property so it can be transitioned — a raw custom
-     property is a string to the animation machinery, and \`mask-image\` itself
-     never interpolates. At rest at the top with nothing below, no rule matches
-     and the mask is absent entirely: full opacity, nothing dimmed. */
-  @property --ol-fade-top { syntax: '<length>'; inherits: false; initial-value: 0px }
-  @property --ol-fade-bottom { syntax: '<length>'; inherits: false; initial-value: 0px }
-  .strip {
-    --ol-fade-top: 0px; --ol-fade-bottom: 0px;
-    transition: --ol-fade-top 150ms ease, --ol-fade-bottom 150ms ease;
-  }
-  .strip[data-fade-top="true"] { --ol-fade-top: var(--ol-fade) }
-  .strip[data-fade-bottom="true"] { --ol-fade-bottom: var(--ol-fade) }
-  .strip[data-fade-top="true"], .strip[data-fade-bottom="true"] {
-    mask-image: linear-gradient(
-      to bottom, transparent 0, #000 var(--ol-fade-top),
-      #000 calc(100% - var(--ol-fade-bottom)), transparent 100%
-    );
-  }
-  .mono { font-family: var(--ol-mono); font-size: .92em }
-  .items {
-    margin: 0; padding: 0; list-style: none;
-    display: flex; flex-direction: column; gap: var(--ol-gap);
-  }
-  .program { font-weight: 550 }
-  .name { color: var(--ol-ink-faint); font-size: 11px }
-  .mark { color: var(--ol-ink-error); margin-right: var(--ol-gap) }
-  .notice { margin-top: var(--ol-pad); padding: 0 11px; color: var(--ol-ink-faint); font-size: 11px }
-  .quiet { padding: var(--ol-pad) 11px; color: var(--ol-ink-ghost) }
-`
