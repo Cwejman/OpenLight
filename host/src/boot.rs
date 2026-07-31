@@ -25,6 +25,51 @@ pub const TILE_PROGRAMS: [&str; 1] = ["read-tile"];
 /// sibling in the spec's suite and unbuilt — recorded deferral.
 pub const STRIP_PROGRAM: &str = "sidebar";
 
+/// The body field a program declares its on-screen kind through, and the one
+/// value that is not the default (host.md §Overlays). A program is tile content
+/// unless it says otherwise; an overlay renders *above* the tile composition,
+/// so the rim gives it the whole window rather than a rectangle in the tree.
+///
+/// **Recorded gap.** host.md models an overlay as a `host/overlay` chunk placed
+/// on the program and on its anchor. That machinery — anchors narrower than the
+/// window, the placement itself — is unbuilt; the body field is the first rung,
+/// and it carries only the session-wide anchor the palette and the context menu
+/// both want.
+pub const SURFACE_KEY: &str = "surface";
+pub const OVERLAY_SURFACE: &str = "overlay";
+
+/// Where a running program's webview goes.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Surface {
+    /// Into the geometry the rim walks — a tile leaf, or the naked strip.
+    Tile,
+    /// Over all of it, spanning the window.
+    Overlay,
+}
+
+/// Read `surface` off a program body. Absent, unreadable, or anything else is
+/// tile content — the rim never guesses a program into the overlay layer.
+pub fn surface_of(body: Option<&serde_json::Value>) -> Surface {
+    match body.and_then(|b| b.get(SURFACE_KEY)).and_then(|s| s.as_str()) {
+        Some(OVERLAY_SURFACE) => Surface::Overlay,
+        _ => Surface::Tile,
+    }
+}
+
+/// What the rim needs about the program behind a mount it did not schedule: the
+/// name to label it by, and where it goes. Read under host identity — the rim
+/// is not a process and has no boundary.
+pub fn program_kind(engine: &Engine, program: &ChunkId) -> (Option<String>, Surface) {
+    let opts = db::ReadOpts {
+        include: db::Includes { chunk_name: true, chunk_body: true, ..db::Includes::default() },
+        ..db::ReadOpts::default()
+    };
+    match engine.get(&Context::host(), program, opts) {
+        Ok(Some(item)) => (item.name.clone(), surface_of(item.body.as_ref())),
+        _ => (None, Surface::Tile),
+    }
+}
+
 /// The session instance the host creates on first launch (bootstrap.md,
 /// closing note: the first session is a runtime action, never a bootstrap
 /// commit). Readable id per the fixture convention (board.md tracked debt).
@@ -310,5 +355,33 @@ fn ensure_session(engine: &Engine) -> Result<ChunkId, BootError> {
             Ok(ChunkId::from(SESSION_ID))
         }
         Err(e) => Err(BootError::Engine(format!("resolving {path}: {e}"))),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Only the declared word puts a program in the overlay layer — an absent
+    /// field, a null body, or a value the rim does not know is tile content.
+    #[test]
+    fn a_program_reaches_the_overlay_layer_only_by_saying_so() {
+        assert_eq!(surface_of(Some(&json!({ "surface": "overlay" }))), Surface::Overlay);
+        assert_eq!(surface_of(Some(&json!({ "runtime": "webview" }))), Surface::Tile);
+        assert_eq!(surface_of(Some(&json!({ "surface": "tile" }))), Surface::Tile);
+        assert_eq!(surface_of(Some(&json!({ "surface": 1 }))), Surface::Tile);
+        assert_eq!(surface_of(None), Surface::Tile);
+    }
+
+    /// The rim's declaration and the seeded field say the same word.
+    #[test]
+    fn the_seeded_context_menu_is_an_overlay() {
+        let declaration = crate::seed::host_declaration();
+        let menu = declaration
+            .chunks
+            .iter()
+            .find(|c| c.name.as_deref() == Some("context-menu"))
+            .expect("the host project ships a context menu");
+        assert_eq!(surface_of(menu.body.as_ref()), Surface::Overlay);
     }
 }

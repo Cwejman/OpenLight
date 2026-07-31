@@ -420,3 +420,149 @@ async fn the_sidebar_strip_reads_exactly_what_step_ten_grants_it() {
 
     booted.engine.clone().shutdown().await.unwrap();
 }
+
+/// The context menu, end to end on the real engine: the strip raises it exactly
+/// as its click handler does, the rim reads the program's own body to learn it
+/// belongs above the tiles (host.md §Overlays), and the menu spends the grant it
+/// was given — cancelling a process it is no relation to, purely because the
+/// write root it was handed reaches it (engine.md, cancel authority).
+///
+/// This is the closest the suite gets to the live gesture: everything but the
+/// pixels and the pointer, through the same seam the rim wires.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_strip_raises_the_menu_as_an_overlay_and_terminates_through_it() {
+    let root = fresh_root("menu");
+    let mut booted = boot::boot(&root.0.join("agents")).expect("boot");
+    let api = EngineAdapter::new(booted.engine.clone());
+    let session = booted.session.as_str().to_string();
+    let tile = booted.tiles[0].process.clone();
+
+    // The boot suite's own mounts, out of the way.
+    for _ in 0..2 {
+        booted.host_rx.try_recv().expect("a queued MountWebview");
+    }
+
+    // The message the strip posts on a click: one request chunk carrying the
+    // anchor in window coordinates and the entries it composed, a child run,
+    // and the whole grant — read and write the session.
+    let raw = format!(
+        r#"{{"id":1,"op":"run","program":"host/context-menu","args":{{"chunks":[{{"name":"request","body":{{"head":"read-tile","anchor":{{"x":134,"y":74}},"entries":[{{"label":"Terminate","op":{{"kind":"cancel","process":"{tile}"}}}}]}}}}],"mode":"child","readBoundary":["{session}"],"writeBoundary":["{session}"]}}}}"#
+    );
+    let strip_ctx = Context { process_id: Some(booted.strip.process.as_str().to_string()) };
+    let (_, reply) = ipc(&api, &strip_ctx, &raw).await;
+    let menu = ChunkId::from(reply["result"]["process"].as_str().expect("the menu's process"));
+
+    // The rim's mount path: the command names the run, and the pending handles
+    // name the program whose body says where the webview goes.
+    let mounted = booted.host_rx.recv().await.expect("the menu's MountWebview");
+    let engine::HostCmd::MountWebview { process_id, executable } = mounted else {
+        panic!("expected MountWebview, got {mounted:?}");
+    };
+    assert_eq!(process_id, menu);
+    assert_eq!(executable, "programs/context-menu/src/index.tsx");
+    let pending = booted.provider.take_pending(&menu).expect("pending handles");
+    assert_eq!(pending.program.as_str(), "host/context-menu");
+    let (name, surface) = boot::program_kind(&booted.engine, &pending.program);
+    assert_eq!(name.as_deref(), Some("context-menu"));
+    assert_eq!(surface, boot::Surface::Overlay, "it takes the window, not a tile");
+    // And what it is raised over does not: the same read, one program apart.
+    assert_eq!(
+        boot::program_kind(&booted.engine, &ChunkId::from("host/read-tile")).1,
+        boot::Surface::Tile,
+    );
+
+    // Terminate. The menu is no relation of the tile's process — its authority
+    // is the write root it was handed, which reaches every process on the
+    // session (engine.md: *within the caller's write boundary*).
+    let menu_ctx = Context { process_id: Some(menu.as_str().to_string()) };
+    assert_eq!(process_status(&booted.engine, &tile).as_deref(), Some("pending"));
+    let (_, reply) = ipc(&api, &menu_ctx, &format!(r#"{{"id":2,"op":"cancel","process":"{tile}"}}"#)).await;
+    assert!(reply.get("error").is_none(), "the grant covers it: {reply}");
+    assert!(
+        wait_until(|| process_status(&booted.engine, &tile).as_deref() == Some("failed"), 2000).await,
+        "the tile's run ended",
+    );
+
+    // Then the menu ends itself — the self-dismissal path the rim unmounts on.
+    let (_, reply) = ipc(&api, &menu_ctx, r#"{"id":3,"op":"exit"}"#).await;
+    assert!(reply.get("error").is_none(), "{reply}");
+    assert!(
+        wait_until(|| process_status(&booted.engine, &menu).as_deref() == Some("completed"), 2000).await,
+        "the menu completed itself",
+    );
+
+    booted.engine.clone().shutdown().await.unwrap();
+}
+
+/// A menu granted nothing may not cancel: the same op, the same target, refused
+/// — the grant is what the pick spends, not the program.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_menu_outside_the_grant_cannot_terminate() {
+    let root = fresh_root("menu-denied");
+    let booted = boot::boot(&root.0.join("agents")).expect("boot");
+    let api = EngineAdapter::new(booted.engine.clone());
+    let tile = booted.tiles[0].process.clone();
+
+    // Raised with the session readable but nothing writable beyond its own run.
+    let raw = format!(
+        r#"{{"id":1,"op":"run","program":"host/context-menu","args":{{"chunks":[],"mode":"child","readBoundary":["{}"],"writeBoundary":["{}"]}}}}"#,
+        booted.session, booted.strip.process,
+    );
+    let strip_ctx = Context { process_id: Some(booted.strip.process.as_str().to_string()) };
+    let (_, reply) = ipc(&api, &strip_ctx, &raw).await;
+    let menu = reply["result"]["process"].as_str().expect("the menu's process").to_string();
+
+    let menu_ctx = Context { process_id: Some(menu) };
+    let (_, reply) = ipc(&api, &menu_ctx, &format!(r#"{{"id":2,"op":"cancel","process":"{tile}"}}"#)).await;
+    assert_eq!(reply["error"]["code"], "BOUNDARY_VIOLATION", "{reply}");
+    assert_eq!(process_status(&booted.engine, &tile).as_deref(), Some("pending"));
+
+    booted.engine.clone().shutdown().await.unwrap();
+}
+
+/// **Recorded gap, pinned here.** *New from this* launches — a surface never
+/// runs children (engine.md, run modes), or the new work would die with the
+/// menu that started it. But `launch` places the new process on *the caller's*
+/// session scopes, and the caller is the menu: a child of the strip, placed on
+/// the strip and on nothing else. So the launched run lands on no session and
+/// the strip never shows it.
+///
+/// Both halves are the engine's to close — the run op carries no placements
+/// (protocol.rs: "engine-owned") and there is no session anchor on a run. Until
+/// then this is what the path does, said out loud.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_launch_from_the_menu_lands_on_no_session_yet() {
+    let root = fresh_root("menu-launch");
+    let booted = boot::boot(&root.0.join("agents")).expect("boot");
+    let api = EngineAdapter::new(booted.engine.clone());
+    let session = booted.session.as_str().to_string();
+
+    let raise = format!(
+        r#"{{"id":1,"op":"run","program":"host/context-menu","args":{{"chunks":[],"mode":"child","readBoundary":["{session}"],"writeBoundary":["{session}"]}}}}"#
+    );
+    let strip_ctx = Context { process_id: Some(booted.strip.process.as_str().to_string()) };
+    let (_, reply) = ipc(&api, &strip_ctx, &raise).await;
+    let menu = reply["result"]["process"].as_str().expect("the menu").to_string();
+
+    // The pick: launch the same program the item ran.
+    let menu_ctx = Context { process_id: Some(menu.clone()) };
+    let launch = format!(
+        r#"{{"id":2,"op":"run","program":"host/read-tile","args":{{"chunks":[],"mode":"launch","readBoundary":["{session}"],"writeBoundary":["{session}"]}}}}"#
+    );
+    let (_, reply) = ipc(&api, &menu_ctx, &launch).await;
+    let launched = reply["result"]["process"].as_str().expect("the launched run").to_string();
+
+    let (_, reply) = ipc(&api, &strip_ctx, &format!(r#"{{"id":3,"op":"get","chunkId":"{launched}"}}"#)).await;
+    let scopes: Vec<&str> = reply["result"]["placements"]
+        .as_array()
+        .expect("placements")
+        .iter()
+        .filter(|p| p["type_"] == "instance")
+        .filter_map(|p| p["scope_id"].as_str())
+        .collect();
+    assert!(scopes.contains(&"host/read-tile"), "{scopes:?}");
+    assert!(scopes.contains(&"engine/process"), "{scopes:?}");
+    assert!(!scopes.contains(&session.as_str()), "the gap: {scopes:?}");
+
+    booted.engine.clone().shutdown().await.unwrap();
+}

@@ -1,8 +1,16 @@
 // The sidebar's pure half: the session it reads off its own call frame, the
-// items that session holds, and the actions each item's state offers
+// items that session holds, and the menu entries each item's state offers
 // (host.md §Sidebar, programs.md §3.2).
 import { describe, expect, test } from 'bun:test'
-import { actions, items, sessionArgument, shortId, stamp } from '../src/items.ts'
+import {
+  CONTEXT_MENU,
+  entries,
+  items,
+  programNamed,
+  sessionArgument,
+  shortId,
+  stamp,
+} from '../src/items.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
 function result(chunks: ChunkItem[]): ScopeResult {
@@ -125,6 +133,8 @@ describe('the order: life before rest, then recency', () => {
       process('p_2', 'host/sidebar', { status: 'running' }),
     ])
     expect(list.map((item) => item.program)).toEqual(['read-tile', 'sidebar'])
+    // And the id beside the name — what *new from this* runs.
+    expect(list.map((item) => item.programId)).toEqual(['host/read-tile', 'host/sidebar'])
   })
 
   test('an unread program falls back to its truncated id, never a blank', () => {
@@ -152,12 +162,21 @@ describe('the order: life before rest, then recency', () => {
   })
 })
 
-describe('the context menu', () => {
-  const labels = (live: boolean) =>
-    actions({ process: 'p', name: 'p', nameIsId: true, program: 'x', status: 's', live, failed: false })
+describe('the context menu the strip composes', () => {
+  const item = (live: boolean, programId?: string) => ({
+    process: 'p_read',
+    name: 'p_read',
+    nameIsId: true,
+    program: 'read-tile',
+    ...(programId === undefined ? {} : { programId }),
+    status: live ? 'running' : 'completed',
+    live,
+    failed: false,
+  })
+  const listed = (live: boolean, programId = 'host/read-tile') => entries(item(live, programId))
 
   test('every item answers with the same menu, in the spec order', () => {
-    expect(labels(true).map((action) => action.label)).toEqual([
+    expect(listed(true).map((entry) => entry.label)).toEqual([
       'Jump to tile',
       'Inspect',
       'Terminate',
@@ -167,12 +186,44 @@ describe('the context menu', () => {
     ])
   })
 
-  test('state gates what fits: terminate a running one, review a stopped one', () => {
-    const running = new Map(labels(true).map((action) => [action.id, action.enabled]))
-    const stopped = new Map(labels(false).map((action) => [action.id, action.enabled]))
-    expect([running.get('terminate'), running.get('review')]).toEqual([true, false])
-    expect([stopped.get('terminate'), stopped.get('review')]).toEqual([false, true])
+  test('terminate cancels this process, and only while it is alive', () => {
+    const running = listed(true)[2]!
+    expect(running.op).toEqual({ kind: 'cancel', process: 'p_read' })
+    expect(running.disabled).toBe(false)
+    // Listed on a stopped one too — greyed, never hidden.
+    const stopped = listed(false)[2]!
+    expect(stopped.op).toEqual({ kind: 'cancel', process: 'p_read' })
+    expect(stopped.disabled).toBe(true)
   })
+
+  test('new from this runs the same program again', () => {
+    expect(listed(false)[4]!.op).toEqual({ kind: 'run', program: 'host/read-tile' })
+    expect(listed(false)[4]!.disabled).toBe(false)
+    // With no program to name, it is inert rather than a run of nothing.
+    const unknown = entries(item(true))[4]!
+    expect(unknown.op).toEqual({ kind: 'none' })
+    expect(unknown.disabled).toBe(true)
+  })
+
+  test('what has no machinery yet is listed, inert and greyed — never hidden', () => {
+    const inert = listed(true).filter((entry) => entry.op.kind === 'none')
+    expect(inert.map((entry) => entry.label)).toEqual([
+      'Jump to tile',
+      'Inspect',
+      'Review changes',
+      'Hide',
+    ])
+    expect(inert.every((entry) => entry.disabled)).toBe(true)
+  })
+})
+
+test('the menu program is found by name, not by a hard-coded id', () => {
+  const programs = [
+    { id: 'host/read-tile', name: 'read-tile' },
+    { id: 'host/context-menu', name: CONTEXT_MENU },
+  ]
+  expect(programNamed(programs, CONTEXT_MENU)).toBe('host/context-menu')
+  expect(programNamed([], CONTEXT_MENU)).toBe(null)
 })
 
 test('short ids are shown whole', () => {

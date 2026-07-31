@@ -163,6 +163,10 @@
     border-radius: var(--ol-radius-small); box-shadow: var(--ol-shadow-over);
   }
 
+  /* The row the keyboard is on reads exactly as the row under the pointer:
+     one highlight, whichever hand is moving. */
+  [data-ui="action"][data-active="true"]:enabled { background: var(--ol-hover) }
+
   /* The fade, per edge, and only while that edge has something past it. At rest
      at the top with nothing below, no rule matches and the mask is absent
      entirely: full opacity, nothing dimmed. */

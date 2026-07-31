@@ -152,19 +152,27 @@ pub fn host_declaration() -> Declaration {
         relates("host/tile", "host/tab"),
         relates("host/tile", "host/recipe"),
     ];
-    for name in ["read-tile", "sidebar", "inspector"] {
+    // The first-party surfaces, each with what its body says it *is* on screen:
+    // a program declaring `surface: 'overlay'` mounts as a full-window layer
+    // above the tiles instead of into tile geometry (host.md §Overlays,
+    // §Command Palette — "just another program, living as an overlay").
+    for (name, surface) in [
+        ("read-tile", None),
+        ("sidebar", None),
+        ("inspector", None),
+        ("context-menu", Some(crate::boot::OVERLAY_SURFACE)),
+    ] {
         let id = format!("host/{name}");
-        chunks.push(chunk(
-            &id,
-            name,
-            None,
-            json!({
-                "executable": format!("programs/{name}/src/index.tsx"),
-                "runtime": "webview",
-                "timeout_ms": SURFACE_TIMEOUT_MS,
-                "text": "First-party demo surface program.",
-            }),
-        ));
+        let mut body = json!({
+            "executable": format!("programs/{name}/src/index.tsx"),
+            "runtime": "webview",
+            "timeout_ms": SURFACE_TIMEOUT_MS,
+            "text": "First-party demo surface program.",
+        });
+        if let Some(surface) = surface {
+            body[crate::boot::SURFACE_KEY] = json!(surface);
+        }
+        chunks.push(chunk(&id, name, None, body));
         placements.push(instance(&id, "host"));
         // Invocables placed instance on the mounted engine/program archetype —
         // the cross-db federation pattern (bootstrap.md, opening note).
@@ -355,11 +363,22 @@ mod tests {
                 })
             })
             .collect();
-        assert_eq!(programs.len(), 3);
-        for p in programs {
+        assert_eq!(programs.len(), 4);
+        for p in &programs {
             let body = p.body.as_ref().unwrap();
             assert!(body.get("executable").is_some());
             assert_eq!(body["runtime"], "webview");
         }
+
+        // Only one of them mounts above the tiles rather than into one, and it
+        // says so in its own body — the rim reads the field, not a list of names.
+        let overlays: Vec<&str> = programs
+            .iter()
+            .filter(|p| p.body.as_ref().unwrap().get(crate::boot::SURFACE_KEY).is_some())
+            .map(|p| p.name.as_deref().unwrap())
+            .collect();
+        assert_eq!(overlays, ["context-menu"]);
+        let menu = programs.iter().find(|p| p.name.as_deref() == Some("context-menu")).unwrap();
+        assert_eq!(menu.body.as_ref().unwrap()[crate::boot::SURFACE_KEY], "overlay");
     }
 }

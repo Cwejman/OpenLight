@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 const READ_TILE: &str = "programs/read-tile/src/index.tsx";
 const SIDEBAR: &str = "programs/sidebar/src/index.tsx";
+const CONTEXT_MENU: &str = "programs/context-menu/src/index.tsx";
 
 struct Host {
     transpiler: Transpiler,
@@ -207,3 +208,35 @@ fn only_the_project_s_own_tree_is_served() {
     let extensionless = serve::module_url(&entry.with_file_name("view"));
     assert_eq!(host.get("p_1", &entry, &extensionless).status, 200);
 }
+
+/// The overlay program is served the same way as any other — there is no second
+/// path for a surface that spans the window. Its shell, its own stylesheet, and
+/// the shared menu markup it renders through, all off one entry.
+#[test]
+fn the_overlay_program_is_served_like_every_other_surface() {
+    let host = Host::start();
+    let entry = host.entry(CONTEXT_MENU);
+
+    let shell = host.get("p_menu", &entry, "/p_menu");
+    assert_eq!((shell.status, shell.mime), (200, "text/html"));
+    let page = String::from_utf8(shell.body).expect("a shell is text");
+    assert!(page.contains(&serve::module_url(&entry)), "{page}");
+
+    // The entry pulls the menu, which pulls the shared component.
+    let index = host.source("p_menu", &entry, &serve::module_url(&entry));
+    assert!(index.contains("createRoot(document.body)"), "{index}");
+    assert!(index.contains("\"./menu.tsx\""), "{index}");
+    let menu = host.source("p_menu", &entry, &serve::module_url(&entry.with_file_name("menu.tsx")));
+    assert!(
+        one_import(&menu, "/host/react/src/index.ts").contains("/host/react/src/index.ts"),
+        "the shared Menu comes from the layer: {menu}",
+    );
+
+    // And its sheet carries the floating register the panel sits on.
+    let served = host.get("p_menu", &entry, &serve::styles_url("p_menu"));
+    assert_eq!((served.status, served.mime), (200, "text/css"));
+    let sheet = String::from_utf8(served.body).expect("a stylesheet is text");
+    assert!(sheet.contains(r#"[data-ui="menu"]"#), "the panel's own register: {sheet}");
+    assert!(sheet.contains("--ol-shadow-over"), "{sheet}");
+}
+

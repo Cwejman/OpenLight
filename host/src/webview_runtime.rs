@@ -17,6 +17,10 @@ use tokio::sync::{mpsc, oneshot};
 /// the engine's outgoing events to forward as `__sdk.event`/`__sdk.resolve`
 /// scripts. A closed events channel is the engine's kill signal.
 pub struct PendingWebview {
+    /// The program chunk this run runs. The rim reads its body to learn where
+    /// the webview goes (`boot::program_kind`) — a mount the rim did not
+    /// schedule itself, an overlay above all, is otherwise nameless to it.
+    pub program: db::ChunkId,
     pub executable: String,
     pub ready: oneshot::Sender<()>,
     pub terminal: oneshot::Sender<TerminalReason>,
@@ -50,6 +54,7 @@ impl RuntimeProvider for WebviewProvider {
         self.pending.lock().expect("pending lock").insert(
             cx.process_id.clone(),
             PendingWebview {
+                program: cx.program.id.clone(),
                 executable: cx.program.executable.clone(),
                 ready: ready_tx,
                 terminal: terminal_tx,
@@ -105,6 +110,8 @@ mod tests {
         // The rim claims the pending handles and fires readiness.
         let pending = provider.take_pending(&db::ChunkId::from("p_1")).unwrap();
         assert_eq!(pending.executable, "programs/read-tile/src/index.tsx");
+        // The program is carried through: the rim reads its body for the layer.
+        assert_eq!(pending.program.as_str(), "host/read-tile");
         pending.ready.send(()).unwrap();
         handle.ready.await.expect("readiness reaches the engine side");
 

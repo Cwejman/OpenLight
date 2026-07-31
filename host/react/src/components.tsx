@@ -116,19 +116,21 @@ export function Pill({ children, className }: { children?: ReactNode; className?
 export type MenuAction = { id: string; label: string; enabled: boolean }
 
 /**
- * The interim context menu — positioned at a point, listing actions, dismissed
- * by its own backdrop.
+ * A menu at a point: a backdrop that takes the next click, and a panel listing
+ * actions. The panel floats over whatever raised it, so it is the one place a
+ * CSS shadow is the second depth register (§Visual Language).
  *
- * **Interim by ruling** (board, *Author review rulings (window v0)*): context
- * menus are not per-program. The settled design is verbs-from-the-field raised
- * by the host over an overlay; this component holds the shape until that
- * machinery lands, so exactly one copy of the markup exists in the meantime.
+ * The markup lives here, not in a program: menus are never per-program (board,
+ * *Author review rulings (window v0)*). The one program that owns menu
+ * *behaviour* — `context-menu`, an overlay spanning the window — renders through
+ * this component, and so would a palette or a popup-at-point.
  */
 export function Menu({
   x,
   y,
   head,
   actions,
+  active,
   onPick,
   onDismiss,
 }: {
@@ -136,6 +138,8 @@ export function Menu({
   y: number
   head?: string
   actions: MenuAction[]
+  /** The row the keyboard is on, by index. Mouse-only menus pass nothing. */
+  active?: number
   onPick: (action: MenuAction) => void
   onDismiss: () => void
 }) {
@@ -150,9 +154,10 @@ export function Menu({
             {head}
           </div>
         ) : null}
-        {actions.map((action) => (
+        {actions.map((action, index) => (
           <button
             data-ui="action"
+            data-active={active === index}
             key={action.id}
             className="block w-full cursor-default rounded-soft px-4 py-2 text-left enabled:hover:bg-hover disabled:text-ink-off"
             disabled={!action.enabled}

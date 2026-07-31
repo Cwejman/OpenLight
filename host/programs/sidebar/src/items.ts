@@ -15,6 +15,9 @@ export type Item = {
   nameIsId: boolean
   /** The program this run runs — its name, or its truncated id when unread. */
   program: string
+  /** The same program by id — what *new from this* runs. Absent when the
+   *  process's placements name none (a field the strip cannot read whole). */
+  programId?: ChunkId
   status: string
   /** host.md §Visual Language: life rises as a card, rest falls flat. */
   live: boolean
@@ -65,11 +68,13 @@ export function items(session: ScopeResult, programs: ChunkItem[], root: ChunkId
     const status = typeof chunk.body?.status === 'string' ? chunk.body.status : 'unknown'
     const error = typeof chunk.body?.error === 'string' ? chunk.body.error : undefined
     const started = typeof chunk.body?.started === 'number' ? chunk.body.started : undefined
+    const program = programOf(chunk, names, root)
     return {
       process: chunk.id,
       name: chunk.name ?? shortId(chunk.id),
       nameIsId: chunk.name === undefined,
-      program: programOf(chunk, names, root),
+      program: program === null ? 'unknown program' : (names.get(program) ?? shortId(program)),
+      ...(program === null ? {} : { programId: program }),
       status,
       live: !TERMINAL.includes(status),
       failed: status === 'failed',
@@ -110,41 +115,71 @@ function programOf(
   chunk: ChunkItem,
   names: Map<ChunkId, string | undefined>,
   root: ChunkId,
-): string {
+): ChunkId | null {
   const scopes = (chunk.placements ?? [])
     .filter((placement) => placement.type_ === 'instance')
     .map((placement) => placement.scope_id)
     .filter((scope) => scope !== ENGINE_PROCESS && scope !== root)
-  const known = scopes.find((scope) => names.has(scope))
-  if (known !== undefined) return names.get(known) ?? shortId(known)
-  return scopes.length > 0 ? shortId(scopes[0]!) : 'unknown program'
+  return scopes.find((scope) => names.has(scope)) ?? scopes[0] ?? null
 }
 
-export type Action = {
-  id: string
-  label: string
-  /** State gating only: every action's *effect* is unbuilt at v0. */
-  enabled: boolean
+/** The program the strip raises its menu on, found by name (the name-lookup
+ *  convention — ids are generated, names are the stable handle). */
+export const CONTEXT_MENU = 'context-menu'
+
+export function programNamed(programs: ChunkItem[], name: string): ChunkId | null {
+  return programs.find((program) => program.name === name)?.id ?? null
 }
 
 /**
- * The context menu any item answers a click with (host.md §Sidebar,
- * programs.md §3.2), in the spec's order. Nothing here acts: v0 positions and
- * lists, and the surface says so when one is picked.
- *
- * **Recorded gap.** *jump to tile* is specced "(if surfaced)" — v0 cannot tell:
- * the tile tree is still composed rim-side, so no `host/tile` relates a process
- * in the field to read. It is listed enabled, ungated, until the tree lands as
- * chunks. Container expansion (§3.2, groups and recipes) is likewise unbuilt.
+ * What an entry does when picked, as `context-menu` reads it. Declared here
+ * rather than imported: the two are separate programs, glued by a substrate
+ * argument, not by a shared module — the contract is the chunk's shape.
+ * `host/programs/context-menu/src/entries.ts` is its other reading.
  */
-export function actions(item: Item): Action[] {
+export type Op =
+  | { kind: 'run'; program: ChunkId; args?: Record<string, unknown>; read?: ChunkId[]; write?: ChunkId[] }
+  | { kind: 'cancel'; process: ChunkId }
+  | { kind: 'none' }
+
+export type Entry = { label: string; op: Op; disabled?: boolean }
+
+/**
+ * The context menu any item answers a click with (host.md §Sidebar,
+ * programs.md §3.2), in the spec's order. Two of them act:
+ *
+ * - *terminate* cancels the run, while it is alive. The menu's authority is the
+ *   write boundary the strip grants it — `[session]` reaches every process
+ *   placed on the session (engine.md, R3).
+ * - *new from this* launches the same program again, detached, so it outlives
+ *   the menu that started it.
+ *
+ * The rest are listed, greyed, and inert — the foolproof path shows every
+ * capability whether or not its machinery exists yet:
+ *
+ * **Recorded gaps.** *jump to tile* is specced "(if surfaced)" and v0 cannot
+ * tell — the tile tree is still composed rim-side, so no `host/tile` relates a
+ * process in the field to read. *inspect* waits on the inspector program,
+ * *review changes* on branch ops (engine.md R1), *hide* on the session-local
+ * `hidden` chunk and R10 negation. And *new from this* launches with no
+ * argument at all: programs.md §3.2 wants a launch form pre-filled from the
+ * frame, which is the palette's machinery, not the strip's.
+ */
+export function entries(item: Item): Entry[] {
   return [
-    { id: 'jump', label: 'Jump to tile', enabled: true },
-    { id: 'inspect', label: 'Inspect', enabled: true },
-    { id: 'terminate', label: 'Terminate', enabled: item.live },
-    { id: 'review', label: 'Review changes', enabled: !item.live },
-    { id: 'new', label: 'New from this', enabled: true },
-    { id: 'hide', label: 'Hide', enabled: true },
+    { label: 'Jump to tile', op: { kind: 'none' }, disabled: true },
+    { label: 'Inspect', op: { kind: 'none' }, disabled: true },
+    { label: 'Terminate', op: { kind: 'cancel', process: item.process }, disabled: !item.live },
+    { label: 'Review changes', op: { kind: 'none' }, disabled: true },
+    {
+      label: 'New from this',
+      op:
+        item.programId === undefined
+          ? { kind: 'none' }
+          : { kind: 'run', program: item.programId },
+      disabled: item.programId === undefined,
+    },
+    { label: 'Hide', op: { kind: 'none' }, disabled: true },
   ]
 }
 

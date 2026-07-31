@@ -15,7 +15,7 @@
 //! DOM became, one JSON line per webview on stdout, and exits (`probe`).
 
 use std::borrow::Cow;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -30,7 +30,7 @@ use wry::WebViewBuilder;
 use db::ChunkId;
 use engine::{HostCmd, ProcessId, TerminalReason};
 use host::adapter::EngineAdapter;
-use host::boot::{self, Booted, TileProcess};
+use host::boot::{self, Booted, Surface, TileProcess};
 use host::compose::{self, ProcessInfo};
 use host::dispatch::{self, Context, EngineApi, Outcome, Parsed};
 use host::field;
@@ -284,6 +284,11 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
     let mut webviews: HashMap<ProcessId, wry::WebView> = HashMap::new();
     let mut terminals: HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>> =
         HashMap::new();
+    // The overlay layer (host.md §Overlays): processes whose program declares
+    // `surface: 'overlay'`. They hold the whole window rather than a rectangle
+    // in the tree, so they are the one set geometry does not describe — and
+    // they are created after the boot suite, which is what puts them on top.
+    let mut overlays: HashSet<ProcessId> = HashSet::new();
     let proxy = event_loop.create_proxy();
 
     // Every surface owes exactly one report. The deadline is the lane's
@@ -312,13 +317,20 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 // what the strip leaves, so one walk keeps both coherent.
                 let (strip_rect, leaves) = layout(&window, &tree, STRIP);
                 if let Some(webview) = webviews.get(&strip_process) {
-                    let _ = webview.set_bounds(bounds(&strip_rect));
+                    place(webview, &strip_rect);
                 }
                 for leaf in &leaves {
                     if let Some(webview) = webviews.get(&ChunkId::from(leaf.id.as_str())) {
-                        let _ = webview.set_bounds(bounds(&leaf.rect));
+                        place(webview, &leaf.rect);
                         // The aura is cut to the tile, so it is re-cut with it.
                         cast_aura(webview, &leaf.rect);
+                    }
+                }
+                // An overlay spans the window, whatever the window becomes.
+                let whole = window_rect(&window);
+                for process in &overlays {
+                    if let Some(webview) = webviews.get(process) {
+                        place(webview, &whole);
                     }
                 }
             }
@@ -326,11 +338,17 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 let Some(pending) = provider.take_pending(&process_id) else {
                     return; // unknown or already claimed; nothing to mount
                 };
+                // Where the webview goes is the program's own declaration, read
+                // off the field: an overlay takes the window, everything else
+                // takes the rectangle geometry gives it (host.md §Overlays).
+                let (declared_name, surface) = boot::program_kind(&engine, &pending.program);
                 let (strip_rect, leaves) = layout(&window, &tree, STRIP);
-                let placed = if process_id == strip_process {
-                    Some(strip_rect)
-                } else {
-                    leaves.into_iter().find(|l| l.id == process_id.as_str()).map(|l| l.rect)
+                let placed = match surface {
+                    Surface::Overlay => Some(window_rect(&window)),
+                    Surface::Tile if process_id == strip_process => Some(strip_rect),
+                    Surface::Tile => {
+                        leaves.into_iter().find(|l| l.id == process_id.as_str()).map(|l| l.rect)
+                    }
                 };
                 let Some(rect) = placed else {
                     eprintln!("host: no surface for process {process_id}; dropping mount");
@@ -339,11 +357,16 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 let program = program_names
                     .get(&process_id)
                     .cloned()
+                    .or(declared_name)
                     .unwrap_or_else(|| pending.executable.clone());
                 let builder = WebViewBuilder::new()
                     .with_bounds(bounds(&rect))
                     .with_transparent(true)
-                    .with_initialization_script(&page::init_script(process_id.as_str()))
+                    .with_initialization_script(&page::init_script(
+                        process_id.as_str(),
+                        rect.x,
+                        rect.y,
+                    ))
                     .with_ipc_handler(ipc_handler(
                         engine_api.clone(),
                         runtime.handle().clone(),
@@ -380,8 +403,15 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                     ))
                 };
                 let webview = builder.build_as_child(&window).expect("webview");
-                // Only a tile floats: the strip is naked on the canvas.
-                if process_id != strip_process {
+                // Only a tile floats: the strip is naked on the canvas, and an
+                // overlay is a transparent pane whose own panel casts its shadow
+                // in CSS — the aura belongs to what the *window* frames.
+                if surface == Surface::Overlay {
+                    overlays.insert(process_id.clone());
+                    // The pane is the whole window and takes every click; it
+                    // must take the keys too, or Escape never reaches it.
+                    let _ = webview.focus();
+                } else if process_id != strip_process {
                     cast_aura(&webview, &rect);
                 }
                 webviews.insert(process_id.clone(), webview);
@@ -424,6 +454,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 }
                 webviews.remove(&process_id);
                 terminals.remove(&process_id);
+                overlays.remove(&process_id);
             }
             Event::UserEvent(HostCmd::EvaluateScript { process_id, script }) => {
                 if let Some(webview) = webviews.get(&process_id) {
@@ -481,7 +512,7 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
         let webview = WebViewBuilder::new()
             .with_bounds(bounds(&leaf.rect))
             .with_transparent(true)
-            .with_initialization_script(&page::init_script(&info.process))
+            .with_initialization_script(&page::init_script(&info.process, leaf.rect.x, leaf.rect.y))
             .with_html(html)
             .with_ipc_handler(ipc_handler(
                 stub.clone(),
@@ -650,6 +681,14 @@ fn layout(window: &Window, tree: &Tile, strip: Strip) -> (Rect, Vec<geometry::Le
 fn window_rect(window: &Window) -> Rect {
     let size: LogicalSize<f64> = window.inner_size().to_logical(window.scale_factor());
     Rect { x: 0.0, y: 0.0, width: size.width, height: size.height }
+}
+
+/// Put a webview where it belongs, and tell it where that is. A page's client
+/// coordinates start at its own webview's origin, so an anchor it hands to an
+/// overlay is only meaningful once the page knows the origin (`page`).
+fn place(webview: &wry::WebView, rect: &Rect) {
+    let _ = webview.set_bounds(bounds(rect));
+    let _ = webview.evaluate_script(&page::origin_script(rect.x, rect.y));
 }
 
 fn bounds(rect: &Rect) -> wry::Rect {

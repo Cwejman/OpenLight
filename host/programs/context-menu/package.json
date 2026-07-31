@@ -1,0 +1,22 @@
+{
+  "name": "@openlight/context-menu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "`context-menu` — the system's first overlay program: a menu at a point, executing the op its caller named. A webview program the host serves from source; `src/index.tsx` is the executable its program chunk names.",
+  "type": "module",
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@openlight/react": "workspace:*",
+    "@openlight/sdk": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.11.1",
+    "@types/bun": "^1.3.14",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3"
+  }
+}

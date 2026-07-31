@@ -7,4 +7,5 @@
 // surface and the shell links it (`ol://app/<process>/styles.css`), so no
 // program inlines CSS any more.
 export { useScope } from './useScope.ts'
+export { origin, windowPoint, type Point } from './anchor.ts'
 export { Card, Menu, Pill, Status, StripItem, type MenuAction } from './components.tsx'

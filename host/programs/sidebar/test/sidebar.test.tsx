@@ -1,7 +1,7 @@
 // The sidebar rendered against fixture substrate, in process: what the author
 // sees in the strip, asserted structurally. Life rises as a card, rest falls
-// flat (host.md §Visual Language); a click answers with the context menu
-// §Sidebar names, and nothing it lists acts yet.
+// flat (host.md §Visual Language); a click raises the real context menu — its
+// own overlay program, run with the entries and the anchor as its argument.
 import {
   Sidebar,
   click,
@@ -16,7 +16,7 @@ import {
 } from './harness.ts'
 import { afterEach, expect, test } from 'bun:test'
 import { fixtureTransport, type FixtureTransport } from '@openlight/sdk/fixture'
-import type { Declaration } from '@openlight/sdk'
+import { get, scope, type Declaration } from '@openlight/sdk'
 
 const SIDEBAR = 'p_sidebar'
 const SESSION = 'session-main'
@@ -45,10 +45,12 @@ function ground(): Declaration {
       { id: SESSION, name: 'main' },
       { id: 'host/read-tile', name: 'read-tile' },
       { id: 'host/sidebar', name: 'sidebar' },
+      { id: 'host/context-menu', name: 'context-menu', body: { surface: 'overlay' } },
     ],
     placements: [
       { chunk: 'host/read-tile', scope: 'engine/program', type: 'instance' },
       { chunk: 'host/sidebar', scope: 'engine/program', type: 'instance' },
+      { chunk: 'host/context-menu', scope: 'engine/program', type: 'instance' },
     ],
   }
 }
@@ -206,14 +208,25 @@ test('members of the session that are not processes are not sidebar items', asyn
   expect(texts(strip, '[data-ui="item"] [data-part="program"]')).toEqual(['read-tile'])
 })
 
-test('a click answers with the context menu, positioned at the point', async () => {
-  field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
+test('a click runs the context menu, anchored where the window saw the click', async () => {
+  const handle = field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
   const strip = await show()
-  expect(strip.container.querySelector('[data-ui="menu"]')).toBe(null)
+  const before = new Set(handle.engine.processes.keys())
+  // The strip is a webview inset in the window; the overlay spans the window.
+  window.__openlight_origin = { x: 14, y: 10 }
 
   await click(strip, '[data-ui="item"]', { x: 120, y: 64 })
 
-  expect(texts(strip, '[data-ui="menu"] [data-ui="action"]')).toEqual([
+  // Nothing was drawn in the strip: the menu is another program's surface.
+  expect(strip.container.querySelector('[data-ui="menu"]')).toBe(null)
+  const raised = [...handle.engine.processes.keys()].filter((pid) => !before.has(pid))
+  expect(raised.length).toBe(1)
+
+  const request = (await scope([])).chunks.find((chunk) => chunk.body?.anchor)
+  expect(request?.body?.anchor).toEqual({ x: 134, y: 74 })
+  expect(request?.body?.head).toBe('read-tile')
+  const entries = request?.body?.entries as { label: string; op: { kind: string } }[]
+  expect(entries.map((entry) => entry.label)).toEqual([
     'Jump to tile',
     'Inspect',
     'Terminate',
@@ -221,17 +234,13 @@ test('a click answers with the context menu, positioned at the point', async () 
     'New from this',
     'Hide',
   ])
-  const menu = strip.container.querySelector('[data-ui="menu"]') as HTMLElement
-  expect(menu.style.left).toBe('120px')
-  expect(menu.style.top).toBe('64px')
-
-  // Dismissal is always available.
-  await click(strip, '[data-ui="backdrop"]')
-  expect(strip.container.querySelector('[data-ui="menu"]')).toBe(null)
+  // It is a run of the menu program, found by name.
+  const item = await get(raised[0]!)
+  expect(item?.placements?.some((p) => p.scope_id === 'host/context-menu')).toBe(true)
 })
 
-test('the menu offers terminate to a running process and review to a terminal one', async () => {
-  field([
+test('the entries carry the state the item is in — terminate only while it lives', async () => {
+  const handle = field([
     ground(),
     frame(),
     process('p_read', 'host/read-tile', { status: 'running' }),
@@ -239,27 +248,42 @@ test('the menu offers terminate to a running process and review to a terminal on
   ])
   const strip = await show()
 
-  const disabled = (): string[] =>
-    [...open!.container.querySelectorAll('[data-ui="menu"] [data-ui="action"]')]
-      .filter((node) => (node as HTMLButtonElement).disabled)
-      .map((node) => node.textContent ?? '')
+  const picked = async (selector: string): Promise<Record<string, boolean>> => {
+    await click(strip, selector)
+    const requests = (await scope([])).chunks.filter((chunk) => chunk.body?.anchor)
+    const entries = requests[requests.length - 1]!.body!.entries as {
+      label: string
+      disabled?: boolean
+    }[]
+    return Object.fromEntries(entries.map((entry) => [entry.label, entry.disabled === true]))
+  }
 
-  await click(strip, '[data-ui="item"][data-live="true"]')
-  expect(disabled()).toEqual(['Review changes'])
-
-  await click(strip, '[data-ui="item"][data-live="false"]')
-  expect(disabled()).toEqual(['Terminate'])
+  const live = await picked('[data-ui="item"][data-live="true"]')
+  expect([live['Terminate'], live['New from this']]).toEqual([false, false])
+  const rest = await picked('[data-ui="item"][data-live="false"]')
+  expect([rest['Terminate'], rest['New from this']]).toEqual([true, false])
+  expect(handle.engine.processes.size).toBeGreaterThan(0)
 })
 
-test('picking an action says it is not built rather than pretending', async () => {
-  field([ground(), frame(), process('p_read', 'host/read-tile', { status: 'running' })])
+test('with no menu program in the field the strip says so rather than swallowing the click', async () => {
+  field([
+    {
+      chunks: [
+        { id: 'engine/process', name: 'process' },
+        { id: 'engine/program', name: 'program' },
+        { id: SESSION, name: 'main' },
+        { id: 'host/read-tile', name: 'read-tile' },
+      ],
+      placements: [{ chunk: 'host/read-tile', scope: 'engine/program', type: 'instance' }],
+    },
+    frame(),
+    process('p_read', 'host/read-tile', { status: 'running' }),
+  ])
   const strip = await show()
 
   await click(strip, '[data-ui="item"]')
-  await click(strip, '[data-ui="menu"] [data-ui="action"]:nth-of-type(3)')
 
-  expect(strip.container.querySelector('[data-ui="menu"]')).toBe(null)
-  expect(text(strip, '[data-part="notice"]')).toBe('Terminate — not built yet')
+  expect(text(strip, '[data-part="notice"]')).toContain('no context-menu program')
 })
 
 test('a commit on the session re-renders the strip', async () => {

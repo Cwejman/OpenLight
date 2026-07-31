@@ -3,20 +3,30 @@
 // background, outside tile geometry, so nothing here draws a panel. Life rises
 // as a card, rest falls flat (host.md §Visual Language). `index.tsx` mounts it.
 //
-// v0 is the first rung, like the read-tile's: it renders and it answers a click
-// with the context menu the spec names — positioned and listed. No action runs.
-// Its write root (`[session]`, boot step 10) stays unused: *hide* is the first
-// write, and it is not built.
+// A click raises the real context menu: `context-menu` is its own overlay
+// program, run as a child of this strip with the entries and the anchor as its
+// argument, and it executes the pick itself under the boundary granted here
+// (board, *Next unit ruled: context menu*). The strip composes the list and
+// then knows nothing more about it.
 //
 // Presentation is Tailwind over the tokens `@openlight/react/ol.css` maps; the
 // shell links the compiled sheet, so nothing here carries CSS. The strip's own
 // geometry (the bleed the host leaves it, the column's width) and its edge
 // fades are the two things the rim depends on, and they are written out as
 // exact lengths for that reason.
-import type { ChunkId } from '@openlight/sdk'
-import { Menu, Status, StripItem, useScope, type MenuAction } from '@openlight/react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ENGINE_PROGRAM, actions, items, sessionArgument, stamp, type Item } from './items.ts'
+import { run, type ChunkId } from '@openlight/sdk'
+import { Status, StripItem, useScope, windowPoint } from '@openlight/react'
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import {
+  CONTEXT_MENU,
+  ENGINE_PROGRAM,
+  entries,
+  items,
+  programNamed,
+  sessionArgument,
+  stamp,
+  type Item,
+} from './items.ts'
 
 export function Sidebar({ process }: { process: ChunkId }) {
   const frame = useScope([process])
@@ -26,104 +36,112 @@ export function Sidebar({ process }: { process: ChunkId }) {
   return <Session session={session} />
 }
 
-type Raised = { item: Item; x: number; y: number }
-
 function Session({ session }: { session: ChunkId }) {
   const members = useScope([session])
   // The programs are read for their names alone, and land on their own clock —
-  // an item shows its program's id until they do, never a blank.
+  // an item shows its program's id until they do, never a blank. The menu
+  // program is found in the same read, by name.
   const programs = useScope([ENGINE_PROGRAM])
-  const [menu, setMenu] = useState<Raised | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+
+  // The menu is not raised *in* the strip: it is its own program on its own
+  // webview spanning the window, above every surface. Two reasons it must be —
+  // the strip's edge fade is a mask, and a mask paints its whole subtree, so a
+  // panel within it would fade and clip at the strip's box; and the strip is
+  // 216px wide, which no menu fits inside.
+  const raise = async (item: Item, event: MouseEvent<HTMLLIElement>): Promise<void> => {
+    setNotice(null)
+    const menu = programNamed(programs?.chunks ?? [], CONTEXT_MENU)
+    if (!menu) {
+      setNotice('no context-menu program in this field')
+      return
+    }
+    try {
+      await run(menu, {
+        chunks: [
+          {
+            name: 'request',
+            // The anchor is in *window* space: the overlay spans the window and
+            // knows nothing of where this strip sits in it.
+            body: { head: item.program, anchor: windowPoint(event), entries: entries(item) },
+          },
+        ],
+        // A child: the menu is this strip's, and goes when the strip goes.
+        mode: 'child',
+        // Its whole grant. Reading the session is how it could show what it is
+        // acting on; writing it is the cancel authority *terminate* spends
+        // (engine.md, R3: a process placed on the session is within it).
+        readBoundary: [session],
+        writeBoundary: [session],
+      })
+    } catch (error) {
+      setNotice(`the menu did not open: ${(error as Error).message}`)
+    }
+  }
 
   if (!members) return <Strip status="reading the session…" />
   const list = items(members, programs?.chunks ?? [], session)
 
-  // The menu is raised beside the strip, not inside it: the strip's edge fade is
-  // a mask, and a mask paints its whole subtree — a menu within it would fade
-  // and clip at the strip's box. It is `position: fixed`, so it needs no parent.
   return (
-    <>
-      <Strip>
-        <ul data-part="items" className="flex flex-col gap-3">
-          {list.map((item) => (
-            <StripItem
-              key={item.process}
-              live={item.live}
-              status={item.status}
-              className="flex cursor-default flex-col gap-px px-[11px] py-4"
-              onClick={(event) => {
-                setNotice(null)
-                setMenu({ item, x: event.clientX, y: event.clientY })
-              }}
+    <Strip>
+      <ul data-part="items" className="flex flex-col gap-3">
+        {list.map((item) => (
+          <StripItem
+            key={item.process}
+            live={item.live}
+            status={item.status}
+            className="flex cursor-default flex-col gap-px px-[11px] py-4"
+            onClick={(event) => void raise(item, event)}
+          >
+            {/* Two lines, one shape for every state: what a run *is* with how
+                it stands, then which run it was and when it began. The state
+                rides the name line so the id below it — the one thing that
+                truncates — never meets the mark's dot. A live card says as
+                much about itself as a dead row does. */}
+            <span className="flex items-baseline gap-2 leading-tight">
+              <span data-part="program" className="min-w-0 truncate font-medium">
+                {item.program}
+              </span>
+              <Status
+                part="mark"
+                status={item.status}
+                dot={item.failed ? 'error' : 'quiet'}
+                className="ml-auto"
+              />
+            </span>
+            <span
+              data-part="process"
+              className="flex items-baseline gap-2 text-small leading-tight text-ink-ghost"
             >
-              {/* Two lines, one shape for every state: what a run *is* with how
-                  it stands, then which run it was and when it began. The state
-                  rides the name line so the id below it — the one thing that
-                  truncates — never meets the mark's dot. A live card says as
-                  much about itself as a dead row does. */}
-              <span className="flex items-baseline gap-2 leading-tight">
-                <span data-part="program" className="min-w-0 truncate font-medium">
-                  {item.program}
-                </span>
-                <Status
-                  part="mark"
-                  status={item.status}
-                  dot={item.failed ? 'error' : 'quiet'}
-                  className="ml-auto"
-                />
-              </span>
               <span
-                data-part="process"
-                className="flex items-baseline gap-2 text-small leading-tight text-ink-ghost"
+                data-part="name"
+                data-id={item.nameIsId}
+                className={item.nameIsId ? 'min-w-0 truncate font-mono' : 'min-w-0 truncate'}
               >
-                <span
-                  data-part="name"
-                  data-id={item.nameIsId}
-                  className={item.nameIsId ? 'min-w-0 truncate font-mono' : 'min-w-0 truncate'}
-                >
-                  {item.name}
-                </span>
-                {item.started === undefined ? null : (
-                  <span
-                    data-part="time"
-                    className="ml-auto shrink-0 font-mono tabular-nums"
-                  >
-                    {stamp(item.started)}
-                  </span>
-                )}
+                {item.name}
               </span>
-            </StripItem>
-          ))}
-        </ul>
+              {item.started === undefined ? null : (
+                <span data-part="time" className="ml-auto shrink-0 font-mono tabular-nums">
+                  {stamp(item.started)}
+                </span>
+              )}
+            </span>
+          </StripItem>
+        ))}
+      </ul>
 
-        {list.length === 0 ? (
-          <div data-part="quiet" className="px-[11px] py-5 text-ink-ghost">
-            this session holds no processes
-          </div>
-        ) : null}
-
-        {notice ? (
-          <div data-part="notice" className="mt-5 px-[11px] text-small text-ink-faint">
-            {notice}
-          </div>
-        ) : null}
-      </Strip>
-
-      {menu ? (
-        <Menu
-          x={menu.x}
-          y={menu.y}
-          head={menu.item.program}
-          actions={actions(menu.item)}
-          onDismiss={() => setMenu(null)}
-          onPick={(action: MenuAction) => {
-            setMenu(null)
-            setNotice(`${action.label} — not built yet`)
-          }}
-        />
+      {list.length === 0 ? (
+        <div data-part="quiet" className="px-[11px] py-5 text-ink-ghost">
+          this session holds no processes
+        </div>
       ) : null}
-    </>
+
+      {notice ? (
+        <div data-part="notice" className="mt-5 px-[11px] text-small text-ink-faint">
+          {notice}
+        </div>
+      ) : null}
+    </Strip>
   )
 }
 
