@@ -70,18 +70,20 @@ pub fn program_kind(engine: &Engine, program: &ChunkId) -> (Option<String>, Surf
     }
 }
 
-/// The session instance the host creates on first launch (bootstrap.md,
-/// closing note: the first session is a runtime action, never a bootstrap
-/// commit). Readable id per the fixture convention (board.md tracked debt).
-const SESSION_ID: &str = "session-main";
-const SESSION_NAME: &str = "main";
-
 pub struct Booted {
     pub engine: Engine,
     pub host_rx: mpsc::Receiver<HostCmd>,
     pub provider: Arc<WebviewProvider>,
     pub session: ChunkId,
-    /// One entry per program in `TILE_PROGRAMS` order — the tile tree's leaves.
+    /// The session's current tab — the root the rim reads the tile tree from.
+    pub tab: ChunkId,
+    /// The active project's db, kept beside the engine's mount: the rim
+    /// subscribes to its commit broadcast for relayout (the engine's own
+    /// `subscribe` requires a process context — a recorded gap; the db feed is
+    /// the same stream the engine's reactivity task drinks from).
+    pub active_db: Arc<db::Db>,
+    /// One entry per program in `TILE_PROGRAMS` order — the boot-spawned tile
+    /// processes (the field's leaves point at them; see `seed::point_leaf`).
     pub tiles: Vec<TileProcess>,
     /// The sidebar: a strip on the background, in no tile.
     pub strip: TileProcess,
@@ -196,7 +198,7 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
     engine
         .mount_project(
             project_id(&cascade.active.path),
-            active_db,
+            active_db.clone(),
             MountMode::ReadWrite,
             db::BranchName::default(),
         )
@@ -210,33 +212,51 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
         return Err(BootError::Unresolved(unresolved));
     }
 
-    // Step 10 — the always-mounted suite: an initial session (found by name,
-    // created on first launch), the tile programs, and the sidebar as a naked
-    // strip with the read roots step 10 names.
-    let session = ensure_session(&engine)?;
+    // Step 10 — the always-mounted suite: the initial workspace (session, tab,
+    // first leaf — a runtime commit, never bootstrap; seed.rs), the tile
+    // programs with the field's leaves pointed at them, and the sidebar as a
+    // naked strip with the read roots step 10 names.
+    let workspace = seed::ensure_workspace(&engine).map_err(BootError::Seed)?;
+    let session = workspace.session;
     let mut tiles = Vec::new();
     for name in TILE_PROGRAMS {
-        tiles.push(spawn_surface(&engine, name, &session, vec![session.clone()])?);
+        let surface = spawn_surface(&engine, name, &session, vec![session.clone()])?;
+        seed::point_leaf(&engine, &workspace.leaf, &surface.process).map_err(BootError::Seed)?;
+        tiles.push(surface);
     }
-    let strip = spawn_surface(
-        &engine,
-        STRIP_PROGRAM,
-        &session,
-        sidebar_read_roots(&engine, &session)?,
-    )?;
+    let strip = spawn_strip(&engine, &session)?;
 
     let programs_root = project_path(&cascade, "host").expect("the cascade requires host");
-    Ok(Booted { engine, host_rx, provider, session, tiles, strip, programs_root })
+    Ok(Booted {
+        engine,
+        host_rx,
+        provider,
+        session,
+        tab: workspace.tab,
+        active_db,
+        tiles,
+        strip,
+        programs_root,
+    })
 }
 
 /// One boot-suite run. The process is placed `instance` on the session, which
-/// *is* sidebar presence (host.md §The Composition Types), and every surface of
-/// the suite writes only the session (step 10).
+/// *is* sidebar presence (host.md §The Composition Types).
 fn spawn_surface(
     engine: &Engine,
     name: &str,
     session: &ChunkId,
     read_roots: Vec<ChunkId>,
+) -> Result<TileProcess, BootError> {
+    spawn_with_boundaries(engine, name, session, read_roots, vec![session.clone()])
+}
+
+fn spawn_with_boundaries(
+    engine: &Engine,
+    name: &str,
+    session: &ChunkId,
+    read_roots: Vec<ChunkId>,
+    write_roots: Vec<ChunkId>,
 ) -> Result<TileProcess, BootError> {
     let program = engine
         .resolve_name(&Context::host(), &format!("host/{name}"))
@@ -250,7 +270,7 @@ fn spawn_surface(
                 placements: vec![session.clone()],
                 mode: engine::RunMode::Child,
                 read_boundary: engine::BoundarySpec::Roots(read_roots),
-                write_boundary: engine::BoundarySpec::Roots(vec![session.clone()]),
+                write_boundary: engine::BoundarySpec::Roots(write_roots),
                 timeout_ms: None,
             },
         )
@@ -258,18 +278,37 @@ fn spawn_surface(
     Ok(TileProcess { program: name.to_string(), process })
 }
 
-/// host.md boot step 10: the sidebar reads `[session, engine/process,
-/// engine/program]`. The two archetypes live in the read-only engine mount —
-/// a boundary root is a reference, never a modification (engine.md, R5).
-fn sidebar_read_roots(engine: &Engine, session: &ChunkId) -> Result<Vec<ChunkId>, BootError> {
-    let mut roots = vec![session.clone()];
+/// The strip, with its boundaries. host.md boot step 10 names read roots
+/// `[session, engine/process, engine/program]` and write root `[session]`;
+/// two roots join each side beyond the spec's letter, both recorded:
+///
+/// - `host/tile` (write): the tiling verbs commit new tiles, and a new tile
+///   must be *typed* — placed instance on the archetype — to satisfy the tab's
+///   `accepts` (substrate.md); a placement's scope must lie within the write
+///   boundary, and the archetype is not reachable from the session. Step 10
+///   predates the tiling verbs; the widening is the smallest that lets them
+///   exist. **Recorded gap** against host.md step 10.
+/// - the session's `hidden` marker (both sides): a literal root, because the
+///   marker has no instance chain (seed.rs, `hidden_id`) — reads exclude it,
+///   the hide verb writes into it.
+///
+/// The archetype reads live in the read-only engine mount — a boundary root is
+/// a reference, never a modification (engine.md, R5).
+fn spawn_strip(engine: &Engine, session: &ChunkId) -> Result<TileProcess, BootError> {
+    let hidden = seed::hidden_id(session);
+    let mut read_roots = vec![session.clone()];
     for path in ["engine/process", "engine/program"] {
         let id = engine
             .resolve_name(&Context::host(), path)
             .map_err(|e| BootError::Engine(format!("resolving {path}: {e}")))?;
-        roots.push(id);
+        read_roots.push(id);
     }
-    Ok(roots)
+    read_roots.push(hidden.clone());
+    let tile_archetype = engine
+        .resolve_name(&Context::host(), "host/tile")
+        .map_err(|e| BootError::Engine(format!("resolving host/tile: {e}")))?;
+    let write_roots = vec![session.clone(), tile_archetype, hidden];
+    spawn_with_boundaries(engine, STRIP_PROGRAM, session, read_roots, write_roots)
 }
 
 /// The typed arguments a boot-suite run receives, one argument chunk per role
@@ -318,44 +357,6 @@ fn seed_first_party(cascade: &Cascade) -> Result<(), BootError> {
 /// engine.md, Settled choices: a project's id is its canonical absolute path.
 fn project_id(path: &Path) -> ProjectId {
     ProjectId::from(path.to_string_lossy().as_ref())
-}
-
-/// Find the initial session by name path, create it on first launch. The
-/// creation is an ordinary host-context commit, not a bootstrap commit.
-fn ensure_session(engine: &Engine) -> Result<ChunkId, BootError> {
-    let path = format!("host/session/{SESSION_NAME}");
-    match engine.resolve_name(&Context::host(), &path) {
-        Ok(id) => Ok(id),
-        Err(engine::EngineError::NotFound(_)) => {
-            let archetype = engine
-                .resolve_name(&Context::host(), "host/session")
-                .map_err(|e| BootError::Engine(format!("resolving host/session: {e}")))?;
-            engine
-                .commit(
-                    &Context::host(),
-                    db::Declaration {
-                        chunks: vec![db::ChunkDeclaration {
-                            id: Some(ChunkId::from(SESSION_ID)),
-                            name: Some(SESSION_NAME.into()),
-                            spec: None,
-                            body: Some(json!({ "text": "Initial session, created on first launch." })),
-                            removed: false,
-                        }],
-                        placements: vec![db::PlacementSpec {
-                            chunk: ChunkId::from(SESSION_ID),
-                            scope: archetype,
-                            type_: db::PlacementType::Instance,
-                            seq: None,
-                            active: true,
-                        }],
-                        message: Some("initial session".into()),
-                    },
-                )
-                .map_err(|e| BootError::Engine(format!("creating the initial session: {e}")))?;
-            Ok(ChunkId::from(SESSION_ID))
-        }
-        Err(e) => Err(BootError::Engine(format!("resolving {path}: {e}"))),
-    }
 }
 
 #[cfg(test)]

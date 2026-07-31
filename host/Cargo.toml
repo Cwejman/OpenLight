@@ -19,6 +19,9 @@ toml = "0.8"
 # host.md boot step 1: the runtime the engine and its providers need. wry's IPC
 # callback hands parsed work here rather than blocking on it.
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
+# The rim drinks the active db's commit broadcast for relayout (main.rs, the
+# reactivity seam) — the same stream engine's reactivity task consumes.
+tokio-stream = "0.1"
 
 # The frame's chrome is AppKit's: the window's canvas is set on NSWindow
 # directly (tao 0.30's colour signature cannot express a gray), and a tile's

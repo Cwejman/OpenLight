@@ -126,11 +126,12 @@ async fn the_loop_closes_webview_traffic_reads_real_substrate_through_the_real_e
     assert_eq!(reply["result"]["body"]["status"], "pending");
     assert_eq!(reply["result"]["body"]["timeout_ms"], 86_400_000u64, "surface timeout from the program body");
 
-    // scope(session) → every surface process, at a real commit head.
+    // scope(session) → every surface process plus the workspace's tab, at a
+    // real commit head.
     let (_, reply) =
         ipc(&api, &ctx, &format!(r#"{{"id":2,"op":"scope","scopes":["{session}"]}}"#)).await;
     let result = &reply["result"];
-    assert_eq!(result["in_scope"], surfaces.len());
+    assert_eq!(result["in_scope"], surfaces.len() + 1);
     let head = result["head"].as_str().unwrap();
     assert!(!head.is_empty() && head != "fixture-head", "a real commit id, not the stub's: {head}");
     let ids: Vec<&str> = result["chunks"]
@@ -253,7 +254,7 @@ async fn a_second_launch_finds_the_field_it_left() {
             db::ScopeOpts { include: db::Includes::content(), ..db::ScopeOpts::default() },
         )
         .unwrap();
-    assert_eq!(result.in_scope, 4, "two surfaces per launch, history preserved");
+    assert_eq!(result.in_scope, 5, "two surfaces per launch plus the tab, history preserved");
 
     second.engine.clone().shutdown().await.unwrap();
 }
@@ -392,13 +393,16 @@ async fn the_sidebar_strip_reads_exactly_what_step_ten_grants_it() {
 
     // The derivation the strip's items stand on: a session member is a process
     // by its `instance` placement on the archetype, and names its program by
-    // another (engine.md, *Program and Process*).
+    // another (engine.md, *Program and Process*). The tab is the session's one
+    // non-process member — exactly what the items derivation must filter out.
     let (_, reply) = ipc(
         &api,
         &ctx,
         &format!(r#"{{"id":4,"op":"scope","scopes":["{}"]}}"#, booted.session),
     )
     .await;
+    let mut processes = 0;
+    let mut tabs = 0;
     for chunk in reply["result"]["chunks"].as_array().expect("session members") {
         let scopes: Vec<&str> = chunk["placements"]
             .as_array()
@@ -407,12 +411,18 @@ async fn the_sidebar_strip_reads_exactly_what_step_ten_grants_it() {
             .filter(|p| p["type_"] == "instance")
             .filter_map(|p| p["scope_id"].as_str())
             .collect();
+        if scopes.contains(&"host/tab") {
+            tabs += 1;
+            continue;
+        }
+        processes += 1;
         assert!(scopes.contains(&"engine/process"), "{scopes:?}");
         assert!(
             scopes.iter().any(|s| s.starts_with("host/")),
             "the program it runs: {scopes:?}"
         );
     }
+    assert_eq!((processes, tabs), (2, 1));
 
     // And nothing beyond the three roots.
     let (_, reply) = ipc(&api, &ctx, r#"{"id":3,"op":"scope","scopes":["host"]}"#).await;

@@ -170,6 +170,85 @@ test('picking a run entry launches the program with the argument the caller wrot
   expect(written.chunks.find((chunk) => chunk.name === 'request')?.body?.target).toEqual([SESSION])
 })
 
+test('picking a commit entry writes the declarations in order, then the menu ends itself', async () => {
+  const handle = field()
+  const { menu, shown } = await raise(
+    handle,
+    [
+      {
+        label: 'Open in tile',
+        op: {
+          kind: 'commit',
+          declarations: [
+            {
+              chunks: [{ id: 'tile-open-1', body: {} }],
+              placements: [],
+              message: 'open in tile: stage',
+            },
+            {
+              chunks: [],
+              placements: [{ chunk: 'tile-open-1', scope: SESSION, type: 'relates' }],
+              message: 'open in tile: graft',
+            },
+          ],
+        },
+      },
+    ],
+    ['tile-open-1'],
+  )
+
+  await click(shown, '[data-ui="action"]')
+
+  handle.actAs(null)
+  const tile = await get('tile-open-1')
+  expect(tile).not.toBe(null)
+  expect(tile?.placements?.some((p) => p.scope_id === SESSION && p.type_ === 'relates')).toBe(true)
+  expect(await statusOf(menu)).toBe('completed')
+})
+
+test('a commit outside the granted boundary is refused — and the menu still leaves', async () => {
+  const handle = field()
+  const { menu, shown } = await raise(handle, [
+    {
+      label: 'Open in tile',
+      op: {
+        kind: 'commit',
+        declarations: [
+          {
+            chunks: [{ id: 'tile-open-1', body: {} }],
+            // The read-tile program chunk lies outside [SESSION]: placing onto
+            // it must refuse under the menu's write boundary.
+            placements: [{ chunk: 'tile-open-1', scope: READ_TILE, type: 'instance' }],
+          },
+        ],
+      },
+    },
+  ])
+
+  await click(shown, '[data-ui="action"]')
+
+  handle.actAs(null)
+  expect(await get('tile-open-1')).toBe(null)
+  expect(await statusOf(menu)).toBe('completed')
+})
+
+test('a greyed entry says why it cannot act, beside its label', async () => {
+  const { shown } = await raise(field(), [
+    {
+      label: 'New from this',
+      op: { kind: 'none' },
+      disabled: true,
+      reason: 'launches into nowhere until a tile can receive it',
+    },
+    { label: 'Terminate', op: { kind: 'cancel', process: 'p_read' } },
+  ])
+
+  expect(texts(shown, '[data-ui="action"]')).toEqual([
+    'New from this — launches into nowhere until a tile can receive it',
+    'Terminate',
+  ])
+})
+
 test('the backdrop dismisses without acting', async () => {
   const handle = field()
   const target = handle.spawnIdentity([SESSION], [SESSION])

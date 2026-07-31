@@ -1,12 +1,25 @@
 // The sidebar's pure half: the session it was handed, the items that session
-// holds, and the actions an item's state offers (host.md §Sidebar,
-// programs.md §3.2). The rendering half imports these; the tests drive them.
-import type { ChunkId, ChunkItem, ScopeResult } from '@openlight/sdk'
+// holds, the actions an item's state offers (host.md §Sidebar, programs.md
+// §3.2), and the tiling declarations those actions commit (host.md §The
+// Composition Types). The rendering half imports these; the tests drive them.
+import type { ChunkId, ChunkItem, Declaration, ScopeResult } from '@openlight/sdk'
 
 /** Every process is `instance` on this archetype (engine.md, *Program and Process*). */
 export const ENGINE_PROCESS: ChunkId = 'engine/process'
 /** Every program is `instance` on this one — the sidebar's third read root. */
 export const ENGINE_PROGRAM: ChunkId = 'engine/program'
+/** The composition archetypes the tiling verbs read and write (host.md). */
+export const HOST_TAB: ChunkId = 'host/tab'
+export const HOST_TILE: ChunkId = 'host/tile'
+
+/**
+ * The session-local hidden marker (programs.md §3.2): derived from the session
+ * so the strip can exclude it before it exists — an unresolved exclude root is
+ * an empty exclusion. Mirrors `host/src/seed.rs`'s `hidden_id`.
+ */
+export function hiddenId(session: ChunkId): ChunkId {
+  return `${session}-hidden`
+}
 
 export type Item = {
   process: ChunkId
@@ -136,50 +149,295 @@ export function programNamed(programs: ChunkItem[], name: string): ChunkId | nul
  * rather than imported: the two are separate programs, glued by a substrate
  * argument, not by a shared module — the contract is the chunk's shape.
  * `host/programs/context-menu/src/entries.ts` is its other reading.
+ *
+ * `commit` carries declarations in order because one gesture may need two
+ * commits: the engine's write-boundary walk runs against pre-commit state, so
+ * a bounded identity cannot place onto a tile born in the same declaration —
+ * open-in-tile stages (create + type) and then grafts (wire the tree).
  */
 export type Op =
   | { kind: 'run'; program: ChunkId; args?: Record<string, unknown>; read?: ChunkId[]; write?: ChunkId[] }
   | { kind: 'cancel'; process: ChunkId }
+  | { kind: 'commit'; declarations: Declaration[] }
   | { kind: 'none' }
 
-export type Entry = { label: string; op: Op; disabled?: boolean }
+export type Entry = {
+  label: string
+  op: Op
+  disabled?: boolean
+  /** Why a disabled entry cannot act — shown beside the label. */
+  reason?: string
+}
+
+// ---- the tile tree, as the strip reads it ------------------------------------
+
+/**
+ * The current tab's tree, distilled to what the tiling verbs need. Built from
+ * the tile chunks the strip gathers by walking scope reads from the tab (its
+ * boundary reaches tiles through the tab's instance chain; the archetype
+ * itself it cannot open).
+ */
+export type TreeInfo = {
+  tab: ChunkId
+  /** The tile placed on the tab, with its seq — null for an empty tab. */
+  root: { id: ChunkId; seq: number } | null
+  /** Per displayed process: its leaf and where the leaf hangs. */
+  mounts: Map<ChunkId, MountInfo>
+}
+
+export type MountInfo = {
+  leaf: ChunkId
+  /** The split holding the leaf, or the tab when the leaf is the root. */
+  parent: ChunkId
+  parentIsTab: boolean
+  /** The split's other child — what survives the collapse. */
+  sibling: ChunkId | null
+  /** Where the split hangs, and at what seq — the collapse re-seats there. */
+  grandparent: ChunkId | null
+  parentSeq: number
+}
+
+/** The tab among a session's members: the chunk typed `instance` on `host/tab`. */
+export function tabOf(members: ChunkItem[]): ChunkId | null {
+  const tab = members.find((chunk) =>
+    (chunk.placements ?? []).some(
+      (placement) => placement.type_ === 'instance' && placement.scope_id === HOST_TAB,
+    ),
+  )
+  return tab?.id ?? null
+}
+
+/** Whether a chunk is a tile — typed `instance` on the tile archetype. */
+export function isTile(chunk: ChunkItem): boolean {
+  return (chunk.placements ?? []).some(
+    (placement) => placement.type_ === 'instance' && placement.scope_id === HOST_TILE,
+  )
+}
+
+/**
+ * Distill gathered tile chunks into [`TreeInfo`]. Tree edges are instance
+ * placements onto the tab or another tile; a leaf's process is its relates
+ * placement (mount-provenance relates, `engine/mount:*`, are synthesized rows
+ * and never processes).
+ */
+export function analyzeTree(tab: ChunkId, tiles: ChunkItem[]): TreeInfo {
+  const ids = new Set(tiles.map((tile) => tile.id))
+  const edges = tiles.flatMap((tile) =>
+    (tile.placements ?? [])
+      .filter((p) => p.type_ === 'instance' && (p.scope_id === tab || ids.has(p.scope_id)))
+      .map((p) => ({ tile: tile.id, scope: p.scope_id, seq: p.seq ?? 0 })),
+  )
+  const rootEdge = edges.find((edge) => edge.scope === tab)
+  const root = rootEdge ? { id: rootEdge.tile, seq: rootEdge.seq } : null
+
+  const mounts = new Map<ChunkId, MountInfo>()
+  for (const tile of tiles) {
+    const inTree = edges.some((edge) => edge.tile === tile.id)
+    if (!inTree) continue // a closed tile's chunk persists; it is not a leaf
+    const process = (tile.placements ?? []).find(
+      (p) => p.type_ === 'relates' && !p.scope_id.startsWith('engine/mount'),
+    )?.scope_id
+    if (!process) continue
+    const up = edges.find((edge) => edge.tile === tile.id)
+    if (!up) continue
+    if (up.scope === tab) {
+      mounts.set(process, {
+        leaf: tile.id,
+        parent: tab,
+        parentIsTab: true,
+        sibling: null,
+        grandparent: null,
+        parentSeq: up.seq,
+      })
+      continue
+    }
+    const split = up.scope
+    const sibling = edges.find((edge) => edge.scope === split && edge.tile !== tile.id)
+    const splitUp = edges.find((edge) => edge.tile === split)
+    mounts.set(process, {
+      leaf: tile.id,
+      parent: split,
+      parentIsTab: false,
+      sibling: sibling?.tile ?? null,
+      grandparent: splitUp?.scope ?? null,
+      parentSeq: splitUp?.seq ?? 1,
+    })
+  }
+  return { tab, root, mounts }
+}
+
+// ---- the tiling declarations -------------------------------------------------
+
+/**
+ * Open a process in a tile (host.md §Tile Geometry semantics): the root
+ * becomes a horizontal split of the existing tree and a new leaf relating the
+ * process. Two commits — stage types the new tiles on the archetype, graft
+ * wires them (see [`Op`]'s note). An empty tab takes the new leaf as its root.
+ */
+export function openInTile(
+  tree: TreeInfo,
+  process: ChunkId,
+  ids: { split: ChunkId; leaf: ChunkId },
+): Declaration[] {
+  const leafChunk = { id: ids.leaf, body: {} }
+  const relates = { chunk: ids.leaf, scope: process, type: 'relates' as const }
+  if (!tree.root) {
+    return [
+      {
+        chunks: [leafChunk],
+        placements: [{ chunk: ids.leaf, scope: HOST_TILE, type: 'instance' }],
+        message: 'open in tile: stage',
+      },
+      {
+        chunks: [],
+        placements: [{ chunk: ids.leaf, scope: tree.tab, type: 'instance', seq: 1 }, relates],
+        message: 'open in tile: graft',
+      },
+    ]
+  }
+  return [
+    {
+      chunks: [{ id: ids.split, body: { direction: 'horizontal', ratio: 0.5 } }, leafChunk],
+      placements: [
+        { chunk: ids.split, scope: HOST_TILE, type: 'instance' },
+        { chunk: ids.leaf, scope: HOST_TILE, type: 'instance' },
+      ],
+      message: 'open in tile: stage',
+    },
+    {
+      chunks: [],
+      placements: [
+        { chunk: ids.split, scope: tree.tab, type: 'instance', seq: tree.root.seq },
+        { chunk: tree.root.id, scope: tree.tab, type: 'instance', active: false },
+        { chunk: tree.root.id, scope: ids.split, type: 'instance', seq: 1 },
+        { chunk: ids.leaf, scope: ids.split, type: 'instance', seq: 2 },
+        relates,
+      ],
+      message: 'open in tile: graft',
+    },
+  ]
+}
+
+/**
+ * Close a tile: remove the leaf placement; a split left with one child
+ * collapses — the sibling re-seats where the split hung, at the split's seq
+ * (the simplification rule host.md's binary tree implies). The tile chunks
+ * persist; the substrate is lossless.
+ */
+export function closeTile(mount: MountInfo): Declaration {
+  if (mount.parentIsTab) {
+    return {
+      chunks: [],
+      placements: [{ chunk: mount.leaf, scope: mount.parent, type: 'instance', active: false }],
+      message: 'close tile',
+    }
+  }
+  const placements: Declaration['placements'] = [
+    { chunk: mount.leaf, scope: mount.parent, type: 'instance', active: false },
+  ]
+  if (mount.sibling && mount.grandparent) {
+    placements.push(
+      { chunk: mount.sibling, scope: mount.parent, type: 'instance', active: false },
+      { chunk: mount.parent, scope: mount.grandparent, type: 'instance', active: false },
+      { chunk: mount.sibling, scope: mount.grandparent, type: 'instance', seq: mount.parentSeq },
+    )
+  }
+  return { chunks: [], placements, message: 'close tile' }
+}
+
+/**
+ * Hide an item (programs.md §3.2): a relates placement onto the session-local
+ * `hidden` chunk — non-destructive un-show; the strip's read excludes the
+ * marker as a root. The marker is (re-)declared each time — idempotent.
+ */
+export function hideDeclaration(session: ChunkId, process: ChunkId): Declaration {
+  const hidden = hiddenId(session)
+  return {
+    chunks: [{ id: hidden, name: 'hidden', body: { text: 'Un-shown sidebar entries.' } }],
+    placements: [
+      { chunk: hidden, scope: session, type: 'relates' },
+      { chunk: process, scope: hidden, type: 'relates' },
+    ],
+    message: 'hide from sidebar',
+  }
+}
+
+/** Fresh readable tile ids for one open-in-tile gesture. */
+export function mintTileIds(now = Date.now()): { split: ChunkId; leaf: ChunkId } {
+  const suffix = `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+  return { split: `tile-split-${suffix}`, leaf: `tile-open-${suffix}` }
+}
+
+/** What the tiling verbs need beyond the item: the tree and the session. */
+export type MenuContext = {
+  session: ChunkId
+  /** Null when the tree walk failed — the tiling verbs grey out honestly. */
+  tree: TreeInfo | null
+  ids: { split: ChunkId; leaf: ChunkId }
+}
 
 /**
  * The context menu any item answers a click with (host.md §Sidebar,
- * programs.md §3.2), in the spec's order. Two of them act:
+ * programs.md §3.2), in the spec's order with the tiling verbs beside *jump*.
+ * The acting entries:
  *
- * - *terminate* cancels the run, while it is alive. The menu's authority is the
- *   write boundary the strip grants it — `[session]` reaches every process
- *   placed on the session (engine.md, R3).
- * - *new from this* launches the same program again, detached, so it outlives
- *   the menu that started it.
+ * - *open in tile* commits the split (host.md semantics) — for a live process
+ *   not already displayed by a leaf. Multi-mount of one process is an open
+ *   (host.md §What Is Open), so an already-mounted item greys.
+ * - *close tile* removes the leaf and collapses the one-child split — for an
+ *   item some leaf displays.
+ * - *terminate* cancels the run, while it is alive; the menu's authority is
+ *   the write boundary the strip grants it (engine.md, R3).
+ * - *hide* places the process relates onto the session's hidden marker — for
+ *   terminal items only: a live process's placements are engine domain
+ *   (engine/ops/commit.rs, protected chunks), so a live item's hide greys
+ *   with the reason.
  *
  * The rest are listed, greyed, and inert — the foolproof path shows every
- * capability whether or not its machinery exists yet:
- *
- * **Recorded gaps.** *jump to tile* is specced "(if surfaced)" and v0 cannot
- * tell — the tile tree is still composed rim-side, so no `host/tile` relates a
- * process in the field to read. *inspect* waits on the inspector program,
- * *review changes* on branch ops (engine.md R1), *hide* on the session-local
- * `hidden` chunk and R10 negation. And *new from this* launches with no
- * argument at all: programs.md §3.2 wants a launch form pre-filled from the
- * frame, which is the palette's machinery, not the strip's.
+ * capability whether or not its machinery exists yet. **Recorded gaps:**
+ * *jump to tile* waits on a focus concept (none exists — nothing tracks which
+ * tile is focused); *inspect* on the inspector program; *review changes* on
+ * branch ops (engine.md R1); *new from this* on the engine placing a menu
+ * launch onto a session (a launch from the menu lands on no session and no
+ * tile — the swap.rs pin), so it stays greyed with the reason visible.
  */
-export function entries(item: Item): Entry[] {
+export function entries(item: Item, menu: MenuContext): Entry[] {
+  const mounted = menu.tree?.mounts.get(item.process) ?? null
+  const openable = item.live && !mounted && menu.tree !== null
+  const open: Entry =
+    openable && menu.tree
+      ? { label: 'Open in tile', op: { kind: 'commit', declarations: openInTile(menu.tree, item.process, menu.ids) } }
+      : {
+          label: 'Open in tile',
+          op: { kind: 'none' },
+          disabled: true,
+          reason: !item.live ? 'the run has ended' : mounted ? 'already in a tile' : 'no tree to split',
+        }
+  const close: Entry = mounted
+    ? { label: 'Close tile', op: { kind: 'commit', declarations: [closeTile(mounted)] } }
+    : { label: 'Close tile', op: { kind: 'none' }, disabled: true, reason: 'not in a tile' }
+  const hide: Entry = item.live
+    ? {
+        label: 'Hide',
+        op: { kind: 'none' },
+        disabled: true,
+        reason: 'a running process is engine-pinned',
+      }
+    : { label: 'Hide', op: { kind: 'commit', declarations: [hideDeclaration(menu.session, item.process)] } }
   return [
-    { label: 'Jump to tile', op: { kind: 'none' }, disabled: true },
+    { label: 'Jump to tile', op: { kind: 'none' }, disabled: true, reason: 'no focus concept yet' },
+    open,
+    close,
     { label: 'Inspect', op: { kind: 'none' }, disabled: true },
     { label: 'Terminate', op: { kind: 'cancel', process: item.process }, disabled: !item.live },
     { label: 'Review changes', op: { kind: 'none' }, disabled: true },
     {
       label: 'New from this',
-      op:
-        item.programId === undefined
-          ? { kind: 'none' }
-          : { kind: 'run', program: item.programId },
-      disabled: item.programId === undefined,
+      op: { kind: 'none' },
+      disabled: true,
+      reason: 'launches into nowhere until a tile can receive it',
     },
-    { label: 'Hide', op: { kind: 'none' }, disabled: true },
+    hide,
   ]
 }
 

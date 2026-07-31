@@ -14,18 +14,25 @@
 // geometry (the bleed the host leaves it, the column's width) and its edge
 // fades are the two things the rim depends on, and they are written out as
 // exact lengths for that reason.
-import { run, type ChunkId } from '@openlight/sdk'
+import { run, scope, type ChunkId, type ChunkItem } from '@openlight/sdk'
 import { Status, StripItem, useScope, windowPoint } from '@openlight/react'
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import {
   CONTEXT_MENU,
   ENGINE_PROGRAM,
+  HOST_TILE,
+  analyzeTree,
   entries,
+  hiddenId,
+  isTile,
   items,
+  mintTileIds,
   programNamed,
   sessionArgument,
   stamp,
+  tabOf,
   type Item,
+  type TreeInfo,
 } from './items.ts'
 
 export function Sidebar({ process }: { process: ChunkId }) {
@@ -37,7 +44,10 @@ export function Sidebar({ process }: { process: ChunkId }) {
 }
 
 function Session({ session }: { session: ChunkId }) {
-  const members = useScope([session])
+  // Session minus hidden (programs.md §3.2): the hidden marker is an exclude
+  // root, derived from the session so it excludes before it exists. Hidden
+  // items vanish from this read; their chunks persist — un-shown, not gone.
+  const members = useScope([session], { exclude: [hiddenId(session)] })
   // The programs are read for their names alone, and land on their own clock —
   // an item shows its program's id until they do, never a blank. The menu
   // program is found in the same read, by name.
@@ -49,30 +59,40 @@ function Session({ session }: { session: ChunkId }) {
   // the strip's edge fade is a mask, and a mask paints its whole subtree, so a
   // panel within it would fade and clip at the strip's box; and the strip is
   // 216px wide, which no menu fits inside.
+  //
+  // The tree is walked fresh at raise time — the entries the person sees act
+  // on the tab as it stands at the click, not as it stood at the last render.
   const raise = async (item: Item, event: MouseEvent<HTMLLIElement>): Promise<void> => {
     setNotice(null)
+    const anchor = windowPoint(event)
     const menu = programNamed(programs?.chunks ?? [], CONTEXT_MENU)
     if (!menu) {
       setNotice('no context-menu program in this field')
       return
     }
+    const hidden = hiddenId(session)
     try {
+      const tree = await fetchTree(session)
+      const list = entries(item, { session, tree, ids: mintTileIds() })
       await run(menu, {
         chunks: [
           {
             name: 'request',
             // The anchor is in *window* space: the overlay spans the window and
             // knows nothing of where this strip sits in it.
-            body: { head: item.program, anchor: windowPoint(event), entries: entries(item) },
+            body: { head: item.program, anchor, entries: list },
           },
         ],
         // A child: the menu is this strip's, and goes when the strip goes.
         mode: 'child',
-        // Its whole grant. Reading the session is how it could show what it is
-        // acting on; writing it is the cancel authority *terminate* spends
-        // (engine.md, R3: a process placed on the session is within it).
-        readBoundary: [session],
-        writeBoundary: [session],
+        // Its whole grant, intersected with this strip's own (boot step 10
+        // plus the two recorded widenings — boot.rs `spawn_strip`). Reading
+        // the session is how it could show what it acts on; writing it is the
+        // cancel authority *terminate* spends (engine.md, R3); `host/tile`
+        // is what lets a commit *type* new tiles; the hidden marker is the
+        // hide verb's target.
+        readBoundary: [session, hidden],
+        writeBoundary: [session, HOST_TILE, hidden],
       })
     } catch (error) {
       setNotice(`the menu did not open: ${(error as Error).message}`)
@@ -143,6 +163,31 @@ function Session({ session }: { session: ChunkId }) {
       ) : null}
     </Strip>
   )
+}
+
+/**
+ * Walk the current tab's tile tree through scope reads: the tab is the
+ * session's `host/tab`-typed member; each read of a tile's scope surfaces its
+ * children with their placements. The strip's boundary reaches every tile
+ * through the tab's instance chain — the archetype itself it cannot open, so
+ * the walk descends rather than sweeping `host/tile`. Trees are a handful of
+ * nodes; the rounds are few. Null when the session holds no tab.
+ */
+export async function fetchTree(session: ChunkId): Promise<TreeInfo | null> {
+  const members = await scope([session])
+  const tab = tabOf(members.chunks)
+  if (!tab) return null
+  const tiles = new Map<ChunkId, ChunkItem>()
+  let frontier: ChunkId[] = [tab]
+  while (frontier.length > 0) {
+    const reads = await Promise.all(frontier.map((id) => scope([id])))
+    const found = reads
+      .flatMap((read) => read.chunks)
+      .filter((chunk) => isTile(chunk) && !tiles.has(chunk.id))
+    for (const chunk of found) tiles.set(chunk.id, chunk)
+    frontier = found.map((chunk) => chunk.id)
+  }
+  return analyzeTree(tab, [...tiles.values()])
 }
 
 /** Which edges the strip's content runs past — the only reason to fade one. */

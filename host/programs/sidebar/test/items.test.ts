@@ -4,12 +4,20 @@
 import { describe, expect, test } from 'bun:test'
 import {
   CONTEXT_MENU,
+  analyzeTree,
+  closeTile,
   entries,
+  hiddenId,
+  hideDeclaration,
   items,
+  openInTile,
   programNamed,
   sessionArgument,
   shortId,
   stamp,
+  tabOf,
+  type MenuContext,
+  type TreeInfo,
 } from '../src/items.ts'
 import type { ChunkItem, ScopeResult } from '@openlight/sdk'
 
@@ -162,22 +170,171 @@ describe('the order: life before rest, then recency', () => {
   })
 })
 
+// ---- the tile tree the tiling verbs act on ----------------------------------
+
+/** A tile chunk as a scope walk surfaces it. */
+function tile(id: string, body: Record<string, unknown>, on: [string, number][], relates?: string): ChunkItem {
+  return {
+    id,
+    body,
+    placements: [
+      { scope_id: 'host/tile', type_: 'instance' },
+      ...on.map(([scope, seq]) => ({ scope_id: scope, type_: 'instance' as const, seq })),
+      ...(relates ? [{ scope_id: relates, type_: 'relates' as const }] : []),
+      { scope_id: 'engine/mount:/x/agents', type_: 'relates' as const },
+    ],
+  }
+}
+
+describe('the tree, distilled', () => {
+  test('the tab is the session member typed on host/tab', () => {
+    const members: ChunkItem[] = [
+      { id: 'p_1', placements: [{ scope_id: 'engine/process', type_: 'instance' }] },
+      { id: 'tab-main', placements: [{ scope_id: 'host/tab', type_: 'instance' }] },
+    ]
+    expect(tabOf(members)).toBe('tab-main')
+    expect(tabOf([])).toBe(null)
+  })
+
+  test('a single-leaf tab: the root is the leaf, its process mounted at the tab', () => {
+    const tree = analyzeTree('tab-main', [tile('tile-first', {}, [['tab-main', 1]], 'p_read')])
+    expect(tree.root).toEqual({ id: 'tile-first', seq: 1 })
+    const mount = tree.mounts.get('p_read')!
+    expect(mount).toEqual({
+      leaf: 'tile-first',
+      parent: 'tab-main',
+      parentIsTab: true,
+      sibling: null,
+      grandparent: null,
+      parentSeq: 1,
+    })
+  })
+
+  test('a split tab: each leaf knows its split, sibling and where the split hangs', () => {
+    const tree = analyzeTree('tab-main', [
+      tile('split-1', { direction: 'horizontal', ratio: 0.5 }, [['tab-main', 1]]),
+      tile('leaf-a', {}, [['split-1', 1]], 'p_a'),
+      tile('leaf-b', {}, [['split-1', 2]], 'p_b'),
+    ])
+    expect(tree.root).toEqual({ id: 'split-1', seq: 1 })
+    expect(tree.mounts.get('p_b')).toEqual({
+      leaf: 'leaf-b',
+      parent: 'split-1',
+      parentIsTab: false,
+      sibling: 'leaf-a',
+      grandparent: 'tab-main',
+      parentSeq: 1,
+    })
+  })
+
+  test('a closed tile still relating its process is not a mount — only tree members are', () => {
+    const tree = analyzeTree('tab-main', [
+      tile('tile-first', {}, [['tab-main', 1]], 'p_read'),
+      // In the gathered set by id, but placed on nothing in the tree.
+      tile('tile-closed', {}, [], 'p_old'),
+    ])
+    expect(tree.mounts.has('p_old')).toBe(false)
+    expect(tree.mounts.has('p_read')).toBe(true)
+  })
+})
+
+describe('the tiling declarations', () => {
+  const IDS = { split: 'tile-split-x', leaf: 'tile-open-x' }
+  const singleLeaf: TreeInfo = analyzeTree('tab-main', [
+    tile('tile-first', {}, [['tab-main', 1]], 'p_read'),
+  ])
+
+  test('open in tile: stage types the new tiles, graft splits the root', () => {
+    const [stage, graft] = openInTile(singleLeaf, 'p_new', IDS)
+    // Stage: create and type — nothing touches the tree yet (the engine's
+    // write-boundary walk sees pre-commit state; items.ts Op note).
+    expect(stage!.chunks.map((chunk) => chunk.id)).toEqual(['tile-split-x', 'tile-open-x'])
+    expect(stage!.chunks[0]!.body).toEqual({ direction: 'horizontal', ratio: 0.5 })
+    expect(stage!.placements).toEqual([
+      { chunk: 'tile-split-x', scope: 'host/tile', type: 'instance' },
+      { chunk: 'tile-open-x', scope: 'host/tile', type: 'instance' },
+    ])
+    // Graft: the split takes the root's place; old root and new leaf beneath
+    // it, seq choosing sides; the leaf displays the process.
+    expect(graft!.placements).toEqual([
+      { chunk: 'tile-split-x', scope: 'tab-main', type: 'instance', seq: 1 },
+      { chunk: 'tile-first', scope: 'tab-main', type: 'instance', active: false },
+      { chunk: 'tile-first', scope: 'tile-split-x', type: 'instance', seq: 1 },
+      { chunk: 'tile-open-x', scope: 'tile-split-x', type: 'instance', seq: 2 },
+      { chunk: 'tile-open-x', scope: 'p_new', type: 'relates' },
+    ])
+  })
+
+  test('open in tile on an empty tab: the new leaf becomes the root, no split', () => {
+    const empty: TreeInfo = { tab: 'tab-main', root: null, mounts: new Map() }
+    const [stage, graft] = openInTile(empty, 'p_new', IDS)
+    expect(stage!.chunks.map((chunk) => chunk.id)).toEqual(['tile-open-x'])
+    expect(graft!.placements).toEqual([
+      { chunk: 'tile-open-x', scope: 'tab-main', type: 'instance', seq: 1 },
+      { chunk: 'tile-open-x', scope: 'p_new', type: 'relates' },
+    ])
+  })
+
+  test('close tile: the one-child split collapses, the sibling re-seats at its seq', () => {
+    const tree = analyzeTree('tab-main', [
+      tile('split-1', { direction: 'horizontal', ratio: 0.5 }, [['tab-main', 1]]),
+      tile('leaf-a', {}, [['split-1', 1]], 'p_a'),
+      tile('leaf-b', {}, [['split-1', 2]], 'p_b'),
+    ])
+    expect(closeTile(tree.mounts.get('p_b')!)).toEqual({
+      chunks: [],
+      placements: [
+        { chunk: 'leaf-b', scope: 'split-1', type: 'instance', active: false },
+        { chunk: 'leaf-a', scope: 'split-1', type: 'instance', active: false },
+        { chunk: 'split-1', scope: 'tab-main', type: 'instance', active: false },
+        { chunk: 'leaf-a', scope: 'tab-main', type: 'instance', seq: 1 },
+      ],
+      message: 'close tile',
+    })
+  })
+
+  test('close tile at the root: the tab empties — a legal state', () => {
+    expect(closeTile(singleLeaf.mounts.get('p_read')!)).toEqual({
+      chunks: [],
+      placements: [
+        { chunk: 'tile-first', scope: 'tab-main', type: 'instance', active: false },
+      ],
+      message: 'close tile',
+    })
+  })
+
+  test('hide: the session-local marker, and the process placed relates onto it', () => {
+    expect(hiddenId('session-main')).toBe('session-main-hidden')
+    const declaration = hideDeclaration('session-main', 'p_old')
+    expect(declaration.chunks[0]!.id).toBe('session-main-hidden')
+    expect(declaration.placements).toEqual([
+      { chunk: 'session-main-hidden', scope: 'session-main', type: 'relates' },
+      { chunk: 'p_old', scope: 'session-main-hidden', type: 'relates' },
+    ])
+  })
+})
+
 describe('the context menu the strip composes', () => {
-  const item = (live: boolean, programId?: string) => ({
-    process: 'p_read',
-    name: 'p_read',
+  const item = (live: boolean, process = 'p_read') => ({
+    process,
+    name: process,
     nameIsId: true,
     program: 'read-tile',
-    ...(programId === undefined ? {} : { programId }),
+    programId: 'host/read-tile',
     status: live ? 'running' : 'completed',
     live,
     failed: false,
   })
-  const listed = (live: boolean, programId = 'host/read-tile') => entries(item(live, programId))
+  const IDS = { split: 'tile-split-x', leaf: 'tile-open-x' }
+  const tree = analyzeTree('tab-main', [tile('tile-first', {}, [['tab-main', 1]], 'p_read')])
+  const menu: MenuContext = { session: 'session-main', tree, ids: IDS }
+  const listed = (live: boolean, process = 'p_read') => entries(item(live, process), menu)
 
-  test('every item answers with the same menu, in the spec order', () => {
+  test('every item answers with the same menu, tiling verbs beside jump', () => {
     expect(listed(true).map((entry) => entry.label)).toEqual([
       'Jump to tile',
+      'Open in tile',
+      'Close tile',
       'Inspect',
       'Terminate',
       'Review changes',
@@ -187,33 +344,65 @@ describe('the context menu the strip composes', () => {
   })
 
   test('terminate cancels this process, and only while it is alive', () => {
-    const running = listed(true)[2]!
+    const running = listed(true)[4]!
     expect(running.op).toEqual({ kind: 'cancel', process: 'p_read' })
     expect(running.disabled).toBe(false)
     // Listed on a stopped one too — greyed, never hidden.
-    const stopped = listed(false)[2]!
+    const stopped = listed(false)[4]!
     expect(stopped.op).toEqual({ kind: 'cancel', process: 'p_read' })
     expect(stopped.disabled).toBe(true)
   })
 
-  test('new from this runs the same program again', () => {
-    expect(listed(false)[4]!.op).toEqual({ kind: 'run', program: 'host/read-tile' })
-    expect(listed(false)[4]!.disabled).toBe(false)
-    // With no program to name, it is inert rather than a run of nothing.
-    const unknown = entries(item(true))[4]!
-    expect(unknown.op).toEqual({ kind: 'none' })
-    expect(unknown.disabled).toBe(true)
+  test('open in tile commits the staged split for a live, unmounted item', () => {
+    const open = listed(true, 'p_other')[1]!
+    expect(open.disabled).toBeUndefined()
+    expect(open.op).toEqual({ kind: 'commit', declarations: openInTile(tree, 'p_other', IDS) })
+    // Already displayed by a leaf: multi-mount is an open — greyed, with why.
+    const mounted = listed(true, 'p_read')[1]!
+    expect(mounted.disabled).toBe(true)
+    expect(mounted.reason).toBe('already in a tile')
+    // Ended: nothing to mount a viewer on.
+    const dead = listed(false, 'p_other')[1]!
+    expect(dead.disabled).toBe(true)
+    expect(dead.reason).toBe('the run has ended')
   })
 
-  test('what has no machinery yet is listed, inert and greyed — never hidden', () => {
-    const inert = listed(true).filter((entry) => entry.op.kind === 'none')
-    expect(inert.map((entry) => entry.label)).toEqual([
-      'Jump to tile',
-      'Inspect',
-      'Review changes',
-      'Hide',
-    ])
-    expect(inert.every((entry) => entry.disabled)).toBe(true)
+  test('close tile commits the collapse for a mounted item, greys otherwise', () => {
+    const close = listed(true, 'p_read')[2]!
+    expect(close.op).toEqual({
+      kind: 'commit',
+      declarations: [closeTile(tree.mounts.get('p_read')!)],
+    })
+    const unmounted = listed(true, 'p_other')[2]!
+    expect(unmounted.disabled).toBe(true)
+    expect(unmounted.reason).toBe('not in a tile')
+  })
+
+  test('hide commits the marker for a terminal item; a live one says why not', () => {
+    const rest = listed(false, 'p_old')[7]!
+    expect(rest.op).toEqual({
+      kind: 'commit',
+      declarations: [hideDeclaration('session-main', 'p_old')],
+    })
+    const live = listed(true)[7]!
+    expect(live.disabled).toBe(true)
+    expect(live.reason).toBe('a running process is engine-pinned')
+  })
+
+  test('new from this stays greyed with the reason visible — a launch lands nowhere', () => {
+    const entry = listed(false)[6]!
+    expect(entry.op).toEqual({ kind: 'none' })
+    expect(entry.disabled).toBe(true)
+    expect(entry.reason).toBe('launches into nowhere until a tile can receive it')
+  })
+
+  test('with no tree to read, every tiling verb greys rather than guessing', () => {
+    const blind = entries(item(true), { session: 'session-main', tree: null, ids: IDS })
+    expect(blind[1]!.disabled).toBe(true)
+    expect(blind[1]!.reason).toBe('no tree to split')
+    expect(blind[2]!.disabled).toBe(true)
+    // Jump waits on a focus concept — said, not just greyed.
+    expect(blind[0]!.reason).toBe('no focus concept yet')
   })
 })
 

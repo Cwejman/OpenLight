@@ -52,8 +52,17 @@ pub fn tile_inputs(
 
 /// host.md: split node body `{ direction, ratio }`; leaf node empty.
 fn tile_body(chunk: &Chunk) -> Result<geometry::TileBody, ComposeError> {
-    let bad = || ComposeError::BadTileBody { id: chunk.id.clone() };
-    let Some(body) = &chunk.body else { return Ok(geometry::TileBody::Leaf) };
+    body_shape(&chunk.id, chunk.body.as_ref())
+}
+
+/// The same reading over a bare body value — shared with `tree`, which reads
+/// tile chunks through the engine rather than from fixture data.
+pub fn body_shape(
+    id: &str,
+    body: Option<&serde_json::Value>,
+) -> Result<geometry::TileBody, ComposeError> {
+    let bad = || ComposeError::BadTileBody { id: id.to_string() };
+    let Some(body) = body else { return Ok(geometry::TileBody::Leaf) };
     let (direction, ratio) = (body.get("direction"), body.get("ratio"));
     if direction.is_none() && ratio.is_none() {
         return Ok(geometry::TileBody::Leaf);

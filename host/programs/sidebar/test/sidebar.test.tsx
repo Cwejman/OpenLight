@@ -228,6 +228,8 @@ test('a click runs the context menu, anchored where the window saw the click', a
   const entries = request?.body?.entries as { label: string; op: { kind: string } }[]
   expect(entries.map((entry) => entry.label)).toEqual([
     'Jump to tile',
+    'Open in tile',
+    'Close tile',
     'Inspect',
     'Terminate',
     'Review changes',
@@ -258,10 +260,13 @@ test('the entries carry the state the item is in — terminate only while it liv
     return Object.fromEntries(entries.map((entry) => [entry.label, entry.disabled === true]))
   }
 
+  // New from this is greyed either way — a launch from the menu lands on no
+  // session and no tile (the swap.rs pin; board part 0). Hide acts only on
+  // rest: a live process's placements are engine-pinned.
   const live = await picked('[data-ui="item"][data-live="true"]')
-  expect([live['Terminate'], live['New from this']]).toEqual([false, false])
+  expect([live['Terminate'], live['New from this'], live['Hide']]).toEqual([false, true, true])
   const rest = await picked('[data-ui="item"][data-live="false"]')
-  expect([rest['Terminate'], rest['New from this']]).toEqual([true, false])
+  expect([rest['Terminate'], rest['New from this'], rest['Hide']]).toEqual([true, true, false])
   expect(handle.engine.processes.size).toBeGreaterThan(0)
 })
 

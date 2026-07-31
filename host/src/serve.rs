@@ -235,6 +235,87 @@ pub fn shell(styles_url: &str, entry_url: &str) -> String {
     )
 }
 
+/// Warm the compile lane for every program shipped under `programs/` (board
+/// directive, menu latency): each program's stylesheet, then its whole module
+/// graph, crawled the way the webview would pull it — a transpiled module's
+/// imports are already `ol://` URLs, so the graph is read off the output.
+/// Runs off the critical path at boot; everything lands in the mtime cache the
+/// live handlers read, so the first overlay open pays file reads, not compiles.
+///
+/// The transpiler pipe carries one request at a time (its lock), so a surface
+/// asking mid-warm waits at most one module — never the whole warm.
+pub fn warm(transpiler: &Transpiler, programs_root: &Path) {
+    let started = std::time::Instant::now();
+    let programs = programs_root.join("programs");
+    let Ok(entries) = std::fs::read_dir(&programs) else { return };
+    let mut queue: Vec<PathBuf> = Vec::new();
+    let mut programs_found = 0usize;
+    for program in entries.flatten() {
+        let src = program.path().join("src");
+        let entry = src.join("index.tsx");
+        if !entry.is_file() {
+            continue;
+        }
+        let _ = transpiler.styles(&src);
+        queue.push(entry);
+        programs_found += 1;
+    }
+    let mut seen: Vec<PathBuf> = Vec::new();
+    let mut compiled = 0usize;
+    while let Some(file) = queue.pop() {
+        if seen.contains(&file) {
+            continue;
+        }
+        seen.push(file.clone());
+        let Ok(code) = transpiler.module(&file) else { continue };
+        compiled += 1;
+        for import in module_imports(&code, &file) {
+            if let Some(resolved) = resolve_file(&import) {
+                queue.push(resolved);
+            }
+        }
+    }
+    eprintln!(
+        "host: warmed {compiled} modules for {programs_found} programs in {:.1}s",
+        started.elapsed().as_secs_f64()
+    );
+}
+
+/// The files a transpiled module pulls next, as the webview would: `ol://`
+/// URLs decode to their absolute paths; relative imports (left as written —
+/// the browser resolves them against the module's own URL, which is its path)
+/// join the module's parent.
+fn module_imports(code: &str, module: &Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    let marker = format!("{ORIGIN}{MODULE_PREFIX}");
+    for specifier in quoted_specifiers(code) {
+        if let Some(path) = specifier.strip_prefix(&marker) {
+            out.push(PathBuf::from(percent_decode(path)));
+        } else if specifier.starts_with("./") || specifier.starts_with("../") {
+            if let Some(parent) = module.parent() {
+                out.push(parent.join(&specifier));
+            }
+        }
+    }
+    out
+}
+
+/// Every double-quoted string that follows an import keyword — the transpiler
+/// emits imports double-quoted, one per statement.
+fn quoted_specifiers(code: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for anchor in ["from \"", "import \"", "import(\""] {
+        let mut rest = code;
+        while let Some(at) = rest.find(anchor) {
+            rest = &rest[at + anchor.len()..];
+            let end = rest.find('"').unwrap_or(rest.len());
+            out.push(rest[..end].to_string());
+            rest = &rest[end..];
+        }
+    }
+    out
+}
+
 /// An import may name a file without its extension, or a directory. The
 /// candidates are tried in order and the first that exists wins.
 pub fn resolve_file(path: &Path) -> Option<PathBuf> {
@@ -409,6 +490,20 @@ mod tests {
         assert!(!transpiled(Path::new("/a/b.css")) && !transpiled(Path::new("/a/b")));
         assert_eq!(mime(Path::new("/a/b.css")), "text/css");
         assert_eq!(mime(Path::new("/a/b.png")), "image/png");
+    }
+
+    #[test]
+    fn the_warmer_follows_both_url_and_relative_imports() {
+        let code = r#"import { a } from "ol://app/mod/Users/x/node_modules/react/index.js";
+import { b } from "./sidebar.tsx";
+import "../shared/base.css";
+const later = import("./lazy.ts");
+export const nothing = "from \" a string, not an import";"#;
+        let found = module_imports(code, Path::new("/proj/src/index.tsx"));
+        assert!(found.contains(&PathBuf::from("/Users/x/node_modules/react/index.js")), "{found:?}");
+        assert!(found.contains(&PathBuf::from("/proj/src/./sidebar.tsx")), "{found:?}");
+        assert!(found.contains(&PathBuf::from("/proj/src/../shared/base.css")), "{found:?}");
+        assert!(found.contains(&PathBuf::from("/proj/src/./lazy.ts")), "{found:?}");
     }
 
     #[test]

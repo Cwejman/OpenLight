@@ -13,6 +13,7 @@ use db::{
     ChunkDeclaration, ChunkId, CommitOpts, Db, Declaration, PlacementSpec, PlacementType, ReadOpts,
     Spec,
 };
+use engine::{Context, Engine};
 use serde_json::json;
 use std::path::Path;
 
@@ -209,6 +210,186 @@ pub fn agents_declaration() -> Declaration {
         ],
         message: Some("bootstrap".into()),
     }
+}
+
+// ---- the initial workspace ---------------------------------------------------
+//
+// bootstrap.md's closing note: bootstrap creates no `host/session` instance —
+// the first session is a runtime commit on first launch. The tab and the first
+// leaf follow the same rule, and for a harder reason than convention: the leaf
+// displays whichever process the current launch spawned, and a process is new
+// every boot, so the tree's relates edge is per-boot runtime state that no
+// once-ever bootstrap commit could carry.
+//
+// **Migration pain, said honestly.** Bootstrap is idempotent by marker, so a
+// changed routine never reaches an already-seeded db — which is why none of
+// this lives in `host_declaration()`. The workspace commit instead re-checks
+// piece by piece (session, then tab, then leaf) on every boot: a db seeded by
+// an earlier build that has the session but no tab gains exactly the missing
+// pieces. That is a hand-rolled migration in miniature; the real path stays
+// unruled debt (bootstrap.md, *Open — no migration path*).
+
+/// Deterministic readable ids, per the fixture convention (board.md tracked
+/// debt: real ids are generated; `resolve_name` is the seam).
+pub const SESSION_ID: &str = "session-main";
+pub const SESSION_NAME: &str = "main";
+pub const TAB_ID: &str = "tab-main";
+pub const LEAF_ID: &str = "tile-first";
+
+/// The session-local hidden marker (programs.md §3.2): chunks placed `relates`
+/// on it are un-shown — the sidebar reads session minus hidden through the
+/// exclude root. The id is derived from the session so the sidebar can exclude
+/// it before it exists (excluding an unresolved root is an empty exclusion),
+/// and it is granted as a literal boundary root — it has no instance chain.
+pub fn hidden_id(session: &ChunkId) -> ChunkId {
+    ChunkId::from(format!("{session}-hidden").as_str())
+}
+
+pub struct Workspace {
+    pub session: ChunkId,
+    pub tab: ChunkId,
+    pub leaf: ChunkId,
+}
+
+/// Find-or-create the initial workspace: one session holding one tab holding
+/// one leaf tile. Idempotent per piece; one commit carries whatever is missing.
+pub fn ensure_workspace(engine: &Engine) -> Result<Workspace, String> {
+    let ctx = Context::host();
+    let session_archetype = resolve(engine, "host/session")?;
+    let tab_archetype = resolve(engine, "host/tab")?;
+    let tile_archetype = resolve(engine, "host/tile")?;
+
+    let mut chunks: Vec<ChunkDeclaration> = Vec::new();
+    let mut placements: Vec<PlacementSpec> = Vec::new();
+
+    let session = ChunkId::from(SESSION_ID);
+    let session_exists = exists(engine, &session)?;
+    if !session_exists {
+        chunks.push(chunk(
+            SESSION_ID,
+            SESSION_NAME,
+            None,
+            json!({ "text": "Initial session, created on first launch.", "current-tab": TAB_ID }),
+        ));
+        placements.push(place(SESSION_ID, session_archetype.as_str(), PlacementType::Instance));
+    }
+
+    let tab = ChunkId::from(TAB_ID);
+    if !exists(engine, &tab)? {
+        chunks.push(chunk(TAB_ID, "main", None, json!({ "name": "main" })));
+        placements.push(place(TAB_ID, tab_archetype.as_str(), PlacementType::Instance));
+        placements.push(place(TAB_ID, SESSION_ID, PlacementType::Instance));
+        if session_exists {
+            // An earlier build's session predates the tab: point it now. A
+            // chunk declaration replaces name/spec/body wholesale (db.md), so
+            // the existing record is read and carried — a body-only patch
+            // would silently clear the name.
+            let opts = db::ReadOpts {
+                include: db::Includes {
+                    chunk_name: true,
+                    chunk_spec: true,
+                    chunk_body: true,
+                    ..db::Includes::default()
+                },
+                ..db::ReadOpts::default()
+            };
+            let existing = engine
+                .get(&ctx, &session, opts)
+                .map_err(|e| format!("reading {session}: {e}"))?
+                .ok_or_else(|| format!("session {session} vanished mid-boot"))?;
+            let mut body = existing.body.unwrap_or_else(|| json!({}));
+            body["current-tab"] = json!(TAB_ID);
+            chunks.push(ChunkDeclaration {
+                id: Some(session.clone()),
+                name: existing.name,
+                spec: existing.spec,
+                body: Some(body),
+                removed: false,
+            });
+        }
+    }
+
+    let leaf = ChunkId::from(LEAF_ID);
+    if !exists(engine, &leaf)? {
+        chunks.push(chunk(LEAF_ID, "first", None, json!({})));
+        placements.push(place(LEAF_ID, tile_archetype.as_str(), PlacementType::Instance));
+        placements.push(PlacementSpec {
+            chunk: leaf.clone(),
+            scope: tab.clone(),
+            type_: PlacementType::Instance,
+            seq: Some(1),
+            active: true,
+        });
+    }
+
+    if !chunks.is_empty() || !placements.is_empty() {
+        engine
+            .commit(&ctx, Declaration { chunks, placements, message: Some("initial workspace".into()) })
+            .map_err(|e| format!("creating the initial workspace: {e}"))?;
+    }
+    Ok(Workspace { session, tab, leaf })
+}
+
+/// Point a leaf at the process it displays (host.md §Tile Geometry: rendering
+/// derives from the process placed `relates` on the leaf). Every boot spawns
+/// fresh processes, so the previous boot's relates edges deactivate — lossless,
+/// but no longer current. One commit.
+pub fn point_leaf(engine: &Engine, leaf: &ChunkId, process: &ChunkId) -> Result<(), String> {
+    let ctx = Context::host();
+    let opts = db::ReadOpts {
+        include: db::Includes { chunk_placements: true, ..db::Includes::default() },
+        ..db::ReadOpts::default()
+    };
+    let item = engine
+        .get(&ctx, leaf, opts)
+        .map_err(|e| format!("reading leaf {leaf}: {e}"))?
+        .ok_or_else(|| format!("leaf {leaf} does not exist"))?;
+    let mut placements: Vec<PlacementSpec> = item
+        .placements
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|p| p.type_ == PlacementType::Relates && p.scope_id != *process)
+        // Provenance rows (`engine/mount:*`) are synthesized, never stored.
+        .filter(|p| !p.scope_id.as_str().starts_with("engine/mount"))
+        .map(|p| PlacementSpec {
+            chunk: leaf.clone(),
+            scope: p.scope_id,
+            type_: PlacementType::Relates,
+            seq: None,
+            active: false,
+        })
+        .collect();
+    placements.push(PlacementSpec {
+        chunk: leaf.clone(),
+        scope: process.clone(),
+        type_: PlacementType::Relates,
+        seq: None,
+        active: true,
+    });
+    engine
+        .commit(
+            &ctx,
+            Declaration {
+                chunks: vec![],
+                placements,
+                message: Some(format!("leaf {leaf} displays {process}")),
+            },
+        )
+        .map_err(|e| format!("pointing leaf {leaf} at {process}: {e}"))?;
+    Ok(())
+}
+
+fn resolve(engine: &Engine, path: &str) -> Result<ChunkId, String> {
+    engine
+        .resolve_name(&Context::host(), path)
+        .map_err(|e| format!("resolving {path}: {e}"))
+}
+
+fn exists(engine: &Engine, id: &ChunkId) -> Result<bool, String> {
+    engine
+        .get(&Context::host(), id, db::ReadOpts::default())
+        .map(|item| item.is_some())
+        .map_err(|e| format!("probing {id}: {e}"))
 }
 
 fn chunk(id: &str, name: &str, spec: Option<Spec>, body: serde_json::Value) -> ChunkDeclaration {

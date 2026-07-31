@@ -7,7 +7,15 @@
 // op the person picked under the boundary the caller granted. Registry-generated
 // entries (programs.md §3.5, *verbs from the field*) are the caller's evolution,
 // not this program's.
-import { cancel, run, type ChunkId, type ProcessId, type ScopeResult } from '@openlight/sdk'
+import {
+  cancel,
+  commit,
+  run,
+  type ChunkId,
+  type Declaration,
+  type ProcessId,
+  type ScopeResult,
+} from '@openlight/sdk'
 import type { MenuAction } from '@openlight/react'
 
 /** What an entry does when it is picked. `none` is a listed-but-inert verb. */
@@ -27,6 +35,13 @@ export type Op =
       write?: ChunkId[]
     }
   | { kind: 'cancel'; process: ProcessId }
+  /**
+   * A general write, executed under the menu's granted boundary — the engine
+   * validates, the menu stays dumb. Declarations run in order, stopping at
+   * the first refusal: one gesture may need a staged pair (the caller's
+   * composition; the sidebar's open-in-tile is the precedent).
+   */
+  | { kind: 'commit'; declarations: Declaration[] }
   | { kind: 'none' }
 
 export type Entry = {
@@ -34,6 +49,8 @@ export type Entry = {
   op: Op
   /** Listed, greyed, unpickable — the foolproof path shows every capability. */
   disabled?: boolean
+  /** Why a greyed entry cannot act — rendered beside its label. */
+  reason?: string
 }
 
 /** The one argument chunk (key: `request`), in window coordinates. */
@@ -77,16 +94,22 @@ function list(value: unknown): Entry[] | null {
 function isEntry(value: unknown): value is Entry {
   const entry = value as { label?: unknown; op?: { kind?: unknown } } | null
   if (typeof entry?.label !== 'string') return false
-  return entry.op?.kind === 'run' || entry.op?.kind === 'cancel' || entry.op?.kind === 'none'
+  const kind = entry.op?.kind
+  return kind === 'run' || kind === 'cancel' || kind === 'commit' || kind === 'none'
 }
 
-/** The entries as the shared `Menu` reads them; the index is the identity. */
+/**
+ * The entries as the shared `Menu` reads them; the index is the identity. A
+ * greyed entry's reason rides its label — the person sees *why* a capability
+ * cannot act, not just that it cannot.
+ */
 export function actions(entries: Entry[]): MenuAction[] {
-  return entries.map((entry, index) => ({
-    id: String(index),
-    label: entry.label,
-    enabled: !entry.disabled && entry.op.kind !== 'none',
-  }))
+  return entries.map((entry, index) => {
+    const enabled = !entry.disabled && entry.op.kind !== 'none'
+    const label =
+      !enabled && entry.reason ? `${entry.label} — ${entry.reason}` : entry.label
+    return { id: String(index), label, enabled }
+  })
 }
 
 /**
@@ -114,6 +137,14 @@ export function move(entries: Entry[], active: number, delta: number): number {
 export async function perform(op: Op): Promise<void> {
   if (op.kind === 'cancel') {
     await cancel(op.process)
+    return
+  }
+  if (op.kind === 'commit') {
+    // In order, first refusal aborts the rest — a graft never lands on a
+    // stage the engine rejected.
+    for (const declaration of op.declarations) {
+      await commit(declaration)
+    }
     return
   }
   if (op.kind === 'run') {
