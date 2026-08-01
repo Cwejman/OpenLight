@@ -1,7 +1,7 @@
 //! Fixture field data — pure. Chunks and placements shaped per
-//! `pilot/substrate.md` (chunk = id/name/spec/body; placement =
-//! chunk/scope/type/seq) holding the archetypes `pilot/host.md`
-//! (§The Composition Types) and `pilot/engine.md` (§Program and Process)
+//! `spec/substrate.md` (chunk = id/name/spec/body; placement =
+//! chunk/scope/type/seq) holding the archetypes `spec/host.md`
+//! (§The Composition Types) and `spec/engine.md` (§Program and Process)
 //! define, plus a demo session. Readable-string ids follow the fixture
 //! convention (board.md tracked debt: real ids are generated).
 

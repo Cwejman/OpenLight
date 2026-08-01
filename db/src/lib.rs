@@ -1,6 +1,6 @@
 //! The substrate library. Owns the database: chunks, placements, commits,
-//! branches, FTS. Implemented from `pilot/db.md`; both contracts answer to
-//! `pilot/substrate.md`.
+//! branches, FTS. Implemented from `spec/db.md`; both contracts answer to
+//! `spec/substrate.md`.
 
 mod bootstrap;
 mod db;

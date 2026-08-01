@@ -1,5 +1,5 @@
 //! Federated pre-validation — the engine-layer answer to the union-accepts
-//! ruling's consequences (research/union-accepts.md §Consequences): the db
+//! ruling's consequences (spec/research/union-accepts.md §Consequences): the db
 //! validates against one connection and silently skips specs resident in peer
 //! mounts, so the engine validates the composed contract across all mounts
 //! before handing the declaration to the active db. Semantics follow the ruled

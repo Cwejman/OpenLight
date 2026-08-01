@@ -1,8 +1,8 @@
 //! FixtureStub — an in-process stand-in for the engine, pure over its
 //! fixture data. Implements the specced read ops (`scope`, `get`,
-//! `subscribe`/`unsubscribe`) per `pilot/substrate.md` §Queries/Scoping and
-//! `pilot/engine.md` §The Program Protocol; result shapes mirror
-//! `pilot/sdk.md` §Types. Ops that need the real engine (writes, runs)
+//! `subscribe`/`unsubscribe`) per `spec/substrate.md` §Queries/Scoping and
+//! `spec/engine.md` §The Program Protocol; result shapes mirror
+//! `spec/sdk.md` §Types. Ops that need the real engine (writes, runs)
 //! answer with an explicit error rather than pretending. Boundary
 //! enforcement is engine work — the stub treats every read as in-boundary.
 

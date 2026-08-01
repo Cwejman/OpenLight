@@ -1,8 +1,8 @@
 # Rework — the program layer, from clean room
 
-> **Status:** the author ruled on this synthesis and the rebuild landed — see `board.md` (*Rebirth epoch*). §5's demand list has since been **folded into the mechanism specs** (see `pilot/programs.md` §6 for the landing map); this file remains the record of the synthesis and evidence grades. §6's decisions are settled (detach + child modes, streaming sanctioned, both marking conventions, identity recipes); §7–8 are superseded where they differ: `inside.md` was ditched outright rather than held for a later values pass, `horizon.md` was rebuilt as the vision file, and `pilot/programs.md` + `pilot/agent.md` were rewritten. §5's demand list (R1–R12) remains the live work queue. This file stays as the record of the synthesis and the evidence grades.
+> **Status:** the author ruled on this synthesis and the rebuild landed — see `board.md` (*Rebirth epoch*). §5's demand list has since been **folded into the mechanism specs** (see `spec/programs.md` §6 for the landing map); this file remains the record of the synthesis and evidence grades. §6's decisions are settled (detach + child modes, streaming sanctioned, both marking conventions, identity recipes); §7–8 are superseded where they differ: `inside.md` was ditched outright rather than held for a later values pass, `horizon.md` was rebuilt as the vision file, and `spec/programs.md` + `spec/agent.md` were rewritten. §5's demand list (R1–R12) remains the live work queue. This file stays as the record of the synthesis and the evidence grades.
 
-**Provenance.** Three independent passes, each a fresh context (untainted by this repo's value documents) given only (a) the author's ground statement of what OpenLight is and (b) the four mechanism specs — `pilot/substrate.md`, `pilot/engine.md`, `pilot/host.md`, `pilot/sdk.md`. Each pass was forbidden from reading `inside.md`, `pilot/programs.md`, `pilot/agent.md`, `horizon.md`, `board.md`, `README.md`, `research/`. Angles: **A** — the person's working day ([`research/cleanroom/scenes.md`](research/cleanroom/scenes.md)); **B** — composition ([`research/cleanroom/composition.md`](research/cleanroom/composition.md)); **C** — the AI bridge ([`research/cleanroom/bridge.md`](research/cleanroom/bridge.md)).
+**Provenance.** Three independent passes, each a fresh context (untainted by this repo's value documents) given only (a) the author's ground statement of what OpenLight is and (b) the four mechanism specs — `spec/substrate.md`, `spec/engine.md`, `spec/host.md`, `spec/sdk.md`. Each pass was forbidden from reading `inside.md`, `spec/programs.md`, `spec/agent.md`, `horizon.md`, `board.md`, `README.md`, `spec/research/`. Angles: **A** — the person's working day ([`spec/research/cleanroom/scenes.md`](spec/research/cleanroom/scenes.md)); **B** — composition ([`spec/research/cleanroom/composition.md`](spec/research/cleanroom/composition.md)); **C** — the AI bridge ([`spec/research/cleanroom/bridge.md`](spec/research/cleanroom/bridge.md)).
 
 The evidence grade throughout is convergence: what three blind contexts derived independently is treated as load-bearing; what one derived is treated as a proposal. Claims about spec text I verified directly against files I read are marked; claims resting on two agents' independent readings of the same spec are marked as such.
 
@@ -54,7 +54,7 @@ Names differ across passes; roles converge. (A/B/C variants in parentheses.)
 
 ## 4. Upgrades over the pre-rework drafts
 
-Where the clean room contradicts or exceeds `pilot/agent.md` and `pilot/programs.md`.
+Where the clean room contradicts or exceeds `spec/agent.md` and `spec/programs.md`.
 
 ### 4.1 The model is a program, not an API call inside the agent
 
@@ -98,7 +98,7 @@ Merged and deduplicated from the three passes (each pass's own numbering appears
 | **R2** | **Scope `limit`/`offset` + body-less probe reads** (`include: {body:false}`); tail-first default for ordered scopes; `get` honoring `at`. | substrate, db, sdk | A, B, C |
 | **R3** | **`cancel` over the protocol with an authority rule** (descendant-of-caller, or target within caller's write boundary; idempotent). Two passes report sdk.md exposes `cancel` while engine.md's op table omits it and `Engine::cancel` takes no `Context` — verify and fix. | engine, sdk | A, B, C |
 | **R4** | **Launch lifetime** — a transient program (palette) cannot start anything that outlives it; runs nest and cascade-die. Options: `detach: true` on `run` (C), or a session-lifetime dispatcher/board program (A, B). Decision §6.1. | engine | A, B, C |
-| **R5** | **Read-only mount rule: "modifies," not "references."** The literal write rule (`READ_ONLY_MOUNT` on any commit referencing a mounted chunk) contradicts the federation pattern the specs themselves rely on — placing instances on mounted archetypes (`engine/program`, session types). *Verified directly: pilot.md:81 vs pilot.md:83 and pilot.md:56 state both sides.* Fix: reject only modification of records resident in a read-only mount. | engine, pilot.md | A, B |
+| **R5** | **Read-only mount rule: "modifies," not "references."** The literal write rule (`READ_ONLY_MOUNT` on any commit referencing a mounted chunk) contradicts the federation pattern the specs themselves rely on — placing instances on mounted archetypes (`engine/program`, session types). *Verified directly: spec/pilot.md:81 vs spec/pilot.md:83 and spec/pilot.md:56 state both sides.* Fix: reject only modification of records resident in a read-only mount. | engine, spec/pilot.md | A, B |
 | **R6** | **Streaming sanctioned** — bless throttled partial commits (+ required subscription coalescing), or add an ephemeral progress event. One decision, in engine.md, not per-program improvisation. If R1 lands, partials on the turn's branch keep main clean. | engine, sdk | A, B, C |
 | **R7** | **Trace nesting vs typed `accepts`** — child processes are placed `instance` on the parent process, but the parent program's propagating `accepts` (listing only arg/result types) would reject that placement. Exempt `engine/process` instances from the program-spec side of the composed contract (or union it in implicitly). | engine | A (B's §1.1 implies both premises) |
 | **R8** | **Capabilities enforced + secrets injected** — small vocabulary (`net[:host]`, `fs:*`, `exec`, `secret:<NAME>`) enforced by the runtime provider at spawn; secrets as env vars from a host keychain, **never chunks** (lossless substrate ⇒ a committed key is permanent). | host providers, engine.md | A, C |
@@ -120,9 +120,9 @@ Where the passes diverge — genuine choices, with my recommendation.
 
 ## 7. What happens to the existing files
 
-- **`pilot/agent.md`** — superseded in its core mechanics (§4.1, §4.2). Rewrite from `cleanroom/bridge.md`, keeping the session-archetype table (which the clean room re-derived almost verbatim — that part was earned).
-- **`pilot/programs.md`** — replace the dimension essay with contract-level program specs synthesized from the three passes; its five-dimension map survives at most as a one-paragraph orientation. Its "demands" section is superseded by §5, which is mechanism-precise.
-- **`pilot/engine.md`, `pilot/host.md`, `pilot/sdk.md`, `pilot/substrate.md`** — take the R-list as the refinement pass `board.md` already planned. R5 and R7 first.
+- **`spec/agent.md`** — superseded in its core mechanics (§4.1, §4.2). Rewrite from `cleanroom/bridge.md`, keeping the session-archetype table (which the clean room re-derived almost verbatim — that part was earned).
+- **`spec/programs.md`** — replace the dimension essay with contract-level program specs synthesized from the three passes; its five-dimension map survives at most as a one-paragraph orientation. Its "demands" section is superseded by §5, which is mechanism-precise.
+- **`spec/engine.md`, `spec/host.md`, `spec/sdk.md`, `spec/substrate.md`** — take the R-list as the refinement pass `board.md` already planned. R5 and R7 first.
 - **`inside.md`** — untouched for now, per the settled path: values are re-derived *last*, from what the programs proved. §4.3 is the first evidence entry for that pass.
 - **`horizon.md`** — unaffected; R1's branch-runs and B's D7 note that merge semantics should be designed with speculative execution in view.
 
@@ -130,5 +130,5 @@ Where the passes diverge — genuine choices, with my recommendation.
 
 1. Author reads the three clean-room files and this synthesis; recognition marks what's his and what isn't.
 2. Settle §6's four decisions.
-3. Fold: R-list into the mechanism specs; program contracts into a rewritten `pilot/programs.md` (+ `agent.md`); update `board.md`.
+3. Fold: R-list into the mechanism specs; program contracts into a rewritten `spec/programs.md` (+ `agent.md`); update `board.md`.
 4. Then the values pass: rebuild `inside.md` from what the program layer demonstrably demanded — a value stays only if something concrete demanded it.

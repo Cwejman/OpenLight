@@ -110,7 +110,7 @@
   },
   {
     "case": "federated-validation/peer-accepts-enforced",
-    "spec": "research/union-accepts.md#consequences-for-code — commit-time validation must not silently skip peer specs; the engine pre-validates federated",
+    "spec": "spec/research/union-accepts.md#consequences-for-code — commit-time validation must not silently skip peer specs; the engine pre-validates federated",
     "mounts": {
       "peer": [
         {
@@ -136,7 +136,7 @@
   },
   {
     "case": "federated-validation/peer-accepts-satisfied",
-    "spec": "research/union-accepts.md — a chunk passes if it is an instance of at least one type in the union",
+    "spec": "spec/research/union-accepts.md — a chunk passes if it is an instance of at least one type in the union",
     "mounts": {
       "peer": [
         {
@@ -165,7 +165,7 @@
   },
   {
     "case": "federated-validation/peer-required-enforced",
-    "spec": "research/union-accepts.md — required composes as union of key sets; peer keys bind",
+    "spec": "spec/research/union-accepts.md — required composes as union of key sets; peer keys bind",
     "mounts": {
       "peer": [
         { "chunks": [{ "id": "peer-type", "spec": { "propagate": true, "required": ["title"] } }] }
@@ -185,7 +185,7 @@
   },
   {
     "case": "federated-validation/peer-required-satisfied",
-    "spec": "research/union-accepts.md — obligations bind; honoring them passes",
+    "spec": "spec/research/union-accepts.md — obligations bind; honoring them passes",
     "mounts": {
       "peer": [
         { "chunks": [{ "id": "peer-type", "spec": { "propagate": true, "required": ["title"] } }] }

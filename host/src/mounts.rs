@@ -1,4 +1,4 @@
-//! The mounts cascade walk (host.md §Boot sequence, step 3; pilot.md
+//! The mounts cascade walk (host.md §Boot sequence, step 3; spec/pilot.md
 //! §Multi-project mounts): read the active project's `.ol/project.toml`,
 //! recurse into each mount's own config, deduplicate by canonical path,
 //! reject cycles. File access is injected so the walk itself stays pure.

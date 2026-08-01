@@ -18,18 +18,20 @@ A model-calling program reads the same typed structure a grep does (or any progr
 
 ---
 
-> Read in order. `pilot/` sub-specs and `research/` are reference depths — descend when work calls for them.
+> Read in order. `spec/` sub-specs and `spec/research/` are reference depths — descend when work calls for them.
 
-[`pilot.md`](pilot.md) and [`pilot/`](pilot/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](pilot/substrate.md), [`db.md`](pilot/db.md), [`engine.md`](pilot/engine.md), [`host.md`](pilot/host.md), [`sdk.md`](pilot/sdk.md). Experience: [`programs.md`](pilot/programs.md), [`agent.md`](pilot/agent.md).
+[`spec/pilot.md`](spec/pilot.md) and [`spec/`](spec/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](spec/substrate.md), [`db.md`](spec/db.md), [`engine.md`](spec/engine.md), [`host.md`](spec/host.md), [`sdk.md`](spec/sdk.md). Experience: [`programs.md`](spec/programs.md), [`agent.md`](spec/agent.md).
 
 [`conventions.md`](conventions.md) — principles and working agreements. Short.
 
-[`board.md`](board.md) — current state, recent decisions, tracked debt.
+[`board.md`](board.md) — the working board: current state, the queue, gates awaiting rulings, tracked debt.
+
+[`log.md`](log.md) — session narratives, newest first; the history the board stands on.
 
 [`horizon.md`](horizon.md) — the vision beyond v0.1, by proximity and proof status.
 
 [`rework.md`](rework.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
 
-[`research/`](research/) — reference depth. [`research/cleanroom/`](research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.
+[`spec/research/`](spec/research/) — reference depth. [`spec/research/cleanroom/`](spec/research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.
 
 ![footer](.img/footer.png)

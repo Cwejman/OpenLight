@@ -1,7 +1,7 @@
 //! Name-path lookup — the board-ruled convention behind readable ids:
 //! canonical chunks are found by name within scope, so surfaces and boot
 //! address seeded archetypes as `host/tile`, never by hardcoded id. The first
-//! segment names a root scope (a chunk with no `instance` parent, pilot.md
+//! segment names a root scope (a chunk with no `instance` parent, spec/pilot.md
 //! §Names and roots); each further segment is found by name among the chunks
 //! placed on the previous one — any placement type, so relates-placed type
 //! definitions stay resolvable (the same reading as `accepts` resolution).
@@ -18,7 +18,7 @@ impl Engine {
     /// across all mounts on the active project's branch. Zero matches at any
     /// segment is `NOT_FOUND`; more than one is refused as ambiguous rather
     /// than silently picked — same-named chunks in separate placement trees
-    /// are separate chunks (pilot.md §Names and roots).
+    /// are separate chunks (spec/pilot.md §Names and roots).
     pub fn resolve_name(&self, ctx: &Context, path: &str) -> Result<ChunkId, EngineError> {
         let inner = &self.inner;
         let branch = inner.mounts.active()?.branch;

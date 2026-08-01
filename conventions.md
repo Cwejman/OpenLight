@@ -36,7 +36,7 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 
 ## Subagent grounding
 
-A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used where less context is the point (the clean-room passes in `research/cleanroom/` are the precedent).
+A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used where less context is the point (the clean-room passes in `spec/research/cleanroom/` are the precedent).
 
 Even with bootstrap context, verify a subagent's conclusions against the core files before relaying. If a claim doesn't match the files, investigate or spawn another — don't pass it through.
 

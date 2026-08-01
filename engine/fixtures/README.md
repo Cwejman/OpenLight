@@ -1,6 +1,6 @@
 # Engine conformance fixtures
 
-Ground truth for the program ↔ engine contract, written from [`pilot/engine.md`](../../pilot/engine.md) before implementation. Same case format as [`db/fixtures/`](../../db/fixtures/README.md) — given/when/then, semantics only — extended with the engine's two axes: **mounts** (federation) and **process** (boundary identity). The engine crate's tests and the SDK's tests both consume these files through thin adapters.
+Ground truth for the program ↔ engine contract, written from [`spec/engine.md`](../../spec/engine.md) before implementation. Same case format as [`db/fixtures/`](../../db/fixtures/README.md) — given/when/then, semantics only — extended with the engine's two axes: **mounts** (federation) and **process** (boundary identity). The engine crate's tests and the SDK's tests both consume these files through thin adapters.
 
 ## Format deltas from db/fixtures
 

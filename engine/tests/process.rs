@@ -488,7 +488,7 @@ async fn r7_trace_placement_is_exempt_when_bootstrap_carries_the_process_type() 
 
 #[tokio::test]
 async fn r7_gap_db_rejects_trace_under_accepts_without_process_type() {
-    // KNOWN SEAM GAP (research/union-accepts.md §Consequences 3): the engine
+    // KNOWN SEAM GAP (spec/research/union-accepts.md §Consequences 3): the engine
     // exempts trace placements from every composed accepts, but the db (as
     // built) has no such seam — when the parent program's accepts is visible
     // locally and lacks a process type, the db rejects the child's trace
