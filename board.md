@@ -37,9 +37,12 @@ The working board — current state, the queue, the gates, the debt. Session nar
 
 - **Preset semantics ruled: template** (author) — copy-on-open into a fresh focus chunk; save-back explicit; the preset's own history is just its commits (no logging mechanism — versioning is native).
 
+- **Stale-display default** (author direction): a changed-or-removed argument chunk still renders as-it-was in the process-view, marked stale — derived from then-commit vs head, cannot lie; generalizes unresolved-roots from *gone* to *changed*. Folds into the process-view contract.
+- **`at` is a pure pipe verb** (author): `scope | at(commit)` — time travel as DSL composition; the lens grammar's deferred `at:` becomes this verb in a focus expression.
+
 ## Gates — author's word wanted
 
-- **The citation shape** (steward-proposed answer to the author's commit-locking question, wants a nod): *the graph binds identities; records cite versions* — relates/placements stay live, never version-locked; where reproducibility demands a version the pin is data on the referencing record, a **citation** `{chunk, at-commit}` (precedents: dispatch pinning the focus commit; branch-pinned mounts). The copy's link to its source preset is a citation; `[[chunk@commit]]` mentions follow; leans on the deferred `at:` read, no new mechanism.
+- **The citation shape — held open, author not ready to trust** ("all feels fresh and unsettled"): commit-pinned references as data on records (`{chunk, at-commit}`). Do not lean on it; the stale-display default absorbs much of its purpose. Revisit when the preset save-back or `[[mention]]`-of-a-version actually demands it.
 - Standing from before: session.md confirmation pass (was ratification; dissolution adopted); **VM containment ruling** before the agents project; steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
 
 ## Tracked debt
