@@ -35,9 +35,11 @@ The working board — current state, the queue, the gates, the debt. Session nar
 - **read-tile → lens rename confirmed** at Next 3.
 - **`focus` named** (author): the lens's referenced argument chunk — scope expressions + view settings; a lens points at its focus; a preset is a committed focus chunk.
 
+- **Preset semantics ruled: template** (author) — copy-on-open into a fresh focus chunk; save-back explicit; the preset's own history is just its commits (no logging mechanism — versioning is native).
+
 ## Gates — author's word wanted
 
-- **Preset semantics**: template or live? Copy-on-open (fresh focus chunk, `relates` its source preset, explicit save-back — steward-recommended) vs live-editing the shared preset chunk. Settle before the preset step.
+- **The citation shape** (steward-proposed answer to the author's commit-locking question, wants a nod): *the graph binds identities; records cite versions* — relates/placements stay live, never version-locked; where reproducibility demands a version the pin is data on the referencing record, a **citation** `{chunk, at-commit}` (precedents: dispatch pinning the focus commit; branch-pinned mounts). The copy's link to its source preset is a citation; `[[chunk@commit]]` mentions follow; leans on the deferred `at:` read, no new mechanism.
 - Standing from before: session.md confirmation pass (was ratification; dissolution adopted); **VM containment ruling** before the agents project; steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
 
 ## Tracked debt

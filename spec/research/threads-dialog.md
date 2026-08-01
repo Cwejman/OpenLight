@@ -92,7 +92,9 @@ The author caught a contradiction in the emerging state ruling: *a process has t
 
 What falls out for free: **master/slave binding** is just two arguments referencing one position chunk — the materialized-position proposal stops being a special case and becomes the only shape (every lens position is a chunk); **time travel** (`at:`) is viewing the position at an earlier commit — the frozen photograph available as history without freezing the lens. The built retarget's "request chunk" is arguably already this indirection; the refinement is declaring it so in the contract.
 
-Open under it: preset semantics — opening a lens *from* a preset presumably copies it into a fresh position chunk (edits don't mutate the shared preset; save-back is an explicit gesture) vs. live-editing the preset itself. Wants a word at the `preset` step.
+Preset semantics — **RULED: template** (author). Opening from a preset copies into a fresh focus chunk; save-back is an explicit gesture; the preset's history needs no mechanism because its edits are commits — "any change to the focus is a loggable change" holds by the laws of the system.
+
+**The citation shape (steward proposal, answering the author's commit-locking question).** Can a chunk relate to another chunk commit-locked? Proposed: *the graph binds identities; records cite versions.* Relates and placements stay live — they bind identity, never a version; no lock flag enters the placement layer. Where reproducibility demands a version, the pin is **data on the referencing record**: a citation `{chunk, at-commit}` — exactly what dispatch already does (turn records the focus chunk + the commit it resolved at) and what branch-pinned mounts do at coarse grain. The copy's link to its source preset is a citation (*instantiated from P at C*), giving diff-against-preset, upstream-moved detection, and honest save-back as derived facts. Downstream: `[[chunk@commit]]` mentions — prose citing a thing as it was. Leans on the deliberately-deferred `at:` (read-at-commit) capability; adds one data shape, zero mechanisms.
 
 ### Guardrails this stretch touches
 
