@@ -37,12 +37,13 @@ The working board — current state, the queue, the gates, the debt. Session nar
 
 - **Preset semantics ruled: template** (author) — copy-on-open into a fresh focus chunk; save-back explicit; the preset's own history is just its commits (no logging mechanism — versioning is native).
 
-- **Stale-display default** (author direction): a changed-or-removed argument chunk still renders as-it-was in the process-view, marked stale — derived from then-commit vs head, cannot lie; generalizes unresolved-roots from *gone* to *changed*. Folds into the process-view contract.
-- **`at` is a pure pipe verb** (author): `scope | at(commit)` — time travel as DSL composition; the lens grammar's deferred `at:` becomes this verb in a focus expression.
+- **Stale-display default** (author direction): a changed-or-removed argument chunk still renders as-it-was in the process-view, marked stale — derived from then-commit vs head, cannot lie; generalizes unresolved-roots from *gone* to *changed*. Folds into the process-view contract. Narrowed by the sequence-of-focuses direction: applies to the *content* a focus views, never the focus itself.
+- **Lens history is a sequence of focuses** (author direction): navigation appends a new focus chunk to an ordered sequence (browser-history shape, clipboard's substrate form); current pointer is a body key; back/forward move it. **Focuses become values** — identity captures version, so references to a focus never go stale and nothing needs commit-pinning; history is field data, pipeable. Preset-opening uniform: preset content appends as a fresh sequence's first focus. Opens at lens v0: what is navigation-grade; forward-branch rule (truncate vs tree).
+- **`at` is a pure pipe verb** (author): `scope | at(commit)` — time travel as DSL composition; vocabulary, no longer load-bearing for lens history or process records.
 
 ## Gates — author's word wanted
 
-- **The citation shape — held open, author not ready to trust** ("all feels fresh and unsettled"): commit-pinned references as data on records (`{chunk, at-commit}`). Do not lean on it; the stale-display default absorbs much of its purpose. Revisit when the preset save-back or `[[mention]]`-of-a-version actually demands it.
+- **The citation shape — held open, author not ready to trust** ("all feels fresh and unsettled"): commit-pinned references as data on records (`{chunk, at-commit}`). Do not lean on it; stale-display absorbs its display purpose and sequence-of-focuses removes its reference purpose. Revisit only if a real case demands a version-bound reference to a *mutable* chunk.
 - Standing from before: session.md confirmation pass (was ratification; dissolution adopted); **VM containment ruling** before the agents project; steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
 
 ## Tracked debt
