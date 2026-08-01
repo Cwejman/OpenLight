@@ -268,3 +268,81 @@ test('a run with no target argument says so rather than rendering nothing', asyn
 
   expect(text(tile, '[data-part="quiet"]')).toContain('no target argument')
 })
+
+/** Drive a controlled input the way a person does: value, then the event. */
+function type(input: HTMLInputElement, value: string): void {
+  const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!
+  set.call(input, value)
+  input.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+test('the lens retargets: completion adds a dimension, a chip’s × drops one', async () => {
+  field([
+    frame(['session']),
+    {
+      chunks: [
+        { id: 'session', name: 'main', body: { text: 'the session' } },
+        { id: 'a', name: 'alpha' },
+        { id: 'trace', name: 'trace', body: { text: 'elsewhere' } },
+        { id: 'e1', name: 'first-paint' },
+        { id: 'e2', name: 'shell-served' },
+      ],
+      placements: [
+        { chunk: 'a', scope: 'session', type: 'instance' },
+        { chunk: 'e1', scope: 'trace', type: 'instance' },
+        { chunk: 'e2', scope: 'trace', type: 'instance' },
+      ],
+    },
+  ])
+  const tile = await show()
+  expect(text(tile, 'h1')).toBe('main')
+  // One dimension: nothing offers to drop it — a lens keeps at least a scope.
+  expect(tile.container.querySelector('[data-part="unscope"]')).toBe(null)
+
+  // Typing raises the completion box: named scopes matching by prefix, from
+  // the whole field (the in-tile stand-in for the completion program).
+  const input = tile.container.querySelector('[data-part="retarget"]') as HTMLInputElement
+  await settle(() => type(input, 'tra'))
+  expect(texts(tile, '[data-part="option"] span:first-child')).toEqual(['trace'])
+
+  // Enter takes the active match: the dimension joins the scope (a frame
+  // write; the subscription brings it back).
+  await settle(() =>
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
+  )
+  expect(texts(tile, '[data-ui="pill"]').join(' ')).toContain('trace')
+  expect(input.value).toBe('')
+
+  // The seeded dimension leaves by its own × — the lens now reads the trace.
+  const drop = tile.container.querySelector('[data-part="unscope"]') as HTMLButtonElement
+  await settle(() => drop.click())
+  expect(text(tile, 'h1')).toBe('trace')
+  expect(texts(tile, '[data-part="row"] [data-part="name"]')).toEqual([
+    'first-paint',
+    'shell-served',
+  ])
+})
+
+test('typed ids with no named match still land: unnamed chunks are reached by id', async () => {
+  field([
+    frame(['session']),
+    {
+      chunks: [
+        { id: 'session', name: 'main' },
+        { id: 'a', name: 'alpha' },
+      ],
+      placements: [{ chunk: 'a', scope: 'session', type: 'instance' }],
+    },
+  ])
+  const tile = await show()
+
+  const input = tile.container.querySelector('[data-part="retarget"]') as HTMLInputElement
+  await settle(() => type(input, 'p_elsewhere'))
+  expect(tile.container.querySelector('[data-part="option"]')).toBe(null)
+  await settle(() =>
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
+  )
+  // The raw id joined the scope; a root that resolves to nothing says so.
+  expect(texts(tile, '[data-ui="pill"]').join(' ')).toContain('p_elsewhere')
+  expect(mode(tile)).toBe('unresolved')
+})

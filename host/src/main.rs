@@ -26,7 +26,6 @@
 
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -50,6 +49,7 @@ use host::geometry::{self, Bleed, Rect, Spacing, Strip, Tile};
 use host::page;
 use host::probe;
 use host::protocol;
+use host::recycle::Pool;
 use host::seed;
 use host::serve;
 use host::stub::FixtureStub;
@@ -224,6 +224,9 @@ enum RimEvent {
     /// A commit moved placements — re-read the tree, reconcile the window.
     TreeChanged,
     Reply { view: ViewKey, script: String },
+    /// Build a warm pane for this executable and park it (`recycle`, prewarm
+    /// lane) — sent after boot for every program the settings chunk names.
+    Prewarm { executable: String },
 }
 
 /// Where a webview stands in the window. Keyed apart from process identity:
@@ -239,7 +242,42 @@ enum ViewKey {
 
 struct View {
     process: ProcessId,
+    /// What built this view's page — the recycle pool's key (`recycle`).
+    executable: String,
+    /// True when the page is served over `ol://`. Only a served pane can be
+    /// renavigated to another process's shell, so only these park.
+    served: bool,
+    identity: Identity,
     webview: wry::WebView,
+}
+
+/// The process a webview currently speaks as. Its handlers (the `ol://`
+/// protocol, IPC) are built once with a clone of this and read it per request,
+/// so a recycled webview rebinds by one store — no handler is ever rebuilt.
+#[derive(Clone)]
+struct Identity(Arc<Mutex<String>>);
+
+impl Identity {
+    fn new(process: &str) -> Identity {
+        Identity(Arc::new(Mutex::new(process.to_string())))
+    }
+    fn process(&self) -> String {
+        self.0.lock().expect("identity lock").clone()
+    }
+    fn rebind(&self, process: &str) {
+        *self.0.lock().expect("identity lock") = process.to_string();
+    }
+}
+
+/// An overlay webview between processes: hidden, its dead document blanked,
+/// everything expensive — the WebContent process, the evaluated runtime, the
+/// compositor — still warm (`recycle`).
+struct Parked {
+    identity: Identity,
+    webview: wry::WebView,
+    /// Whether this pane has ever been on screen. A prewarmed pane has not,
+    /// and its first claim measures compositor spin-up honestly.
+    shown: bool,
 }
 
 fn main() {
@@ -301,6 +339,24 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
     if std::env::var("OL_NO_WARM").map(|v| v != "1").unwrap_or(true) {
         let (transpiler, programs_root) = (transpiler.clone(), programs_root.clone());
         std::thread::spawn(move || serve::warm(&transpiler, &programs_root));
+    }
+
+    // The telemetry lane (settings chunk, `timings`): every finished open
+    // path becomes event chunks on its process trace, typed by category
+    // chunks (`telemetry` — the process *is* the trace; nothing aggregate is
+    // stored). Stderr stays `OL_TIMING`'s, the measurement lane; the two are
+    // the same marks.
+    if settings_timings(&engine, &session) {
+        let (sink_engine, handle) = (engine.clone(), runtime.handle().clone());
+        timing.to_field(Box::new(move |execution| {
+            let engine = sink_engine.clone();
+            // Off the caller's thread — done() fires on wry's IPC callback.
+            handle.spawn(async move {
+                if let Err(e) = host::telemetry::commit_execution(&engine, &execution) {
+                    eprintln!("host: {e}");
+                }
+            });
+        }));
     }
 
     let strip_process = strip.process.clone();
@@ -368,17 +424,51 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
 
     // `--demo-menu`: raise the context menu through the same run op the strip
     // posts — the open path under measurement (OL_TIMING=1), pointer-free.
+    // Then the recycle lane's A/B: cancel it, open again — the second open
+    // claims the parked pane, and the two traces sit side by side.
     if args.iter().any(|a| a == "--demo-menu") {
         let (engine, session) = (engine.clone(), session.clone());
         runtime.spawn(async move {
             tokio::time::sleep(Duration::from_millis(2500)).await;
+            let first = match demo_menu(&engine, &session) {
+                Ok(process) => process,
+                Err(e) => {
+                    eprintln!("host: --demo-menu failed: {e}");
+                    return;
+                }
+            };
+            tokio::time::sleep(Duration::from_millis(3000)).await;
+            if let Err(e) = engine.cancel(&engine::Context::host(), &first) {
+                eprintln!("host: --demo-menu cancel failed: {e}");
+                return;
+            }
+            tokio::time::sleep(Duration::from_millis(1500)).await;
             if let Err(e) = demo_menu(&engine, &session) {
-                eprintln!("host: --demo-menu failed: {e}");
+                eprintln!("host: --demo-menu reopen failed: {e}");
+            }
+        });
+    }
+
+    // The prewarm lane (`recycle`): every program the settings chunk names
+    // gets a warm pane before its first launch, built off the boot path once
+    // the window has settled. One shot — after the first claim, recycling
+    // refills the slot through use. `OL_NO_PREWARM=1` skips it, the
+    // measurement lane's before/after switch beside `OL_NO_WARM`.
+    if std::env::var("OL_NO_PREWARM").map(|v| v != "1").unwrap_or(true) {
+        let (engine, session, prewarm_proxy) =
+            (engine.clone(), session.clone(), event_loop.create_proxy());
+        runtime.spawn(async move {
+            tokio::time::sleep(Duration::from_millis(2000)).await;
+            for executable in prewarm_targets(&engine, &session) {
+                let _ = prewarm_proxy.send_event(RimEvent::Prewarm { executable });
             }
         });
     }
 
     let mut views: HashMap<ViewKey, View> = HashMap::new();
+    // Warm overlay panes between processes (`recycle`): parked on unmount,
+    // claimed by the next mount of the same executable.
+    let mut pool: Pool<Parked> = Pool::new();
     let mut terminals: HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>> =
         HashMap::new();
     // Mounts whose leaf has not landed yet: `run` and the tree commit are two
@@ -414,7 +504,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
         *control_flow = ControlFlow::Wait;
         match event {
             Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
-                shutdown(&runtime, &engine, &mut views, &mut terminals, control_flow);
+                shutdown(&runtime, &engine, &mut views, &mut pool, &mut terminals, control_flow);
             }
             Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
                 place_all(&window, &view_state, &views);
@@ -457,7 +547,25 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 let (declared_name, surface) = boot::program_kind(&engine, &pending.program);
                 let (strip_rect, leaves) = layout(&window, &view_state, STRIP);
                 let (key, rect) = match surface {
-                    Surface::Overlay => (ViewKey::Overlay(process_id.clone()), window_rect(&window)),
+                    Surface::Overlay => {
+                        if let Some(warm) = pool.claim(&executable) {
+                            remount_overlay(
+                                warm,
+                                window_rect(&window),
+                                process_id,
+                                declared_name.unwrap_or_else(|| executable.clone()),
+                                executable,
+                                Some(pending),
+                                &mut views,
+                                &mut terminals,
+                                &runtime,
+                                &proxy,
+                                &timing,
+                            );
+                            return;
+                        }
+                        (ViewKey::Overlay(process_id.clone()), window_rect(&window))
+                    }
                     Surface::Tile if process_id == strip_process => (ViewKey::Strip, strip_rect),
                     Surface::Tile => {
                         let leaf = view_state
@@ -467,7 +575,11 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                             Some(leaf) => (ViewKey::Tile(leaf.id.clone()), leaf.rect.clone()),
                             None => {
                                 // No leaf yet: the tree commit is still in
-                                // flight. Park; TreeChanged completes it.
+                                // flight. Park; TreeChanged completes it. Said
+                                // aloud because a park nothing completes is a
+                                // surface that silently never appears — the
+                                // stale-leaf boot bug was found by this line.
+                                eprintln!("host: mount for {process_id} parked — no leaf relates it yet");
                                 parked.insert(process_id, pending);
                                 return;
                             }
@@ -501,10 +613,27 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
                 // The probe lane's one seam into the loop: no process is named
                 // this, so the ordinary unmount stays what it was.
                 if process_id.as_str() == probe::DONE {
-                    shutdown(&runtime, &engine, &mut views, &mut terminals, control_flow);
+                    shutdown(&runtime, &engine, &mut views, &mut pool, &mut terminals, control_flow);
                     return;
                 }
-                views.retain(|_, view| view.process != process_id);
+                let dead: Vec<ViewKey> = views
+                    .iter()
+                    .filter(|(_, view)| view.process == process_id)
+                    .map(|(key, _)| key.clone())
+                    .collect();
+                for key in dead {
+                    let Some(view) = views.remove(&key) else { continue };
+                    // A served overlay parks instead of dying (`recycle`) —
+                    // hidden, and its dead document blanked now, so the next
+                    // claim can show the pane before its navigation paints
+                    // without flashing what the last process left.
+                    if matches!(key, ViewKey::Overlay(_)) && view.served {
+                        let View { executable, identity, webview, .. } = view;
+                        let _ = webview.set_visible(false);
+                        let _ = webview.evaluate_script("document.body.replaceChildren()");
+                        drop(pool.park(&executable, Parked { identity, webview, shown: true }));
+                    }
+                }
                 terminals.remove(&process_id);
                 parked.remove(&process_id);
             }
@@ -517,12 +646,110 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
             }
             Event::UserEvent(RimEvent::Reply { view, script }) => {
                 if let Some(view) = views.get(&view) {
+                    // The surface's first answered op — the stretch between
+                    // this and first-ipc is the engine round trip.
+                    timing.mark_once(view.process.as_str(), "first-reply");
                     let _ = view.webview.evaluate_script(&script);
                 }
+            }
+            Event::UserEvent(RimEvent::Prewarm { executable }) => {
+                // An occupied slot means a pane already waits — never two.
+                if pool.occupied(&executable) {
+                    return;
+                }
+                let entry = programs_root.join(&executable);
+                if !entry.is_file() {
+                    return;
+                }
+                // The pane speaks as nobody (empty identity) until a claim
+                // rebinds it; its page is the warm route — the program's
+                // packages evaluated, its own code fetched but never run
+                // (`serve::warm_page`, the author's ruling).
+                let identity = Identity::new("");
+                let init = page_init("", 0.0, 0.0, &timing);
+                let builder = WebViewBuilder::new()
+                    .with_bounds(bounds(&window_rect(&window)))
+                    .with_transparent(true)
+                    .with_initialization_script(&init)
+                    .with_ipc_handler(ipc_handler(
+                        engine_api.clone(),
+                        runtime.handle().clone(),
+                        proxy.clone(),
+                        identity.clone(),
+                        None,
+                        None,
+                        timing.clone(),
+                    ))
+                    .with_custom_protocol(
+                        serve::SCHEME.into(),
+                        module_protocol(
+                            transpiler.clone(),
+                            source_root.clone(),
+                            identity.clone(),
+                            entry,
+                            timing.clone(),
+                        ),
+                    )
+                    .with_url(serve::warm_url());
+                let Ok(webview) = builder.build_as_child(&window) else {
+                    return; // no pane, no economy — the cold path still works
+                };
+                let _ = webview.set_visible(false);
+                if timing.enabled() {
+                    eprintln!("host: prewarmed a pane for {executable}");
+                }
+                drop(pool.park(&executable, Parked { identity, webview, shown: false }));
             }
             _ => {}
         }
     });
+}
+
+/// Whether the settings chunk turns the telemetry lane on.
+fn settings_timings(engine: &engine::Engine, session: &ChunkId) -> bool {
+    let opts = db::ReadOpts {
+        include: db::Includes { chunk_body: true, ..db::Includes::default() },
+        ..db::ReadOpts::default()
+    };
+    matches!(
+        engine.get(&engine::Context::host(), &seed::settings_id(session), opts),
+        Ok(Some(item))
+            if item.body.as_ref().and_then(|b| b.get(seed::TIMINGS_KEY)).and_then(|v| v.as_bool())
+                == Some(true)
+    )
+}
+
+/// What the field says to prewarm: the settings chunk's `prewarm` names
+/// resolved to overlay programs' executables. Absent settings, unknown names,
+/// non-overlay surfaces — all skipped silently: prewarming is an economy,
+/// never a correctness requirement. (Only overlays claim from the pool today;
+/// tiles keep their per-leaf lifecycle.)
+fn prewarm_targets(engine: &engine::Engine, session: &ChunkId) -> Vec<String> {
+    let ctx = engine::Context::host();
+    let opts = db::ReadOpts {
+        include: db::Includes { chunk_body: true, ..db::Includes::default() },
+        ..db::ReadOpts::default()
+    };
+    let Ok(Some(settings)) = engine.get(&ctx, &seed::settings_id(session), opts.clone()) else {
+        return Vec::new();
+    };
+    let names: Vec<String> = settings
+        .body
+        .and_then(|body| body.get(seed::PREWARM_KEY).cloned())
+        .and_then(|list| serde_json::from_value(list).ok())
+        .unwrap_or_default();
+    names
+        .iter()
+        .filter_map(|name| {
+            let program = engine.resolve_name(&ctx, name).ok()?;
+            let (_, surface) = boot::program_kind(engine, &program);
+            if !matches!(surface, Surface::Overlay) {
+                return None;
+            }
+            let item = engine.get(&ctx, &program, opts.clone()).ok()??;
+            item.body?.get("executable")?.as_str().map(str::to_string)
+        })
+        .collect()
 }
 
 /// The open-in-tile state, driven through ordinary ops (board directive): a
@@ -636,7 +863,7 @@ fn demo_open_in_tile(
 }
 
 /// One context-menu run, shaped exactly as the strip's click posts it.
-fn demo_menu(engine: &engine::Engine, session: &ChunkId) -> Result<(), String> {
+fn demo_menu(engine: &engine::Engine, session: &ChunkId) -> Result<ProcessId, String> {
     let ctx = engine::Context::host();
     let program = engine
         .resolve_name(&ctx, "host/context-menu")
@@ -667,8 +894,7 @@ fn demo_menu(engine: &engine::Engine, session: &ChunkId) -> Result<(), String> {
                 timeout_ms: None,
             },
         )
-        .map_err(|e| format!("running host/context-menu: {e}"))?;
-    Ok(())
+        .map_err(|e| format!("running host/context-menu: {e}"))
 }
 
 /// What one mount needs — the rim's one webview constructor, shared by the
@@ -698,6 +924,24 @@ struct Mount<'a> {
     tally: &'a Arc<Mutex<probe::Tally>>,
 }
 
+/// A page's initialization script: the transport alias and identity stamp
+/// (`page`), plus the paint probes when timing is on. Init scripts run on
+/// every document a webview loads, so a recycled pane re-arms its probes with
+/// each navigation.
+fn page_init(process: &str, x: f64, y: f64, timing: &Timing) -> String {
+    let mut init = page::init_script(process, x, y);
+    if timing.enabled() {
+        // Paint proxies, posted through the IPC channel and read before
+        // dispatch: `__frame` is the page's first rendered frame — compositor
+        // spin-up, since this is scheduled at document start — and `__paint`
+        // the frame after it.
+        init.push_str(
+            "\nrequestAnimationFrame(() => { window.ipc.postMessage('\"__frame\"'); requestAnimationFrame(() => window.ipc.postMessage('\"__paint\"')); });",
+        );
+    }
+    init
+}
+
 fn mount(m: Mount) {
     let Mount {
         window,
@@ -720,14 +964,8 @@ fn mount(m: Mount) {
         probing,
         tally,
     } = m;
-    let mut init = page::init_script(process.as_str(), rect.x, rect.y);
-    if timing.enabled() {
-        // First-paint proxy: the frame after the first rendered frame, posted
-        // through the IPC channel and read before dispatch.
-        init.push_str(
-            "\nrequestAnimationFrame(() => requestAnimationFrame(() => window.ipc.postMessage('\"__paint\"')));",
-        );
-    }
+    let init = page_init(process.as_str(), rect.x, rect.y, timing);
+    let identity = Identity::new(process.as_str());
     let builder = WebViewBuilder::new()
         .with_bounds(bounds(&rect))
         .with_transparent(true)
@@ -736,8 +974,13 @@ fn mount(m: Mount) {
             engine_api.clone(),
             runtime.handle().clone(),
             proxy.clone(),
-            Context { process_id: Some(process.as_str().to_string()) },
-            key.clone(),
+            identity.clone(),
+            // An overlay's view key follows its identity (the pane recycles
+            // across processes); everywhere else the key is the mount's own.
+            match &key {
+                ViewKey::Overlay(_) => None,
+                fixed => Some(fixed.clone()),
+            },
             probing.then(|| ProbeSink {
                 program: program.clone(),
                 tally: tally.clone(),
@@ -749,14 +992,15 @@ fn mount(m: Mount) {
     // keep the rim's demo HTML until theirs is written (host.md §Authoring
     // Programs).
     let entry = programs_root.join(executable);
-    let builder = if entry.is_file() {
+    let served = entry.is_file();
+    let builder = if served {
         builder
             .with_custom_protocol(
                 serve::SCHEME.into(),
                 module_protocol(
                     transpiler.clone(),
                     source_root.clone(),
-                    process.as_str().to_string(),
+                    identity.clone(),
                     entry,
                     timing.clone(),
                 ),
@@ -767,6 +1011,7 @@ fn mount(m: Mount) {
     };
     let webview = builder.build_as_child(window).expect("webview");
     timing.mark(process.as_str(), "webview-built");
+    timing.label(process.as_str(), &program);
     // Only a tile floats: the strip is naked on the canvas, and an overlay is a
     // transparent pane whose own panel casts its shadow in CSS — the aura
     // belongs to what the *window* frames.
@@ -779,7 +1024,10 @@ fn mount(m: Mount) {
         ViewKey::Tile(_) => cast_aura(&webview, &rect),
         ViewKey::Strip => {}
     }
-    views.insert(key, View { process: process.clone(), webview });
+    views.insert(
+        key,
+        View { process: process.clone(), executable: executable.to_string(), served, identity, webview },
+    );
 
     if probing {
         // Through the ordinary delivery path, once the surface has had time to
@@ -794,10 +1042,22 @@ fn mount(m: Mount) {
     }
 
     let Some(pending) = pending else { return };
+    adopt(pending, process, terminals, runtime, proxy);
+}
+
+/// Wire a spawn's engine handles to the view now standing: readiness fires,
+/// the terminal channel parks, and outgoing engine traffic (subscription
+/// events) becomes delivery scripts; a closed channel is the engine's kill
+/// signal — unmount follows. Shared by first mounts and recycled ones.
+fn adopt(
+    pending: PendingWebview,
+    process: ProcessId,
+    terminals: &mut HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>>,
+    runtime: &tokio::runtime::Runtime,
+    proxy: &EventLoopProxy<RimEvent>,
+) {
     let _ = pending.ready.send(());
     terminals.insert(process.clone(), pending.terminal);
-    // Outgoing engine traffic (subscription events) becomes delivery scripts;
-    // a closed channel is the engine's kill signal — unmount follows.
     let mut events = pending.events;
     let drain_proxy = proxy.clone();
     runtime.spawn(async move {
@@ -813,6 +1073,45 @@ fn mount(m: Mount) {
         }
         let _ = drain_proxy.send_event(RimEvent::Engine(HostCmd::UnmountWebview { process_id: process }));
     });
+}
+
+/// Claim a parked pane for a new overlay process (`recycle`): rebind its
+/// identity, renavigate to the new process's shell, show. The webview, its
+/// WebContent process, its evaluated runtime, its compositor — all warm; this
+/// open pays a document, never a webview. Order matters: the pane becomes
+/// visible only after the navigation is underway, and the old document was
+/// blanked at park, so nothing stale can flash.
+#[allow(clippy::too_many_arguments)]
+fn remount_overlay(
+    warm: Parked,
+    rect: Rect,
+    process: ProcessId,
+    program: String,
+    executable: String,
+    pending: Option<PendingWebview>,
+    views: &mut HashMap<ViewKey, View>,
+    terminals: &mut HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>>,
+    runtime: &tokio::runtime::Runtime,
+    proxy: &EventLoopProxy<RimEvent>,
+    timing: &Arc<Timing>,
+) {
+    let Parked { identity, webview, shown } = warm;
+    identity.rebind(process.as_str());
+    timing.mark(process.as_str(), if shown { "webview-recycled" } else { "webview-prewarmed" });
+    timing.label(process.as_str(), &program);
+    let _ = webview.set_bounds(bounds(&rect));
+    let _ = webview.load_url(&serve::shell_url(process.as_str()));
+    let _ = webview.set_visible(true);
+    // The pane is the whole window and takes every click; it must take the
+    // keys too, or Escape never reaches it (as at first mount).
+    let _ = webview.focus();
+    views.insert(
+        ViewKey::Overlay(process.clone()),
+        View { process: process.clone(), executable, served: true, identity, webview },
+    );
+    if let Some(pending) = pending {
+        adopt(pending, process, terminals, runtime, proxy);
+    }
 }
 
 /// Reconcile the mounted views with the tree just read: drop views whose leaf
@@ -961,8 +1260,8 @@ fn fixture_main(runtime: tokio::runtime::Runtime) {
                 stub.clone(),
                 runtime.handle().clone(),
                 event_loop.create_proxy(),
-                Context { process_id: Some(info.process.clone()) },
-                ViewKey::Tile(leaf.id.clone()),
+                Identity::new(&info.process),
+                Some(ViewKey::Tile(leaf.id.clone())),
                 None,
                 timing.clone(),
             ))
@@ -1018,10 +1317,12 @@ fn shutdown(
     runtime: &tokio::runtime::Runtime,
     engine: &engine::Engine,
     views: &mut HashMap<ViewKey, View>,
+    pool: &mut Pool<Parked>,
     terminals: &mut HashMap<ProcessId, tokio::sync::oneshot::Sender<TerminalReason>>,
     control_flow: &mut ControlFlow,
 ) {
     views.clear();
+    pool.clear();
     terminals.clear();
     if let Err(e) = runtime.block_on(engine.clone().shutdown()) {
         eprintln!("host: engine shutdown: {e}");
@@ -1044,28 +1345,41 @@ struct ProbeSink {
 /// all that happens on wry's callback thread — the engine call goes to the
 /// runtime, because `await` suspends until the awaited processes end. The
 /// reply targets this view alone; several views may speak as one process.
+///
+/// The process is read per message from the webview's [`Identity`], never
+/// captured — a recycled pane speaks as whatever it was last bound to. `view`
+/// is the mount's fixed key, or `None` for an overlay, whose key follows its
+/// identity for the same reason.
 fn ipc_handler(
     engine: Arc<dyn EngineApi>,
     runtime: tokio::runtime::Handle,
     proxy: EventLoopProxy<RimEvent>,
-    ctx: Context,
-    view: ViewKey,
+    identity: Identity,
+    view: Option<ViewKey>,
     probe_sink: Option<ProbeSink>,
     timing: Arc<Timing>,
 ) -> impl Fn(wry::http::Request<String>) + 'static {
-    // Checked at mount, never inside the callback: a webview always speaks as
-    // its process (host.md §Transport, the webview→process registry).
-    let process = ctx.process_id.clone().expect("webview context names a process");
-    let first = AtomicBool::new(true);
     move |message| {
+        let process = identity.process();
+        if process.is_empty() {
+            return; // a warm pane speaks as nobody; nothing it says is traffic
+        }
+        let view = view
+            .clone()
+            .unwrap_or_else(|| ViewKey::Overlay(ChunkId::from(process.as_str())));
+        let ctx = Context { process_id: Some(process.clone()) };
         if timing.enabled() {
-            if message.body() == "\"__paint\"" {
-                timing.mark(&process, "first-paint");
-                timing.done(&process);
-                return;
-            }
-            if first.swap(false, Ordering::Relaxed) {
-                timing.mark(&process, "first-ipc");
+            match message.body().as_str() {
+                "\"__frame\"" => {
+                    timing.mark(&process, "first-frame");
+                    return;
+                }
+                "\"__paint\"" => {
+                    timing.mark(&process, "first-paint");
+                    timing.done(&process);
+                    return;
+                }
+                _ => timing.mark_once(&process, "first-ipc"),
             }
         }
         // The probe answer rides the same channel, read before dispatch and
@@ -1127,21 +1441,19 @@ fn spawned_process(response: &str) -> Option<String> {
 fn module_protocol(
     transpiler: Arc<Transpiler>,
     root: std::path::PathBuf,
-    process: String,
+    identity: Identity,
     entry: std::path::PathBuf,
     timing: Arc<Timing>,
 ) -> impl Fn(wry::WebViewId, wry::http::Request<Vec<u8>>) -> wry::http::Response<Cow<'static, [u8]>>
 {
-    let first_module = AtomicBool::new(true);
     move |_id, request| {
+        let process = identity.process();
         let path = request.uri().path().to_string();
-        if timing.enabled() {
+        if timing.enabled() && !process.is_empty() {
             match serve::route(&path) {
                 serve::Route::Shell(_) => timing.mark(&process, "shell-served"),
                 serve::Route::Styles(_) => timing.mark(&process, "styles-served"),
-                serve::Route::Module(_) if first_module.swap(false, Ordering::Relaxed) => {
-                    timing.mark(&process, "first-module")
-                }
+                serve::Route::Module(_) => timing.mark_once(&process, "first-module"),
                 _ => {}
             }
         }

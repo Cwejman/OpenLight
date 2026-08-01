@@ -218,10 +218,19 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
     // naked strip with the read roots step 10 names.
     let workspace = seed::ensure_workspace(&engine).map_err(BootError::Seed)?;
     let session = workspace.session;
+    // The leaf boot points its run at is the *current* tree's first: the
+    // tiling verbs evolve the tree between boots, and a close may have
+    // collapsed the seeded first leaf out of it — pointing a leaf outside the
+    // tree would strand the fresh mount parked forever, displaying nothing.
+    // The seeded leaf is only the empty tab's fallback.
+    let target_leaf = crate::tree::read(&engine, &workspace.tab)
+        .ok()
+        .and_then(|view| view.tree.map(|tile| ChunkId::from(crate::geometry::first_leaf(&tile))))
+        .unwrap_or_else(|| workspace.leaf.clone());
     let mut tiles = Vec::new();
     for name in TILE_PROGRAMS {
         let surface = spawn_surface(&engine, name, &session, vec![session.clone()])?;
-        seed::point_leaf(&engine, &workspace.leaf, &surface.process).map_err(BootError::Seed)?;
+        seed::point_leaf(&engine, &target_leaf, &surface.process).map_err(BootError::Seed)?;
         tiles.push(surface);
     }
     let strip = spawn_strip(&engine, &session)?;

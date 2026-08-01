@@ -41,6 +41,11 @@ const TRANSPILED: [&str; 7] = ["ts", "tsx", "js", "jsx", "mjs", "cjs", "json"];
 const CANDIDATES: [&str; 8] =
     ["ts", "tsx", "js", "jsx", "mjs", "index.ts", "index.tsx", "index.js"];
 
+/// The warm page's own path. Reserved the way `db/` is for virtual scopes: a
+/// process id can never be the bare word `warm` (ids are generated), so the
+/// route costs no real shell.
+const WARM: &str = "warm";
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Route {
     /// The shell for a process.
@@ -49,6 +54,8 @@ pub enum Route {
     Styles(String),
     /// A file, by absolute path.
     Module(PathBuf),
+    /// The prewarm page: this webview's program made hot, run nothing.
+    Warm,
     Unknown,
 }
 
@@ -61,11 +68,17 @@ pub fn route(path: &str) -> Route {
     }
     match path.trim_start_matches('/') {
         "" => Route::Unknown,
+        WARM => Route::Warm,
         rest => match rest.strip_suffix(STYLES).filter(|process| !process.is_empty()) {
             Some(process) => Route::Styles(percent_decode(process)),
             None => Route::Shell(percent_decode(rest)),
         },
     }
+}
+
+/// The URL a prewarm pane is pointed at.
+pub fn warm_url() -> String {
+    format!("{ORIGIN}/{WARM}")
 }
 
 /// The URL a process's shell is loaded from.
@@ -150,6 +163,8 @@ pub enum Answer {
     Module(PathBuf),
     /// The stylesheet for the program whose sources live in this directory.
     Styles(PathBuf),
+    /// The warm page for the program whose entry this is.
+    Warm(PathBuf),
 }
 
 /// Read one request for one webview. `process` and `entry` are that webview's
@@ -177,6 +192,7 @@ pub fn respond(root: &Path, process: &str, entry: &Path, uri_path: &str) -> Answ
             Some(file) => Answer::Module(file),
             None => Answer::Ready(Served::missing(&format!("module {}", path.display()))),
         },
+        Route::Warm => Answer::Warm(entry.to_path_buf()),
         Route::Unknown => Answer::Ready(Served::missing("route")),
     }
 }
@@ -199,6 +215,9 @@ pub fn serve(
                 Served::unstyled(&format!("styles for {}", source.display()), &message)
             }
         },
+        Answer::Warm(entry) => {
+            Served::ok("text/html", warm_page(&graph(transpiler, &entry)).into_bytes())
+        }
     }
 }
 
@@ -220,17 +239,27 @@ fn module(transpiler: &Transpiler, file: &Path) -> Served {
 }
 
 /// The shell (host.md §Authoring Programs): a charset, one stylesheet, the
-/// program's entry as a module, nothing else. There is no root element — the
-/// program mounts the body — and no inline style: every rule the page needs
-/// arrives through the one link, so a surface never carries CSS in its markup.
+/// program's entry as a module, and the page's own identity — nothing else.
+/// There is no root element — the program mounts the body — and no inline
+/// style: every rule the page needs arrives through the one link, so a surface
+/// never carries CSS in its markup.
+///
+/// Identity is read off the page's own URL, which *is* the process id
+/// (`ol://app/<process>`), rather than baked into the markup: the same shell
+/// text serves every process, and a recycled webview navigating to a new
+/// process's shell stamps itself — its initialization script still carries the
+/// id of the mount that built it (`page`, recorded gap), and this line, running
+/// on every document, is what keeps the global true.
 pub fn shell(styles_url: &str, entry_url: &str) -> String {
     format!(
         "<!doctype html>\n\
          <html><head><meta charset=\"utf-8\">\n\
          <link rel=\"stylesheet\" href=\"{}\">\n\
+         <script>window.{} = decodeURIComponent(location.pathname.slice(1));</script>\n\
          <script type=\"module\" src=\"{}\"></script>\n\
          </head><body></body></html>",
         escape_attribute(styles_url),
+        crate::page::PROCESS_GLOBAL,
         escape_attribute(entry_url)
     )
 }
@@ -248,7 +277,9 @@ pub fn warm(transpiler: &Transpiler, programs_root: &Path) {
     let started = std::time::Instant::now();
     let programs = programs_root.join("programs");
     let Ok(entries) = std::fs::read_dir(&programs) else { return };
-    let mut queue: Vec<PathBuf> = Vec::new();
+    // Shared graphs overlap (every program pulls its React), so the honest
+    // count is unique files, not the sum of walks.
+    let mut compiled: Vec<PathBuf> = Vec::new();
     let mut programs_found = 0usize;
     for program in entries.flatten() {
         let src = program.path().join("src");
@@ -257,28 +288,71 @@ pub fn warm(transpiler: &Transpiler, programs_root: &Path) {
             continue;
         }
         let _ = transpiler.styles(&src);
-        queue.push(entry);
+        for file in graph(transpiler, &entry) {
+            if !compiled.contains(&file) {
+                compiled.push(file);
+            }
+        }
         programs_found += 1;
     }
+    eprintln!(
+        "host: warmed {} modules for {programs_found} programs in {:.1}s",
+        compiled.len(),
+        started.elapsed().as_secs_f64()
+    );
+}
+
+/// One program's whole module graph, crawled from its entry through the
+/// transpiler — every file compiled (or read from the cache) along the way.
+/// Shared graphs overlap: two programs both count their `react`.
+pub fn graph(transpiler: &Transpiler, entry: &Path) -> Vec<PathBuf> {
+    let mut queue: Vec<PathBuf> = vec![entry.to_path_buf()];
     let mut seen: Vec<PathBuf> = Vec::new();
-    let mut compiled = 0usize;
     while let Some(file) = queue.pop() {
         if seen.contains(&file) {
             continue;
         }
-        seen.push(file.clone());
         let Ok(code) = transpiler.module(&file) else { continue };
-        compiled += 1;
         for import in module_imports(&code, &file) {
             if let Some(resolved) = resolve_file(&import) {
                 queue.push(resolved);
             }
         }
+        seen.push(file);
     }
-    eprintln!(
-        "host: warmed {compiled} modules for {programs_found} programs in {:.1}s",
-        started.elapsed().as_secs_f64()
-    );
+    seen
+}
+
+/// The prewarm page (author ruling, board directive *menu latency*): make a
+/// program's open cheap **without ever invoking it** — a program runs only as
+/// a process, and this page has none. Package modules (`node_modules` in
+/// their path) are imported, so the heavy runtime is parsed, evaluated, and
+/// bytecode-cached: a library at module scope is inert. The program's own
+/// files are `modulepreload`ed — fetched and compiled, never executed; only
+/// its entry has effects at module scope, and it never runs here. No identity
+/// is stamped and no stylesheet is linked: the page is a cache, not a surface.
+pub fn warm_page(files: &[PathBuf]) -> String {
+    let mut urls: Vec<(bool, String)> = files
+        .iter()
+        .map(|file| (file.components().any(|c| c.as_os_str() == "node_modules"), module_url(file)))
+        .collect();
+    urls.sort();
+    let preloads: String = urls
+        .iter()
+        .filter(|(package, _)| !package)
+        .map(|(_, url)| format!("<link rel=\"modulepreload\" href=\"{}\">\n", escape_attribute(url)))
+        .collect();
+    let imports: String = urls
+        .iter()
+        .filter(|(package, _)| *package)
+        .map(|(_, url)| format!("import {};\n", json_string(url)))
+        .collect();
+    format!(
+        "<!doctype html>\n\
+         <html><head><meta charset=\"utf-8\">\n\
+         {preloads}<script type=\"module\">\n{imports}</script>\n\
+         </head><body></body></html>"
+    )
 }
 
 /// The files a transpiled module pulls next, as the webview would: `ol://`
@@ -435,13 +509,20 @@ mod tests {
     }
 
     #[test]
-    fn the_shell_is_one_stylesheet_and_the_program_s_entry() {
+    fn the_shell_is_one_stylesheet_the_entry_and_the_page_s_own_identity() {
         let page = shell("ol://app/p_1/styles.css", "ol://app/mod/x/index.tsx");
         assert!(page.contains(r#"<script type="module" src="ol://app/mod/x/index.tsx"></script>"#), "{page}");
         assert!(page.contains(r#"<link rel="stylesheet" href="ol://app/p_1/styles.css">"#), "{page}");
         assert!(page.contains("<body></body>"), "nothing is mounted for the program: {page}");
         assert!(!page.contains("id=\"root\""), "the program mounts the body itself: {page}");
         assert!(!page.contains("<style"), "every rule arrives through the link: {page}");
+        // Identity comes off the URL, not the markup: the same shell text is
+        // true for every process, so a recycled webview self-stamps.
+        assert!(
+            page.contains("window.__openlight_process = decodeURIComponent(location.pathname.slice(1));"),
+            "the page derives its process from its own URL: {page}"
+        );
+        assert!(!page.contains("p_1</script>"), "no process id is baked into the markup: {page}");
     }
 
     #[test]
@@ -490,6 +571,47 @@ mod tests {
         assert!(!transpiled(Path::new("/a/b.css")) && !transpiled(Path::new("/a/b")));
         assert_eq!(mime(Path::new("/a/b.css")), "text/css");
         assert_eq!(mime(Path::new("/a/b.png")), "image/png");
+    }
+
+    #[test]
+    fn the_warm_route_is_reserved_and_its_page_never_runs_the_program() {
+        assert_eq!(route("/warm"), Route::Warm);
+        // A name that merely starts the same is still a shell.
+        assert_eq!(route("/warmer"), Route::Shell("warmer".into()));
+        let url = warm_url();
+        assert_eq!(route(url.strip_prefix(ORIGIN).expect("one origin")), Route::Warm);
+
+        let files = [
+            PathBuf::from("/proj/programs/menu/src/index.tsx"),
+            PathBuf::from("/proj/programs/menu/src/menu.tsx"),
+            PathBuf::from("/proj/node_modules/react/index.js"),
+            PathBuf::from("/proj/node_modules/react-dom/client.js"),
+        ];
+        let page = warm_page(&files);
+        // Package modules are imported — parsed, evaluated, bytecode-cached;
+        // a library at module scope is inert.
+        assert!(page.contains(r#"import "ol://app/mod/proj/node_modules/react/index.js";"#), "{page}");
+        assert!(page.contains(r#"import "ol://app/mod/proj/node_modules/react-dom/client.js";"#), "{page}");
+        // The program's own files are fetched and compiled, never executed —
+        // running a program without a process is what the ruling forbids.
+        for own in ["index.tsx", "menu.tsx"] {
+            assert!(
+                page.contains(&format!("<link rel=\"modulepreload\" href=\"ol://app/mod/proj/programs/menu/src/{own}\">")),
+                "{own} is preloaded: {page}"
+            );
+            assert!(!page.contains(&format!("import \"ol://app/mod/proj/programs/menu/src/{own}\"")), "{own} is never imported: {page}");
+        }
+        // A cache, not a surface: no identity, no stylesheet, nothing mounted.
+        assert!(!page.contains("__openlight_process"), "{page}");
+        assert!(!page.contains("stylesheet"), "{page}");
+        assert!(page.contains("<body></body>"), "{page}");
+
+        // The warm answer resolves before any file is read.
+        let entry = PathBuf::from("/proj/programs/menu/src/index.tsx");
+        assert_eq!(
+            respond(Path::new("/proj"), "p_1", &entry, "/warm"),
+            Answer::Warm(entry)
+        );
     }
 
     #[test]

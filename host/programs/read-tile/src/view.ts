@@ -2,7 +2,7 @@
 // argument, and the view the scope's *shape* asks for (programs.md §3.5,
 // *Viewing the substrate*). Pure — the rendering half imports these, the tests
 // drive them directly.
-import type { ChunkId, ChunkItem, ScopeResult } from '@openlight/sdk'
+import type { ChunkId, ChunkItem, Declaration, ScopeResult } from '@openlight/sdk'
 
 export type Member = {
   chunk: ChunkItem
@@ -55,6 +55,33 @@ export function argumentTarget(frame: ScopeResult): ChunkId[] {
     }
   }
   return []
+}
+
+/** The frame chunk carrying that argument — the one a retarget rewrites. */
+export function argumentChunk(frame: ScopeResult): ChunkItem | undefined {
+  return frame.chunks.find((chunk) => chunk.body?.target !== undefined)
+}
+
+/**
+ * The frame write that retargets the lens (author ruling: a read whose scope
+ * cannot change is not a lens — the scope is the lens's live argument). An
+ * ordinary commit into the program's own frame: the request chunk carried
+ * whole — a declaration replaces name/spec/body wholesale, so dropping them
+ * here would silently strip the record — with only `target` rewritten.
+ */
+export function retargetDeclaration(request: ChunkItem, target: ChunkId[]): Declaration {
+  return {
+    chunks: [
+      {
+        id: request.id,
+        ...(request.name == null ? {} : { name: request.name }),
+        ...(request.spec == null ? {} : { spec: request.spec }),
+        body: { ...(request.body ?? {}), target },
+      },
+    ],
+    placements: [],
+    message: 'retarget lens',
+  }
 }
 
 /** Pin: `name` when present, else the id truncated — enough to disambiguate. */

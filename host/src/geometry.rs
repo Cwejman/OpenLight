@@ -1,4 +1,4 @@
-//! Tile geometry — pure. From `pilot/host.md` §Tile Geometry:
+//! Tile geometry — pure. From `spec/host.md` §Tile Geometry:
 //! binary split tree; `ratio` is the seq-first child's share of the split
 //! axis, clamped inside (0, 1). The walk is a pure function of
 //! (tree, viewport, spacing) → leaf rectangles; spacing values are
@@ -24,6 +24,16 @@ pub enum Tile {
         first: Box<Tile>,
         second: Box<Tile>,
     },
+}
+
+/// The walk-first leaf — where boot lands its tile run. The tiling verbs
+/// evolve the tree (a close may collapse the seeded first leaf away), so
+/// "first" is the current tree's word, never a remembered id (boot.rs step 10).
+pub fn first_leaf(tile: &Tile) -> &str {
+    match tile {
+        Tile::Leaf { id } => id,
+        Tile::Split { first, .. } => first_leaf(first),
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

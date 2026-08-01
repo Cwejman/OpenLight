@@ -1,4 +1,4 @@
-//! Per-project bootstrap seeding (`pilot/bootstrap.md`): the initial commit
+//! Per-project bootstrap seeding (`spec/bootstrap.md`): the initial commit
 //! each first-party project's substrate starts with. The routines live here
 //! because the host runs them (`ol init` is host implementation — bootstrap.md,
 //! closing note). Ids are readable strings per the fixture convention
@@ -245,6 +245,52 @@ pub fn hidden_id(session: &ChunkId) -> ChunkId {
     ChunkId::from(format!("{session}-hidden").as_str())
 }
 
+/// The session's settings chunk (author ruling, *solution for now*): host
+/// configuration lives in the field as one chunk on a derived id, beside the
+/// session it configures — readable at boot, writable later by whatever
+/// surface edits settings. `prewarm` names the programs whose surfaces get a
+/// warm pane before their first launch (`main`'s prewarm lane).
+///
+/// **Recorded gap.** No spec gives settings an archetype or a home; like the
+/// hidden marker, this chunk stands on a derived id with no instance chain
+/// until a ruling places it.
+pub fn settings_id(session: &ChunkId) -> ChunkId {
+    ChunkId::from(format!("{session}-settings").as_str())
+}
+
+pub const PREWARM_KEY: &str = "prewarm";
+pub const PREWARM_DEFAULT: [&str; 1] = ["host/context-menu"];
+/// Commit each surface open's stage timings to the field (`main`'s telemetry
+/// lane) — a card per execution in any read of the session.
+pub const TIMINGS_KEY: &str = "timings";
+
+/// What a fresh settings chunk holds.
+fn settings_defaults() -> serde_json::Value {
+    let mut body = json!({
+        "text": "Host settings, read at boot. prewarm: programs whose surfaces get a warm pane before their first launch. timings: commit each surface open's stage timings to the field.",
+    });
+    body[PREWARM_KEY] = json!(PREWARM_DEFAULT);
+    body[TIMINGS_KEY] = json!(true);
+    body
+}
+
+/// The settings body brought up to the defaults: a key this build grew is
+/// added with its default value, and a key the field already carries is never
+/// touched — the person's word outranks the build's (the session
+/// `current-tab` patch is the precedent). `None` when nothing is missing.
+pub fn merged_settings(existing: Option<serde_json::Value>) -> Option<serde_json::Value> {
+    let defaults = settings_defaults();
+    let mut body = existing.unwrap_or_else(|| json!({}));
+    let mut grew = false;
+    for (key, value) in defaults.as_object().expect("defaults are an object") {
+        if body.get(key).is_none() {
+            body[key.as_str()] = value.clone();
+            grew = true;
+        }
+    }
+    grew.then_some(body)
+}
+
 pub struct Workspace {
     pub session: ChunkId,
     pub tab: ChunkId,
@@ -320,6 +366,39 @@ pub fn ensure_workspace(engine: &Engine) -> Result<Workspace, String> {
             seq: Some(1),
             active: true,
         });
+    }
+
+    let settings = settings_id(&session);
+    let opts = db::ReadOpts {
+        include: db::Includes {
+            chunk_name: true,
+            chunk_spec: true,
+            chunk_body: true,
+            ..db::Includes::default()
+        },
+        ..db::ReadOpts::default()
+    };
+    let existing =
+        engine.get(&ctx, &settings, opts).map_err(|e| format!("reading {settings}: {e}"))?;
+    match existing {
+        None => {
+            if let Some(body) = merged_settings(None) {
+                chunks.push(chunk(settings.as_str(), "settings", None, body));
+            }
+        }
+        // An earlier build's settings may predate a key: grow the missing
+        // defaults, carry everything else (name, spec, the person's values).
+        Some(item) => {
+            if let Some(body) = merged_settings(item.body) {
+                chunks.push(ChunkDeclaration {
+                    id: Some(settings.clone()),
+                    name: item.name,
+                    spec: item.spec,
+                    body: Some(body),
+                    removed: false,
+                });
+            }
+        }
     }
 
     if !chunks.is_empty() || !placements.is_empty() {
@@ -488,6 +567,29 @@ mod tests {
                 assert_eq!(c.name.is_none(), is_anchor, "{:?} name/anchor mismatch", c.id);
             }
         }
+    }
+
+    #[test]
+    fn settings_grow_missing_defaults_and_never_overwrite() {
+        let fresh = merged_settings(None).expect("everything is missing");
+        assert_eq!(fresh[PREWARM_KEY], json!(["host/context-menu"]));
+        assert_eq!(fresh[TIMINGS_KEY], json!(true));
+
+        // Nothing missing → no patch, no commit.
+        assert_eq!(merged_settings(Some(fresh.clone())), None);
+
+        // A key the person set keeps their value — even a falsy one — and a
+        // key this build grew arrives with its default beside it.
+        let mut theirs = json!({ "text": "kept" });
+        theirs[PREWARM_KEY] = json!([]);
+        theirs[TIMINGS_KEY] = json!(false);
+        assert_eq!(merged_settings(Some(theirs.clone())), None, "false is a value, not a gap");
+        let mut partial = json!({ "text": "kept" });
+        partial[PREWARM_KEY] = json!(["theirs"]);
+        let grown = merged_settings(Some(partial)).expect("timings was missing");
+        assert_eq!(grown["text"], "kept");
+        assert_eq!(grown[PREWARM_KEY], json!(["theirs"]));
+        assert_eq!(grown[TIMINGS_KEY], json!(true));
     }
 
     #[test]

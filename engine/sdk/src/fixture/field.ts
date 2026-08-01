@@ -532,7 +532,13 @@ function matchesFts(view: View, chunk: ChunkId, query?: string): boolean {
     .toLowerCase()
     .split(/\s+/)
     .filter((term) => term.length > 0)
-    .every((term) => new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(text))
+    .every((term) => {
+      // FTS5's one syntax this emulation honors: a trailing `*` makes the
+      // term a token prefix — the shape completion queries send. The word
+      // boundary already prefixes; the star only drops from the literal.
+      const prefix = term.endsWith('*') ? term.slice(0, -1) : term
+      return new RegExp(`\\b${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(text)
+    })
 }
 
 function strings(value: unknown): string[] {

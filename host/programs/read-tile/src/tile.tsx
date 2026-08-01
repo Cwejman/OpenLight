@@ -10,19 +10,31 @@
 // links it, so nothing here carries CSS. Two markers survive the classes, and
 // they are what the tests and the probe read: `data-ui` for a shared
 // component's meaning, `data-part` for one of this surface's own regions.
-import { get, type ChunkId, type ChunkItem, type ScopeResult } from '@openlight/sdk'
+import { commit, get, scope, type ChunkId, type ChunkItem, type ScopeResult } from '@openlight/sdk'
 import { Card, Pill, Status, useScope } from '@openlight/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import {
+  argumentChunk,
   argumentTarget,
   bodyEntries,
   displayName,
   infer,
   leadingText,
   meta,
+  retargetDeclaration,
   shortId,
   type Member,
 } from './view.ts'
+import { ftsQuery, options, SEARCH_LIMIT, type Option as CompletionOption } from './complete.ts'
+
+/** The future completion program's whole contract: a string in, matching
+ * scopes out — its body is `complete.ts`; only the field read lives here. */
+async function search(typed: string, roots: ChunkId[]): Promise<CompletionOption[]> {
+  const query = ftsQuery(typed)
+  if (query.length === 0) return []
+  const result = await scope([], { match_: query, include: { body: false }, limit: SEARCH_LIMIT })
+  return options(result, roots)
+}
 
 type Read =
   | { status: 'pending' }
@@ -34,10 +46,26 @@ export function ReadTile({ process }: { process: ChunkId }) {
   if (!frame) return <Frame status="reading the frame…" />
   const target = argumentTarget(frame)
   if (target.length === 0) return <Frame status="this run carries no target argument" />
-  return <Scope roots={target} />
+  const request = argumentChunk(frame)
+  return <Scope roots={target} {...(request === undefined ? {} : { onRetarget: retarget(request) })} />
 }
 
-function Scope({ roots }: { roots: ChunkId[] }) {
+/**
+ * Retargeting is an ordinary frame write: the request chunk's `target`
+ * rewritten, the frame subscription delivering it back, the tile re-reading.
+ * A refused write is said where a program's failures are said (the console)
+ * and the lens keeps its scope — the recorded gap on person-facing refusal
+ * (menu.tsx) applies here too.
+ */
+function retarget(request: ChunkItem): (target: ChunkId[]) => void {
+  return (target) => {
+    void commit(retargetDeclaration(request, target)).catch((error: unknown) => {
+      console.error('read: retarget refused', error)
+    })
+  }
+}
+
+function Scope({ roots, onRetarget }: { roots: ChunkId[]; onRetarget?: (target: ChunkId[]) => void }) {
   const result = useScope(roots)
   const rootRead = useChunks(roots, result?.head)
 
@@ -63,10 +91,25 @@ function Scope({ roots }: { roots: ChunkId[] }) {
       {/* Context first: the ids the scope was opened by are the breadcrumb the
           subject hangs under, so they lead — then the subject, then its prose. */}
       <header data-part="head" className="border-b border-line px-9 pt-7 pb-5">
-        <div data-part="chips" className="flex flex-wrap gap-2">
+        <div data-part="chips" className="relative flex flex-wrap items-center gap-2">
           {roots.map((id) => (
-            <Pill key={id}>{shortId(id, 24)}</Pill>
+            <Pill key={id}>
+              {shortId(id, 24)}
+              {/* A dimension leaves by its own ×; the last one stays — a lens
+                  with no scope at all has no way back to one. */}
+              {onRetarget !== undefined && roots.length > 1 ? (
+                <button
+                  data-part="unscope"
+                  aria-label={`drop ${id}`}
+                  className="ml-1 cursor-default text-ink-ghost hover:text-ink"
+                  onClick={() => onRetarget(roots.filter((kept) => kept !== id))}
+                >
+                  ×
+                </button>
+              ) : null}
+            </Pill>
           ))}
+          {onRetarget === undefined ? null : <Retarget roots={roots} onRetarget={onRetarget} />}
         </div>
         <h1
           data-part="title"
@@ -122,6 +165,114 @@ function Scope({ roots }: { roots: ChunkId[] }) {
         <span className="font-mono">{shortId(result.head, 10)}</span>
       </footer>
     </Frame>
+  )
+}
+
+/**
+ * The scope, editable in place — the lens's argument as a quiet field beside
+ * its chips. The input *adds* dimensions (the chips' × removes them; together
+ * they are the whole grammar), and typing raises the completion box: named
+ * scopes matching what is typed, from the field's own FTS (`complete` — the
+ * in-tile stand-in for the completion *program*, gated on the overlay-anchor
+ * open). Enter takes the active match, or the raw typed ids when nothing
+ * matched — an unnamed chunk (a process) is reached by its id.
+ */
+function Retarget({
+  roots,
+  onRetarget,
+  find = search,
+}: {
+  roots: ChunkId[]
+  onRetarget: (target: ChunkId[]) => void
+  find?: typeof search
+}) {
+  const [typed, setTyped] = useState('')
+  const [found, setFound] = useState<CompletionOption[]>([])
+  const [active, setActive] = useState(0)
+
+  const key = JSON.stringify(roots)
+  useEffect(() => {
+    if (typed.trim() === '') {
+      setFound([])
+      return undefined
+    }
+    let live = true
+    void find(typed, JSON.parse(key) as ChunkId[])
+      .then((matches) => {
+        if (live) {
+          setFound(matches)
+          setActive(0)
+        }
+      })
+      .catch(() => {
+        if (live) setFound([])
+      })
+    return () => {
+      live = false
+    }
+  }, [typed, key, find])
+
+  const add = (ids: ChunkId[]): void => {
+    const fresh = ids.filter((id) => id.length > 0 && !roots.includes(id))
+    setTyped('')
+    setFound([])
+    if (fresh.length > 0) onRetarget([...roots, ...fresh])
+  }
+
+  return (
+    <span className="relative min-w-32 flex-1">
+      <input
+        data-part="retarget"
+        placeholder="add scope…"
+        spellCheck={false}
+        value={typed}
+        onChange={(event) => setTyped(event.target.value)}
+        className="w-full bg-transparent font-mono text-small text-ink-soft outline-none placeholder:text-ink-ghost"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            setTyped('')
+            setFound([])
+          } else if (event.key === 'ArrowDown' && found.length > 0) {
+            event.preventDefault()
+            setActive((current) => (current + 1) % found.length)
+          } else if (event.key === 'ArrowUp' && found.length > 0) {
+            event.preventDefault()
+            setActive((current) => (current - 1 + found.length) % found.length)
+          } else if (event.key === 'Enter') {
+            const pick = found[active]
+            if (pick) add([pick.id])
+            else add(typed.split(/[\s,]+/))
+          }
+        }}
+      />
+      {found.length === 0 ? null : (
+        <ul
+          data-part="complete"
+          className="absolute top-full left-0 z-10 mt-2 max-h-64 w-72 overflow-y-auto rounded-soft border border-line bg-white py-1 shadow-sm"
+        >
+          {found.map((option, index) => (
+            <li key={option.id}>
+              <button
+                data-part="option"
+                data-active={index === active}
+                className="flex w-full cursor-default items-baseline gap-3 px-4 py-2 text-left data-[active=true]:bg-hover"
+                // Mouse-down, not click: the pick must land before the input
+                // loses focus and the box would close.
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  add([option.id])
+                }}
+              >
+                <span className="min-w-0 truncate font-medium">{option.name}</span>
+                <span className="truncate font-mono text-small text-ink-ghost">
+                  {shortId(option.id, 18)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </span>
   )
 }
 

@@ -2,12 +2,14 @@
 // the view its target's shape asks for (programs.md §3.5).
 import { describe, expect, test } from 'bun:test'
 import {
+  argumentChunk,
   argumentTarget,
   bodyEntries,
   displayName,
   infer,
   leadingText,
   meta,
+  retargetDeclaration,
   shortId,
   stamp,
 } from '../src/view.ts'
@@ -162,5 +164,32 @@ describe('display', () => {
 
   test('long prose is cut', () => {
     expect(leadingText({ id: 'a', body: { text: 'x'.repeat(200) } }, 10)).toBe(`${'x'.repeat(10)}…`)
+  })
+
+  test('a retarget carries the request chunk whole and rewrites only its target', () => {
+    const request: ChunkItem = {
+      id: 'arg',
+      name: 'request',
+      body: { target: ['session'], depth: 2 },
+    }
+    const declaration = retargetDeclaration(request, ['timing-first-paint', 'p_1'])
+    expect(declaration.chunks).toEqual([
+      {
+        id: 'arg',
+        // A declaration replaces the record wholesale — dropping the name
+        // here would silently strip it (the session-patch precedent).
+        name: 'request',
+        body: { target: ['timing-first-paint', 'p_1'], depth: 2 },
+      },
+    ])
+    expect(declaration.placements).toEqual([])
+
+    // The chunk a retarget rewrites is the one the argument was read from.
+    const frame = result([
+      { id: 'p', body: { status: 'running' } },
+      request,
+    ])
+    expect(argumentChunk(frame)?.id).toBe('arg')
+    expect(argumentChunk(result([{ id: 'p', body: {} }]))).toBeUndefined()
   })
 })
