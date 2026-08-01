@@ -13,7 +13,7 @@ The working board — current state, the queue, the gates, the debt. Session nar
 
 ## Namings — pinned for code
 
-`lens` — the arrangement viewer (read-tile's deepening target; rename pending author word) · `process-view` — the process surface: argument · frame · result (author: not "inspector") · `form` — the generated argument editor; one program serving draft and palette · `prose` — markdown-with-slots; `[[mention]]`s render through the ladder · `position` — one union term of a lens scope (an intersection of terms) · `preset` — a committed lens argument; a recipe whose program is a surface · `draft` — pre-dispatch process state; argument editable iff unconsumed · `attribute` — per-element adjunct query + slot · `lineage` — the citation walk (process in, thread out) · `merge` — peer-position interleave (seq/time, commit-time ties) · `fold` — arrangement grain state (element vs its summary; lens-owned) · `contribution` — derived per-position membership.
+`lens` — the arrangement viewer (read-tile's deepening target; rename pending author word) · `process-view` — the process surface: argument · frame · result (author: not "inspector") · `form` — the generated argument editor; one program serving draft and palette · `prose` — markdown-with-slots; `[[mention]]`s render through the ladder · `position` — one union term of a lens scope (an intersection of terms) · `preset` — a committed lens argument; a recipe whose program is a surface · `draft` — pre-dispatch process state; argument editable iff unconsumed · `attribute` — per-element adjunct query + slot · `lineage` — the citation walk (process in, thread out) · `merge` — peer-position interleave (seq/time, commit-time ties) · `fold` — arrangement grain state (element vs its summary; lens-owned) · `contribution` — derived per-position membership · `focus` — the chunk a lens's immutable argument references: the whole view definition (scope expressions + settings); presets are committed focus chunks.
 
 ## Next
 
@@ -33,11 +33,11 @@ The working board — current state, the queue, the gates, the debt. Session nar
 - **The dissolution transmutations adopted** — author: "that is the whole point." Answer-home → draft-summons-form; the conversation container dies; a conversation is a named position, materialized as a chunk only when named/shared/bound/peopled. The session.md ratification read is now a confirmation pass over threads-dialog.md.
 - **Drafts are substrate-resident** — author: "there is no in-memory markdown; substrate it is." The draft process holds its draft prose in the field by the laws of the system; persistence is not a policy but a consequence. Nothing auto-sweeps.
 - **read-tile → lens rename confirmed** at Next 3.
+- **`focus` named** (author): the lens's referenced argument chunk — scope expressions + view settings; a lens points at its focus; a preset is a committed focus chunk.
 
 ## Gates — author's word wanted
 
-- **Naming the lens's referenced argument chunk** (holds scope expressions + view settings; presets are committed instances of it). Candidate: `focus` — a lens points at its focus. Author flagged the naming as open.
-- **Preset semantics**: opening from a preset copies into a fresh focus chunk (save-back explicit) vs live-editing the preset. Settle at the preset step.
+- **Preset semantics**: template or live? Copy-on-open (fresh focus chunk, `relates` its source preset, explicit save-back — steward-recommended) vs live-editing the shared preset chunk. Settle before the preset step.
 - Standing from before: session.md confirmation pass (was ratification; dissolution adopted); **VM containment ruling** before the agents project; steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
 
 ## Tracked debt
