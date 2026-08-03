@@ -96,7 +96,7 @@ A Rust library linked into the host. The host's wry IPC handlers and engine APIs
 
 ### The host
 
-A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `pilot/programs.md` §3.1). See [`pilot/host.md`](pilot/host.md).
+A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `programs.md` §3.1). See [`host.md`](host.md).
 
 ### Programs
 
@@ -170,9 +170,9 @@ agents/              — first user-facing project for v0.1. The agent program
     project.toml     — declares mounts on host and engine projects
 ```
 
-`bootstrap.rs` (seed routines) lives inside whichever crate runs them; each project's bootstrap is its own concern (see [`pilot/bootstrap.md`](pilot/bootstrap.md)).
+`bootstrap.rs` (seed routines) lives inside whichever crate runs them; each project's bootstrap is its own concern (see [`bootstrap.md`](bootstrap.md)).
 
-The TypeScript implementations under `pilot/db/` and `pilot/engine/` are legacy archive from earlier evolutions, not a source of truth. The spec is. Rust impl flows from the spec; tests verify against the spec.
+The first pilot's TypeScript implementations were deleted outright (git history keeps them); they were never a source of truth. The spec is. Rust impl flows from the spec; tests verify against the spec.
 
 ## Build Order
 
@@ -185,7 +185,7 @@ The rule across the spec phase: implementation drawings are derived from the ins
 1. **Substrate component.**
    - **1a.** Audit [`substrate.md`](substrate.md) for gaps in the two contracts: consumer ↔ db (the program-facing operations and types), db ↔ sqlite (the schema, indexes, FTS, transaction discipline). Mostly there; small audit.
    - **1b.** Write a new [`db.md`](db.md) — top-to-bottom drawing of how the Rust db actually works. Derived holistically from the substrate spec, Rust idiom, and SQLite idiom.
-2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`engine.md`](engine.md), [`pilot/host.md`](pilot/host.md), and a new [`sdk.md`](sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
+2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`engine.md`](engine.md), [`host.md`](host.md), and a new [`sdk.md`](sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
 
 **Implementation phase — code from the settled drawings.**
 
@@ -205,11 +205,11 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 - [`substrate.md`](substrate.md) — chunk, placement, spec language, commits, queries. The primitive layer (concept, two contracts).
 - [`db.md`](db.md) — implementation drawing of the Rust db. Top-to-bottom, derived holistically from the substrate spec.
 - [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
-- [`pilot/host.md`](pilot/host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
+- [`host.md`](host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
 - [`sdk.md`](sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
-- [`pilot/programs.md`](pilot/programs.md) — the program layer at experience depth: the call frame, lifecycle, the interface concretely (sidebar, palette, launch, viewers), the program set, and the demands returned to the foundation.
-- [`pilot/agent.md`](pilot/agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately.
-- [`pilot/bootstrap.md`](pilot/bootstrap.md) — the seed data.
+- [`programs.md`](programs.md) — the program layer at experience depth: the call frame, lifecycle, the interface concretely (sidebar, palette, launch, viewers), the program set, and the demands returned to the foundation.
+- [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately.
+- [`bootstrap.md`](bootstrap.md) — the seed data.
 
 ## What Is Open
 

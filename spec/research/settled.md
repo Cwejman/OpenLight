@@ -90,3 +90,5 @@ Binding objecthood (pairing vs object) · `ordered`/`seq` home · single-owner u
 **substrate.md** ← §1 as law · **db.md** ← physical only (`owned` in the enum, link table, ownership paths, expression indexes) · **engine.md** ← §2 + §3 whole (accepts machinery retires) · **programs.md** ← **rewritten from scratch**: actual programs only (catalog, contracts, experience — §4 + chrome + citizens/slots + tool programs + result names), mechanics referenced never restated · **sdk.md** ← translation + resolution modes · session/agent/host swept to vocabulary.
 
 Then the build queue as boarded: reader v0 → draft + form → process-view v0 → prose v0 → follow + thread face → attributes → shipped collations. A fresh session starts here: this file, then board.md, then the target spec.
+
+**Known-stale until the fold sweeps them** (from the cold-agent dry run): engine.md still calls `attach` load-bearing (demoted); agent.md/session.md/programs.md §4 still teach `[[id]]` (ol: supersedes); substrate.md has no antecedent for owned-by/reach (the largest fold delta); the dispatch-frontier pause lifts when the redistribution lands (now stated on the board).

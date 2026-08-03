@@ -20,7 +20,7 @@ A model-calling program reads the same typed structure a grep does (or any progr
 
 > Read in order. `spec/` sub-specs and `spec/research/` are reference depths — descend when work calls for them.
 
-[`spec/pilot.md`](spec/pilot.md) and [`spec/`](spec/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](spec/substrate.md), [`db.md`](spec/db.md), [`engine.md`](spec/engine.md), [`host.md`](spec/host.md), [`sdk.md`](spec/sdk.md). Experience: [`programs.md`](spec/programs.md), [`agent.md`](spec/agent.md).
+[`spec/pilot.md`](spec/pilot.md) and [`spec/`](spec/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](spec/substrate.md), [`db.md`](spec/db.md), [`engine.md`](spec/engine.md), [`host.md`](spec/host.md), [`sdk.md`](spec/sdk.md). Experience: [`programs.md`](spec/programs.md), [`agent.md`](spec/agent.md), [`session.md`](spec/session.md).
 
 [`conventions.md`](conventions.md) — principles and working agreements. Short.
 
