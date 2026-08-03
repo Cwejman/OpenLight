@@ -283,7 +283,8 @@ host/
                        useCommit/useRun) used by webview programs the host
                        renders. Lives here for v0.1; may extract later.
   programs/          — first-party host-shipped programs, one package each:
-                       sidebar, tab-bar, command-palette, dispatcher, read-tile.
+                       sidebar, tab-bar, command-palette, form, read-tile
+                       (grows into `reader`; programs.md §3.5, §4).
                        (Webview programs in TSX, served from source over ol://;
                        the host runs them at boot or on demand.)
   .ol/db, .ol/project.toml

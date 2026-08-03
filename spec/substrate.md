@@ -221,6 +221,10 @@ Summaries, vector embeddings, and other derived data are not special-cased — t
 
 A derived chunk records what it was derived from in its body (e.g. `source_commit`, `model`), so a reader can tell whether the source has moved since. Detecting and regenerating staleness is the reader's concern — the substrate stores the data, not the policy.
 
+### Grain — type or body key
+
+One question decides where a property lives (ruled): **does the property change while the chunk remains itself?** State — a task's status, a document's draft flag — is a body key; making it a placement would churn placements on every change and let the "type" lie about identity. Identity — what the chunk *is*, without which it is nothing (a telemetry event's category, whose whole body is one number) — is a type, carried by placement. A JSON body is **compressed field structure**: the grain choice is never fatal, because a pure transform can project body keys as virtual chunks on demand (`explode`, engine.md §What Is Open) and a writer who knows the shape may commit at chunk grain — pre-explosion, not indexing.
+
 ### Temporal scoping
 
 Reconstruct state at any commit. A scope read at `--at <commit-id>` resolves all chunks and placements as of that point in history.
@@ -282,4 +286,4 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 - **Spec language evolution.** The four fields (ordered, accepts, required, unique) cover the known cases. The vocabulary may grow through use.
 - **Merge semantics — ruled.** Branches diverge freely; merge auto-takes the union of additions and fails hard only on true collision (the same chunk's body or spec changed on both sides). No conflict-resolution machinery in the primitives: an agent resolves a refused merge with existing tooling, committing the reconciliation as ordinary work. Substrate refuses, intelligence resolves. Protocol shape lands with branch ops (engine.md, *What Is Open*).
 - **Temporal validity.** Event time vs system time is expressible through body properties. Whether `valid_from`/`valid_to` deserve first-class status depends on use.
-- **Views.** Saved scopes with display settings. Drift detection when knowledge changes under an approved view. Concept is clear; mechanics are unbuilt.
+- **Views.** Saved scopes with display settings — now drawn concretely as the reader's **reading** chunks and committed **templates** (programs.md §3.5); drift detection when knowledge changes under an approved view remains open.

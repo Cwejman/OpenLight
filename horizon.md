@@ -40,6 +40,12 @@ The substrate is typed, so interface can be inferred from shape — that is a la
 2. **Authored overrides.** Where inference falls short, a program or a per-archetype hint supplies the form — hand-built views remain first-class, and a powerful UI stays cheap.
 3. **Generated interfaces.** On the far end, AI generates views — more tractable here than in conventional apps, because the substrate separates mechanics from form and the type system constrains what a view must honor.
 
+## Typed JSON — chunk references in bodies
+
+Body schemas document key types today, but a chunk id in a body is an opaque string — untyped, unvalidated, invisible to the placement graph. The direction: schema keys can be **reference-typed** — a key declared as holding a chunk id (optionally constrained by archetype), validated on write, resolvable by readers, surfaced to queries. Until then, anything that must point at a chunk *and be seen doing so* uses a `relates` placement even where the grain rule would prefer a body key (the reader's current-reading relates is the standing example — author-flagged, the reason this entry exists).
+
+**Real today:** `body.schema` documents keys; references-are-never-capabilities is settled; R12 `attach` (engine.md, open) is the run-argument face of the same need. **Open:** enforcement shape, whether reference-typed keys project as placements (which would dissolve the relates workaround), migration of existing id-strings.
+
 ## The band
 
 Several model programs sharing a field, each with its own face, running in oscillation — one's output enabling what another could not make alone. Kept deliberately, and marked honestly: this is the least proven idea in the project. It depends on completion-model performance over many cycles running together, which no one has demonstrated at this shape.
