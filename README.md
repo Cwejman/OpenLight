@@ -30,6 +30,8 @@ A model-calling program reads the same typed structure a grep does (or any progr
 
 [`horizon.md`](horizon.md) — the vision beyond v0.1, by proximity and proof status.
 
+[`sketches.md`](sketches.md) — mini-projects: small app ideas inside the environment, held open with their grounding.
+
 [`rework.md`](rework.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
 
 [`spec/research/`](spec/research/) — reference depth. [`spec/research/cleanroom/`](spec/research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.

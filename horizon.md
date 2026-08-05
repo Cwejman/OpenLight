@@ -52,6 +52,12 @@ Several model programs sharing a field, each with its own face, running in oscil
 
 What makes it worth holding: the mechanical floor already exists and required no new mechanism — delegation as nested runs, siblings coordinating through subscriptions on shared scopes, blackboard scopes with enforced specs, attribution on every commit (`spec/programs.md`). The band is what may emerge *above* that floor. It is not a mechanism to build first; it is what the working environment makes it possible to attempt.
 
+## Knowledge as resolutions
+
+When the environment is usable enough that the spec itself moves into the substrate, knowledge stops being prose files and becomes structure — and the unit to build it from is the **resolution**: a settled decision as a chunk, its premises as connections. What makes a resolution steadfast — explicit claim, explicit premises, a commit with author and time — is exactly what makes it the opposite when it must be: dissolvable. Retire a premise and the resolutions standing on it surface as a query, not as stale prose a reader must remember to catch. The standing example is live in this file: *host-native sidebar/tabs* was held open on the premise of host-cast chrome; the one-compositor ruling ([`spec/research/one-compositor.md`](spec/research/one-compositor.md)) retired the premise, and only a reader's memory connected the two.
+
+**Real today:** the conventions mandate legible openness (settled vs held-open, marked in place); specs are already substrate-enforced contracts; every commit carries author and time. **Open:** the resolution archetype's shape (claim, premises, status), whether premise links are placements or reference-typed body keys (kin to *Typed JSON* above), and what dissolution does downstream — mark, notify, or block.
+
 ## Uniform VM containment via DOM streaming
 
 The pilot uses split containment — capability-bearing programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels: a thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for the same pattern.
@@ -72,6 +78,8 @@ v0.1 ships read-only filesystem-local mounts. The full picture is larger; the ar
 ## View modes beyond tabs
 
 Tabs are one lens. A zoomable canvas — workspaces as nested regions, navigation spatial, containers abstracting with zoom — is the most charted alternative (Figma, tldraw, Muse). The composition types hold for either geometry; what changes is the layout a view program imposes and one new host geometry interpreter (rect walk + viewport transform beside the split-tree walk). The clean-room audit confirmed the delta is that small ([`spec/research/cleanroom/composition.md`](spec/research/cleanroom/composition.md) §3.4). Because view modes are programs, lenses — canvas, outline, timeline, graph — are additive, not forks.
+
+In the canvas lens the drawable outruns the window: the host's canvas extends beyond the viewport and the viewport becomes a **camera** over it. Fixed strips lose their claim to edges — a sidebar becomes a floating, minimizable overlay widget among a launcher of overlays (Figma's pattern), spawned rather than always-mounted. The overlay archetype already carries the shape; what changes is that anchoring goes spatial.
 
 ## WebGPU-capable views
 
