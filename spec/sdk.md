@@ -30,6 +30,20 @@ React helpers (`useScope`, future `useCommit`, `useRun`, `useSubscribe`) are not
 
 ---
 
+## Boundary translation — three forms of one value
+
+Typed bodies exist in three forms; translation between them is the SDK's job, invisible to program code:
+
+- **In hand — native values.** A `ref` key is a `Ref` object (id + convenience resolve), `time` is a `Date`, `set` is a `Set`, `markdown` is a string tagged by its type. Program code works with real values, never tag envelopes.
+- **On the wire — tagged JSON.** Values self-describe: `{"$ref": "chunk_id"}` · `{"$loc": "<normalized expression>"}` · `{"$set": [...]}` · `{"$time": "2026-08-03T…"}` · `{"$md": "…"}`. Tags are what make union checks tag-membership and link-finding spec-free (substrate.md); the engine validates them against instance specs at commit.
+- **In the file — plain JSON.** The db stores one JSON text column, byte-identical semantics; the tagged encoding is the stored form.
+
+The SDK encodes on every write and decodes on every read, driven by the tags alone — no spec fetch needed to translate. Schema-driven TS types (a program's argument as a real TypeScript type, generated from the archetype's instance spec) are a later layer on the same encoding.
+
+## Resolution modes — frozen or head
+
+A process's argument is frozen at dispatch, but the chunks it references live on. When a program reads through its argument's refs, the SDK resolves **at the stamped commit by default** (`at:` from the process body) — reproducible, exactly what the run was given. Following the **living head** is the deliberate, explicit choice (`{ at: 'head' }`) for programs that want liveness — the reader following its reading is this, plus a subscription. Same temporal machinery, two honest modes (engine.md, *Frozen safety or rolling head*).
+
 ## The Substrate Surface
 
 `@openlight/sdk` exposes typed functions at the package root.
@@ -42,7 +56,7 @@ get(chunkId: ChunkId, opts?: ReadOpts): Promise<ChunkItem | null>
 readBatch(reads: TaggedRead[]): Promise<BatchResult>
 ```
 
-All wrap engine ops of the same name. Errors arrive as rejected Promises typed `EngineError`. `scope([])` with `opts.match_` is a whole-field FTS query (boundary-filtered); `opts.exclude` subtracts scopes; `limit`/`offset`/`include: { body: false }` per substrate.md (*Pagination and projection*). `readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on (`programs.md` §3.5).
+All wrap engine ops of the same name. Errors arrive as rejected Promises typed `EngineError`. `scope([])` with `opts.match_` is a whole-field FTS query (boundary-filtered); `opts.exclude` subtracts scopes; `limit`/`offset`/`include: { body: false }` per substrate.md (*Pagination and projection*). `readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on (`programs.md` §5).
 
 ### Writes
 
@@ -56,13 +70,13 @@ One-shot atomic write through the engine. The engine validates against the progr
 ### Process control
 
 ```ts
-run(programId: ChunkId, args: RunArgs): Promise<{ process: ProcessId }>
-awaitRun(processIds: ProcessId[], opts?: { resultsOnly?: boolean }): Promise<Record<ProcessId, ScopeResult>>
+run(args: RunArgs): Promise<{ process: ProcessId }>
+awaitRun(processIds: ProcessId[]): Promise<Record<ProcessId, ChunkItem>>
 cancel(processId: ProcessId): Promise<void>
 exit(): Promise<void>
 ```
 
-`run` returns the process id immediately. `RunArgs.mode` selects `'child'` (default — composed work, nested on the caller, cascades with it) or `'launch'` (detached — placed on the session, survives the caller; boundaries still intersect at spawn). `awaitRun` resolves when each named process reaches a terminal state; `resultsOnly` filters each returned scope to result-typed chunks. `cancel` is authorized for descendants or targets within the caller's write boundary; idempotent. `exit` requests the calling program's own terminal transition — the webview self-dismissal path.
+`run` dispatches — a program plus an already-committed argument chunk, or a draft process to consume — and returns the process id immediately. `RunArgs.mode` selects `'child'` (default — composed work, owned by the caller, cascades with it) or `'launch'` (detached — owned by the session, survives the caller; grants still intersect at spawn). `awaitRun` resolves when each named process reaches a terminal state and **returns the process chunk itself** — status and `result` ref in the body, the result one `get` away. `cancel` is authorized for descendants or targets within the caller's write boundary; idempotent. `exit` requests the calling program's own terminal transition — the webview self-dismissal path.
 
 `awaitRun` is named to dodge `await` (a TypeScript reserved word). The engine method is `await_processes`.
 
@@ -100,7 +114,7 @@ useScope(scopes: ChunkId[], opts?: ScopeOpts): ScopeResult | undefined
 
 **Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `scope` together must follow the same ordering.
 
-*Open — no error channel.* `useScope` returns `ScopeResult | undefined`, and `undefined` is its only failure form — a refused scope read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The read-tile's inline-error pin (programs.md §3.5) is unreachable for scope reads until this closes.
+*Open — no error channel.* `useScope` returns `ScopeResult | undefined`, and `undefined` is its only failure form — a refused scope read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The reader's inline-error pin (programs.md §3) is unreachable for scope reads until this closes.
 
 **Why re-fetch every event** rather than apply the event's `commit` payload as a delta. Single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available to the callback for delta optimization in custom uses, but the default discards it.
 
@@ -126,19 +140,25 @@ type ChunkItem = {
 }
 
 type Spec = {
-  ordered?: boolean
-  accepts?: ChunkId[]
-  required?: ChunkId[]
-  unique?: ChunkId[]
-  propagate?: boolean
+  instance?: Record<string, string>  // the instance spec — key → type expression
+                                     // ("string", "ref(workplace)", "list<ref>",
+                                     // "markdown", …; `?` and `unique` inline)
+  ordered?: boolean                  // interim home; open (substrate.md)
 }
 
 type Placement = {
   scope_id: ChunkId
-  type_: 'instance' | 'relates'   // key asymmetry, pinned: a placement is
-                                  // declared with `type` (writes,
+  type_: 'owned' | 'instance' | 'relates'   // key asymmetry, pinned: a placement
+                                  // is declared with `type` (writes,
                                   // PlacementSpec) and read back with `type_`
   seq?: number
+}
+
+type Link = {
+  source_id: ChunkId
+  target: ChunkId | string        // chunk id, or normalized location expression
+  kind: 'field' | 'mention'
+  key?: string                    // declaring key when kind = 'field'
 }
 
 type Declaration = {
@@ -167,9 +187,12 @@ type ScopeResult = {
                            // yet (the db does — recorded, ahead of the wire)
   total: number
   in_scope: number
+  in_scope_owned: number
   in_scope_instance: number
   in_scope_relates: number
   chunks: ChunkItem[]
+  linked: Link[]           // fields and mentions pointing at the roots — derived,
+                           // reader-reach-filtered, never mixed with placements
   dimensions: Dim[]
 }
 
@@ -182,14 +205,18 @@ type Commit = {
   branch: string           // which branch it landed on — the event's only carrier
   chunks_modified: ChunkId[]
   placements_modified: [ChunkId, ChunkId][]
+  links_modified: ChunkId[]  // chunks whose inbound links changed this commit
 }
 
 type RunArgs = {
-  chunks: ChunkDeclaration[]
-  mode?: 'child' | 'launch'  // child (default): nested, cascades with caller;
-                             // launch: detached, session-placed, survives caller
-  readBoundary: ChunkId[]    // scope roots — the SDK builds a fresh boundary chunk per run
-  writeBoundary: ChunkId[]   // same — programs always supply roots
+  program?: ChunkId          // with `argument`: direct dispatch
+  argument?: ChunkId         // an already-committed chunk, instance on the
+                             // program's argument archetype
+  draft?: ProcessId          // alternative: consume an existing draft process
+  mode?: 'child' | 'launch'  // child (default): owned by caller, cascades;
+                             // launch: owned by session, survives caller
+  read?: ChunkId[]           // granted read roots (beside grants-derived ones)
+  write?: ChunkId[]          // granted write roots
   timeout_ms?: number
 }
 
@@ -213,7 +240,7 @@ type EngineError = {
 
 Ambient globals a runtime installs — `window.__wry_ipc`, `window.__sdk`, `window.__openlight_process`, `globalThis.__openlight_transport` — are typed in one home, the SDK's `globals.d.ts`; no package re-declares them.
 
-**`RunArgs` is the program-facing projection of the engine's `RunArgs`** (see [`engine.md`](engine.md#engine-api-callable-from-the-host)). Two engine fields are absent by design: `program_id` is the first argument to `run`, not part of `args`; `placements` is engine-owned — the engine places a tool-call's process on its parent for trace nesting, which is not a program's concern. Boundaries are roots only: a program always builds a fresh boundary per run. Reusing a named boundary chunk (`BoundarySpec::Existing`) is a host/Rust-API affordance, not exposed over the protocol in v0.1.
+**`RunArgs` is the program-facing projection of the engine's `RunArgs`** (see [`engine.md`](engine.md#engine-api-callable-from-the-host)). One engine field is absent by design: `placements` is engine-owned — trace residence (child owned by caller, launch owned by session) is not a program's concern. Grants are roots only; the engine records them as the process body's `read`/`write` keys, intersected with the caller's reach for nested runs.
 
 ---
 
@@ -232,7 +259,7 @@ Both built-in transports surface the same internal `Transport` shape (`send(req)
 
 The SDK posts requests through `window.__wry_ipc.postMessage(<json>)`. The host's wry IPC handler receives the JSON, attaches the calling process's `Context`, calls the engine, and resolves by injecting `webview.evaluate_script("__sdk.resolve(<id>, <payload>)")`.
 
-One webview may carry several protocol identities: when a surface hosts embedded citizens (slot-and-hook, `programs.md` §3.5), each sovereign citizen's SDK instance holds a slot identity token issued at slot creation, stamped on every request; the host's handler maps token → process id before attaching `Context`. Each citizen speaks as its own process — boundaries and commit attribution hold at slot granularity. Events ride the same channel in the other direction via `__sdk.event(<payload>)`. The SDK demultiplexes by message shape: `id + result|error` is a response, `event` field is unsolicited.
+One webview may carry several protocol identities: when a surface hosts embedded citizens (slot-and-hook, `programs.md` §5), each sovereign citizen's SDK instance holds a slot identity token issued at slot creation, stamped on every request; the host's handler maps token → process id before attaching `Context`. Each citizen speaks as its own process — boundaries and commit attribution hold at slot granularity. Events ride the same channel in the other direction via `__sdk.event(<payload>)`. The SDK demultiplexes by message shape: `id + result|error` is a response, `event` field is unsolicited.
 
 The `__sdk` global on the webview side is the SDK's hook surface — a small object the host calls to deliver responses and events. The host's dispatch logic only knows the function names.
 
@@ -262,6 +289,8 @@ engine/sdk/                                   — @openlight/sdk package
     index.ts              — public re-exports of the substrate surface
     globals.d.ts          — ambient runtime globals, typed once for every consumer
     types.ts              — TS mirror of substrate types
+    values.ts             — boundary translation: native values ⇄ tagged wire
+                            encoding ($ref/$loc/$set/$time/$md); Ref class
     protocol.ts           — Request | Response | Event shapes; id counter
     surface.ts            — scope, get, commit, run, awaitRun, cancel
     subscriptions.ts      — subscribe, registry, event router
@@ -293,4 +322,4 @@ Same coherence pattern as the db crate: each file owns a topic; predictable shap
 - **Type generation.** TS types are a hand-maintained mirror today. A codegen step from the Rust source could keep them in sync mechanically.
 - **Non-TS clients.** The substrate protocol is JSON-lines; an SDK can be reimplemented in any language that runs as a VM program. The first non-TS port is a known horizon target. See [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) for what's deferred.
 - **Streaming intra-op results.** Settled engine-side as a convention rather than protocol machinery: streaming is throttled partial commits (`body.partial`), coalesced subscription events, re-fetch on event — see engine.md, *Streaming convention*. Intra-op streaming stays out of the protocol.
-- **The slot provider.** The coalescing resolver for slot-and-hook views (collect hook declarations per render pass → one `readBatch` → slices to hooks) belongs in the UI layer on top of `readBatch`; its exact shape settles by building the conversation tile (`programs.md` §3.5).
+- **The slot provider.** The coalescing resolver for slot-and-hook views (collect hook declarations per render pass → one `readBatch` → slices to hooks) belongs in the UI layer on top of `readBatch`; its exact shape settles by building the thread tile (`programs.md` §5).

@@ -41,17 +41,17 @@ Though called "the pilot," this is **v0.1** — the seed that grows. Architectur
 
 ### Names and roots
 
-A **root scope** is a chunk with no `instance` parent. By convention, a project intended as a mountable peer has one root named after itself, so absolute names like `engine/program` read cleanly. The substrate permits any structure; a db can hold any number of roots.
+A **root scope** is a chunk with no owner. By convention, a project intended as a mountable peer has one root named after itself, so absolute names like `engine/program` read cleanly. The substrate permits any structure; a db can hold any number of roots.
 
-Absolute names walk the instance chain: `engine/program` is shorthand for the chunk `program` placed `instance` on the chunk `engine`. Mounting doesn't add a layer — a root in a mounted db stays a root.
+Absolute names walk the ownership chain: `engine/program` is the chunk named `program` owned by the root `engine` (substrate.md, *Five Connection Kinds*). Mounting doesn't add a layer — a root in a mounted db stays a root; ownership never crosses mounts.
 
-A scope query returns everything placed on the scope — `instance` (typed membership) and `relates` (association). Same-named chunks in separate placement trees are separate chunks; the host disambiguates visually when names collide across mounts.
+A scope query answers across the five connection kinds — what lives here (`owned`), what is a member (`instance`), what is about it (`relates`), plus the derived links (`field`, `mention`) in the separate `linked` result. Same-named chunks under separate owners are separate chunks; the host disambiguates visually when names collide across mounts.
 
 Two virtual scopes appear per db: `db/commits` (the commit graph) and `db/branches` (the branch list). The `db/` prefix is reserved for substrate-machinery virtual scopes.
 
 The pilot's first-party projects ship the system's archetypes:
 
-- **`engine`** — `engine/program`, `engine/process`, read/write-boundary, and `engine/mount` (instances synthesized at query time from the live registry).
+- **`engine`** — `engine/program`, `engine/process`, `engine/status` (the lifecycle value chunks), and `engine/mount` (instances synthesized at query time from the live registry).
 - **`host`** — `host/session`, `host/tab`, `host/tile`, `host/overlay`, `host/recipe`.
 - **`agents`** — first-party active project for v0.1. Its own scopes (the agent program, tool programs, the agent's working sessions). Invocables placed `instance` on `engine/program`; sessions placed `instance` on `host/session`. Placements live in the agents project's db; archetypes live in the mounted engine and host dbs. Other active projects, by users or for other purposes, follow the same pattern.
 
@@ -96,7 +96,7 @@ A Rust library linked into the host. The host's wry IPC handlers and engine APIs
 
 ### The host
 
-A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `programs.md` §3.1). See [`host.md`](host.md).
+A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `programs.md` §1). See [`host.md`](host.md).
 
 ### Programs
 
@@ -150,11 +150,11 @@ host/                — Rust binary. tao + wry. Window, tile geometry, webview
                        lifecycle, wry IPC surface, the VM and webview runtime
                        providers. Depends on db and engine crates.
   src/               — Rust source.
-  ui/                — TypeScript UI library (React components, hooks like
+  react/             — TypeScript UI library (React components, hooks like
                        useScope). Used by webview programs that the host renders.
                        Lives here for v0.1; may extract later.
   programs/          — first-party programs the host ships (sidebar, tab-bar,
-                       command-palette, read-tile, launch, inspector, …).
+                       palette, form, read-tile → reader, process-view, …).
                        The frame machinery itself — window, tiling,
                        background — is host-native.
   .ol/
@@ -207,7 +207,7 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 - [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
 - [`host.md`](host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
 - [`sdk.md`](sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
-- [`programs.md`](programs.md) — the program layer at experience depth: the call frame, lifecycle, the interface concretely (sidebar, palette, launch, viewers), the program set, and the demands returned to the foundation.
+- [`programs.md`](programs.md) — the actual programs: the catalog, per-program contracts, the interface concretely (sidebar, palette, `form`, `reader`, `process-view`).
 - [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately.
 - [`bootstrap.md`](bootstrap.md) — the seed data.
 
@@ -215,9 +215,10 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 
 Held in the specs rather than closed prematurely. These do not block the pilot's structure; they need decisions as implementation reaches them.
 
-- **Recipe referencing** — does a recipe bind specific programs, or declare slots the user fills on spawn?
-- **Overlay anchor escalation** — how a program anchors an overlay above its own tile boundary. Related to write-boundary semantics.
+- **Overlay anchor escalation** — how a program anchors an overlay above its own tile. Leaning arranger-mediated (host.md).
 - **Cross-workspace wrap policy** — when composing tiles into a container, what happens to children visible in other tabs.
 - **Service lifecycle UX** — when a program is long-lived and mounted in multiple tiles, identity, termination, and display semantics.
 - **Sidebar disambiguation** — visual scheme for multiple processes with the same program + args.
 - **React hooks surface** — `useScope` is the current guess for reading. The full hook vocabulary will refine through building real programs.
+
+The design-level opens — the settled model's consolidated list — live in [`research/settled.md`](research/settled.md) §7 and in place in each spec.

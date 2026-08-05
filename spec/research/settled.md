@@ -1,6 +1,8 @@
 # The Settled Model — whole, current, one file
 
-**This is the authority for the coming rewrite.** [`threads-dialog.md`](threads-dialog.md) is the *path* — it contains superseded layers and must not be read as current. Everything below is the end state of the 2026-08-01→03 arc. Board carries the queue.
+**Status: §8's redistribution LANDED (2026-08-03 session).** The specs are now the law; this file remains the settlement record and the consolidated opens (§7). Three silences resolved by author word at the fold: run boundaries as typed process-body keys, five kinds in scope reads, status `draft | running | done | failed`. One steward reading marked open in engine.md: the frame as the process's ownership subtree.
+
+[`threads-dialog.md`](threads-dialog.md) is the *path* — it contains superseded layers and must not be read as current. Everything below is the end state of the 2026-08-01→03 arc. Board carries the queue.
 
 ---
 
@@ -91,4 +93,4 @@ Binding objecthood (pairing vs object) · `ordered`/`seq` home · single-owner u
 
 Then the build queue as boarded: reader v0 → draft + form → process-view v0 → prose v0 → follow + thread face → attributes → shipped collations. A fresh session starts here: this file, then board.md, then the target spec.
 
-**Known-stale until the fold sweeps them** (from the cold-agent dry run): engine.md still calls `attach` load-bearing (demoted); agent.md/session.md/programs.md §4 still teach `[[id]]` (ol: supersedes); substrate.md has no antecedent for owned-by/reach (the largest fold delta); the dispatch-frontier pause lifts when the redistribution lands (now stated on the board).
+**Known-stale list — SWEPT by the redistribution**: `attach` demoted in engine.md; `[[id]]` replaced by `ol:` throughout; substrate.md rewritten around owned-by/reach; the dispatch-frontier pause lifted on the board.

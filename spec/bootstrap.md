@@ -2,54 +2,58 @@
 
 Each project has its own bootstrap — the initial commit that seeds its substrate when the project is first initialized. v0.1's first-party projects (`engine`, `host`, `agents`) each ship a bootstrap routine; running `ol init` against an empty directory creates the `.ol/db` and runs the appropriate routine.
 
-The three first-party projects' bootstraps below show what each db starts with. In the running system, these three dbs are mounted together (active project + host + engine) and the engine federates queries across them — so an invocable in the active project is `instance` on `engine/program`, with the placement record in the active project's db and the archetype chunk in the engine project's db. Cross-db placements work by virtue of globally-unique ULIDs; see [`engine.md`](engine.md#engine-api-callable-from-the-host).
+In the running system these dbs are mounted together (active project + host + engine) and the engine federates queries across them. Two rules shape every seed:
+
+- **Ownership is local; typing may cross.** Every seeded chunk is owned within its own project (ownership never crosses mounts — substrate.md); `instance` placements may reference archetypes in mounted dbs (the placement record lives in the placing project's db, the archetype in the peer's).
+- **Interface archetypes are owned by their program.** A program's argument and result archetypes live in its ownership subtree, referenced from its body's `argument`/`result` keys — found from the program, never by global name, so every program having an `output` collides nowhere (engine.md).
 
 ## The engine project's bootstrap
 
-Runtime contracts and primitives. Lives in the engine project's db; mounted by every project that runs anything.
+Runtime contracts and primitives. Mounted by every project that runs anything.
 
-1. `engine` — root scope
-2. `program` archetype on `engine`: `{ required: ['executable', 'runtime'] }`. Any chunk with an executable and a runtime declaration is a program; instances of `engine/program` are the runnable things in the system. The `runtime` field is a string identifying the registered runtime kind (`'webview'`, `'vm'`, future kinds); other body fields (`capabilities`, `boundary`, `timeout_ms`) are optional.
-3. `process` archetype on `engine`: `{ propagate: true }`. A process chunk is the artifact of a run — created by the engine each time a program is invoked. `propagate: true` so any typed arguments placed on a process are validated against the program's `accepts`. The engine writes process state into the body (`status`, `started`, `pid`, `timeout_ms`, `error?` — see [`engine.md`](engine.md#program-and-process)); these are engine-managed, not enforced by the substrate's spec rules.
-4. `read-boundary` on `engine` (instance) and `process` (relates). A boundary chunk is `relates` on the process it belongs to — boundaries are execution configuration, not structural content.
-5. `write-boundary` on `engine` (instance) and `process` (relates).
+1. `engine` — root scope. Everything below is owned by it.
+2. `program` — the archetype of runnable things. Instance spec (the program body, engine.md):
+   ```
+   { executable: string, runtime: string, capabilities?: list<string>,
+     timeout_ms?: number, argument?: ref, result?: ref, demand?: map,
+     uses?: list<ref>, presets?: list<ref> }
+   ```
+3. `process` — the archetype of runs. Instance spec (the process record, engine.md):
+   ```
+   { argument: ref, at: ref, status: ref(status), result?: ref,
+     read: list<ref>, write: list<ref> }
+   ```
+   The engine writes and protects instances from dispatch on; drafts are data.
+4. `status` — the archetype whose instances are the lifecycle vocabulary: `draft`, `running`, `done`, `failed` — four value chunks owned by it (enums are the substrate's; substrate.md).
 
-`engine/mount` is not bootstrapped — it is a virtual scope (like `db/commits`, `db/branches`), with both archetype and instances synthesized by the engine from its in-memory mount registry. See [`engine.md`](engine.md).
+No boundary chunks are seeded — a run's reach is the process body's `read`/`write` keys. `engine/mount` is not bootstrapped — it is a virtual scope, synthesized from the mount registry (engine.md).
 
 ## The host project's bootstrap
 
-Composition primitives for the host's interface layer. Lives in the host project's db; mounted by every project a user opens in the host.
+Composition primitives for the interface layer. Mounted by every project a user opens in the host.
 
-1. `host` — root scope
-2. `session` on `host`: `{ propagate: true, accepts: ['tab', 'process'] }`. The outer container of the interface state — a session holds tabs (current arrangements) and processes (running and completed programs, visible in the sidebar). `tab` and `engine/process` are `relates` on `session` too — `accepts` names resolve within the archetype's own scope, so a name with nothing placed there resolves empty and the list rejects everything ([`substrate.md`](substrate.md#archetypes)); the relates placement changes no home.
-3. `tab` on `host`: `{ propagate: true, accepts: ['tile'] }`. The root of a tile tree. Workspaces are tabs. `tile` is `relates` on `tab` for the same resolution reason.
-4. `tile` on `host`: `{ propagate: true, ordered: true }` — propagate so seq orders the children *within* each tile rather than the tiles placed directly on the archetype ([`host.md`](host.md#the-composition-types)). A node in the split tree. Split nodes carry `{ direction, ratio }`; leaf nodes are empty and point at a process through a `relates` placement.
-5. `overlay` on `host`. A program rendered above its anchor (session, tab, or tile) rather than inside the tile composition.
-6. `recipe` on `host`: `{ propagate: true, accepts: ['tile'] }`, with `tile` `relates` on `recipe`. A preserved tile subtree that can be spawned into a new root.
-7. Host-shipped surface programs, seeded as invocables: `read-tile`, `sidebar`, `inspector` — each `instance` on `host` and on the mounted `engine/program` (the cross-db pattern above). Declared is not run: boot runs read-tile and the sidebar strip; `inspector` is declared ahead of its build.
-
-*Open — surface arguments.* The surface programs take typed arguments (the sidebar's is one `request` chunk carrying the session it renders, key `session`), but no `programs/argument` archetype is seeded for them to instance — the argument anatomy of programs.md §1 has no bootstrap home yet.
+1. `host` — root scope.
+2. `session`, `tab`, `tile`, `overlay`, `recipe` — the composition archetypes, with the instance specs drawn in [`host.md`](host.md#the-composition-types). Membership is placements: tabs and processes `instance` on a session instance, tiles `instance` on tabs/parent tiles with `seq`, the displayed process `relates` on its leaf.
+3. Host-shipped surface programs, seeded as invocables — owned by `host`, `instance` on the mounted `engine/program`: `read-tile` (grows into `reader`), `sidebar`, `form`, and the chrome as it lands (`tab-bar`, `palette`). Each owns its argument archetype (the sidebar's: `request` with `{ session: ref(session) }`; the reader's: `reading` with `{ current: ref }` — programs.md §3). Declared is not run: boot runs the sidebar strip and read-tile; the rest are declared ahead of their builds.
 
 ## The `agents` project's bootstrap
 
-Concrete programs and the agent's working scopes. Lives in the agents project's db. References engine and host archetypes via cross-db placements (the placement records live in agents' db; the archetype chunks live in the mounted engine and host project dbs).
+Concrete programs and the agent's steering vocabulary. No session or conversation container is seeded — **threads derive** from citation ([`session.md`](session.md)); a conversation materializes as a named location only when named, shared, bound, or peopled.
 
 1. `agents` — root scope.
-2. `session` archetype on `agents`: `{ propagate: true, ordered: true }` — propagate so the seq requirement lands on each session's turns rather than on the archetype's own members; content deliberately wildcard (no `accepts`). A session is **turns** (see [`session.md`](session.md)): each entity is the agent invocation's process chunk, dual-placed with seq at dispatch. The prompt is the invocation's argument; the answer is a chunk on its frame. No event types are seeded.
-3. `control` type on `agents` (instance) and `session` (relates): `{ required: ['signal'] }`, body also `target` (the turn's process id; defaults to the active turn) — pause | resume | abort-completion | adjust. `gate` with `{ required: ['action', 'status'] }` lives on frames (see [`agent.md`](agent.md)).
-4. Tool programs on `agents` (instance) and `engine/program` (instance): `filesystem`, `shell`, `web`. Each declares `{ propagate: true, accepts: [argument-type], runtime: 'vm' }`, an intrinsic boundary limited to its own process scope, and the executable path. Each argument type is `relates` on its program with `{ required: [...] }` and a schema in body for API tool generation.
-5. `model` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['request', 'output'], runtime: 'vm' }`, intrinsic boundary limited to its own process scope, capabilities `['net:<provider>', 'secret:<KEY>']`. The only program holding provider access; one completion call per run (see [`agent.md`](agent.md)). `request` type `relates` on `model` with `{ required: ['kind', 'model'] }`; `output` type `relates` on `model` — the completion result the run commits onto its own frame (`{ kind, content | vector, usage }`), which the program's own propagating spec must accept.
-6. `agent` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['session', 'context', 'prompt', 'answer'], runtime: 'vm' }`. `session`, `context`, `prompt`, `answer` placed `relates` on `agent` — `answer` is the chunk the turn commits onto its own frame (body `text`, `partial`, `refs`). No intrinsic boundary placement — the agent is *open*, deferring all restriction to the run. Composes `model`; never touches a provider itself.
-7. `echo` on `agents` (instance) and `engine/program` (instance): `{ propagate: true, accepts: ['message'], runtime: 'vm' }` — a minimal test program that echoes its input back as an answer. `message` type on `echo` (relates) with `{ required: ['text'] }`.
+2. `control` — the steering archetype: instance spec `{ signal: ref(signal), target: ref }`; `signal` beside it with four value chunks — `pause`, `resume`, `abort-completion`, `adjust`. Controls are placed `relates` on the turn they steer.
+3. Tool programs — owned by `agents`, `instance` on the mounted `engine/program`: `filesystem`, `shell`, `web`, `echo`. Each declares `runtime: 'vm'`, a frame-only `demand` (`{ read: [], write: [] }`), its capabilities, and owns its interface archetypes:
+   - `shell` — argument `{ command: string, cwd?: string }`; result `output` `{ stdout: string, stderr: string, exit: number }`.
+   - `web` — argument `{ url: string, method?: string, body?: string }`; result `output` `{ status: number, headers: map, body: string }`; capability `net`.
+   - `filesystem` — argument (op-shaped: `{ op: string, path: string, content?: string }`); result `output` (op-shaped by a `kind` key: content, entries, ack); capability `fs`.
+   - `echo` — argument `{ text: string }`; result `output` `{ text: string }`. The loop proof.
+4. `model` — owned by `agents`, `instance` on `engine/program`. `runtime: 'vm'`, frame-only demand, capabilities `['net:<provider>', 'secret:<KEY>']`. Owns `request` (`{ kind: string, model: string, … }` — provider keys as `?`-optional) and result `output` (`{ kind: string, content?: markdown, vector?: list<number>, usage: map }`). The only program holding provider access; one completion per run ([`agent.md`](agent.md)).
+5. `agent` — owned by `agents`, `instance` on `engine/program`. `runtime: 'vm'`, **no demand** — intrinsically open, the run grant is the person's whole decision. Owns its argument archetype `turn` (the draft's record: context expression + prompt — *open: exact keys settle at the draft + form build*), its result `answer` (`{ text: markdown, partial?: number }`), and `gate` (a frame chunk, not a result, declared in the body for the same enforcement reason — `{ action: string, status: ref(status) }`, shape open). Composes `model`; never touches a provider itself.
 
-**Result archetypes — the general rule.** Every program's interface declares its result archetype: the chunk type its run commits onto its own frame, `relates` on the program and named in its `accepts` — the pattern `model` (`output`) and `agent` (`answer`) already carry. `filesystem`, `shell`, `web`, and `echo` gain theirs the same way; without a declared result type, a frame's results reject once federated `accepts` enforcement lands.
+**After bootstrap.** Each project's db holds its own root and contracts. Running the host against the active project mounts host and engine as peers, federates the substrate, and the system is reachable. Bootstrap doesn't create a session instance or any tabs; the first launch creates an initial session and an empty tab — a program run, not part of any bootstrap commit.
 
-The `engine/program` archetype these programs are placed `instance` on lives in the engine project's db (mounted as a peer). The placement record itself is stored in the agents project's db. Cross-db placements work via globally-unique ULIDs; the engine federates resolution at query time.
+The `ol init` CLI is host implementation; it writes `.ol/db`, runs the appropriate bootstrap commit, and writes a starter `.ol/project.toml` declaring the host and engine mounts.
 
----
+*Open — no migration path.* Bootstrap is idempotent by marker (db.md): once seeded, the routine never re-runs, so changed declarations never reach an already-seeded project. Reseeding is the current answer; a real migration path is unruled debt.
 
-**After bootstrap.** Each project's db holds its own root scope and contracts. Running the host against the active project mounts host and engine as peers, federates the substrate, and the system is reachable. Bootstrap doesn't create a `host/session` instance or any tabs; the first time the host launches, it creates an initial session and an empty tab for the user to work from. That first action is a program run, not part of any project's bootstrap commit.
-
-The `ol init` CLI for fresh projects is part of host implementation; it writes `.ol/db`, runs the appropriate bootstrap commit, and writes a starter `.ol/project.toml` declaring the host and engine projects as required mounts.
-
-*Open — no migration path.* Bootstrap is idempotent by marker (db.md, *Bootstrap idempotence*): once a project is seeded, the routine never re-runs, so changed declarations never reach an already-seeded project. Reseeding is the current answer; a real migration path is unruled debt.
+*Open — ref-constraint naming.* How seeded specs name their ref constraints (`ref(status)` — id vs scoped name) couples to the bootstrap-ID debt (board); these settle together.

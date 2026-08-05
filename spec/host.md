@@ -55,49 +55,45 @@ All in the `host` namespace (the host project ships these archetypes; project na
 
 ```
 host/session
-  spec: { propagate: true, accepts: ['tab', 'process'] }
-  body: { name?, current-tab? }
-  — The outer container. Restorable, shareable. Any process placed on the
-    session as instance becomes sidebar-visible. No separate pin archetype —
-    session membership is sidebar presence.
+  spec: { instance: { name?: string, current-tab?: ref } }
+  — The outer container. Restorable, shareable. Its members are placements:
+    tabs and processes placed instance on a session instance. Any process on
+    the session is sidebar-visible — no separate pin archetype; session
+    membership is sidebar presence.
 
 host/tab
-  spec: { propagate: true, accepts: ['tile'] }
-  body: { name? }
-  placements: on session (instance)
-  — The root of a tile tree. Workspaces are tabs; one term, one archetype.
+  spec: { instance: { name?: string } }
+  — The root of a tile tree, placed instance on its session. Workspaces are
+    tabs; one term, one archetype.
 
 host/tile
-  spec: { propagate: true, ordered: true }   — propagate so seq orders children
-                                               within each tile, per substrate.md
-  body:
-    split node:  { direction: 'horizontal'|'vertical', ratio }
-    leaf node:   (empty; mount expressed through placement)
-  placements:
-    on tab or parent-tile (instance, seq chooses split side)
-    on engine/process (relates — "this leaf displays this running process")
+  spec: { instance: { direction?: string, ratio?: number } }
+  — A node in the split tree. A split node carries direction
+    ('horizontal'|'vertical') and ratio; a leaf carries neither — its mount is
+    a placement. Placed instance on its tab or parent tile, seq choosing the
+    split side (children ordered by seq; the `ordered` declaration's interim
+    home is the spec flag, substrate.md *What's Open*); the displayed process
+    is relates on the leaf.
 
 host/overlay
-  body: { anchor: 'session'|'tab'|'tile' }
-  placements:
-    on engine/program (relates — overlay content)
-    on anchor target (relates)
+  spec: { instance: { anchor: ref } }
+  — A program rendered above the composition; anchor names its span target
+    (session, tab, or tile instance). Content program relates on the overlay.
 
 host/recipe
-  spec: { propagate: true, accepts: ['tile'] }
-  body: { name?, description? }
-  — A tile subtree preserved as a template. Spawning clones the structure
-    under a chosen root — a whole tab, or a single tile within an existing
-    tab. The recipe itself persists separately from any spawned instance.
+  spec: { instance: { name?: string, description?: markdown } }
+  — A tile subtree preserved for spawning: tiles placed instance on the
+    recipe. Spawning clones the structure under a chosen root; the recipe
+    persists separately from any spawned instance.
 ```
 
 A recipe, when spawned, produces a **composition**: a container process visible as one unit in the sidebar, with a nested tile structure on the board. Collapsing the container stops its children. Composition is the live form; recipe is the saved template — spawning instantiates fresh processes, the recipe itself unchanged.
 
 ---
 
-## View Modes as Lenses
+## View modes
 
-v0.1 walks one geometry — tabs (below). It is one lens on the chunks, not the only one: because the host is built by programs, a view mode is itself a program over the composition types, so other lenses (zoomable canvas, outline, graph) are additive, not forks. Directions in [`horizon.md`](../horizon.md#view-modes-beyond-tabs).
+v0.1 walks one geometry — tabs (below). It is one view on the chunks, not the only one: because the host is built by programs, a view mode is itself a program over the composition types, so other modes (zoomable canvas, outline, graph) are additive, not forks. Directions in [`horizon.md`](../horizon.md#view-modes-beyond-tabs).
 
 ## Tile Geometry
 
@@ -147,7 +143,7 @@ A webview program calls the SDK; the SDK serializes the call and posts it throug
 
 Unsolicited events from the engine ride the same channel in the other direction: `webview.evaluate_script("__sdk.event(<payload>)")`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape on the JS side. See [`engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
 
-**Per-slot identity.** One webview may host embedded citizens (slot-and-hook, [`programs.md`](programs.md) §3.5), each its own process. At slot creation the host issues the citizen a slot identity token; every request from that citizen's SDK instance carries it, and the IPC handler maps token → process id before attaching `Context`. The webview→process registry becomes webview→{process, slots}; everything downstream of `Context` is unchanged.
+**Per-slot identity.** One webview may host embedded citizens (slot-and-hook, [`programs.md`](programs.md) §5), each its own process. At slot creation the host issues the citizen a slot identity token; every request from that citizen's SDK instance carries it, and the IPC handler maps token → process id before attaching `Context`. The webview→process registry becomes webview→{process, slots}; everything downstream of `Context` is unchanged.
 
 The host does not interpret substrate operations — it dispatches them. VM programs (tool programs running inside their VMs) speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly without going through the host.
 
@@ -240,7 +236,7 @@ Host startup has a fixed order:
 7. **Configure the VM.** Hand the VM provider the FS-mount table: active project at `/active/` read-write, each peer at `/peers/<project-id>/` read-only. The VM starts; programs spawned later run inside it.
 8. **Mount projects.** `engine.mount_project(id, db, ReadOnly, branch)` for each peer; `engine.mount_project(active-id, active-db, ReadWrite, "main")` for the active project. The engine subscribes to the active project's commit broadcast for reactivity; read-only mounts contribute reads but not events (no in-process writer ever fires).
 9. **Boot-time validation.** Ask the engine to validate that every placement in the active project's db has its `scope_id` resolve in some mount. Missing references — most often a missing host or engine mount — return as a list; surface them and refuse to enter the event loop. No half-loaded state.
-10. **Spawn the always-mounted suite.** Sidebar and tab-bar are first-party programs the host references by id and runs at boot via `engine.run(..., Context { process_id: None })` — sidebar with read roots `[session, engine/process, engine/program]` and write root `[session]`; tab-bar with read/write `[session]`; both positioned as naked strips on the background, outside tile geometry. The command palette is spawned on-demand when the leader key fires, as a session-anchored overlay with full read reach, writing only through composition (it launches; it doesn't commit structure). Contracts at experience depth: [`programs.md`](programs.md) §3.1–3.3.
+10. **Spawn the always-mounted suite.** Sidebar and tab-bar are first-party programs the host references by id and runs at boot via `engine.run(..., Context { process_id: None })` — sidebar with read roots `[session, engine/process, engine/program]` and write root `[session]`; tab-bar with read/write `[session]`; both positioned as naked strips on the background, outside tile geometry. The command palette is spawned on-demand when the leader key fires, as a session-anchored overlay with full read reach, writing only through composition (it launches; it doesn't commit structure). Contracts at experience depth: [`programs.md`](programs.md) §1–2.
 11. **Enter the event loop.** `event_loop.run(...)` on the main thread, draining `HostCmd` events from the engine, wry IPC messages from webviews, and tao's window events.
 
 Shutdown reverses the order: cancel running processes, await `engine.shutdown()`, drop the VM (which unmounts FSes), drop dbs, exit.
@@ -254,10 +250,10 @@ The cascade walk and FS-mount-table assembly are host code (file-aware). The mou
 ## What Is Open
 
 - **React hooks surface.** Starting hook is `useScope(ids)`. Richer vocabulary (for mutations, for subscriptions to typed events, for React Suspense integration) may appear through use. The full surface is specified in [`sdk.md`](sdk.md).
-- **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Leaning: mediated through the arranger (`programs.md` §3.9) — a request-shaped route rather than boundary escalation; unprivileged programs never need write reach above their tile.
-- **Recipe referencing.** Settled identity-based for v0.1 (`programs.md` §3.9): a leaf records `{ program, argument declarations, boundary roots, view state }`; spawning re-declares fresh. Slot-based recipes (placeholders filled at spawn) are a later layer on the same shape.
-- **The ensemble tile.** A leaf tile relates one process today; citizen ensembles (`programs.md` §3.5, the peer inversion) need a leaf relating a group container of citizen processes — or subtiling within tiles. Settles by building the conversation tile.
-- **Host-native sidebar/tabs.** Held open (`programs.md` §3.1): they stay webview programs for now; going native later would buy visual coherence with the frame's card treatment and performance, when the demand justifies the exception.
+- **Overlay anchor escalation.** How a program anchors an overlay above its own tile's scope. Leaning: mediated through the arranger (`programs.md` §7) — a request-shaped route rather than boundary escalation; unprivileged programs never need write reach above their tile.
+- **Recipe referencing.** Settled identity-based for v0.1 (`programs.md` §7): a leaf records `{ program, argument declarations, boundary roots, view state }`; spawning re-declares fresh. Slot-based recipes (placeholders filled at spawn) are a later layer on the same shape.
+- **The ensemble tile.** A leaf tile relates one process today; citizen ensembles (`programs.md` §5) need a leaf relating a group container of citizen processes — or subtiling within tiles. Settles by building the conversation tile.
+- **Host-native sidebar/tabs.** Held open (`programs.md` §1): they stay webview programs for now; going native later would buy visual coherence with the frame's card treatment and performance, when the demand justifies the exception.
 - **Multi-mount of services.** One long-running program mounted in two tiles — shared single surface, or two surfaces over one backing state?
 - **Sidebar disambiguation.** The exact visual scheme for distinguishing multiple processes of the same program with identical arguments.
 - **Color coding.** Whether scopes or programs carry a color attribute, and how it surfaces in the visual language.
@@ -284,7 +280,7 @@ host/
                        renders. Lives here for v0.1; may extract later.
   programs/          — first-party host-shipped programs, one package each:
                        sidebar, tab-bar, command-palette, form, read-tile
-                       (grows into `reader`; programs.md §3.5, §4).
+                       (grows into `reader`; programs.md §3, §8).
                        (Webview programs in TSX, served from source over ol://;
                        the host runs them at boot or on demand.)
   .ol/db, .ol/project.toml

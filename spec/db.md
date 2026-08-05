@@ -46,7 +46,7 @@ impl Db {
 }
 ```
 
-`scope` returns the intersection of the named scopes — chunks placed on every one of them, by either placement type: a chunk placed `relates` on every named scope is at the intersection like an `instance` one (substrate.md, *Scope*). The `in_scope_instance` / `in_scope_relates` counts report the split. `get` returns a single chunk by id, or `None` if not present in current state.
+`scope` returns the intersection of the named scopes — chunks placed on every one of them, by any stored placement kind: `owned`, `instance`, and `relates` all put a chunk at the intersection (substrate.md, *Scope*). The `in_scope_owned` / `in_scope_instance` / `in_scope_relates` counts report the split; the `linked` field carries the body-derived kinds (fields and mentions pointing at the roots), never mixed with placements. `get` returns a single chunk by id, or `None` if not present in current state.
 
 `ScopeOpts`:
 
@@ -75,9 +75,9 @@ ReadOpts
 
 `scopes` may be empty. Empty scope means the whole field — every chunk qualifies for the intersection (vacuous truth), composed with `match_`, `Includes`, and `limit` like any other scope. Pagination is the guardrail against unbounded fetches, not a runtime restriction.
 
-Under empty scope the counts collapse: `in_scope = in_scope_instance = in_scope_relates = total` (the empty conjunction holds for both placement types). The instance/relates split is degenerate here — reported for consistency with the non-empty case, not as useful attribution.
+Under empty scope the counts collapse: `in_scope = total` and the per-kind splits are degenerate — reported for consistency with the non-empty case, not as useful attribution. `linked` is empty under empty scope (links answer per named root).
 
-**Order and pagination.** When the read names exactly one scope and that scope's effective contract is `ordered`, the window is **tail-first**: the default is the latest entries and `offset` pages backward from the end (`limit: 10, offset: 10` returns the ten entries before the last ten). Within the window the chunks always read ascending by `seq` — the query sorts descending and the window is reversed before it returns. Every other read (empty scope, several scopes, or an unordered one) pages forward in `chunk_id` order. Positions are set positions, not seq values: sparse seqs leave no gaps in a window. Duplicate explicit seq values are legal; ties break by commit order — the earlier-committed placement reads first.
+**Order and pagination.** When the read names exactly one scope and that scope's spec is `ordered`, the window is **tail-first**: the default is the latest entries and `offset` pages backward from the end (`limit: 10, offset: 10` returns the ten entries before the last ten). Within the window the chunks always read ascending by `seq` — the query sorts descending and the window is reversed before it returns. Every other read (empty scope, several scopes, or an unordered one) pages forward in `chunk_id` order. Positions are set positions, not seq values: sparse seqs leave no gaps in a window. Duplicate explicit seq values are legal; ties break by commit order — the earlier-committed placement reads first.
 
 ### Result
 
@@ -88,9 +88,12 @@ ScopeResult
                         reported as metadata, not an error; the read still runs
   total                 chunks in branch
   in_scope              chunks at intersection
+  in_scope_owned        ...via owned on every dim in scope
   in_scope_instance     ...via instance on every dim in scope
   in_scope_relates      ...via relates on every dim in scope
   chunks: [ChunkItem]   intersection chunks (opt-in)
+  linked: [Link]        who points at the roots — fields and mentions,
+                        derived, never mixed with placements
   dimensions: [Dim]     scopes you can add (opt-in)
 ```
 
@@ -99,25 +102,34 @@ ChunkItem
   id                                      always
   name?  spec?  body?  placements?       chunk self-data (opt-in)
 
+Link
+  source_id                               the chunk whose body holds the reference
+  target                                  a root chunk id — or a normalized
+                                          location expression (mentions only)
+  kind                                    'field' | 'mention'
+  key?                                    the declaring key, when kind = field
+
 Dim
   id, name
   count                                   chunks at intersection placed here
-  instance
-  relates
+  owned, instance, relates                per-kind split
   edges?: [Edge]                          scopes you can reach from this dim,
                                           beyond current adjacency (opt-in)
 
 Edge
   id, name
   count                                   chunks on this dim also placed on the edge dim
-  instance
-  relates
+  owned, instance, relates
 
 Placement
-  scope_id, type_, seq?
+  scope_id, type_, seq?                   type_ ∈ owned | instance | relates
 
 Spec
-  ordered, accepts, required, unique, propagate
+  instance?: KeyMap                       the instance spec — typed key-map
+                                          (string | number | time | markdown |
+                                          ref(X)? | list<…> | set<…> | map;
+                                          per-key `?` and `unique`)
+  ordered?: bool                          interim home; open (substrate.md)
 ```
 
 **Why dimensions and edges differ:** dimensions are scopes intersection chunks already touch — adding any keeps the intersection non-empty (narrowing). Edges are scopes a dim's chunks (including chunks NOT at the current intersection) touch beyond the current adjacency — reachable only by stepping out of the current scope.
@@ -196,9 +208,12 @@ Commit
   branch: BranchName                           which branch the commit landed on
   chunks_modified:     [ChunkId]
   placements_modified: [(ChunkId, ChunkId)]    (chunk_id, scope_id) entered or left
+  links_modified:      [ChunkId]               chunks whose inbound links changed —
+                                               the link delta, computed from the
+                                               current_refs refile in this transaction
 ```
 
-`chunks_modified` and `placements_modified` are the deltas — for caller convenience and for filtering on the change stream. `branch` is the event's only carrier of where the commit landed, so `SubscribeOpts.branch` has something to filter on.
+`chunks_modified`, `placements_modified`, and `links_modified` are the deltas — for caller convenience and for filtering on the change stream (a subscription on a chunk fires when links *to* it appear or disappear, engine.md). `branch` is the event's only carrier of where the commit landed, so `SubscribeOpts.branch` has something to filter on.
 
 ### Branch operations
 
@@ -238,8 +253,12 @@ Backpressure: each subscriber has a bounded receiver. On overflow, oldest events
 ### Errors
 
 ```
-ValidationError { scope_id, kind }     spec violation; kind = Ordered | Accepts | Required | Unique | AmbiguousType
-NameCollision { scope_id, name }       name uniqueness rule
+ValidationError { chunk_id, kind }     spec violation; kind = MissingKey | KeyType |
+                                       RefTarget | RefArchetype | Unique | Ordered |
+                                       AmbiguousKey (two instance specs claim one
+                                       key with different types) | MultiOwner
+                                       (a second owned placement)
+NameCollision { owner_id, name }       name uniqueness within the owner
 NotFound { kind, id }                  removal target, branch, or commit not
                                        present — never a placement side, which
                                        may dangle by design
@@ -257,9 +276,10 @@ A declaration is one transaction. Inside:
 
 1. Insert version rows for everything in the declaration.
 2. Apply current-state transitions (FTS triggers fire).
-3. Run validation against the post-write current state.
-4. If validation passes: insert the commit row, advance the branch HEAD, COMMIT, push to the change stream.
-5. If validation fails: ROLLBACK. Nothing recorded; nothing emitted.
+3. Run validation against the post-write current state: instance-spec obligations for every touched chunk (the union of the specs of every archetype it is `instance` on), ref-target checks for declared ref keys (locally resolvable targets — cross-mount targets are the engine's, substrate.md *Links*), name uniqueness within the owner, single-owner, seq on ordered scopes.
+4. Refile `current_refs` for every touched chunk (delete-and-reinsert); collect the link delta.
+5. If validation passes: insert the commit row, advance the branch HEAD, COMMIT, push to the change stream.
+6. If validation fails: ROLLBACK. Nothing recorded; nothing emitted.
 
 Writes within a declaration are visible to validation through ordinary SELECTs (the post-write state lives in current-state tables inside the transaction), but invisible to other transactions until COMMIT. The substrate's two-pass write-then-validate is delivered by SQLite transaction semantics directly.
 
@@ -301,7 +321,7 @@ CREATE TABLE placement_versions (
   chunk_id   TEXT NOT NULL,
   scope_id   TEXT NOT NULL,
   commit_id  TEXT NOT NULL REFERENCES commits(id),
-  type       TEXT NOT NULL CHECK (type IN ('instance', 'relates')),
+  type       TEXT NOT NULL CHECK (type IN ('owned', 'instance', 'relates')),
   seq        INTEGER,
   active     INTEGER NOT NULL DEFAULT 1,
   PRIMARY KEY (chunk_id, scope_id, commit_id)
@@ -332,13 +352,30 @@ CREATE VIRTUAL TABLE chunk_fts USING fts5(
   content_rowid='rowid',
   tokenize='unicode61'
 );
+
+-- Derived, rebuildable, never part of commits: the link index
+-- (fields and mentions — substrate.md, *Links*).
+CREATE TABLE current_refs (
+  source_id  TEXT NOT NULL,               -- chunk whose body holds the reference
+  branch     TEXT NOT NULL REFERENCES branches(name),
+  target     TEXT NOT NULL,               -- chunk id, or normalized location
+                                          -- expression (mentions only)
+  kind       TEXT NOT NULL CHECK (kind IN ('field', 'mention')),
+  key        TEXT,                        -- declaring key when kind = 'field';
+                                          -- element links share the key
+  PRIMARY KEY (source_id, branch, target, kind, key)
+);
 ```
+
+`current_refs` is maintained like FTS: in the write transaction, delete-and-reinsert per touched chunk — declared ref keys (per element for `list`/`set`) and mentions scanned from prose and fenced expression blocks. Wipe it and it re-derives from current bodies. It is per-branch current state only; historical bodies remain in the version log, re-derivable if temporal link queries are ever wanted.
 
 ### Indexes
 
 ```sql
 CREATE INDEX idx_current_placements_scope ON current_placements(scope_id, branch, type);
 CREATE INDEX idx_current_placements_chunk ON current_placements(chunk_id, branch);
+CREATE INDEX idx_current_refs_target      ON current_refs(target, branch);      -- who points here
+CREATE INDEX idx_current_refs_source      ON current_refs(source_id, branch);   -- delete-and-reinsert
 CREATE INDEX idx_chunk_versions_chunk     ON chunk_versions(chunk_id, commit_id);
 CREATE INDEX idx_placement_versions_chunk ON placement_versions(chunk_id, scope_id, commit_id);
 CREATE INDEX idx_commits_parent           ON commits(parent_id);
@@ -396,7 +433,12 @@ commit(declaration, opts):
     apply current-state transition for opts.branch
 
   validate in Rust against post-write current state on this branch:
-    for each chunk touched, compose effective contract and check rules
+    for each chunk touched, union the instance specs of its archetypes
+    and check the body against every obligation; validate ref targets;
+    check name-within-owner, single-owner, seq rules
+
+  refile current_refs for each touched chunk (delete-and-reinsert);
+  collect links_modified
 
   any failure => ROLLBACK and return
 
@@ -407,7 +449,7 @@ commit(declaration, opts):
   return Commit
 ```
 
-Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would require recursive CTEs over the propagating-archetype graph and lock the rule into SQL; Rust gives clearer code and easier evolution. Rules read against the open transaction's post-write state (see *Atomicity*), not a pre-fetched snapshot.
+Validation is in Rust. SQL stores; Rust enforces. Validating in SQL would lock the key-map rules into SQL; Rust gives clearer code and easier evolution. Rules read against the open transaction's post-write state (see *Atomicity*), not a pre-fetched snapshot.
 
 ### Current-state transitions
 
@@ -433,7 +475,7 @@ Removal is per-branch.
 
 #### Intersection (the chunks)
 
-Membership is a subquery over `current_placements` with no type filter — `relates` places a chunk at the intersection like `instance` does:
+Membership is a subquery over `current_placements` with no type filter — all three stored kinds place a chunk at the intersection:
 
 ```sql
 SELECT cc.*
@@ -446,7 +488,15 @@ WHERE cc.branch = :branch
     HAVING COUNT(DISTINCT cp.scope_id) = :n_scopes);
 ```
 
-The same shape with `AND cp.type = :type` inside the subquery gives `in_scope_instance` and `in_scope_relates`.
+The same shape with `AND cp.type = :type` inside the subquery gives the per-kind counts. The `linked` answer is a separate indexed lookup, one per named root, unioned:
+
+```sql
+SELECT source_id, target, kind, key
+FROM current_refs
+WHERE branch = :branch AND target IN (:scope_ids);
+```
+
+(Location-expression targets answer by expression match — normalization open, substrate.md.)
 
 `exclude` and `match_` append conditions to the same WHERE — one filter chain, shared by the counts and the chunk fetch:
 
@@ -486,6 +536,7 @@ WITH in_scope AS (
 )
 SELECT
   cp.scope_id,
+  COUNT(*) FILTER (WHERE cp.type = 'owned')    AS owned_count,
   COUNT(*) FILTER (WHERE cp.type = 'instance') AS instance_count,
   COUNT(*) FILTER (WHERE cp.type = 'relates')  AS relates_count,
   COUNT(*) AS total
@@ -508,6 +559,7 @@ When `scopes` is empty, the `in_scope` CTE collapses to "every chunk on this bra
 SELECT
   cm1.scope_id AS from_dim,
   cm2.scope_id AS to_dim,
+  COUNT(*) FILTER (WHERE cm2.type = 'owned')    AS owned_count,
   COUNT(*) FILTER (WHERE cm2.type = 'instance') AS instance_count,
   COUNT(*) FILTER (WHERE cm2.type = 'relates')  AS relates_count,
   COUNT(*) AS total
@@ -638,7 +690,10 @@ db/
     db.rs                  — Db { conn: Mutex<Connection>, sender: broadcast::Sender<Commit>,
                                   read_only: bool }
                              Db::open, Db::open_read_only, require_writable, Drop
-    validate.rs            — Rule enum + check_commit; effective-contract composition
+    validate.rs            — Rule enum + check_commit; instance-spec obligations,
+                             ref-target checks, owner/name rules
+    refs.rs                — current_refs refile (delete-and-reinsert per chunk);
+                             body scan for tagged refs + mentions; link delta
     virtual_chunks.rs      — db/branches / db/commits projection (used by ops::scope, ops::get)
     bootstrap.rs           — initial seed on fresh open (main branch + initial commit)
     ops/                   — public surface; one module per Db method
@@ -691,7 +746,7 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 **Reactivity push.** Three call sites push the resulting `Commit` onto `db.sender` — `ops::commit`, `ops::branches::create_branch`, `ops::branches::delete_branch` — two lines each, repetition over a wrapper. The post-`tx.commit()` ordering and its durability guarantee are spec'd above under *Reactivity wiring*.
 
-**Validation.** `Rule` enum with one variant per rule (`Ordered`, `Accepts`, `Required`, `Unique`, `NameUnique`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through the open transaction (see *Atomicity*).
+**Validation.** `Rule` enum with one variant per rule (`Keys`, `RefTargets`, `Unique`, `Ordered`, `NameUnique`, `SingleOwner`); `match` dispatches inside `check_commit(conn, branch, touched)`. Adding a rule = adding a variant. Reads run through the open transaction (see *Atomicity*).
 
 **Errors.** `thiserror`. Per-op enums (`OpenError`, `ReadError`, `WriteError`) with shared variants (e.g. `IoError(rusqlite::Error)`) duplicated across them — dumb-but-clear over a single mega-enum.
 
@@ -703,7 +758,8 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 - **`rusqlite_migration`** with the full schema as the v1 migration.
 - **Schema version = `user_version`.** The migration list owns SQLite's `user_version` pragma; that number is the db's schema version. The version this build writes is derived by running the list against an in-memory db (`schema::latest_version()`) — no constant duplicating the DDL. `open_read_only` compares a peer's file against it and refuses skew; the host refuses the same mismatch a step earlier, at cascade-walk time ([`host.md`](host.md#boot-sequence) steps 3–4).
-- **JSON for body and spec.** Body is `serde_json::Value`. Spec is a typed struct with `#[serde(default)]`.
+- **JSON for body and spec.** Body is `serde_json::Value`, carrying the tagged value encoding for typed keys (`$ref`, `$loc`, `$set`, `$time`, `$md` — sdk.md owns translation; the db validates tags against instance specs). Spec is a typed struct with `#[serde(default)]`: the `instance` key-map plus the interim `ordered` flag.
+- **Hot keys escalate with expression indexes.** A typed key a query proves hot gets a SQLite expression index on `json_extract(body, '$.key')` — per key, promotion-when-proven, never a storage rewrite.
 - **Bootstrap idempotence.** A `meta` table with a single bootstrap-version row; `open()` checks before seeding.
 
 ---
@@ -713,5 +769,7 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 - **Cross-call read snapshots** — explicit handles for multi-read consistency.
 - **Branch-meta commits** — whether `create_branch`/`delete_branch` should write commits on a meta-branch for uniform traceability.
 - **FTS branch-scoping** — currently FTS holds all branches; branch filter at query time.
-- **Bootstrap IDs** — resolved at the substrate level (lookup-by-name); carries through.
+- **Bootstrap IDs** — resolved at the substrate level (lookup-by-name); carries through. Ownership paths (`engine/program`) make path-lookup the natural convention: resolve each segment as a name among the previous chunk's owned children.
+- **Eager vs lazy link re-derivation on spec edits** — editing an archetype's instance spec invalidates the derived rows of every instance; eager fan-out vs knowingly-stale-until-next-write is the sharpest open engineering decision (substrate.md, *What's Open*).
 - **Time-travel query optimization** — recursive ancestry walk is correct but unmeasured.
+- **Divergence from built code, tracked**: the implemented crate still validates the retired spec language (`accepts`/`required`/`propagate`), has a two-kind placement CHECK, and no `current_refs`. Spec leads; the alignment pass follows (board).
