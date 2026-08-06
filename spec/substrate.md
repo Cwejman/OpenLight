@@ -8,20 +8,20 @@ A chunk is a unit of meaning with identity.
 
 ```
 chunk {
-  id:   globally unique, system-generated
-  name: optional; unique within its owner
-  spec: structural contract (system-enforced)
-  body: everything else — one JSON object (reader-interpreted)
+  id:       globally unique, system-generated
+  name:     optional; unique within its owner
+  instance: what an instance is to be (system-enforced; below)
+  body:     everything else — one JSON object (reader-interpreted)
 }
 ```
 
 Two fields, cleanly separated by who reads them:
 
-**Spec** is for the system — a contract enforced on writes. Its center is the **instance spec** (below): the typed key-map that instances of this chunk must fit.
+**Instance** is for the system — the contract enforced on writes: the typed key-map this chunk's instances' bodies must fit (below). It says nothing about this chunk itself.
 
 **Body** is for the reader — always a kv object. All content lives here: readable text, structured properties, references. Typing is contract and validation, never storage — the body remains one JSON object however strictly its keys are typed. FTS indexes all string values in body.
 
-A chunk can serve as content, identity, archetype, or connection. These roles are not declared; they emerge from how the chunk is connected. A chunk with an instance spec is an archetype by nature.
+A chunk can serve as content, identity, archetype, or connection. These roles are not declared; they emerge from how the chunk is connected. A chunk with a non-empty `instance` is an archetype by nature.
 
 ## Five Connection Kinds
 
@@ -30,16 +30,16 @@ Everything in the field is chunks and the connections between them. There are ex
 ```
 placement {
   chunk_id: the chunk being placed
-  scope_id: the chunk it is placed on
-  type:     'owned' | 'instance' | 'relates'
-  seq:      optional integer — position within the scope
+  on:       the chunk it is placed on
+  kind:     'owned' | 'instance' | 'relates'
+  seq:      optional integer — position within the place
 }
 ```
 
 - **owned-by** — *where it lives.* Every chunk has at most one owner; ownership forms a tree. Names are unique within their owner, so `/` paths address chunks: `engine/program` is the chunk named `program` owned by the root `engine`. A module is an ownership subtree. Ownership never crosses mounts. A chunk with no owner is a root; the pilot's convention is one root per project, named after it.
-- **instance** — *what it is.* Pure type membership: the chunk is an instance of the scope's type. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
+- **instance** — *what it is.* Pure type membership: the chunk is an instance of the archetype it is placed on. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
 - **relates** — *what it is about.* Authored aboutness. Prose placed on its subjects — the chunk at the intersection *is* the relationship — stays the substrate's oldest pattern.
-- **field** — *related by key.* A typed ref in a body, declared by the owning archetype's instance spec (`person` declares `work` holds a `workplace`). Directional by nature — a body reads outward, which is what pointer-facts always needed and relates never was. Derived into the link index at write.
+- **field** — *related by key.* A typed ref in a body, declared by the owning archetype's instance contract (`person` declares `work` holds a `workplace`). Directional by nature — a body reads outward, which is what pointer-facts always needed and relates never was. Derived into the link index at write.
 - **mention** — *spoken of.* A reference in prose (the `ol:` scheme) or a chunk/location a fenced expression uses. The open end of the spectrum: where naming the relation would be false precision, prose carries the meaning and the mention carries the reference. Derived into the link index at write.
 
 Rigid pointers that once leaned on `relates` move into fields; relates is relieved, not removed — it goes back to reliably meaning aboutness.
@@ -48,7 +48,7 @@ Rigid pointers that once leaned on `relates` move into fields; relates is reliev
 
 ### What connection creates
 
-**Identity.** A chunk with other chunks connected to it IS a scope. No declaration needed — it emerges from the graph.
+**Identity.** A chunk with other chunks connected to it IS a place. No declaration needed — it emerges from the graph.
 
 **Hierarchy** is ownership — organizational and permission-bearing (reach walks it), never a cage for reference: anything can reference anything regardless of where it lives.
 
@@ -60,25 +60,21 @@ Rigid pointers that once leaned on `relates` move into fields; relates is reliev
 
 Names are unique within their owner; root names are unique within their db. The system references by id internally; names are human-readable labels, and paths resolve down the ownership tree. Renaming is trivial — nothing structural depends on the name.
 
-## The Instance Spec
+## Instance — the contract on instances
 
-A chunk's spec may carry `instance:` — spoken *"instance spec"* — a typed key-map that its instances' bodies must fit. It binds instances only, **never the chunk itself**: only what a chunk is an instance of constrains its body.
+A chunk's `instance` field is a typed key-map that its instances' bodies must fit — *what an instance is to be*. It binds instances only, **never the chunk itself**: only what a chunk is an instance of constrains its body. One flat field, no wrapper. (`ordered` lost its home in the flattening — see What's Open.)
 
 ```
-spec: {
-  instance: {
-    name:    string unique
-    work:    ref(workplace)
-    joined:  time
-    bio?:    markdown
-    tags:    set<string>
-  }
-  ordered?: true      — instance placements on this scope carry seq
-                        (the field's home is open; see What's Open)
+person.instance = {
+  name:    string unique
+  work:    ref(workplace)
+  joined:  time
+  bio?:    markdown
+  tags:    set<string>
 }
 ```
 
-Towers are natural: `shell` fits `program`'s instance spec while carrying its own instance spec for its runs. Each level is judged one step up — the type's spec binds the instance's body; nothing propagates further.
+Towers are natural: `shell` fits `program`'s instance contract while carrying its own for its runs. Each level is judged one step up — the type's `instance` binds the instance's body; nothing propagates further.
 
 **Key types**: `string` · `number` · `time` · format-tagged string (`markdown`) · `ref` (optionally archetype-constrained: `ref(workplace)`) · `list<…>` · `set<…>` (a list with uniqueness checked) · `map` (untyped nesting). Collections are stored as JSON arrays, validated per element, one link row per element — no intermediate chunk ceremony. Per-key modifiers: `?` optional — required by default; there is no `required` array — and `unique` (value unique across the type's instances).
 
@@ -86,31 +82,34 @@ Towers are natural: `shell` fits `program`'s instance spec while carrying its ow
 
 **Enums are the substrate's own.** A closed vocabulary is `ref(X)` where X's instances are the value chunks — `status: ref(status)` with `draft`, `running`, `done`, `failed` as chunks. No enum machinery; the link index answers "all running" derived, with no placement churn.
 
-**Typing goes as deep as archetypes are named.** Anonymous nested maps stay untyped, as bodies always were. The fence against ontology creep is *ownership*: a key name lives inside one archetype's spec, like a struct field in a struct — never in a global predicate vocabulary. That is the difference between this and RDF.
+**Typing goes as deep as archetypes are named.** Anonymous nested maps stay untyped, as bodies always were. The fence against ontology creep is *ownership*: a key name lives inside one archetype's `instance`, like a struct field in a struct — never in a global predicate vocabulary. That is the difference between this and RDF.
 
-**Multi-typing composes as obligations.** A chunk instance of several archetypes must fit every spec; keys no spec claims are unconstrained. Two specs claiming the same key with different types cannot both be satisfied — the write is rejected. (The natural reading, written plainly; revisit on evidence.)
+**Multi-typing composes as obligations.** A chunk instance of several archetypes must fit every contract; keys no contract claims are unconstrained. Two contracts claiming the same key with different types cannot both be satisfied — the write is rejected. (The natural reading, written plainly; revisit on evidence.)
 
-Retired from the spec language: `accepts`, `required` (per-key `?` replaced it), `propagate`, `unique`-as-array (now per-key), `body.schema`. Content contracts are typed ref-lists in bodies; argument validation is a placement check (engine.md); chunk typing is instance placements.
+Retired from the old spec language: `accepts`, `required` (per-key `?` replaced it), `propagate`, `unique`-as-array (now per-key), `body.schema` — and the `spec` wrapper field itself, flattened into `instance`. Content contracts are typed ref-lists in bodies; argument validation is a placement check (engine.md); chunk typing is instance placements.
 
 ### Example
 
-```
-chunk: workplace            — archetype
-  spec: { instance: { name: string unique, city?: string } }
+```ol
+chunk workplace {
+  instance: { name: string unique, city?: string }
+}
 
-chunk: status               — archetype whose instances are the vocabulary
-  spec: { instance: {} }
-  instances: draft, running, done, failed
+chunk status { instance: {} }        — the vocabulary archetype; draft, running,
+                                       done, failed exist as chunks placed
+                                       instance on it (found by reading, never
+                                       a field — instances are placements)
 
-chunk: person               — archetype
-  spec: { instance: {
+chunk person {
+  instance: {
     name:   string
     work:   ref(workplace)
     status: ref(status)
     notes?: markdown
-  } }
+  }
+}
 
-chunk: ada  (instance on person)
+ada — instance on person
   body: { name: "Ada", work: "<id of acme>", status: "<id of running>" }
 ```
 
@@ -121,9 +120,9 @@ Writing `ada` validates `work` (exists, instance of `workplace`) and `status` (i
 When a body is saved, in the same transaction:
 
 - **Declared ref keys are validated** — target exists and is an instance of the constrained archetype — else the write fails like any spec violation.
-- **Every link the body contains** — typed refs, and mentions in prose or fenced expressions — is filed into one derived link table: delete-and-reinsert per chunk, the FTS pattern. The table is never part of commits and is rebuildable from current bodies. Typed refs make link-*finding* spec-free (tags announce refs); only archetype-constraint checking reads specs, at write.
+- **Every link the body contains** — typed refs, and mentions in prose or fenced expressions — is filed into one derived link table: delete-and-reinsert per chunk, the FTS pattern. The table is never part of commits and is rebuildable from current bodies. Typed refs make link-*finding* contract-free (tags announce refs); only archetype-constraint checking reads contracts, at write.
 
-**Both-sides reading.** `ScopeResult` carries a separate `linked` field beside membership — who points here, labeled `field` (with its key) or `mention`, never mixed with placements. "Who works here" is one indexed lookup; open Turing and every prose that mentions him is there.
+**Both-sides reading.** `ReadResult` carries a separate `linked` field beside membership — who points here, labeled `field` (with its key) or `mention`, never mixed with placements. "Who works here" is one indexed lookup; open Turing and every prose that mentions him is there.
 
 **Permissions engage both ends.** Creating a ref is gated by the writer's reach over the target — otherwise validation becomes an existence probe outside one's boundary. `linked` answers are filtered by the reader's reach — you never see links from chunks you could not read.
 
@@ -137,9 +136,9 @@ When a body is saved, in the same transaction:
 
 Mutations are atomic. A declaration — one or many chunks, with their placements — succeeds entirely or fails entirely; a commit appears only when every write passes. This atomicity is a property of the field itself, not of any storage layer beneath it.
 
-Validation runs against the post-write state of the declaration: all chunks and placements declared together are recorded before any spec is checked, so a chunk and its instance placement (the type membership its body is judged by) may arrive in one declaration without ordering failure. For each chunk touched, the effective obligation is the union of the instance specs of every archetype it is `instance` on; the body must fit each. Ref keys validate their targets; name uniqueness within the owner is enforced at placement time; a second `owned` placement for a chunk that already has an owner is rejected.
+Validation runs against the post-write state of the declaration: all chunks and placements declared together are recorded before any spec is checked, so a chunk and its instance placement (the type membership its body is judged by) may arrive in one declaration without ordering failure. For each chunk touched, the effective obligation is the union of the instance contracts of every archetype it is `instance` on; the body must fit each. Ref keys validate their targets; name uniqueness within the owner is enforced at placement time; a second `owned` placement for a chunk that already has an owner is rejected.
 
-`ordered` scopes: instance placements carry `seq`, auto-assigned on append when omitted.
+Ordered places: instance placements carry `seq`, auto-assigned on append when omitted (the `ordered` flag's home is open — What's Open).
 
 ## History
 
@@ -175,59 +174,59 @@ The substrate is branch-aware: every read and every write specifies a branch. Wh
 
 Nothing is destroyed. Removal is logical: a removed chunk drops out of current-state reads, as do placements involving it and link rows derived from it — refs *to* it become dead references, rendered, never repaired. Version history retains everything; time-travel reads see the past state intact. Removal is itself a mutation, recorded in a commit like any other write.
 
-## Queries / Scoping
+## Reads
 
-### Scope
+### Read
 
-The primary read operation. Declarative, pure, deterministic — the same query against the same field state returns the same result.
+The primary operation. Declarative, pure, deterministic — the same read against the same field state returns the same result.
 
-A scope read on X answers across the five connection kinds, each kept distinct. **Membership** is the three stored kinds — what lives here (`owned`), what is a member (`instance`), what is about it (`relates`) — reported with per-kind counts. **Links** — who points here by key (`field`), who speaks of it (`mention`) — arrive in the separate `linked` result. Intersection: naming several scopes returns the chunks placed (any stored kind) on every one; add a scope to narrow, remove to widen. Connected scopes are computed from shared placements.
+A read at X answers across the five connection kinds, each kept distinct. **Membership** is the three stored kinds — what lives here (`owned`), what is a member (`instance`), what is about it (`relates`) — reported with per-kind counts. **Links** — who points here by key (`field`), who speaks of it (`mention`) — arrive in the separate `linked` result. A location is an intersection: reading several chunks returns those placed (any stored kind) on every one; add a chunk to narrow, remove to widen. Adjacent places are computed from shared placements.
 
 ### Traversal
 
-Follow connections. From an identity chunk: its members and residents by placement, its subjects by relates, its outward refs by reading the body, its inward refs from `linked`. Traversal and scoping work together — scope to narrow the space, then follow connections within it.
+Follow connections. From an identity chunk: its members and residents by placement, its subjects by relates, its outward refs by reading the body, its inward refs from `linked`. Traversal and reading work together — read a location to narrow the space, then follow connections within it.
 
 ### Full-text search
 
-A native substrate feature. Entry point into the structure when the scope vocabulary isn't known yet. The index covers chunk names and string values in bodies; find chunks by keyword, discover their scopes, then navigate structurally. Maintained by the substrate, consistent with current state on each commit.
+A native substrate feature. Entry point into the structure when the place vocabulary isn't known yet. The index covers chunk names and string values in bodies; find chunks by keyword, discover their places, then navigate structurally. Maintained by the substrate, consistent with current state on each commit.
 
 ### Derived data — summaries, embeddings, and beyond
 
-Summaries, vector embeddings, and other derived data are chunks placed with the same primitives. A summary `relates` on the scope it summarizes and on a derivation scope like `summaries/opus-4.6`; an embedding carries its vector in body, placed on its source chunk and on its model's scope. Derivation scopes are ordinary scopes — queryable, navigable, no special tables. A derived chunk records what it was derived from in its body (`source_commit`, `model`), so a reader can tell whether the source has moved. Detecting and regenerating staleness is a reader concern.
+Summaries, vector embeddings, and other derived data are chunks placed with the same primitives. A summary `relates` on the place it summarizes and on a derivation place like `summaries/opus-4.6`; an embedding carries its vector in body, placed on its source chunk and on its model's place. Derivation places are ordinary places — queryable, navigable, no special tables. A derived chunk records what it was derived from in its body (`source_commit`, `model`), so a reader can tell whether the source has moved. Detecting and regenerating staleness is a reader concern.
 
 ### Grain — type or body key
 
 One question decides where a property lives (ruled): **does the property change while the chunk remains itself?** State — a task's status, a document's draft flag — is a body key (typed `ref` when the vocabulary is closed); making it a placement would churn placements on every change and let the "type" lie about identity. Identity — what the chunk *is*, without which it is nothing — is a type, carried by `instance`. A JSON body is **compressed field structure**: the grain choice is never fatal, because a pure transform can project body keys as virtual chunks on demand (`explode`, engine.md) and a writer who knows the shape may commit at chunk grain — pre-explosion, not indexing.
 
-### Temporal scoping
+### Temporal reads
 
-Reconstruct state at any commit: a read at `at: <commit>` resolves all chunks and placements as of that point. Time travel is read-only; to work from a past state, fork a branch from that commit and mutate forward. In the expression language, `at` is a pure pipe verb (`scope | at(commit)`).
+Reconstruct state at any commit: a read at `at: <commit>` resolves all chunks and placements as of that point. Time travel is read-only; to work from a past state, fork a branch from that commit and mutate forward. In the expression language, `at` is a pure pipe verb (`[project, tasks] | at(commit)`).
 
 ### Negation
 
-Everything in scope A except what's also in scope B. Set difference over placements, exposed as `exclude` roots on a scope read; excluded scopes are boundary-checked like positive ones.
+Everything in place A except what's also in place B. Set difference over placements, exposed as `exclude` roots on a read; excluded roots are boundary-checked like positive ones.
 
 ### Pagination and projection
 
-Ordered scopes grow large; reads are bounded by default. A scope read takes `limit` and `offset`: for ordered scopes the default window is tail-first (the latest entries), `offset` pages backward. Counts always describe the full set, so a reader probes shape before pulling data. Reads also project: `include: { body: false }` returns names, specs, placements, and counts without bodies — the cheap survey read context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups.
+Ordered places grow large; reads are bounded by default. A read takes `limit` and `offset`: for an ordered place the default window is tail-first (the latest entries), `offset` pages backward. Counts always describe the full set, so a reader probes shape before pulling data. Reads also project: `include: { body: false }` returns names, specs, placements, and counts without bodies — the cheap survey read context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups.
 
 ## Ingestion
 
-The substrate accepts any content. A chunk's body is a JSON object of any size — a full document, a dataset, an API response. The structural tools (connections, scopes, archetypes, FTS) make it possible for an agent to break content down and integrate it. The substrate stores the result; the agent provides the intelligence.
+The substrate accepts any content. A chunk's body is a JSON object of any size — a full document, a dataset, an API response. The structural tools (connections, places, archetypes, FTS) make it possible for an agent to break content down and integrate it. The substrate stores the result; the agent provides the intelligence.
 
 ## Integration
 
-External content is referenced, not stored. A chunk with body fields containing resolution parameters points outside the system; an integration contract chunk (itself an archetype, its instance spec naming the required keys) defines how to resolve references of that type.
+External content is referenced, not stored. A chunk with body fields containing resolution parameters points outside the system; an integration contract chunk (itself an archetype, its instance contract naming the required keys) defines how to resolve references of that type.
 
-A file reference is a chunk placed on the scopes where it's relevant; its body carries a path plus anchoring information. File references don't mirror filesystem hierarchy — placement reflects knowledge relationships, not disk layout.
+A file reference is a chunk placed on the places where it's relevant; its body carries a path plus anchoring information. File references don't mirror filesystem hierarchy — placement reflects knowledge relationships, not disk layout.
 
-**Git as first integration driver.** If the referenced file is git-tracked, the substrate commit and the git commit together pin the reference in time. An agent can later reconcile: what git commits touched this file since the reference was made? The substrate stores the fact; the intelligence evaluates it. The pattern generalizes: any integration type is an archetype whose instance spec carries resolution parameters.
+**Git as first integration driver.** If the referenced file is git-tracked, the substrate commit and the git commit together pin the reference in time. An agent can later reconcile: what git commits touched this file since the reference was made? The substrate stores the fact; the intelligence evaluates it. The pattern generalizes: any integration type is an archetype whose instance contract carries resolution parameters.
 
 Staleness detection is a reader concern — the field knows when the reference was established, not whether the world has changed.
 
 ## Peers
 
-Peers are separate databases, not partitions of one — each owns its data. They compose into one field by mounting: chunk ids are globally unique, so a placement in one db can reference a scope chunk in another, and reads union across the mounted set. Ownership never crosses mounts — a chunk's owner lives in its own db. Backlinks are per-db: a peer's links to my chunk live in their table; a complete `linked` answer is a federated union across mounts, like reads generally. How projects declare and resolve mounts, and the read-write/read-only model, are the engine's — see [`pilot.md`](pilot.md#multi-project-mounts) and [`engine.md`](engine.md).
+Peers are separate databases, not partitions of one — each owns its data. They compose into one field by mounting: chunk ids are globally unique, so a placement in one db can reference a chunk in another, and reads union across the mounted set. Ownership never crosses mounts — a chunk's owner lives in its own db. Backlinks are per-db: a peer's links to my chunk live in their table; a complete `linked` answer is a federated union across mounts, like reads generally. How projects declare and resolve mounts, and the read-write/read-only model, are the engine's — see [`pilot.md`](pilot.md#multi-project-mounts) and [`engine.md`](engine.md).
 
 ## Logical schema
 
@@ -251,9 +250,9 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 
 ## What's Open
 
-- **`ordered`/`seq` home.** Order survives as placement `seq`; where a scope *declares* orderedness now that `propagate` is gone — a spec field beside `instance` (the interim form above), a body key, or something else — is unruled.
-- **Ref-constraint naming.** How `ref(workplace)` names its archetype — id vs scoped name — couples to the bootstrap-ID debt; these settle together.
-- **Eager vs lazy re-derivation.** Editing an archetype's instance spec invalidates the derived link rows of every instance. Eager (write fan-out on spec edits) vs lazy (rows knowingly stale until each chunk's next write) is the sharpest open engineering decision.
+- **`ordered` — homeless since the flattening.** Order survives as placement `seq`; the flag that declared a place ordered lost its wrapper when `spec` collapsed into the flat `instance`. Steward proposal, unruled: dissolve it — `seq` auto-assigns on every placement (max+1 per place), order is read where wanted, the flag disappears. Until ruled, the db honors a reserved `$ordered` entry in the stored `instance` column as the interim carrier.
+- **Ref-constraint naming.** How `ref(workplace)` names its archetype — id vs closure name — couples to the bootstrap-ID debt; these settle together.
+- **Eager vs lazy re-derivation.** Editing an archetype's instance contract invalidates the derived link rows of every instance. Eager (write fan-out on spec edits) vs lazy (rows knowingly stale until each chunk's next write) is the sharpest open engineering decision.
 - **Expression normalization.** When two location descriptions count as the same location (for "who references this"). Settles at build.
 - **Temporal link queries.** v0.1 offers none; historical bodies remain in the version log, re-derivable if wanted.
 - **Mention/fence syntax edges.** The `ol:` scheme's location URIs and the fenced-expression tag settle at `prose` v0.

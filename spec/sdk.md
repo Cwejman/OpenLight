@@ -22,11 +22,11 @@ Both answer to the engine spec. Where they disagree, engine.md is right.
 
 ## One package, runtime-agnostic
 
-The SDK ships as one package: **`@openlight/sdk`**. Functions only: `scope`, `get`, `readBatch`, `commit`, `run`, `awaitRun`, `cancel`, `exit`, `subscribe`. No DOM, no React, no rendering. Imports cleanly in any JS/TS runtime — webview, Bun, future runtimes — because transport is a runtime concern, not the SDK's.
+The SDK ships as one package: **`@openlight/sdk`**. Functions only: `read`, `get`, `readBatch`, `commit`, `run`, `awaitRun`, `cancel`, `exit`, `subscribe`. No DOM, no React, no rendering. Imports cleanly in any JS/TS runtime — webview, Bun, future runtimes — because transport is a runtime concern, not the SDK's.
 
 The SDK lives in the engine crate (`engine/sdk/`) — it IS the engine's protocol expressed as TypeScript, so it ships where the protocol lives. Future capability surfaces (fs, network) eventually land here the same way: typed functions over the IPC bridge.
 
-React helpers (`useScope`, future `useCommit`, `useRun`, `useSubscribe`) are not part of the SDK — they're a separate UI library, `@openlight/react`, shipped from `host/react/` (because they're coupled to webview programs that the host renders). Webview programs that render React import the SDK *and* the UI library; VM programs only import the SDK. Non-TS clients eventually exist by reimplementing the SDK against the JSON-lines protocol — they don't see the UI library at all.
+React helpers (`useRead`, future `useCommit`, `useRun`, `useSubscribe`) are not part of the SDK — they're a separate UI library, `@openlight/react`, shipped from `host/react/` (because they're coupled to webview programs that the host renders). Webview programs that render React import the SDK *and* the UI library; VM programs only import the SDK. Non-TS clients eventually exist by reimplementing the SDK against the JSON-lines protocol — they don't see the UI library at all.
 
 ---
 
@@ -42,7 +42,7 @@ The SDK encodes on every write and decodes on every read, driven by the tags alo
 
 ## Resolution modes — frozen or head
 
-A process's argument is frozen at dispatch, but the chunks it references live on. When a program reads through its argument's refs, the SDK resolves **at the stamped commit by default** (`at:` from the process body) — reproducible, exactly what the run was given. Following the **living head** is the deliberate, explicit choice (`{ at: 'head' }`) for programs that want liveness — the reader following its reading is this, plus a subscription. Same temporal machinery, two honest modes (engine.md, *Frozen safety or rolling head*).
+A process's argument is frozen at start, but the chunks it references live on. When a program reads through its argument's refs, the SDK resolves **at the stamped commit by default** (`at:` from the process body) — reproducible, exactly what the run was given. Following the **living head** is the deliberate, explicit choice (`{ at: 'head' }`) for programs that want liveness — the reader following its reading is this, plus a subscription. Same temporal machinery, two honest modes (engine.md, *Frozen safety or rolling head*).
 
 ## The Substrate Surface
 
@@ -51,12 +51,12 @@ A process's argument is frozen at dispatch, but the chunks it references live on
 ### Reads
 
 ```ts
-scope(scopes: ChunkId[], opts?: ScopeOpts): Promise<ScopeResult>
-get(chunkId: ChunkId, opts?: ReadOpts): Promise<ChunkItem | null>
+read(places: ChunkId[], opts?: ReadOpts): Promise<ReadResult>
+get(chunkId: ChunkId, opts?: GetOpts): Promise<ChunkItem | null>
 readBatch(reads: TaggedRead[]): Promise<BatchResult>
 ```
 
-All wrap engine ops of the same name. Errors arrive as rejected Promises typed `EngineError`. `scope([])` with `opts.match_` is a whole-field FTS query (boundary-filtered); `opts.exclude` subtracts scopes; `limit`/`offset`/`include: { body: false }` per substrate.md (*Pagination and projection*). `readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on (`programs.md` §5).
+All wrap engine ops of the same name. Errors arrive as rejected Promises typed `EngineError`. `read([])` with `opts.match_` is a whole-field FTS query (boundary-filtered); `opts.exclude` subtracts places; `limit`/`offset`/`include: { body: false }` per substrate.md (*Pagination and projection*). `readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on (`programs.md` §5).
 
 ### Writes
 
@@ -76,7 +76,7 @@ cancel(processId: ProcessId): Promise<void>
 exit(): Promise<void>
 ```
 
-`run` dispatches — a program plus an already-committed argument chunk, or a draft process to consume — and returns the process id immediately. `RunArgs.mode` selects `'child'` (default — composed work, owned by the caller, cascades with it) or `'launch'` (detached — owned by the session, survives the caller; grants still intersect at spawn). `awaitRun` resolves when each named process reaches a terminal state and **returns the process chunk itself** — status and `result` ref in the body, the result one `get` away. `cancel` is authorized for descendants or targets within the caller's write boundary; idempotent. `exit` requests the calling program's own terminal transition — the webview self-dismissal path.
+`run` starts a process — a program plus an already-committed argument chunk, or a draft to consume — and returns the process id immediately. `RunArgs.mode` selects `'child'` (default — composed work, owned by the caller, cascades with it) or `'launch'` (detached — owned by the session, survives the caller; grants still intersect at spawn). `awaitRun` resolves when each named process reaches a terminal state and **returns the process chunk itself** — status and `result` ref in the body, the result one `get` away. `cancel` is authorized for descendants or targets within the caller's write boundary; idempotent. `exit` requests the calling program's own terminal transition — the webview self-dismissal path.
 
 `awaitRun` is named to dodge `await` (a TypeScript reserved word). The engine method is `await_processes`.
 
@@ -88,13 +88,13 @@ type SubEvent =
   | { kind: 'lagged' }
   | { kind: 'invalid', reason: string }
 
-subscribe(scopes: ChunkId[], callback: (event: SubEvent) => void): () => void
+subscribe(places: ChunkId[], callback: (event: SubEvent) => void): () => void
 ```
 
 Imperative subscription. The callback receives:
-- `{ kind: 'changed', commit }` for each `scope_changed` event — re-fetch via `scope`.
+- `{ kind: 'changed', commit }` for each `place_changed` event — re-fetch via `read`.
 - `{ kind: 'lagged' }` when the engine's input channel overflowed and this subscription may have missed events — re-fetch to recover.
-- `{ kind: 'invalid', reason }` when the engine has invalidated and unsubscribed this subscription (a subscribed scope became unreachable). No further events will come; the subscription is dead.
+- `{ kind: 'invalid', reason }` when the engine has invalidated and unsubscribed this subscription (a subscribed place became unreachable). No further events will come; the subscription is dead.
 
 The wire `lagged` event carries `subscriptionIds: string[]` — the SDK matches those against its registered subscriptions and fires `{ kind: 'lagged' }` only on the affected callbacks. Subscribers without an id in the list see nothing.
 
@@ -107,14 +107,14 @@ The returned thunk unsubscribes. Calling it after a `kind: 'invalid'` is a no-op
 The host's UI library exposes React hooks built on `@openlight/sdk`. v0.1 ships one:
 
 ```ts
-useScope(scopes: ChunkId[], opts?: ScopeOpts): ScopeResult | undefined
+useRead(places: ChunkId[], opts?: ReadOpts): ReadResult | undefined
 ```
 
-**Contract.** On mount and on every dependency change: register a `subscribe` first, *then* fetch initial state via `scope`, re-fetch on every `scope_changed` or `lagged` event, unmount → unsubscribe. The hook returns the latest fetched result; `undefined` until the first fetch resolves. On `subscription_invalid` (engine-emitted when a subscribed scope becomes unreachable), the hook stops re-fetching and returns `undefined` — the subscription is dead, the data is gone.
+**Contract.** On mount and on every dependency change: register a `subscribe` first, *then* fetch initial state via `read`, re-fetch on every `place_changed` or `lagged` event, unmount → unsubscribe. The hook returns the latest fetched result; `undefined` until the first fetch resolves. On `subscription_invalid` (engine-emitted when a subscribed place becomes unreachable), the hook stops re-fetching and returns `undefined` — the subscription is dead, the data is gone.
 
-**Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `scope` together must follow the same ordering.
+**Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `read` together must follow the same ordering.
 
-*Open — no error channel.* `useScope` returns `ScopeResult | undefined`, and `undefined` is its only failure form — a refused scope read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The reader's inline-error pin (programs.md §3) is unreachable for scope reads until this closes.
+*Open — no error channel.* `useRead` returns `ReadResult | undefined`, and `undefined` is its only failure form — a refused read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The reader's inline-error pin (programs.md §3) is unreachable for reads until this closes.
 
 **Why re-fetch every event** rather than apply the event's `commit` payload as a delta. Single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available to the callback for delta optimization in custom uses, but the default discards it.
 
@@ -134,23 +134,21 @@ type ProcessId = ChunkId   // a process is a chunk
 type ChunkItem = {
   id: ChunkId
   name?: string
-  spec?: Spec
+  instance?: Instance
   body?: Record<string, unknown>
   placements?: Placement[]
 }
 
-type Spec = {
-  instance?: Record<string, string>  // the instance spec — key → type expression
-                                     // ("string", "ref(workplace)", "list<ref>",
-                                     // "markdown", …; `?` and `unique` inline)
-  ordered?: boolean                  // interim home; open (substrate.md)
-}
+type Instance = Record<string, string>  // the flat instance contract — key → type
+                                        // expression ("string", "ref(workplace)",
+                                        // "list<ref>", "markdown", …; `?` and
+                                        // `unique` inline; reserved interim
+                                        // `$ordered` entry — substrate.md)
 
 type Placement = {
-  scope_id: ChunkId
-  type_: 'owned' | 'instance' | 'relates'   // key asymmetry, pinned: a placement
-                                  // is declared with `type` (writes,
-                                  // PlacementSpec) and read back with `type_`
+  on: ChunkId
+  kind: 'owned' | 'instance' | 'relates'   // the old type/type_ wire asymmetry
+                                           // dies with the rename
   seq?: number
 }
 
@@ -167,29 +165,29 @@ type Declaration = {
   message?: string
 }
 
-type ScopeOpts = {
+type ReadOpts = {
   branch?: string
   at?: CommitId
   match_?: string
   exclude?: ChunkId[]   // negation — set difference, either placement type;
                         // roots boundary-checked
-  limit?: number        // a single ordered scope reads tail-first: latest
+  limit?: number        // a single ordered place reads tail-first: latest
   offset?: number       // entries by default, offset pages backward, the
                         // window itself ascending by seq (db.md)
   include?: Includes    // { body: false } = survey read, no bodies
 }
 
-type ScopeResult = {
+type ReadResult = {
   head: CommitId
   unresolved?: ChunkId[]   // roots resolving in no mount (federated intersection,
                            // engine.md) — dead references as metadata, not error;
                            // optional because the engine wire does not carry it
                            // yet (the db does — recorded, ahead of the wire)
   total: number
-  in_scope: number
-  in_scope_owned: number
-  in_scope_instance: number
-  in_scope_relates: number
+  in_place: number
+  in_place_owned: number
+  in_place_instance: number
+  in_place_relates: number
   chunks: ChunkItem[]
   linked: Link[]           // fields and mentions pointing at the roots — derived,
                            // reader-reach-filtered, never mixed with placements
@@ -209,7 +207,7 @@ type Commit = {
 }
 
 type RunArgs = {
-  program?: ChunkId          // with `argument`: direct dispatch
+  program?: ChunkId          // with `argument`: direct start
   argument?: ChunkId         // an already-committed chunk, instance on the
                              // program's argument archetype
   draft?: ProcessId          // alternative: consume an existing draft process
@@ -221,12 +219,12 @@ type RunArgs = {
 }
 
 type TaggedRead =
-  | { tag: string, scopes: ChunkId[], opts?: ScopeOpts }
-  | { tag: string, chunkId: ChunkId, opts?: ReadOpts }
+  | { tag: string, places: ChunkId[], opts?: ReadOpts }
+  | { tag: string, chunkId: ChunkId, opts?: GetOpts }
 
 type BatchResult = {
   head: CommitId             // the one snapshot every sub-query resolved at
-  results: Record<string, ScopeResult | ChunkItem | null | EngineError>
+  results: Record<string, ReadResult | ChunkItem | null | EngineError>
 }
 
 type EngineError = {
@@ -292,7 +290,7 @@ engine/sdk/                                   — @openlight/sdk package
     values.ts             — boundary translation: native values ⇄ tagged wire
                             encoding ($ref/$loc/$set/$time/$md); Ref class
     protocol.ts           — Request | Response | Event shapes; id counter
-    surface.ts            — scope, get, commit, run, awaitRun, cancel
+    surface.ts            — read, get, commit, run, awaitRun, cancel
     subscriptions.ts      — subscribe, registry, event router
     transport.ts          — Transport interface + selection at module load
                             (globalThis.__openlight_transport > wry > stdio)
@@ -305,12 +303,12 @@ engine/sdk/                                   — @openlight/sdk package
 host/react/                                   — UI library (@openlight/react)
   src/
     index.ts              — public re-exports of hooks and components
-    useScope.ts           — the useScope hook
+    useRead.ts           — the useRead hook
   test/
-    useScope.test.ts      — hook semantics
+    useRead.test.ts      — hook semantics
 ```
 
-Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useScope`'s treatment of `subscription_invalid` as a dead subscription.
+Same coherence pattern as the db crate: each file owns a topic; predictable shape inside (constants on top, public function in the middle, private helpers below). When a function outgrows linear narrative, it decomposes into named helpers in the same file; the public function becomes the orchestrator. What's genuinely non-obvious here and earns a comment (per [`conventions.md`](../conventions.md#code)): the transport's module-load selection (pre-set transport vs `window.__wry_ipc` vs stdio fallback), the event-router's id-vs-event message-shape distinguisher, `useRead`'s treatment of `subscription_invalid` as a dead subscription.
 
 `host/react` depends on `@openlight/sdk` for transport-aware functions; nothing else.
 
@@ -318,7 +316,7 @@ Same coherence pattern as the db crate: each file owns a topic; predictable shap
 
 ## What Is Open
 
-- **React hooks beyond `useScope`.** `useCommit` for guarded writes, `useRun` binding `run + awaitRun` to component lifetime, `useSubscribe` for non-React imperative needs — candidates that may emerge as first-party programs are written.
+- **React hooks beyond `useRead`.** `useCommit` for guarded writes, `useRun` binding `run + awaitRun` to component lifetime, `useSubscribe` for non-React imperative needs — candidates that may emerge as first-party programs are written.
 - **Type generation.** TS types are a hand-maintained mirror today. A codegen step from the Rust source could keep them in sync mechanically.
 - **Non-TS clients.** The substrate protocol is JSON-lines; an SDK can be reimplemented in any language that runs as a VM program. The first non-TS port is a known horizon target. See [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) for what's deferred.
 - **Streaming intra-op results.** Settled engine-side as a convention rather than protocol machinery: streaming is throttled partial commits (`body.partial`), coalesced subscription events, re-fetch on event — see engine.md, *Streaming convention*. Intra-op streaming stays out of the protocol.

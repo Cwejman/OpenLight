@@ -151,7 +151,7 @@ The host does not interpret substrate operations — it dispatches them. VM prog
 
 A program imports the SDK and calls the substrate operations it needs directly; webview programs render with their DOM library of choice (`react-dom/client` for React) — the SDK has no rendering concerns. The op surface is owned by [`sdk.md`](sdk.md); a worked example is under *Authoring Programs* below.
 
-React hooks live in the host's UI library (`host/react/`), shipped as `@openlight/react`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `scope_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
+React hooks live in the host's UI library (`host/react/`), shipped as `@openlight/react`. The starting hook is `useScope(ids)` — registers a `subscribe` first, then fetches via `scope`, re-fetches on `place_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
 
 ---
 
