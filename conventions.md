@@ -34,6 +34,10 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 - **No builders.** Direct struct construction, with free-function helpers where useful.
 - **TDD, explicit.** Every build unit is planned before coded, and driven by tests written from the spec first — the suite is the spec's enforcement arm. If a test can't be written from the spec, the spec is what needs work; code never advances past what the spec carries, so the two cannot diverge silently.
 
+## Spend the model where it matters
+
+Frontier-model sittings are for design dialog, rulings, and writing that needs the whole context in one head. Mechanical work — renames, vocabulary sweeps, batched spec folds, reference retargeting — is never done live in a reasoning sitting: record the ruling in `spec/research/conclusions.md`, queue the sweep, and let a cheap session or subagent execute it. Renaming is not a frontier task.
+
 ## Subagent grounding
 
 A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used where less context is the point (the clean-room passes in `spec/research/cleanroom/` are the precedent).

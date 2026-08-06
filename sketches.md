@@ -21,3 +21,23 @@ A reading surface with two coupled parts:
 - What does the stream show at paragraph grain — first sentence, a derived summary chunk, or the chunk's name?
 - Does the pacing layer belong to the reader program or to a separate annotating program whose output any reader consumes?
 - Honest ceiling: ~400 wpm with intact comprehension. Is the value speed at all, or navigation — and does the pitch change accordingly?
+
+## Type-mirror integration
+
+**Open — sketch** (author margin note, 2026-08-05: an integration running the *other* way — syncing the field out to the external world).
+
+An integration that, while running, subscribes to the field and **generates TypeScript types over the whole substrate** — every archetype's instance spec as a real TS type, with inference — so a program author (or an agent) writes against the SDK with the field's own contracts checked in the editor.
+
+**Grounding.** The selection arc already leans on this existing: the ol language is TS-expression grammar precisely so that "with generated TS types over the substrate, plans type-check in any editor" ([`spec/research/selection.md`](spec/research/selection.md) §9); sdk.md holds schema-driven TS types as the layer above the tagged encoding. This sketch is that layer realized as an ordinary integration — subscription in, `.d.ts` out — not SDK machinery.
+
+**Open questions.** Regeneration cadence (per commit? debounced?); where the generated module lives (a chunk? a file the VM serves?); naming collisions across mounts (ownership paths as namespaces is the natural answer); whether the argument-set contracts (`accepts`) also project as call signatures.
+
+## Web-projection integration
+
+**Open — sketch** (author margin note, 2026-08-05).
+
+An integration that scans a website and **projects its pages and URL structure into the field**: the unique-name-within-owner law means one chunk's ownership path *is* the URL — `site.com/docs/api` as a chunk named `api` owned by `docs` owned by the site root. The web's own addressing scheme lands in the field without invention.
+
+**Grounding.** Integrations reference external content rather than store it (substrate.md §Integration); ownership paths give the projection its skeleton for free; staleness is the standing reconcile pattern (source commit vs the live page).
+
+**Open questions.** What the body carries — content snapshot vs pure reference with fetch-on-read; refresh policy and change detection; how deep a crawl goes (a scope-filtered projection?); whether links between pages file as mentions (they are exactly that).
