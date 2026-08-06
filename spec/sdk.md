@@ -40,8 +40,6 @@ Typed bodies exist in three forms; translation between them is the SDK's job, in
 
 The SDK encodes on every write and decodes on every read, driven by the tags alone — no spec fetch needed to translate. Schema-driven TS types (a program's argument as a real TypeScript type, generated from the archetype's instance spec) are a later layer on the same encoding.
 
-> I hope this will look good in code, that the mappings between db types and implementation in ts is done in a functional and coherent manner.
-
 ## Resolution modes — frozen or head
 
 A process's argument is frozen at dispatch, but the chunks it references live on. When a program reads through its argument's refs, the SDK resolves **at the stamped commit by default** (`at:` from the process body) — reproducible, exactly what the run was given. Following the **living head** is the deliberate, explicit choice (`{ at: 'head' }`) for programs that want liveness — the reader following its reading is this, plus a subscription. Same temporal machinery, two honest modes (engine.md, *Frozen safety or rolling head*).

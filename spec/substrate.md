@@ -15,8 +15,6 @@ chunk {
 }
 ```
 
-> i tohught spec was named instance by the rpevious session, perhaps instance is not the eprfect name either, as a name such in thtis case point to its primary purpose ( good practice), which for the instance spec is to serve validation for its instances, it is like a view into what an instance is to be.
-
 Two fields, cleanly separated by who reads them:
 
 **Spec** is for the system — a contract enforced on writes. Its center is the **instance spec** (below): the typed key-map that instances of this chunk must fit.
@@ -38,8 +36,6 @@ placement {
 }
 ```
 
-> i wonder if scope id is an unclear name. Clear names are important, the less unclear, the more natural it is to read. Meaning is to be as coeherent with the commonality of agreed upon and known words.
-
 - **owned-by** — *where it lives.* Every chunk has at most one owner; ownership forms a tree. Names are unique within their owner, so `/` paths address chunks: `engine/program` is the chunk named `program` owned by the root `engine`. A module is an ownership subtree. Ownership never crosses mounts. A chunk with no owner is a root; the pilot's convention is one root per project, named after it.
 - **instance** — *what it is.* Pure type membership: the chunk is an instance of the scope's type. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
 - **relates** — *what it is about.* Authored aboutness. Prose placed on its subjects — the chunk at the intersection *is* the relationship — stays the substrate's oldest pattern.
@@ -50,29 +46,19 @@ Rigid pointers that once leaned on `relates` move into fields; relates is reliev
 
 **Reach = ownership + explicit grants.** Permission walks read ownership and granted roots only — a grant over a root reaches its ownership subtree. Instance, relates, field, and mention never confer reach: you can hand anyone an address; the field decides at the door.
 
-> Oh, so a chunk can claim restricted access downstream? Private bubble on th ebranch of a root? A protected sub-root. Good or bad?
-
 ### What connection creates
 
 **Identity.** A chunk with other chunks connected to it IS a scope. No declaration needed — it emerges from the graph.
 
-> A scope is merely a vantage point, saying it is a vantage point by a special word is not needed. It is impled it is a vantage point for the substrate is space. The term for a vantage point on the higher levels of the spec, is location.
-
-> Also i think a name must be nessesary for an identity, and therefore a connection.
-
 **Hierarchy** is ownership — organizational and permission-bearing (reach walks it), never a cage for reference: anything can reference anything regardless of where it lives.
 
 **Connections.** A chunk placed `relates` on multiple identity chunks bridges them. The chunk at the intersection of `turing` and `cambridge` IS the relationship between Turing and Cambridge; its meaning is in its body. No separate link/edge primitive.
-
-> Or the other way around is different congitively, naturally a piece of knowledge about turings time in cambridge can be a separate chunk. But the previous notion that a chunk should always be broken down into its consituents it not nessesarly absolutely true, rather it is a displice with a certain nature and function. Prose can definetly be a larger part of meaning complecting various locations in the field.
 
 **Consolidation principle.** If content doesn't create a new intersection of identities, it belongs in the identity chunk's body, not as a separate chunk. Separate chunks exist when they bridge identities. (The grain rule below decides body key vs type.)
 
 ### Names
 
 Names are unique within their owner; root names are unique within their db. The system references by id internally; names are human-readable labels, and paths resolve down the ownership tree. Renaming is trivial — nothing structural depends on the name.
-
-> Except uniqueness at at each closure for them to be adressable by name.
 
 ## The Instance Spec
 
@@ -85,7 +71,7 @@ spec: {
     work:    ref(workplace)
     joined:  time
     bio?:    markdown
-      tags:    set<string>
+    tags:    set<string>
   }
   ordered?: true      — instance placements on this scope carry seq
                         (the field's home is open; see What's Open)
@@ -100,10 +86,6 @@ Towers are natural: `shell` fits `program`'s instance spec while carrying its ow
 
 **Enums are the substrate's own.** A closed vocabulary is `ref(X)` where X's instances are the value chunks — `status: ref(status)` with `draft`, `running`, `done`, `failed` as chunks. No enum machinery; the link index answers "all running" derived, with no placement churn.
 
-> Is it a good or a bad idea, to create an integration, in this cxse the other way around, isntead of syncing the external world it syncs the external world to the field. One such sketch is to have a typescript module, when the integration is running it is subscribed to the field and generates typescript types over the whole substrate, with type inference etc, enabling oneself to use them together with the sdk...
-
-> Another sketch to be taken to sketch.md (a separate branch to be incorporated once the other related feedback is handled and processed.) is to for an integration, being able to scan a website and project its pages / url-structure into the field, the unique nameable nature means the location by ownership to one chunk is the actual web url
-
 **Typing goes as deep as archetypes are named.** Anonymous nested maps stay untyped, as bodies always were. The fence against ontology creep is *ownership*: a key name lives inside one archetype's spec, like a struct field in a struct — never in a global predicate vocabulary. That is the difference between this and RDF.
 
 **Multi-typing composes as obligations.** A chunk instance of several archetypes must fit every spec; keys no spec claims are unconstrained. Two specs claiming the same key with different types cannot both be satisfied — the write is rejected. (The natural reading, written plainly; revisit on evidence.)
@@ -111,12 +93,6 @@ Towers are natural: `shell` fits `program`'s instance spec while carrying its ow
 Retired from the spec language: `accepts`, `required` (per-key `?` replaced it), `propagate`, `unique`-as-array (now per-key), `body.schema`. Content contracts are typed ref-lists in bodies; argument validation is a placement check (engine.md); chunk typing is instance placements.
 
 ### Example
-
-> Oh, i didnt think instance was inside spec? Spec is renamed to instance?
-
-> Nother practical DX consern is that one may want to define if this instance spec is to allow untyped fields, changes the meaning of it quite a lot.
-
-> Is this an over json response? Because strcturally instances is not a field on a chunk. they are only findeable over the field...
 
 ```
 chunk: workplace            — archetype
@@ -147,19 +123,13 @@ When a body is saved, in the same transaction:
 - **Declared ref keys are validated** — target exists and is an instance of the constrained archetype — else the write fails like any spec violation.
 - **Every link the body contains** — typed refs, and mentions in prose or fenced expressions — is filed into one derived link table: delete-and-reinsert per chunk, the FTS pattern. The table is never part of commits and is rebuildable from current bodies. Typed refs make link-*finding* spec-free (tags announce refs); only archetype-constraint checking reads specs, at write.
 
-> Now i remember that the command for reading was prevously scope. O suggest read is a better verb, or is your opinions perhaps different?
-
 **Both-sides reading.** `ScopeResult` carries a separate `linked` field beside membership — who points here, labeled `field` (with its key) or `mention`, never mixed with placements. "Who works here" is one indexed lookup; open Turing and every prose that mentions him is there.
 
 **Permissions engage both ends.** Creating a ref is gated by the writer's reach over the target — otherwise validation becomes an existence probe outside one's boundary. `linked` answers are filtered by the reader's reach — you never see links from chunks you could not read.
 
-> Interesting, the point of the permission boundaries is what is reacheable and not, so in a way boundaries can determine what type of relations are possible, the onces that cause commitment of marriage, then the dependcy forbids deletion... Good or bad idea? - Some ideas complect wihtout justifiable reason implement rather than postpone.
-
 **Integrity is write-time only, permanently.** The field never re-validates old bodies and never repairs. A target that later loses its archetype or is removed leaves refs to it stale — a *legal, permanent state*, rendered as dead references. Losslessness demands this.
 
-**Location mentions target descriptions, not chunks.** A mention may point at a location — an expression, normalized as text, that may resolve to a hundred chunks today and ninety tomorrow. The link's target column therefore holds two kinds — a chunk id, or a normalized location expression — and "who references this location" answers by expression match. Materializing a description into a chunk stays the separate sharing-confers-identity gesture, never a side effect of mentioning.A
-
-> I dont understand this above paragrpah. also expression is a reserved term. And the talk about descriptino is completely incomprehendeable to me.
+**Location mentions target descriptions, not chunks.** A mention may point at a location — an expression, normalized as text, that may resolve to a hundred chunks today and ninety tomorrow. The link's target column therefore holds two kinds — a chunk id, or a normalized location expression — and "who references this location" answers by expression match. Materializing a description into a chunk stays the separate sharing-confers-identity gesture, never a side effect of mentioning.
 
 **Cross-mount refs validate through the engine** — the federation seam (engine.md). The db stays id-blind and validates locally resolvable targets only. Adopted as the simple thing; author reservation on record that it may prove the wrong seam.
 
@@ -232,10 +202,6 @@ One question decides where a property lives (ruled): **does the property change 
 ### Temporal scoping
 
 Reconstruct state at any commit: a read at `at: <commit>` resolves all chunks and placements as of that point. Time travel is read-only; to work from a past state, fork a branch from that commit and mutate forward. In the expression language, `at` is a pure pipe verb (`scope | at(commit)`).
-
-> Should you? Now that the egnine enables expressions, such things are writeable anyway.
-
-> Also brings the question, what about speed for expressions, will there be a time when it is better to add some primitive function as part of the db nin some way opr how does one allow the egnine to do more proper sql queries? Critical ipossible failure point to analyse.
 
 ### Negation
 

@@ -33,11 +33,7 @@ The engine federates across multiple substrate dbs — one read-write **active p
 }
 ```
 
-> Here is demand again, instead of read and write flat in the spec.
-
 **Role is conferred by reference.** An archetype is this program's argument or result because the program's body says so. Interface archetypes are found from the program, never by global name or path — every program having an `output` collides nowhere. The argument archetype's instance spec carries the parameters: types, refs, lists and sets, per-key docs, per-key `?` optionality, and `grants: read|write` markers — a filled ref whose key is grants-marked makes its target a boundary root of the run. Twins are distinguished by name (`{old: ref(A), new: ref(A)}`); nothing anywhere depends on position.
-
-> This above senstance is hard to read and comprehend.
 
 This one convention feeds three consumers with zero duplication: the `form` renders fields and boundary chips from the argument archetype's instance spec, the agent compiles provider tool schemas from the same spec, and expressions type-check plans before running them (see *Expressions*).
 
@@ -101,8 +97,6 @@ engine/mount  (virtual)
 ```
 
 `engine/mount` is a virtual scope, in the same family as `db/commits` and `db/branches`. Every chunk surfaced from mount X carries a synthesized `relates` placement on X's mount instance — provenance through native substrate plumbing. Programs can scope the mount root to list mounts, or intersect any scope with a mount instance to narrow to its chunks.
-
-> Scope again
 
 ## Lifecycle: draft, run, launch
 
@@ -299,8 +293,6 @@ impl Engine {
 
 Dispatching (`run` with program + argument, or a consumed draft) is one atomic `db.commit()`:
 
-> Again with the messy and inconsistent vocabilary. Dispatch was used  in a preivous pilot. I feel like you say run sometimes when you mean process, and to me the act of creating a process, the verb is run, not dispatch
-
 1. **The placement check.** The argument chunk must be `instance` on the archetype the program's `argument` ref names. Fail → `VALIDATION_ERROR`, nothing written.
 2. **The process chunk** — fresh for a direct dispatch (owned per mode, `instance` on `engine/process`, the program, and each caller-supplied scope), or the existing draft flipped. Body written whole: `argument` ref, `at` stamped to the branch head, `status → running`, `read`/`write` as granted (grants-derived roots + demand + the caller's edits, intersected with the caller's own reach for nested runs).
 3. **The argument freezes.** From this commit, writes to the argument chunk are rejected — consumed.
@@ -344,8 +336,6 @@ collation:   { members: kv<name, location | expression>, settings, predecessor }
              — the reader's stored value (programs.md); predecessor cites the
                collation it was edited from
 ```
-
-> Here i'd prefer to see actual full chunk specs. Actually i would think that is best practice in all the markdown files, in the same manner using the agreed upon syntatic sugar (maybe typescript renders fine fo rhihglithing in the codeblock?).
 
 Names resolve internal nodes first, then collation siblings — the scoped-name rule, applied twice. Expressions may reference sibling expressions. Pipe verbs are pure programs: `follow` (the citation walk), `at` (time travel as composition), `where`, `fold`, `explode`, `group`. **Pipe output is substrate-shaped** — chunks-and-placements — so the algebra composes over results, not just stored scopes.
 
