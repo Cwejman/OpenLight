@@ -27,6 +27,12 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 
 **A question is not a work order.** When the prompt contains a question, answering it *is* the turn's work. Do not spawn subagents, start an implementation, or begin edits that presume the answer — a question asked is a decision not yet made, and work started against it is work likely thrown away. Propose in words, then wait for the grant.
 
+## Rewriting prose
+
+When a change reworks a file's argument rather than a detail, **replace whole sections at once** — never patch paragraph by paragraph. Prose is not modular: meaning lives in transitions and in what has already been said, so serial edits leave repeated setup, dangling transitions, and new claims arranged in the old argument's skeleton. One replacement holds the passage in a single head at a single moment, which is the only way coherence is actually checkable — and it diffs honestly, as prose to be read rather than hunks to be reassembled.
+
+The inverse holds for local changes — a rename, one correction. There a wholesale rewrite lets concepts shift invisibly under cover of a large diff, and the diff misstates its own scope. **Surgical when the constraint is *nothing else may change*; wholesale when the argument itself is what changed.**
+
 ## Code
 
 - **Languages.** Rust is the platform (host, engine, substrate). TypeScript is the *pilot's* language for programs and the first SDK — a pragmatic choice, not a limit: VM programs declare their own runtimes and dependencies (a program may demand Node, Python, anything its shebang and packages name), and SDKs for other languages follow. Nothing below binds programs to TypeScript.
