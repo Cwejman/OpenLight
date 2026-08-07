@@ -1,8 +1,8 @@
-//! Per-project bootstrap seeding (`spec/bootstrap.md`): the initial commit
+//! Per-project bootstrap seeding (`@md/spec/bootstrap.md`): the initial commit
 //! each first-party project's substrate starts with. The routines live here
 //! because the host runs them (`ol init` is host implementation — bootstrap.md,
 //! closing note). Ids are readable strings per the fixture convention
-//! (board.md tracked debt); the engine's `resolve_name` is the seam that makes
+//! (@md/board.md tracked debt); the engine's `resolve_name` is the seam that makes
 //! generated ids a later swap.
 //!
 //! Idempotence follows db.md's meta-table pattern lifted to the substrate:
@@ -229,7 +229,7 @@ pub fn agents_declaration() -> Declaration {
 // pieces. That is a hand-rolled migration in miniature; the real path stays
 // unruled debt (bootstrap.md, *Open — no migration path*).
 
-/// Deterministic readable ids, per the fixture convention (board.md tracked
+/// Deterministic readable ids, per the fixture convention (@md/board.md tracked
 /// debt: real ids are generated; `resolve_name` is the seam).
 pub const SESSION_ID: &str = "session-main";
 pub const SESSION_NAME: &str = "main";

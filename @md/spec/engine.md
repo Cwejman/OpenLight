@@ -818,7 +818,7 @@ An explicit `BOUNDARY_VIOLATION` beats a silently empty read. The engine returns
 
 ## Client Library
 
-The engine exposes only Rust functions; it ships no TS client. Programs reach those functions through the SDK, which serializes calls into the protocol JSON and selects the transport. The SDK ships from the engine crate ([`engine/sdk/`](../engine/sdk/)) because it is the engine's protocol expressed as TypeScript; surface and transports in [`sdk.md`](sdk.md).
+The engine exposes only Rust functions; it ships no TS client. Programs reach those functions through the SDK, which serializes calls into the protocol JSON and selects the transport. The SDK ships from the engine crate ([`engine/sdk/`](../../engine/sdk/)) because it is the engine's protocol expressed as TypeScript; surface and transports in [`sdk.md`](sdk.md).
 
 ---
 

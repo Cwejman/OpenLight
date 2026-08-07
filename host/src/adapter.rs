@@ -1,6 +1,6 @@
 //! The swap: `EngineApi` implemented by the real `engine::Engine`. The rim
 //! hands dispatch this adapter instead of the `FixtureStub` and the surfaces
-//! read the real field — the seam's proof (board.md, build track step 5).
+//! read the real field — the seam's proof (@md/board.md, build track step 5).
 //! Wire result shapes come from the engine's own serializers
 //! (`engine::scope_result_json` and friends), so the wire has one home.
 

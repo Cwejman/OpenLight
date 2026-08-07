@@ -1,9 +1,9 @@
 //! Fixture field data — pure. Chunks and placements shaped per
-//! `spec/substrate.md` (chunk = id/name/spec/body; placement =
-//! chunk/scope/type/seq) holding the archetypes `spec/host.md`
-//! (§The Composition Types) and `spec/engine.md` (§Program and Process)
+//! `@md/spec/substrate.md` (chunk = id/name/spec/body; placement =
+//! chunk/scope/type/seq) holding the archetypes `@md/spec/host.md`
+//! (§The Composition Types) and `@md/spec/engine.md` (§Program and Process)
 //! define, plus a demo session. Readable-string ids follow the fixture
-//! convention (board.md tracked debt: real ids are generated).
+//! convention (@md/board.md tracked debt: real ids are generated).
 
 use serde_json::{json, Value};
 

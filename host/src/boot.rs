@@ -152,7 +152,7 @@ pub fn boot(active_path: &Path) -> Result<Booted, BootError> {
     let cascade = mounts::walk(active_path, &mut mounts::fs_loader).map_err(BootError::Cascade)?;
     mounts::require(&cascade, &["host", "engine"]).map_err(BootError::Cascade)?;
 
-    // Per-project bootstrap seeding — the explicit pre-open step (board.md
+    // Per-project bootstrap seeding — the explicit pre-open step (@md/board.md
     // gate "before swap"). Idempotent; peers without a routine must already
     // carry a db, enforced by the read-only open below.
     seed_first_party(&cascade)?;

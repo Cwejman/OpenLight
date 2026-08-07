@@ -4,7 +4,7 @@
 //! what it leaves (`tree::read` → `geometry::walk`); per-webview IPC handlers
 //! (host.md §Transport) dispatching through the `EngineApi` seam. The rim
 //! chooses the implementor at runtime: the real `engine::Engine` behind
-//! `EngineAdapter` by default (the swap, board.md build track step 5), the
+//! `EngineAdapter` by default (the swap, @md/board.md build track step 5), the
 //! `FixtureStub` under `--fixture`.
 //!
 //! The tile tree is field-driven: the rim reads the active session's current
@@ -361,7 +361,7 @@ fn engine_main(runtime: tokio::runtime::Runtime, args: &[String]) {
 
     let strip_process = strip.process.clone();
 
-    // The probe lane (board.md's layout-as-data jewel, thin end): boot whole,
+    // The probe lane (@md/board.md's layout-as-data jewel, thin end): boot whole,
     // then ask each surface what its DOM became. Nothing else changes.
     let probing = args.iter().any(|a| a == "--probe");
 

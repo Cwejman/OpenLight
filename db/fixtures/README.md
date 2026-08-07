@@ -1,6 +1,6 @@
 # Substrate conformance fixtures
 
-Ground truth for the consumer ↔ db contract, written from [`spec/substrate.md`](../../spec/substrate.md) before any implementation. Every case is a claim the spec makes; the db crate's tests and the SDK's tests both consume these files through thin adapters, so the two implementations cannot drift apart silently.
+Ground truth for the consumer ↔ db contract, written from [`spec/substrate.md`](../../@md/spec/substrate.md) before any implementation. Every case is a claim the spec makes; the db crate's tests and the SDK's tests both consume these files through thin adapters, so the two implementations cannot drift apart silently.
 
 ## Format
 

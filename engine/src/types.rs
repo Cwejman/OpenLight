@@ -6,7 +6,7 @@ use std::fmt;
 pub type ProcessId = ChunkId;
 
 /// Well-known chunk ids for the engine project's archetypes. Bootstrap ids are
-/// hand-picked human-readable strings for v0.1 (board.md, tracked debt); the
+/// hand-picked human-readable strings for v0.1 (@md/board.md, tracked debt); the
 /// engine binds to them as constants until generated-id lookup lands.
 pub mod archetypes {
     pub const ENGINE_PROGRAM: &str = "engine/program";

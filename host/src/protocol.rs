@@ -1,9 +1,9 @@
 //! Wire protocol — pure. The program protocol's request/response envelope,
-//! exactly as `spec/engine.md` §The Program Protocol specifies it: every
+//! exactly as `@md/spec/engine.md` §The Program Protocol specifies it: every
 //! request has an `op` and a monotonic `id`; every response pairs the same
 //! `id` with either `result` or `error`; events carry an `event` field and
 //! no `id`. The wry delivery scripts (`__sdk.resolve(<id>, <payload>)`,
-//! `__sdk.event(<payload>)`) are `spec/host.md` §Transport.
+//! `__sdk.event(<payload>)`) are `@md/spec/host.md` §Transport.
 
 use serde::Deserialize;
 use serde_json::Value;
