@@ -32,7 +32,7 @@ A model-calling program reads the same typed structure a grep does (or any progr
 
 [`@md/sketches.md`](@md/sketches.md) — mini-projects: small app ideas inside the environment, held open with their grounding.
 
-[`@md/rework.md`](@md/rework.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
+[`@md/spec/research/cleanroom/synthesis.md`](@md/spec/research/cleanroom/synthesis.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
 
 [`@md/spec/research/`](@md/spec/research/) — reference depth. [`@md/spec/research/cleanroom/`](@md/spec/research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.
 
