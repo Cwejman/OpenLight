@@ -58,6 +58,10 @@ When the environment is usable enough that the spec itself moves into the substr
 
 **Real today:** the conventions mandate legible openness (settled vs held-open, marked in place); specs are already substrate-enforced contracts; every commit carries author and time. **Open:** the resolution archetype's shape (claim, premises, status), whether premise links are placements or reference-typed body keys (kin to *Typed JSON* above), and what dissolution does downstream — mark, notify, or block.
 
+## Lifetimes in the substrate
+
+Placements and chunks that carry a lifespan — a role membership that expires on its own, a grant valid until Friday, a dimension whose members age out. Today every standing permission or grouping outlives its intent until someone remembers to remove it; a lifespan makes the field forget on schedule. Touches the retention/ring idea in buffers and the locked-relationships exploration (its inverse: a relation that may *never* lapse). Noted 2026-08-07 from the boundary dialog ([`spec/research/dimensions.md`](spec/research/dimensions.md)); no design taken.
+
 ## Uniform VM containment via DOM streaming
 
 The pilot uses split containment — capability-bearing programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels: a thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for the same pattern.
