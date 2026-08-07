@@ -2,7 +2,7 @@
 
 **Status: §8's redistribution LANDED (2026-08-03 session).** The specs are now the law; this file remains the settlement record and the consolidated opens (§7). Three silences resolved by author word at the fold: run boundaries as typed process-body keys, five kinds in scope reads, status `draft | running | done | failed`. One steward reading marked open in engine.md: the frame as the process's ownership subtree.
 
-[`threads-dialog.md`](threads-dialog.md) is the *path* — it contains superseded layers and must not be read as current. Everything below is the end state of the 2026-08-01→03 arc. Board carries the queue.
+[`threads-dialog.md`](../threads-dialog.md) is the *path* — it contains superseded layers and must not be read as current. Everything below is the end state of the 2026-08-01→03 arc. Board carries the queue.
 
 ---
 

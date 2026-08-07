@@ -26,14 +26,14 @@ Though called "the pilot," this is **v0.1** — the seed that grows. Architectur
 
 ## What v0.1 Defers
 
-- **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](horizon.md).
+- **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](../horizon.md).
 - **Services as first-class.** A long-lived program is a code pattern, not a substrate distinction.
 - **Derived chunks** — summaries, embeddings. The pattern works; generation is not in the loop.
 - **Temporal queries.** `--at <commit>` for time travel is possible against the current schema, not wired into the interface.
 - **Shell language.** Programs are executables; the file's shebang determines its runtime.
 - **Streaming** model responses. The agent loop buffers.
 - **Retention.** Nothing is pruned.
-- **WebGPU-capable views.** Views render DOM. Pixel/GPU surfaces are a direction in [`horizon.md`](horizon.md), not v0.1 scope.
+- **WebGPU-capable views.** Views render DOM. Pixel/GPU surfaces are a direction in [`horizon.md`](../horizon.md), not v0.1 scope.
 
 ---
 
@@ -82,7 +82,7 @@ A mount contributes its substrate (federated read-only into the field), its invo
 
 **Sharing scopes across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's invocables are placed there and discoverable across the field.
 
-What v0.1's mounts don't yet support: read-write across mounts, remote (network) mounts, identity verification, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. See [`horizon.md`](horizon.md).
+What v0.1's mounts don't yet support: read-write across mounts, remote (network) mounts, identity verification, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. See [`horizon.md`](../horizon.md).
 
 ### The substrate (`db`)
 
@@ -92,7 +92,7 @@ A SQLite-backed Rust library. Chunks, placements, commits. See [`substrate.md`](
 
 Sits between the substrate and anything that would run against it. Creates a `process` chunk when a program is run, enforces boundaries, spawns the program's executable, mediates all substrate access the running program attempts. See [`engine.md`](engine.md).
 
-A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. In v0.1 there is no separate engine process, no inter-process hop between host and engine — but the protocol seam deliberately preserves the engine-as-daemon direction (hosts as attaching windows, network reach; see [`horizon.md`](horizon.md)).
+A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. In v0.1 there is no separate engine process, no inter-process hop between host and engine — but the protocol seam deliberately preserves the engine-as-daemon direction (hosts as attaching windows, network reach; see [`horizon.md`](../horizon.md)).
 
 ### The host
 
@@ -119,7 +119,7 @@ The SDK hides which transport is active. `scope(ids)` feels local regardless.
 
 v0.1 uses **split containment**. `runtime: 'vm'` programs run inside the active project's Linux VM (the substrate's containment for capability-bearing programs); peer projects' filesystems are mounted read-only at `/peers/<project-id>/` so peer-defined invocables run from their mounted paths within the same VM. `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains VM programs. This is the simpler path, and putting capability-bearing programs in a VM gives v0.1 the safety floor it needs to host agentic programs without inventing new mechanism.
 
-The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
+The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](../horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 
 ---
 
@@ -221,4 +221,4 @@ Held in the specs rather than closed prematurely. These do not block the pilot's
 - **Sidebar disambiguation** — visual scheme for multiple processes with the same program + args.
 - **React hooks surface** — `useScope` is the current guess for reading. The full hook vocabulary will refine through building real programs.
 
-The design-level opens — the settled model's consolidated list — live in [`research/settled.md`](research/settled.md) §7 and in place in each spec.
+The design-level opens — the settled model's consolidated list — live in [`research/arc/settled.md`](research/arc/settled.md) §7 and in place in each spec.

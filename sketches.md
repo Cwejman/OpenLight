@@ -28,7 +28,7 @@ A reading surface with two coupled parts:
 
 An integration that, while running, subscribes to the field and **generates TypeScript types over the whole substrate** — every archetype's instance spec as a real TS type, with inference — so a program author (or an agent) writes against the SDK with the field's own contracts checked in the editor.
 
-**Grounding.** The selection arc already leans on this existing: the ol language is TS-expression grammar precisely so that "with generated TS types over the substrate, plans type-check in any editor" ([`spec/research/selection.md`](spec/research/selection.md) §9); sdk.md holds schema-driven TS types as the layer above the tagged encoding. This sketch is that layer realized as an ordinary integration — subscription in, `.d.ts` out — not SDK machinery.
+**Grounding.** The selection arc already leans on this existing: the ol language is TS-expression grammar precisely so that "with generated TS types over the substrate, plans type-check in any editor" ([`spec/research/arc/selection.md`](spec/research/arc/selection.md) §9); sdk.md holds schema-driven TS types as the layer above the tagged encoding. This sketch is that layer realized as an ordinary integration — subscription in, `.d.ts` out — not SDK machinery.
 
 **Open questions.** Regeneration cadence (per commit? debounced?); where the generated module lives (a chunk? a file the VM serves?); naming collisions across mounts (ownership paths as namespaces is the natural answer); whether the argument-set contracts (`accepts`) also project as call signatures.
 

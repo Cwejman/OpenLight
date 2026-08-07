@@ -4,7 +4,7 @@ What was decided, compact. [`worklist.md`](worklist.md) carries the queue; this 
 
 **Protocol (author-corrected, 2026-08-06):**
 - **Dialog runs to its end before anything is written here.** A ruling lands once, whole — no incremental drafting mid-sitting, no edit rounds chasing a conversation still in motion.
-- **Spec folds are batched mechanical passes**, run later by a cheap session — never live during the sitting. Renaming is not a frontier task ([`conventions.md`](../../conventions.md), *Spend the model where it matters*).
+- **Spec folds are batched mechanical passes**, run later by a cheap session — never live during the sitting. Renaming is not a frontier task ([`conventions.md`](../../../conventions.md), *Spend the model where it matters*).
 
 ---
 

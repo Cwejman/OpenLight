@@ -36,7 +36,7 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 
 ## Spend the model where it matters
 
-Frontier-model sittings are for design dialog, rulings, and writing that needs the whole context in one head. Mechanical work — renames, vocabulary sweeps, batched spec folds, reference retargeting — is never done live in a reasoning sitting: record the ruling in `spec/research/conclusions.md`, queue the sweep, and let a cheap session or subagent execute it. Renaming is not a frontier task.
+Frontier-model sittings are for design dialog, rulings, and writing that needs the whole context in one head. Mechanical work — renames, vocabulary sweeps, batched spec folds, reference retargeting — is never done live in a reasoning sitting: record the ruling in `spec/research/arc/conclusions.md`, queue the sweep, and let a cheap session or subagent execute it. Renaming is not a frontier task.
 
 ## Subagent grounding
 

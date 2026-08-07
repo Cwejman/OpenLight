@@ -1,6 +1,6 @@
 # Programs
 
-The actual programs: what each one is, its contract, and what a person sees and does. Mechanics are referenced, never restated — the call frame, lifecycle, boundaries, and expressions are [`engine.md`](engine.md); the type system is [`substrate.md`](substrate.md); the thread experience is [`session.md`](session.md); the model programs are [`agent.md`](agent.md). Provenance: rebuilt from three blind re-derivations ([`research/cleanroom/`](research/cleanroom/)), settled through the 2026-08 author dialogs ([`research/settled.md`](research/settled.md)).
+The actual programs: what each one is, its contract, and what a person sees and does. Mechanics are referenced, never restated — the call frame, lifecycle, boundaries, and expressions are [`engine.md`](engine.md); the type system is [`substrate.md`](substrate.md); the thread experience is [`session.md`](session.md); the model programs are [`agent.md`](agent.md). Provenance: rebuilt from three blind re-derivations ([`research/cleanroom/`](research/cleanroom/)), settled through the 2026-08 author dialogs ([`research/arc/settled.md`](research/arc/settled.md)).
 
 This file mixes settled contracts with open exploration and marks the difference **in place** — *Held open*, *Open*, *direction*. Unmarked mechanics are settled; the interaction design throughout is a starting point with enormous room.
 

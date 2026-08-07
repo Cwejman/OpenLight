@@ -12,9 +12,9 @@ The question that produced it: *if I grant a chunk to a program, what exactly di
 
 Scattered across two specs; nowhere stated whole.
 
-**The core rule** ([`substrate.md`](../substrate.md) §47): *"Reach = ownership + explicit grants. Permission walks read ownership and granted roots only — a grant over a root reaches its ownership subtree. Instance, relates, field, and mention never confer reach: you can hand anyone an address; the field decides at the door."*
+**The core rule** ([`substrate.md`](../../substrate.md) §47): *"Reach = ownership + explicit grants. Permission walks read ownership and granted roots only — a grant over a root reaches its ownership subtree. Instance, relates, field, and mention never confer reach: you can hand anyone an address; the field decides at the door."*
 
-**Construction, not filtering** ([`engine.md`](../engine.md), *Boundaries*): a run's reach is assembled at start from three sources and frozen for the run —
+**Construction, not filtering** ([`engine.md`](../../engine.md), *Boundaries*): a run's reach is assembled at start from three sources and frozen for the run —
 
 1. **The frame** — the process's own ownership subtree, both ways, always, implicit. The argument chunk rides along.
 2. **Grants** — roots derived from `grants: read|write`-marked ref keys in the argument, plus whatever the starter adds. Nested runs intersect with the parent: *reach narrows through the call stack, never widens.*
@@ -30,7 +30,7 @@ Scattered across two specs; nowhere stated whole.
 
 ## 2. Gap one — the room, and what "inside" means
 
-A read at X answers across all five kinds: `owned`, `instance`, `relates` as membership with per-kind counts, plus `field`/`mention` in the separate `linked` result ([`substrate.md`](../substrate.md), *Read*). Reach, meanwhile, walks ownership alone.
+A read at X answers across all five kinds: `owned`, `instance`, `relates` as membership with per-kind counts, plus `field`/`mention` in the separate `linked` result ([`substrate.md`](../../substrate.md), *Read*). Reach, meanwhile, walks ownership alone.
 
 So a read at a granted X returns chunks that are **not in reach** — everything merely placed `instance` or `relates` on it. Engine.md's "does not filter inside an opened room" appears to bless this. But the sentence is ambiguous between two very different systems:
 
