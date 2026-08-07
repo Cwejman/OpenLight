@@ -85,7 +85,7 @@ chunk engine/process {
     argument: selection        — the offered set; frozen at start
     at:       ref(commit)      — the branch head at start, engine-stamped
     status:   ref(status)      — draft | running | done | failed (value chunks)
-    result:   ref?             — filled once at completion
+    result?:  ref              — filled once at completion
     error?:   string           — written by cleanup on a failed transition
     read:     selection        — the run's boundary, frozen as an expression
     write:    selection

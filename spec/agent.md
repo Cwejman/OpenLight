@@ -1,10 +1,23 @@
 # The Model Programs
 
+> **This file awaits worklist E, and its model has not been re-derived against the current law.** E is an author sitting that has not happened ([`research/arc/conclusions.md`](research/arc/conclusions.md), *Not ruled*): the steward owes a whole re-derivation of what a turn, the cycle and the answer *are* under the law — context as selection, set arguments, buffers for the token stream, resolve/planner, purity — *before* that dialog. **Nothing below should be read as conforming to substrate.md or engine.md**, and no other file should be changed to agree with it. Two mechanical corrections have been applied and nothing else: `demand` → the flat `read`/`write` keys (the frame-only meaning unchanged), and `form` → the seated argument ([`programs.md`](programs.md) §2).
+>
+> Known stale, precisely — claims the rewritten law contradicts, left standing until E rules:
+>
+> - **`read([P])` returning nested tool frames** (*The `agent` program* step 4, *Audit*) **is the transitive ownership walk.** Reach is one hop; reading a whole trace is a `follow`-shaped depth expression, never one read.
+> - **Boundary chunks walked to roots** (*The cycle*, step 1). Boundary chunks are retired: a run's reach is the two selection-typed keys on its process body.
+> - **Frame language throughout** predates `[self]` — a process's frame is its own dimension, and children and results are *owned* by the process.
+> - **`context item owned by <context chunk> (seq)`** is legal only if `context` declares `seq: true`, and nothing does (substrate.md, *Ordered places*).
+> - **"probe counts, then pull"** stands on a counts guarantee that is gone: counts describe what your boundary admits, and there is no privileged view of a full set.
+> - **"an ordered list of places"** as context's shape is exactly the `selection` type, unnamed here.
+> - **"its argument archetype's instance contract"** (*The `model` programs*) names a thing that no longer exists: there is no argument archetype. A program's interface is `accepts` — a list of reified type entries — and its chunk-shaped entries are payload archetypes. Left as written because what `model` accepts is an E question.
+> - **Project-level defaults on the project root** (*Conventions and edges*) assume cascade from a root; nothing cascades from a root — ownership is naming and containment.
+
 The programs that carry completion, rebuilt on the clean-room derivation ([`research/cleanroom/bridge.md`](research/cleanroom/bridge.md)): **`model`** — one completion call per run, the only kind of program that touches a provider — and **`agent`** — the harness that composes context from the field, starts tools, and answers onto its frame. Neither is architecturally special; the split is the system's own modularity applied to itself, and the harness is expected to decompose further (context assembler, tool runner, renderer as separate programs) as the shape proves out.
 
 The center this serves: **completion from a point in the field.** Context is a place — addressable, pinned, reproducible — not a pasted transcript.
 
-This file carries both halves: the mechanics of the two programs, and the lived experience of agent work — watching it, steering it, trusting it. There is no session to spec, so there is no second file: the experience belongs to the thread, and the thread is derived from what these programs record. Ground for the mechanisms the experience composes: [`engine.md`](engine.md) (drafts, the lifecycle), [`programs.md`](programs.md) §2 (`form`), §3 (`reader`, readings, collation), §6 (`process-view`).
+This file carries both halves: the mechanics of the two programs, and the lived experience of agent work — watching it, steering it, trusting it. There is no session to spec, so there is no second file: the experience belongs to the thread, and the thread is derived from what these programs record. Ground for the mechanisms the experience composes: [`engine.md`](engine.md) (drafts, the lifecycle), [`programs.md`](programs.md) §2 (the seated argument), §3 (`reader`, readings, collation), §6 (`process-view`).
 
 ---
 
@@ -16,7 +29,7 @@ Providers differ, and will differ more. So `model` is not one rigid program with
 
 **Invariants (what makes it a model program).**
 
-- **One call per run; frame-only.** `demand: { read: [], write: [] }` — nothing beyond its own frame, and a run can only narrow (engine.md, *Boundaries*). A completion sees exactly what was rendered into its request chunk; there is no path to exfiltrate substrate content beyond the caller's explicit rendering. Purity enforced, not promised.
+- **One call per run; frame-only.** `read: {}` / `write: {}` — nothing beyond its own frame, and a run can only narrow (engine.md, *Boundaries*). A completion sees exactly what was rendered into its request chunk; there is no path to exfiltrate substrate content beyond the caller's explicit rendering. Purity enforced, not promised.
 - **The verbatim request is the artifact.** The byte-exact context window is the process's argument chunk: every prompt ever sent is inspectable, diffable, reproducible.
 - **Output lands enumerable.** Owned by its process (the frame), `instance` on its result archetype and on `model/<name>` — every completion in the system enumerable per model; usage is a read, not a metering subsystem.
 - **Egress and secrets concentrate here.** Only model programs (and `web`) hold network capability; only model programs hold provider secrets — injected as env vars from the host keychain at spawn, **never chunks**: a committed key in a lossless substrate is permanent.
@@ -32,7 +45,7 @@ Leaning (b) — the adapter belongs with the thing it adapts, and passthrough ke
 
 The knot that dissolved the agent session for good: **context is per-turn; the thread is derived.** They were fused in the old session shape; they are different things.
 
-**Context** is the agent's actual argument: an **ordered list of places** — guidelines first, then the thread, then the prompt, then whatever this turn adds. It is composed as a draft ([`engine.md`](engine.md), *Lifecycle* — substrate-resident, edited by the `form`, editable iff unconsumed) and recorded twice, deliberately — **intent and fact**:
+**Context** is the agent's actual argument: an **ordered list of places** — guidelines first, then the thread, then the prompt, then whatever this turn adds. It is composed as a draft ([`engine.md`](engine.md), *Lifecycle* — substrate-resident, edited as a seated argument, editable iff unconsumed) and recorded twice, deliberately — **intent and fact**:
 
 - **The expression (intent).** The context argument is a field expression — locations unioned in, exclusions, folds routing through summaries (`follow(previous) − turns[5..9] + summary-S`). Staging is place algebra: *include* is a union term; any tile with the grant can write into the draft's context, since the draft is field data.
 - **The resolution (fact).** The start consumes the draft: the assembler resolves the expression at **one commit snapshot** and records the resolved items on the turn's frame:
@@ -57,7 +70,7 @@ control  instance: { signal: ref(signal), target: ref }
 
 A **conversation is a named location** — a lineage materializes a location chunk only when named, shared, bound, or peopled (participants attach there as relations); until then the thread exists only as the walk. No tool-call or tool-result event types exist; no agent-session type exists; no container type exists. History stays linear while context varies per turn — both recorded: read the thread for what happened, drill any turn for what it read, and the draft's context (a location in the reader's collation) shows what the next turn will include — face follows context.
 
-**Starting is summoned by drafts, not gated by types** (transmutes the former answer-home rule). The `form` appears wherever a draft process exists, and creating a draft is the gesture — *talk about this* on any entity creates a draft citing it. An email thread grows no composer because nothing creates a draft there unbidden; its reply composer matches its own types and answers in its own medium — actually sending an email is a tool call, not a discourse answer. The context list accepts any places at all: a list of people, an email thread projected through an integration, a codebase. A headless run is just a draft started with no one watching.
+**Starting is summoned by drafts, not gated by types** (transmutes the former answer-home rule). The seated argument appears wherever a draft process exists, and creating a draft is the gesture — *talk about this* on any entity creates a draft citing it. An email thread grows no composer because nothing creates a draft there unbidden; its reply composer matches its own types and answers in its own medium — actually sending an email is a tool call, not a discourse answer. The context list accepts any places at all: a list of people, an email thread projected through an integration, a codebase. A headless run is just a draft started with no one watching.
 
 **Provider-API coherence, reconstructed not stored.** Providers want prior tool exchanges as message history. The current turn's pairs the agent holds while running; previous turns' pairs are recoverable losslessly by walking turn frames (child processes in order, argument chunks as tool_use, result chunks as tool_result). Replay, summarize, or omit is the serializer's *policy*, not the thread's shape.
 
@@ -73,7 +86,7 @@ The cycle:
 
 1. **Orient.** Read own frame: the resolved context list, boundary chunks walked to roots — the agent can tell the model, truthfully, what it can see and touch. Subscribe to its own turn for controls: the steering channel.
 2. **Assemble.** Resolve the context list in order (probe counts, then pull); select under budget. Commit the turn's context chunk + items into its own frame (pinned, `relates` on sources). Selection policy — recency, FTS, summaries in place of large bodies — is agent code; the *record* of selection is substrate.
-3. **Complete.** Render the context into the selected model program's request shape, each block prefixed with its chunk id so the model addresses the field by id. Compile tool schemas from the toolset's programs — from their argument chunks, the same structure the `form` renders. Run the model program; await.
+3. **Complete.** Render the context into the selected model program's request shape, each block prefixed with its chunk id so the model addresses the field by id. Compile tool schemas from the toolset's programs — from their argument chunks, the same structure the seated argument renders. Run the model program; await.
 4. **Start.** Substrate ops (`read`, `get`, `commit`) execute directly — a `VALIDATION_ERROR` or `BOUNDARY_VIOLATION` renders back as the tool result; **spec enforcement is the model's error signal.** Program tools are `run` (child mode): nested trace, boundaries intersected — the model can never escalate. Parallel calls are parallel runs awaited together. Nothing is written anywhere discourse-shaped — the tool trace *is* the frame; loop to 2.
 5. **Answer.** Commit the answer chunk into its own frame, `partial: true`, updated on a throttle (streaming is commits — engine.md), finalized with `partial: false`. Inline mentions ride the `ol:` scheme — the request preamble teaches the model the convention; every mention files into the link index at commit, so an answer's citations are queryable from both ends. Exit 0.
 
@@ -87,19 +100,19 @@ The discipline that makes this more than a stop button: **the context stays pure
 
 **Sub-agents.** A run of `agent` from within `agent` — child mode, boundaries narrowed, trace nested. An orchestrator is not a framework; it is a program that calls `run` several times.
 
-**Boundary.** No `demand` — intrinsically open; the run grant is the user's whole decision about reach, made visible as chips before the turn starts (`programs.md` §2).
+**Boundary.** `read` and `write` both absent — intrinsically open; the run grant is the user's whole decision about reach, made visible as chips before the turn starts (`programs.md` §2).
 
 **Audit.** `read([db/commits, P])` — every write. `read([P])` — args, boundary, nested tool frames, each model call's verbatim request. `follow(turn) | at(commit)` — the thread at any moment. No bespoke logging anywhere.
 
 ## The thread view — a composition, not a program
 
-The thread view is: **a `reader`** whose collation holds the thread (`follow` from the draft) and the draft's context — **`sequence` holding the ground**, slotting each element through `process-view` — with the **`form`** filling the draft's argument region at the bottom. No conversation tile exists as a thing to build — it is the reader chrome plus surfaces (`sequence`, `process-view`, `form`, `prose`) composed.
+The thread view is: **a `reader`** whose collation holds the thread (`follow` from the draft) and the draft's context — **`sequence` holding the ground**, slotting each element through `process-view` — with the **seated argument** filling the draft's argument region at the bottom. No conversation tile exists as a thing to build — it is the reader chrome plus surfaces (`sequence`, `process-view`, `prose`) and the seated argument, composed.
 
 **Face follows context** (ruled — the resting default). The thread renders as what the next turn will see: the draft's context is a location in the collation, so the face is the assembler's proposal, honest by construction. **Reading is free; including is a gesture** — expanding folds, drilling frames, wandering into referenced threads feeds the agent nothing; staging writes into the draft's context (place algebra: union a location in), from any tile with the grant. Every element wears its inclusion state (per-location slot chrome): in-whole, in-as-summary, merely-open. Deviation between face and context is marked, never silent. The discourse register — everything that ever happened here — is a location switch away.
 
 ## The turn, rendered — process-view's derived faces
 
-One program over the lifecycle (`programs.md` §6): **draft → the form · running → the live frame · done → prompt + answer**. The agent-matched depth (a process is `instance` of its program — the renderer ladder carries the specialization):
+One program over the lifecycle (`programs.md` §6): **draft → the seated argument · running → the live frame · done → prompt + answer**. The agent-matched depth (a process is `instance` of its program — the renderer ladder carries the specialization):
 
 **Folded — the line form** (the thread's default reading):
 ```
@@ -132,7 +145,7 @@ Cycles are strictly sequential; tools within a cycle run parallel when the model
 Aligned with the board's build queue:
 
 1. **`reader` v0** — the collation over the built intersection grammar; members side by side; slot chrome; hide/show.
-2. **`draft` + `form`** — the draft state; the form on any unconsumed argument; the start as consumption.
+2. **`draft` + the seated argument** — the draft state; the seating of any unconsumed argument; the start as consumption.
 3. **`process-view` v0** — the three regions, result by declared archetype; folded line with derived status (L0).
 4. **`prose` v0** — mentions as links; answer streaming in place.
 5. **`follow` + the thread face** — the walk as a member; the draft at the bottom; face-follows-context, inclusion via slot chrome.
@@ -144,7 +157,7 @@ Each step is demonstrable alone; where one can't reach this spec with the mechan
 ## Conventions and edges
 
 - **A completed turn's resting form is prompt + answer visible, mechanics folded** — a thread of resting turns reads as a conversation, not a list of digests.
-- **Defaults live in the field**: standing boundary defaults, toolset, model choice, guidelines reference — chunks `relates` on the named location (project-level defaults on the project root); the form reads them, the person edits them.
+- **Defaults live in the field**: standing boundary defaults, toolset, model choice, guidelines reference — chunks `relates` on the named location (project-level defaults on the project root); the seated argument reads them, the person edits them.
 - **Controls carry a `target`** (the turn's process id). Signals: `pause`, `resume`, `abort-completion` (stop the current model call, keep the turn alive), `adjust` — rendered as an instruction block in the next request; recorded on the frame as a context delta.
 - **Entity mentions**: the `ol:` scheme (`<ol:id>` badge, `[name](ol:id)` link — `programs.md` §4); the request preamble teaches the model the convention, and every mention files into the link index at commit.
 - **"Include the thread" default**: the default assembler walks the lineage — recent turns at full projection, older through their summary groups; an assembler-policy knob, not a mechanism. Swapping or parameterizing the assembler *is* the thread's defining act, not a violation of it.
