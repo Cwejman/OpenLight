@@ -1,10 +1,27 @@
 # Dimensions — the permission model re-grounded
 
-Record of the 2026-08-06/07 boundary dialog, written from the point of resolution. Status: **author-directed direction**, not law; feeds the absorption pass. Revised 2026-08-07 with the steward review folded in — eight findings, credited inline where they changed the text; finding 1 restructured §2 and dissolved findings 4, 6, and 8 by cascade. [`boundaries.md`](boundaries.md) is the position paper that opened the question — its assembly of the current law (§1) and its gap analysis stand; its proposed position is superseded by this file.
+Record of the 2026-08-06/07 boundary dialog, written from the point of resolution. Status: **author-directed direction**, not law; feeds the absorption pass. Revised 2026-08-07 with the steward review folded in — eight findings, credited inline where they changed the text; finding 1 restructured §2 and dissolved findings 4, 6, and 8 by cascade. **This file stands alone** — §0 carries the law it replaces and the gaps that broke it, so nothing else need be read to integrate it. [`boundaries.md`](boundaries.md) is the position paper that opened the question; its diagnosis is compressed into §0 here and its proposed cure is superseded. Consult it only for the long-form derivation.
 
 The snag that started it: as specced, a read at a granted chunk returns *members with bodies* — chunks that reach (ownership-walk + grants) never included. Anything `relates`-placed on a granted scope leaked. Fixing that inside the ownership model required choosing between filtered rooms and locked-door hallways. The author widened the frame instead, and the problem dissolved.
 
 ---
+
+## 0. What this replaces
+
+Carried here so this file integrates on its own. The prior law, in brief:
+
+- **Reach = ownership + explicit grants.** A grant over a root reached its entire **ownership subtree**; `instance`, `relates`, `field` and `mention` never conferred reach.
+- **Constructed at start, immutable for the run**, from three sources: the **frame** (the process's ownership subtree), **grants** (roots from argument-marked ref keys plus whatever the starter added, intersected with the parent's reach), and **demand** (the program's argument-independent ceiling — absent = open, present = exact).
+- **Filtering was partial**: `linked` answers and full-text search were reach-filtered; membership answers were not, and counts described the full set regardless of the reader.
+- Creating a ref was gated by the writer's reach over the target, so validation could not be used as an existence probe.
+
+The three gaps that broke it:
+
+1. **The leak.** A read answers across all five connection kinds; reach walked one. So a read at a granted chunk returned members — with bodies — that reach never included. Anything `relates`-placed on a granted scope was exposed, which taxes the substrate's oldest pattern: relate something and you publish it, unintentionally.
+2. **Ownership carried three jobs** — naming, containment, and the reach region — so reorganizing the tree for meaning silently reorganized permission, and rooms-for-tidiness and rooms-for-safety shared one mechanism.
+3. **Growth was uncharacterized.** A grant over a collection that grows forever was never declared to be a snapshot or a standing licence.
+
+**What survives untouched**: caps (child reach ⊆ parent reach), `demand` as a stated ceiling a run may narrow but never widen, ref-creation gating, and reach-filtered links and search — now extended to membership rather than replaced.
 
 ## 1. The model
 
