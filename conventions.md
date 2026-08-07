@@ -40,12 +40,6 @@ Feedback often carries open ideas, not verdicts. Reason them through in conversa
 
 Frontier-model sittings are for design dialog, rulings, and writing that needs the whole context in one head. Mechanical work — renames, vocabulary sweeps, batched spec folds, reference retargeting — is never done live in a reasoning sitting: record the ruling in `spec/research/arc/conclusions.md`, queue the sweep, and let a cheap session or subagent execute it. Renaming is not a frontier task.
 
-## Retiring a record
-
-A record is retired when nothing depends on it. Before deleting, make the successor **stand alone** — carry the prior state and the reasoning it replaced into the file that supersedes it, so no future reader needs the dead one. Then delete; git holds it.
-
-What must never be carried is an index. A list of terse headings — the residue of a file whose surrounding prose explained them — reads as knowledge and is not: a future session learns nothing from *"navigation-grade"* on its own, and glossing such fragments to look complete is worse than dropping them. Either the knowledge is stated in full where it belongs, or it goes. References in narrative files (`log.md`, `board.md` *Recent*) get de-linked, never rewritten — the history stays true.
-
 ## Subagent grounding
 
 A subagent is an agent without your context. By default, instruct it to bootstrap — read `README.md` and follow its reading order — so it stands on the same ground you do. The exception is a deliberately lobotomised subagent, used where less context is the point (the clean-room passes in `spec/research/cleanroom/` are the precedent).
