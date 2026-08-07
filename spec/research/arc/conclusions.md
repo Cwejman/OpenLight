@@ -31,6 +31,19 @@ What was decided, compact. [`worklist.md`](worklist.md) carries the queue; this 
 - **A drift not to preserve**: engine.md derives grants from `grants: read|write`-marked ref keys in the argument archetype's instance contract. selection.md §4–5 retired that — arguments are sets; boundary facts live only in the program's flat `read`/`write` keys with argument references. dimensions.md then upgrades those keys to selection-grade. Do not carry the marked-key mechanism forward.
 - A3's block notation replaces ad-hoc shape sketches everywhere, with its three riders: the substrate example's fake `instances:` field; "renaming is trivial" gains the uniqueness caveat; consolidation softens from rule to discipline.
 
+## G — `ref` admitted to selections (ruled 2026-08-07)
+
+**`selection = set<loc | ref | expr>`.** selection.md §16 had rejected `ref` as an element because "one-term locations cover the single-chunk case." They do not: §2 of that same file defines `[X]` as the place at X — *the chunk **and** what is placed on it*. **X ≠ [X]**, so without `ref` there was no way to offer a bare chunk except an expression subtracting a place's members from itself — computation to say "here is this one thing," the most common offer there is.
+
+Three things confirm it rather than one:
+- §4's matching rule already reads "for chunk entries (`ref(X)`, payloads) the element must be *instance on that archetype*" — which is dead code unless elements can be refs. §4 described the mechanism §3 forbade.
+- It dissolves the argument-type contradiction (`argument: set<loc | ref>` versus `selection = set<loc | expr>` versus "1:1 — precisely"): the argument **is** a selection now, exactly, and the reconciling sentence a subagent had to invent is gone.
+- Collations are `list<selection>`, so a reader can hold a bare chunk as a member — "show me this document" without its room coming along. Author-confirmed as a positive consequence, not a side effect.
+
+Nothing breaks: elements are tagged, so `$ref` and `$loc` are never the same element and binding stays unambiguous; the purity clause only ever governed `expr` elements; disjointness extends mechanically (`[ref(X), selection]` is containment-illegal exactly as `[loc, selection]` already was). *Refs are pointers living in bodies* survives — it was always a claim about storage, never about what may be offered.
+
+Landed in substrate.md's type vocabulary and engine.md (process body `argument: selection`, the type table, the 1:1 statement); struck in place in selection.md §3 and §16.
+
 ## D — substrate shorts (ruled 2026-08-06/07)
 
 - **D1 — no deny.** A chunk cannot restrict access below itself under a grant that covers it. Revisit when a real case demands it.

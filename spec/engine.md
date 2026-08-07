@@ -82,7 +82,7 @@ One convention feeds three consumers with no duplication: the draft's argument, 
 ```ol
 chunk engine/process {
   instance: {
-    argument: set<loc | ref>   — the offered set; frozen at start
+    argument: selection        — the offered set; frozen at start
     at:       ref(commit)      — the branch head at start, engine-stamped
     status:   ref(status)      — draft | running | done | failed (value chunks)
     result:   ref?             — filled once at completion
@@ -110,7 +110,7 @@ process P — status: draft
   }
 ```
 
-A program's argument content is 1:1 with a selection wherever every element is a place or an expression; payload chunks are the extra freedom an argument has over a selection, which admits `loc | pure expr` only. That correspondence is why a selection, a slot's offer, and a call are the same text (*The written language*).
+**A program's argument content is a selection — precisely, with nothing left over.** A selection admits `loc | ref | expr`, so the places, payload chunks and expression chunks an argument carries are all ordinary elements of one. That exactness is why a selection, a slot's offer, and a call are the same text (*The written language*).
 
 **Results** are `instance` on the declared result archetype and **owned by the process that produced them**. Ownership is membership, so a result is a member of the process's own dimension and writing it needs nothing beyond the frame.
 
@@ -161,7 +161,7 @@ The engine owns the expression layer: the data shapes, the written language, the
 location     [my-project, tasks]        — places, intersected; a value kind
 call         program(e1, e2, …)         — the parentheses ARE the offered set
 expression   one grouped unit — named nodes, its own closure, last unnamed line = out
-selection    set<loc | expr>            — substrate.md; purity clause below
+selection    set<loc | ref | expr>      — substrate.md; purity clause below
 ```
 
 Two archetypes carry the lifted forms:
