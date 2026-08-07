@@ -460,15 +460,13 @@ pub struct Context {
 pub struct Selection(pub Vec<SelectionTerm>);
 
 pub enum SelectionTerm {
-    Loc(Vec<ChunkId>),                  // an intersection of places
-    Expr(ChunkId),                      // an expression chunk — single-request class
-                                        // when it appears in a boundary
-}
-
-/// An argument element: `$loc` or `$ref` on the wire.
-pub enum ArgElement {
-    Loc(Vec<ChunkId>),
-    Ref(ChunkId),                       // a payload or expression chunk
+    Loc(Vec<ChunkId>),                  // an intersection of places — `$loc`
+    Ref(ChunkId),                       // one chunk: content, payload, or an
+                                        // expression chunk — `$ref`. A stored
+                                        // expression is always the chunk form,
+                                        // so it needs no variant of its own;
+                                        // in a boundary it must lower to the
+                                        // single-request class
 }
 
 pub struct RunArgs {
@@ -482,7 +480,7 @@ pub struct RunArgs {
 }
 
 pub enum RunTarget {
-    Start { program: ChunkId, argument: Vec<ArgElement> },
+    Start { program: ChunkId, argument: Selection },
     Draft(ProcessId),                   // consume an existing draft process
 }
 
@@ -832,7 +830,7 @@ The engine exposes only Rust functions; it ships no TS client. Programs reach th
 engine/
   src/
     lib.rs              — public re-exports
-    types.rs            — Context, RunArgs, RunTarget, ArgElement, Selection,
+    types.rs            — Context, RunArgs, RunTarget, Selection,
                           SelectionTerm, ResolveTarget, ProcessId, SubscriptionId,
                           ProjectId, MountMode, RuntimeKind, ProcessStatus, Event,
                           HostCmd, plus Display/From impls
