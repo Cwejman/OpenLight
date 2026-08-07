@@ -106,7 +106,7 @@ Towers are natural: `shell` fits `program`'s instance contract while carrying it
 - `expr` — an expression: named nodes, its own closure, last unnamed line as `out` ([`engine.md`](engine.md)).
 - `list<T>` (ordered) · `set<T>` (unordered, uniqueness checked). Both take an exact cardinality: `list<ref(commit), 2>` is the ordered pair, `set<ref(commit), 2>` the symmetric one. Tuples are unnecessary.
 - `map` — untyped nesting. `map<T>` — named entries of typed values.
-- `selection` — `set<loc | expr>`, with a purity clause: expressions within one must derive pure ([`engine.md`](engine.md)). A selection is what you offer to be viewed or consumed: places, and derivations of places. **At most one `selection` per contract** — two would compete for the same elements.
+- `selection` — `set<loc | expr>`, with a purity clause: expressions within one must derive pure ([`engine.md`](engine.md)). A selection is what you offer to be viewed or consumed: places, and derivations of places. **At most one `selection` entry in a program's `accepts`** — two would compete for the same offered elements ([`engine.md`](engine.md)). This is a rule about argument matching, not about contracts at large: a body may hold several selection-typed keys, as the program contract's `read` and `write` do.
 
 **Struct literals are types.** `{k: type, …}` in a type position types a nested value inline, no archetype involved: `grades?: map<{ wmin?: number, wmax?: number }>`. Typing goes as deep as you write it; anonymous nested maps stay untyped, as bodies always were. `instance:` means exactly one thing — the contract on chunk *instances* — and archetype names appear in key positions only inside `ref(X)`.
 
