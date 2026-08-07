@@ -41,3 +41,37 @@ An integration that scans a website and **projects its pages and URL structure i
 **Grounding.** Integrations reference external content rather than store it (substrate.md §Integration); ownership paths give the projection its skeleton for free; staleness is the standing reconcile pattern (source commit vs the live page).
 
 **Open questions.** What the body carries — content snapshot vs pure reference with fetch-on-read; refresh policy and change detection; how deep a crawl goes (a scope-filtered projection?); whether links between pages file as mentions (they are exactly that).
+
+## Rewrite versus edit — an AI-compute sketch
+
+**Open — sketch** (author, 2026-08-07, reflecting on the substrate rewrite).
+
+Rewriting a whole file produces coherent prose; editing paragraph by paragraph produces new claims wearing the old argument's skeleton. But the rewrite has its own failure mode, and it is the more dangerous one: **fact loss and distortion**. Nothing forces the rewriter to carry every settled claim across, and what vanishes vanishes silently — a patch that drops a fact at least shows an empty hunk.
+
+The resolution is a **second cycle whose only job is comparison**: diff old against new, enumerate every claim present before and absent after, and rule each one dropped-on-purpose or lost. Coherence from the rewrite, completeness from the audit — neither pass is asked to do the other's job.
+
+**The interesting part is the economics.** This is two model passes where one is traditionally spent, and the cost difference is unmeasured. If the audit is materially cheaper than the write — a smaller model, a mechanical claim-extraction, a narrower context — then rewrite-then-audit is strictly better than careful editing, and "edit surgically to avoid loss" is a habit inherited from human authoring costs rather than a real constraint. If it is not cheaper, the tradeoff is live.
+
+**Why it belongs here.** It is a sketch about *fashioning AI compute* rather than about the environment — but the environment is where it would be built: passes are programs, the comparison is an expression over two commits, and the dropped-claim list is field content a person rules on. The substrate makes the audit cycle addressable instead of a habit someone has to remember.
+
+**Open questions.** Can "claims present in A, absent in B" be extracted mechanically, or does it need a model? Does the auditor need the rewrite's brief, or is brief-blindness what makes it honest? Is there a grain at which rewrite-scope stops being safe regardless of audit?
+
+## Compounding reflection — revelation as a function of chains
+
+**Open — sketch** (author, 2026-08-07, observed live in the session that produced the substrate rewrite).
+
+A single reasoning chain produces conclusions. A chain that reflects on *another* chain's reasoning produces something neither could reach alone — and when several chains revolve around one steered direction, the capacity for revelation compounds rather than merely accumulating.
+
+**Three instances from one afternoon**, none available to the chain that produced them:
+
+- The steward recommended recomposing from the new file rather than the old, on the grounds that re-absorption was expensive and risky. The author's reflection identified that as an **economic argument wearing quality's clothes** — true only because transcripts evaporate. The steward could not see it because it was reasoning *from inside* the constraint.
+- A subagent was briefed to recompose and instead reordered with rewritten seams. Reading the result against the brief showed the **deviation beat the instruction** — the paragraphs' interiors were already coherent, so rewriting them risked loss for no gain.
+- Comparing that deviation against the audit requirement produced the actual finding: **near-verbatim preservation is what made the audit conclusive.** Nine line-deltas can be ruled individually; a full recomposition yields an audit nobody can mechanically close. Organic composition and auditable fidelity pull against each other. Neither the brief nor the execution contained this — only their comparison did.
+
+**The condition is the steering.** Chains pointed at different things produce noise. Chains revolving around one direction produce layered scrutiny, each pass seeing the previous pass's blind spot because it stands somewhere else.
+
+**The risk, named so the sketch isn't naive:** reflection compounds error as readily as insight. A chain reflecting on a chain it agrees with produces confident wrongness with a second signature on it. Whether compounding yields revelation or echo probably turns on whether the reflecting pass is **blind to the earlier one's conclusion** — the same question [*Rewrite versus edit*](#rewrite-versus-edit--an-ai-compute-sketch) raises about the auditor.
+
+**Why it belongs to the environment.** Compounding requires the earlier chains to still exist. Today they are transcripts that evaporate, so reflection is bounded by one context window — which is why this afternoon's revelations happened at all only because a human held the thread across them. With turns as substrate ([`horizon.md`](horizon.md), *Turns as substrate*), reflection becomes a read over prior reasoning, and the compounding stops depending on a person remembering.
+
+**Open questions.** Does the sequence converge, saturate, or drift? Is there a chain count past which reflection only re-derives? Does a reflecting pass need the prior pass's *reasoning*, or only its *output*, to stay honest? And can "revolving around the same direction" be made explicit — a steered direction as field content the chains are placed on, rather than an intention held in someone's head?

@@ -58,6 +58,26 @@ When the environment is usable enough that the spec itself moves into the substr
 
 **Real today:** the conventions mandate legible openness (settled vs held-open, marked in place); specs are already substrate-enforced contracts; every commit carries author and time. **Open:** the resolution archetype's shape (claim, premises, status), whether premise links are placements or reference-typed body keys (kin to *Typed JSON* above), and what dissolution does downstream — mark, notify, or block.
 
+## Turns as substrate — ingestion stops being sunk cost
+
+A worked example, from this project's own rewrite (2026-08-07). Asked whether a corrective pass should regenerate from the old file or recompose from the new, the steward chose the new — reasoning that going back would mean re-running the absorption of two dialog records, which was **expensive and risky to repeat**. The author's observation: that constraint is an artifact of today's tooling, not a real one. In the compute environment, the series of turns that performed the absorption is **itself substrate** — typed, addressable, reusable. Nothing to re-run.
+
+The claim generalizes past caching ([*The field as the model's cache*](#the-field-as-the-models-cache--the-substrate-embodied) is about the model embodying the field at inference; this is about the *work of a pass* persisting). Today a reasoning pass is a transcript that evaporates: its conclusions might be written down, but its derivation, its rejected branches, and its checks are gone, so "start again from an earlier point" prices in redoing all of it. When turns are field content, restarting from any point is a read — and the decision "which version do I generate from?" stops being an economic one and becomes purely a question of which is *right*.
+
+What that changes about authoring is the interesting part: **an expensive ingestion becomes a fixed asset**. Passes can be cheap and numerous because none of them re-pays for understanding. It also makes the audit cycle in [`sketches.md`](sketches.md) *Rewrite versus edit* affordable by construction rather than by hoping the auditor is a smaller model.
+
+Noted 2026-08-07 (author). **Open:** what grain a turn files at, whether rejected branches are kept or pruned, and how a later pass addresses "the understanding reached at turn N" without replaying it.
+
+## Prose as substrate — markdown retired
+
+Today the spec is markdown files and the substrate is what they describe. At some point that inverts: **prose stops being a format the substrate stores and becomes structure the substrate *is*.* Words, sentences, formatting, links and slots, paragraphs — each an instance contract, so a document is not a blob with syntax in it but a composition the field understands natively.
+
+What that buys is the whole point: dimensions and relations can point at a **paragraph, a sentence, or the meaning itself**, not at a file plus an offset. Aboutness lands where the thought is. Editing, reading, and the act of finding meaning all become surfaces over typed structure — transforming prose *around* meaning-as-data, and presenting that visually, rather than editing characters and hoping the structure survives.
+
+The abstraction shape this wants is wider than ownership, and TouchDesigner is the reference: a component holds a world — its own node canvas — and that nesting repeats for as many depths as the work needs. Ownership is *partially* related but too narrow; the general phenomenon is a chunk containing a whole authored space, recursively.
+
+Noted 2026-08-07 (author). Enormous and deliberately compressed here; near-future, at a moment of priority. Related: [`spec/research/arc/selection.md`](spec/research/arc/selection.md) §13's grades and the prose ladder, the fenced-expression-as-anonymous-chunk pattern, and *Interface inference* above — all of them are this idea seen through a keyhole.
+
 ## Lifetimes in the substrate
 
 Placements and chunks that carry a lifespan — a role membership that expires on its own, a grant valid until Friday, a dimension whose members age out. Today every standing permission or grouping outlives its intent until someone remembers to remove it; a lifespan makes the field forget on schedule. Touches the retention/ring idea in buffers and the locked-relationships exploration (its inverse: a relation that may *never* lapse). Noted 2026-08-07 from the boundary dialog ([`spec/research/arc/dimensions.md`](spec/research/arc/dimensions.md)); no design taken.
