@@ -208,7 +208,7 @@ Everything in place A except what's also in place B. Set difference over placeme
 
 ### Pagination and projection
 
-Ordered places grow large; reads are bounded by default. A read takes `limit` and `offset`: for an ordered place the default window is tail-first (the latest entries), `offset` pages backward. Counts always describe the full set, so a reader probes shape before pulling data. Reads also project: `include: { body: false }` returns names, specs, placements, and counts without bodies — the cheap survey read context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups.
+Ordered places grow large; reads are bounded by default. A read takes `limit` and `offset`: for an ordered place the default window is tail-first (the latest entries), `offset` pages backward. Counts always describe the full set, so a reader probes shape before pulling data. Reads also project: `include: { body: false }` returns names, instance contracts, placements, and counts without bodies — the cheap survey read context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups.
 
 ## Ingestion
 

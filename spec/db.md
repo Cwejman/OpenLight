@@ -69,7 +69,7 @@ ReadOpts
 GetOpts
   branch: BranchName            default "main"
   at: Option<CommitId>          time travel
-  include: Includes             only the chunk-self flags (name/spec/body/
+  include: Includes             only the chunk-self flags (name/instance/body/
                                 placements) apply; read-level flags are ignored
 ```
 
@@ -170,7 +170,7 @@ The substrate's discipline is that everything is chunks and placements. Branches
 - `db.read(&[db/branches, branch_id], opts)` — a single branch.
 - `db.read(&[db/commits, branch_id], opts)` — commits in the branch's ancestry, ordered.
 
-`db/branches` and `db/commits` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded specs (the `branch` and `commit` archetypes). Two of them appear per db, and the `db/` prefix is reserved for substrate-machinery virtual scopes.
+`db/branches` and `db/commits` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded contracts (the `branch` and `commit` archetypes). Two of them appear per db, and the `db/` prefix is reserved for substrate-machinery virtual places.
 
 Virtual chunks are read-only via `read`/`get`. Writes targeting them are rejected (`WriteToVirtualChunk`). Their state is owned by db-level operations: `commit` (advances a branch's head), `create_branch` / `delete_branch` (manipulate the branch graph).
 
@@ -257,7 +257,7 @@ Backpressure: each subscriber has a bounded receiver. On overflow, oldest events
 ```
 ValidationError { chunk_id, kind }     spec violation; kind = MissingKey | KeyType |
                                        RefTarget | RefArchetype | Unique | Ordered |
-                                       AmbiguousKey (two instance specs claim one
+                                       AmbiguousKey (two instance contracts claim one
                                        key with different types) | MultiOwner
                                        (a second owned placement)
 NameCollision { owner_id, name }       name uniqueness within the owner
@@ -431,11 +431,11 @@ commit(declaration, opts):
     apply current-state transition for opts.branch
 
   for each placement (chunk-bound and bare):
-    INSERT INTO placement_versions (chunk_id, on_id, commit_id, type, seq, active)
+    INSERT INTO placement_versions (chunk_id, on_id, commit_id, kind, seq, active)
     apply current-state transition for opts.branch
 
   validate in Rust against post-write current state on this branch:
-    for each chunk touched, union the instance specs of its archetypes
+    for each chunk touched, union the instance contracts of its archetypes
     and check the body against every obligation; validate ref targets;
     check name-within-owner, single-owner, seq rules
 
@@ -772,6 +772,6 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 - **Branch-meta commits** — whether `create_branch`/`delete_branch` should write commits on a meta-branch for uniform traceability.
 - **FTS branch-scoping** — currently FTS holds all branches; branch filter at query time.
 - **Bootstrap IDs** — resolved at the substrate level (lookup-by-name); carries through. Ownership paths (`engine/program`) make path-lookup the natural convention: resolve each segment as a name among the previous chunk's owned children.
-- **Eager vs lazy link re-derivation on spec edits** — editing an archetype's instance spec invalidates the derived rows of every instance; eager fan-out vs knowingly-stale-until-next-write is the sharpest open engineering decision (substrate.md, *What's Open*).
+- **Eager vs lazy link re-derivation on spec edits** — editing an archetype's instance contract invalidates the derived rows of every instance; eager fan-out vs knowingly-stale-until-next-write is the sharpest open engineering decision (substrate.md, *What's Open*).
 - **Time-travel query optimization** — recursive ancestry walk is correct but unmeasured.
 - **Divergence from built code, tracked**: the implemented crate still validates the retired spec language (`accepts`/`required`/`propagate`), has a two-kind placement CHECK, and no `current_refs`. Spec leads; the alignment pass follows (board).

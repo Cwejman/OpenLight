@@ -169,7 +169,7 @@ The wire carries the tagged value encoding for typed bodies (`$ref`, `$loc`, `$s
 |---|---|
 | `BOUNDARY_VIOLATION` | Read or write outside the effective boundary |
 | `READ_ONLY_MOUNT` | Commit modifies a record resident in a read-only mount (reference alone is legal — see *Read-only enforcement*) |
-| `VALIDATION_ERROR` | Declaration fails spec validation — instance-spec key check, ref-target check, or the start/completion placement check |
+| `VALIDATION_ERROR` | Declaration fails spec validation — instance-contract key check, ref-target check, or the start/completion placement check |
 | `NOT_FOUND` | Referenced chunk, program, or subscription does not exist |
 | `RUN_FAILED` | A run the program started ended non-zero |
 | `INVALID_REQUEST` | Malformed JSON, unknown op, missing fields |
@@ -181,7 +181,7 @@ A program receives unsolicited messages from the engine on the same channel it s
 
 | Event | Shape | Meaning |
 |---|---|---|
-| `place_changed` | `{ event: "place_changed", subscriptionId, commit }` | A commit touched a scope this subscription registered on. The SDK re-fetches via `scope`. |
+| `place_changed` | `{ event: "place_changed", subscriptionId, commit }` | A commit touched a place this subscription registered on. The SDK re-fetches via `read`. |
 | `lagged` | `{ event: "lagged", subscriptionIds: [string] }` | The engine's input channel overflowed; the named subscriptions may have missed events. Re-fetch to recover. |
 | `subscription_invalid` | `{ event: "subscription_invalid", subscriptionId, reason }` | A subscribed place became unreachable from the process's read boundary. The engine has unsubscribed; the SDK treats the subscription as dead. |
 
@@ -277,7 +277,7 @@ impl Engine {
 
 **Cross-db placements work because dbs are dumb.** A placement stored in db_active can reference an `on` whose chunk lives in db_engine — placements store ULIDs, globally unique. To list `engine/program`'s instances, the engine queries every mount's placements for that place and unions. Validation that needs an archetype's instance contract (ref constraints, the start placement check) reads it from whichever mount holds the archetype. Brokenness — a placement referencing a chunk no mounted db has — surfaces at use time as an unresolved root, not at storage time; the db enforces no placement residency (ruled by spec precedence; substrate.md §Peers). Status, honestly: the anchor-row bridge built while db still required residency (`engine/src/mounts.rs`) is still in the code although its stated reason is gone; retirement queued.
 
-**Sharing scopes across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's invocables are placed there and discoverable across the field.
+**Sharing places across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's programs are placed there and discoverable across the field.
 
 **Federation cost is O(N) per resolution**, N = mount count. For v0.1's 3–5 mounts, negligible. A lazily populated `chunk_id → mount_id` index is the natural optimization at larger N; not v0.1 work.
 
@@ -385,7 +385,7 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
 
 2. **engine.** On `mount_project` for a `ReadWrite` mount, the engine subscribes to that mount's `db.subscribe(&[db/commits], ..)`. A background task drains the receiver, filters by the mount's branch, and runs the dispatcher.
 
-3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched scope set* — the union of:
+3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched place set* — the union of:
    - `commit.chunks_modified` — chunks whose body, spec, or name changed.
    - Both sides of `commit.placements_modified` — places that gained or lost a placement, and chunks whose own placements changed.
    - `commit.links_modified` — chunks that gained or lost links *to* them (the link delta, computed in the write transaction).

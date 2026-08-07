@@ -35,10 +35,10 @@ React helpers (`useRead`, future `useCommit`, `useRun`, `useSubscribe`) are not 
 Typed bodies exist in three forms; translation between them is the SDK's job, invisible to program code:
 
 - **In hand — native values.** A `ref` key is a `Ref` object (id + convenience resolve), `time` is a `Date`, `set` is a `Set`, `markdown` is a string tagged by its type. Program code works with real values, never tag envelopes.
-- **On the wire — tagged JSON.** Values self-describe: `{"$ref": "chunk_id"}` · `{"$loc": "<normalized expression>"}` · `{"$set": [...]}` · `{"$time": "2026-08-03T…"}` · `{"$md": "…"}`. Tags are what make union checks tag-membership and link-finding spec-free (substrate.md); the engine validates them against instance specs at commit.
+- **On the wire — tagged JSON.** Values self-describe: `{"$ref": "chunk_id"}` · `{"$loc": "<normalized expression>"}` · `{"$set": [...]}` · `{"$time": "2026-08-03T…"}` · `{"$md": "…"}`. Tags are what make union checks tag-membership and link-finding spec-free (substrate.md); the engine validates them against instance contracts at commit.
 - **In the file — plain JSON.** The db stores one JSON text column, byte-identical semantics; the tagged encoding is the stored form.
 
-The SDK encodes on every write and decodes on every read, driven by the tags alone — no spec fetch needed to translate. Schema-driven TS types (a program's argument as a real TypeScript type, generated from the archetype's instance spec) are a later layer on the same encoding.
+The SDK encodes on every write and decodes on every read, driven by the tags alone — no spec fetch needed to translate. Schema-driven TS types (a program's argument as a real TypeScript type, generated from the archetype's instance contract) are a later layer on the same encoding.
 
 ## Resolution modes — frozen or head
 

@@ -11,7 +11,7 @@ This file carries only what is v0.1's own: what it establishes and defers, how a
 ## What v0.1 Establishes
 
 - **The self-describing field works.** A program's contract is its chunks. The host reads those chunks and produces the surface the user interacts with. Nothing is configured out-of-band.
-- **Scope is the read mechanism.** Programs read the field by intersecting scopes. No snapshots, no manual tool calls for retrieval.
+- **Read is the mechanism.** Programs read the field by intersecting places. No snapshots, no manual tool calls for retrieval.
 - **Boundaries are architectural.** A program running against the field sees only what its read boundary reaches, writes only where its write boundary allows. The engine enforces this uniformly.
 - **Everything is traceable.** Chunk → commit → process → program. Any change the field underwent can be walked back to the program that caused it and the user who ran it.
 - **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare `runtime: 'webview'`; tools declare `runtime: 'vm'`. Both pass through the same lifecycle.
@@ -19,7 +19,7 @@ This file carries only what is v0.1's own: what it establishes and defers, how a
 
 ## What v0.1 Defers
 
-- **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](../horizon.md).
+- **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, place-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](../horizon.md).
 - **Services as first-class.** A long-lived program is a code pattern, not a substrate distinction.
 - **Derived chunks** — summaries, embeddings. The pattern works; generation is not in the loop.
 - **Temporal queries.** `--at <commit>` for time travel is possible against the current schema, not wired into the interface.
@@ -83,7 +83,7 @@ host/                — Rust binary. tao + wry. Window, tile geometry, webview
                        providers. Depends on db and engine crates.
   src/               — Rust source.
   react/             — TypeScript UI library (React components, hooks like
-                       useScope). Used by webview programs that the host renders.
+                       useRead). Used by webview programs that the host renders.
                        Lives here for v0.1; may extract later.
   programs/          — first-party programs the host ships (sidebar, tab-bar,
                        palette, form, read-tile → reader, process-view, …).
