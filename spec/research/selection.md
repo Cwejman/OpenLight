@@ -131,15 +131,17 @@ DSL-written inline calls entering an argument materialize their chunks at entry 
 
 ## 5. Boundaries
 
+> **Superseded in part by [`dimensions.md`](dimensions.md) (2026-08-07).** Item 1 and the closing granularity sentence are **dead**: ownership confers no transitive reach, the frame is `[self]`, and a root grants one hop of membership, not a subtree. Items 2–5 stand and upgrade — the `read`/`write` keys become selection-grade, set algebra joining locs and argument references. Do not implement the ownership walk described below.
+
 A run's reach is constructed at dispatch, immutable after:
 
-1. **The frame** — implicit, always: the process's own ownership subtree; results ride here (a program always writes its own result; never declared).
+1. ~~**The frame** — implicit, always: the process's own ownership subtree; results ride here~~ **(superseded — the frame is the process's own dimension, `[self]`; children and results are owned by the process, which *is* their membership in it.)** A program always writes its own result; never declared.
 2. **Argument content is implicitly read-granted, always** — the offer *is* the grant: someone gestured the content into the argument, and that gesture is the consent read needs.
 3. **Program `read`/`write`** — flat keys on the body; per key, absent = defers to the run, present = exact ceiling. Members are static locs and **argument references** — an entry's type name (unique by disjointness) or a payload-key path (`write: {route.from, route.to}`). **Write is never implicit.** At dispatch a reference resolves to the **term chunks** of the bound element (`[a, b]` contributes both; an expression chunk contributes what its mentions name); snapshot into the process record; rendered as the form's chips before Go, narrowable there.
 4. **Explicit dispatch additions** — anything else the dispatcher grants.
 5. Everything intersected with the **parent's reach** (a cap, not a source).
 
-**Content never carries reach** — structural, not stated: all reach lives in the boundary keys or explicit grants; never an inference from what happened to match. Known granularity: a term-chunk root grants its ownership subtree — the boundary model's standing grain.
+**Content never carries reach** — structural, not stated: all reach lives in the boundary keys or explicit grants; never an inference from what happened to match. ~~Known granularity: a term-chunk root grants its ownership subtree — the boundary model's standing grain.~~ **(Superseded — a root grants one hop of membership; depth, when wanted, is stated as an expression. [`dimensions.md`](dimensions.md) §5.)**
 
 ## 6. Purity — derived, never declared
 

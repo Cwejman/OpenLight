@@ -56,6 +56,8 @@ One pass, in this order. Ordering matters only at the head: the tree moves befor
    - **sdk.md** — the `resolve` op; varargs calls; the purity predicate surfaced for badge derivation; no new tags (`$loc`/`$ref` suffice).
 4. **D5's rewrite** and the A3 riders, wherever they land.
 
+**Precedence, where the records disagree**: on boundaries, reach, and the frame, **dimensions.md wins over selection.md, which wins over anything in the specs**. Everywhere else selection.md stands as written. one-compositor.md governs surface technology and arrangement alone and collides with neither. boundaries.md is diagnosis only — never a source. The two conflicting passages are struck in place in selection.md §5; if a third is found, it is a question for the author, not a judgement call.
+
 **Do not resolve open questions while executing.** Both source records carry live ledgers — selection.md §16 and dimensions.md §8 — and those stay open. Anything the brief does not cover is a question for the author, not a decision for the executor.
 
 ## Not ruled

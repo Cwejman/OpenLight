@@ -118,7 +118,7 @@ Commits stay **SQL rows**, not chunks with placements — a commit carries messa
 
 - **substrate.md** — the reach law rewritten: reach = boundary selections; ownership = naming and containment, never reach; the placement rules of §3 (create: write-dimension + read-chunk; remove: write-dimension); the counts sentence; uniform boundary-filtering of membership answers.
 - **engine.md** — the Boundaries section rebuilt on selections (single-request grammar); frame as `[self]`; caps unchanged; the instance claim-vs-publish decision taken here.
-- **selection.md alignment** — its §5 `read`/`write` keys upgrade naturally: members become selection-grade (they were already locs and argument references; set algebra joins them). No contradiction; one grammar.
+- **selection.md alignment** — its §5 `read`/`write` keys upgrade naturally: members become selection-grade (they were already locs and argument references; set algebra joins them). But **§5 is not contradiction-free**, as first written here: its item 1 (the frame as the process's *ownership subtree*) and its closing granularity sentence (*a term-chunk root grants its ownership subtree*) are dead, not upgraded. Both are struck in place there, pointing here. Items 2–5 stand.
 - **boundaries.md** — stands as the opening position paper; superseded on position, retained for its assembly and for the gap analysis that located the wound.
 - **db.md** — boundary evaluation rides the plan interface (single-request lowering); membership filtering joins the read path.
 

@@ -1,5 +1,7 @@
 # Boundaries — a position paper on reach, and where it is underspecified
 
+> **Superseded on position by [`dimensions.md`](dimensions.md) (2026-08-07).** The author widened the frame instead of choosing inside the ownership model, and the problem dissolved. §1's assembly of the prior law and §2–4's gap analysis stand — they located the wound. **§5's proposal is dead**: reach is not ownership-plus-spread but boundary selections over dimensions. Read this file for the diagnosis, never for the cure.
+
 Steward position, written 2026-08-06 at the author's request for independent review. **Not law.** The specs are law; this file assembles what they say about permission into one place, names three gaps, and argues a direction. It exists to be attacked.
 
 The question that produced it: *if I grant a chunk to a program, what exactly did I give away?* The author's suspicion — that the permission model is incomplete in a way successive sessions have not noticed — is, on inspection, correct.
