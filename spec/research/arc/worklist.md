@@ -23,7 +23,7 @@ What still needs attention, one item at a time. An item closes on the author's g
 
 - **A — absorption.** Ruled 2026-08-06/07. Three records absorbed, not two: selection.md §15, one-compositor.md, and [`dimensions.md`](dimensions.md). `seq: true` settled; host.md slims to Rust authority; all three records land translated into the ruled vocabulary.
 - **B — vocabulary.** Ruled 2026-08-06. scope retired wholesale; start replaces dispatch; placement `on`/`kind`; the chunk field flattens to `instance`; the match vs the gate.
-- **D — substrate shorts.** Ruled 2026-08-06/07. D1 no deny; **D1b** — the boundary model, opened by [`boundaries.md`](boundaries.md) and resolved by [`dimensions.md`](dimensions.md); D2 a dimension needs a name; D5 a drafting task riding the batch; D6 instance contracts stay open.
+- **D — substrate shorts.** Ruled 2026-08-06/07. D1 no deny; **D1b** — the boundary model, re-grounded by [`dimensions.md`](dimensions.md); D2 a dimension needs a name; D5 a drafting task riding the batch; D6 instance contracts stay open.
 - **F1 + F2 — the spec tree.** Ruled 2026-08-06. session.md dissolves into agent.md; pilot.md slims to its unique content.
 
 **Conventions, recorded:** the author skips the engine's technical layers — steward-owned review territory, and no concept-level change may hide in them.

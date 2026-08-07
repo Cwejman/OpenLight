@@ -1,6 +1,6 @@
 # Dimensions — the permission model re-grounded
 
-Record of the 2026-08-06/07 boundary dialog, written from the point of resolution. Status: **author-directed direction**, not law; feeds the absorption pass. Revised 2026-08-07 with the steward review folded in — eight findings, credited inline where they changed the text; finding 1 restructured §2 and dissolved findings 4, 6, and 8 by cascade. **This file stands alone** — §0 carries the law it replaces and the gaps that broke it, so nothing else need be read to integrate it. [`boundaries.md`](boundaries.md) is the position paper that opened the question; its diagnosis is compressed into §0 here and its proposed cure is superseded. Consult it only for the long-form derivation.
+Record of the 2026-08-06/07 boundary dialog, written from the point of resolution. Status: **author-directed direction**, not law; feeds the absorption pass. Revised 2026-08-07 with the steward review folded in — eight findings, credited inline where they changed the text; finding 1 restructured §2 and dissolved findings 4, 6, and 8 by cascade. **This file stands alone** — §0 carries the law it replaces and the gaps that broke it, so nothing else need be read to integrate it. The position paper that opened the question has been retired: its diagnosis is §0 here, its proposed cure was superseded, and it survives in git alone.
 
 The snag that started it: as specced, a read at a granted chunk returns *members with bodies* — chunks that reach (ownership-walk + grants) never included. Anything `relates`-placed on a granted scope leaked. Fixing that inside the ownership model required choosing between filtered rooms and locked-door hallways. The author widened the frame instead, and the problem dissolved.
 
@@ -136,7 +136,6 @@ Commits stay **SQL rows**, not chunks with placements — a commit carries messa
 - **substrate.md** — the reach law rewritten: reach = boundary selections; ownership = naming and containment, never reach; the placement rules of §3 (create: write-dimension + read-chunk; remove: write-dimension); the counts sentence; uniform boundary-filtering of membership answers.
 - **engine.md** — the Boundaries section rebuilt on selections (single-request grammar); frame as `[self]`; caps unchanged; the instance claim-vs-publish decision taken here.
 - **selection.md alignment** — its §5 `read`/`write` keys upgrade naturally: members become selection-grade (they were already locs and argument references; set algebra joins them). But **§5 is not contradiction-free**, as first written here: its item 1 (the frame as the process's *ownership subtree*) and its closing granularity sentence (*a term-chunk root grants its ownership subtree*) are dead, not upgraded. Both are struck in place there, pointing here. Items 2–5 stand.
-- **boundaries.md** — stands as the opening position paper; superseded on position, retained for its assembly and for the gap analysis that located the wound.
 - **db.md** — boundary evaluation rides the plan interface (single-request lowering); membership filtering joins the read path.
 
 **Three budgets to write down, not assume** *(findings 3 and 7)*:

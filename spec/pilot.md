@@ -221,4 +221,4 @@ Held in the specs rather than closed prematurely. These do not block the pilot's
 - **Sidebar disambiguation** — visual scheme for multiple processes with the same program + args.
 - **React hooks surface** — `useScope` is the current guess for reading. The full hook vocabulary will refine through building real programs.
 
-The design-level opens — the settled model's consolidated list — live in [`research/arc/settled.md`](research/arc/settled.md) §7 and in place in each spec.
+The design-level opens live in place in each spec, beside the mechanism each one qualifies. The current arc's ledgers are [`research/arc/selection.md`](research/arc/selection.md) §16 and [`research/arc/dimensions.md`](research/arc/dimensions.md) §8.
