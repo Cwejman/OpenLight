@@ -1,6 +1,6 @@
 # Threads — The Session Dissolved (Experience Spec)
 
-The lived experience of agent work: watching it, steering it, trusting it. This file's previous model (an agent session as a `conversation`-typed container of turns) is **superseded by the dissolution** (adopted; reasoning record: [`research/threads-dialog.md`](research/threads-dialog.md)): there is no container. Mechanics ground: [`agent.md`](agent.md) (context/thread, the cycle), [`engine.md`](engine.md) (drafts, the lifecycle), [`programs.md`](programs.md) §2 (`form`), §3 (`reader`, readings, collation), §6 (`process-view`). The file keeps its name until the rename ruling (*thread* over *session*, tentative) is taken; the content is thread-model throughout.
+The lived experience of agent work: watching it, steering it, trusting it. This file's previous model (an agent session as a `conversation`-typed container of turns) is **superseded by the dissolution** (adopted; reasoning record: `research/threads-dialog.md`): there is no container. Mechanics ground: [`agent.md`](agent.md) (context/thread, the cycle), [`engine.md`](engine.md) (drafts, the lifecycle), [`programs.md`](programs.md) §2 (`form`), §3 (`reader`, readings, collation), §6 (`process-view`). The file keeps its name until the rename ruling (*thread* over *session*, tentative) is taken; the content is thread-model throughout.
 
 ---
 
