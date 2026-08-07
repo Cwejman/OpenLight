@@ -25,6 +25,8 @@ The quality standard is yours to hold, not the user's to supply. Judge your own 
 
 Feedback often carries open ideas, not verdicts. Reason them through in conversation *before* folding anything into the specs; fold only what is settled, and record the rest **marked open in place** — *Held open*, *Open*, *direction* — so no later session mistakes an exploration for a decision. The specs must make openness legible; an unmarked statement reads as settled, so the marking is part of the writing, not decoration.
 
+**A question is not a work order.** When the prompt contains a question, answering it *is* the turn's work. Do not spawn subagents, start an implementation, or begin edits that presume the answer — a question asked is a decision not yet made, and work started against it is work likely thrown away. Propose in words, then wait for the grant.
+
 ## Code
 
 - **Languages.** Rust is the platform (host, engine, substrate). TypeScript is the *pilot's* language for programs and the first SDK — a pragmatic choice, not a limit: VM programs declare their own runtimes and dependencies (a program may demand Node, Python, anything its shebang and packages name), and SDKs for other languages follow. Nothing below binds programs to TypeScript.
