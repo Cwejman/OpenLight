@@ -100,7 +100,7 @@ engine/mount  (virtual)
 
 ## Lifecycle: draft, run, launch
 
-A process may exist before start — **status `draft`**, its argument under composition. A draft is ordinary field data: written by whoever holds the grant (the `form`, the palette), substrate-resident (there is no in-memory draft state), resting visibly where it was begun until an explicit gesture deletes it — nothing auto-sweeps. A draft whose argument cites a previous turn joins that thread's lineage (session.md). From start on, the process chunk is engine-domain.
+A process may exist before start — **status `draft`**, its argument under composition. A draft is ordinary field data: written by whoever holds the grant (the `form`, the palette), substrate-resident (there is no in-memory draft state), resting visibly where it was begun until an explicit gesture deletes it — nothing auto-sweeps. A draft whose argument cites a previous turn joins that thread's lineage ([`agent.md`](agent.md)). From start on, the process chunk is engine-domain.
 
 A start takes one of two modes:
 
@@ -276,6 +276,8 @@ impl Engine {
 **Reactivity is single-source in v0.1.** Only read-write mounts fire commits in-process, and v0.1 has exactly one: the active project. The dispatcher holds one `broadcast::Receiver`, filtered by the active project's branch. When cross-host reactivity or dynamic mount writes land (horizon), the dispatcher extends to more receivers — it's just `select!`.
 
 **Cross-db placements work because dbs are dumb.** A placement stored in db_active can reference an `on` whose chunk lives in db_engine — placements store ULIDs, globally unique. To list `engine/program`'s instances, the engine queries every mount's placements for that place and unions. Validation that needs an archetype's instance contract (ref constraints, the start placement check) reads it from whichever mount holds the archetype. Brokenness — a placement referencing a chunk no mounted db has — surfaces at use time as an unresolved root, not at storage time; the db enforces no placement residency (ruled by spec precedence; substrate.md §Peers). Status, honestly: the anchor-row bridge built while db still required residency (`engine/src/mounts.rs`) is still in the code although its stated reason is gone; retirement queued.
+
+**Sharing scopes across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's invocables are placed there and discoverable across the field.
 
 **Federation cost is O(N) per resolution**, N = mount count. For v0.1's 3–5 mounts, negligible. A lazily populated `chunk_id → mount_id` index is the natural optimization at larger N; not v0.1 work.
 
@@ -545,7 +547,11 @@ The provider drives readiness and terminal on its own schedule; the engine await
 
 ## Containment
 
-Containment is the runtime provider's concern. What the engine guarantees regardless of provider: every substrate operation passes the boundary check, so containment and boundary enforcement compose. v0.1's split-containment model and the uniform-VM alternative are in [`pilot.md`](pilot.md#containment) and [`horizon.md`](../horizon.md).
+Containment is the runtime provider's concern. What the engine guarantees regardless of provider: every substrate operation passes the boundary check, so containment and boundary enforcement compose.
+
+v0.1 uses **split containment**. `runtime: 'vm'` programs run inside the active project's Linux VM (the substrate's containment for capability-bearing programs); peer projects' filesystems are mounted read-only at `/peers/<project-id>/` so peer-defined invocables run from their mounted paths within the same VM. `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains VM programs. This is the simpler path, and putting capability-bearing programs in a VM gives v0.1 the safety floor it needs to host agentic programs without inventing new mechanism.
+
+The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](../horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 
 ---
 

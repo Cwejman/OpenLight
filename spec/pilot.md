@@ -2,16 +2,9 @@
 
 The first working instance of the substrate. A person opens a window, sees a space, runs a program, and what happened is preserved in the field. The pilot exists to prove that the substrate's self-description is sufficient — that an interface, a program, and a history can all be generated from what the field knows about itself, with no external configuration carrying the weight.
 
-Four things make the pilot:
-
-- **`db`** — the substrate library. Owns the database. Pure reads and writes.
-- **`engine`** — mediates between the substrate and the programs that run against it. Creates processes, enforces boundaries, manages program lifecycle.
-- **`host`** — the native shell. A window, tile geometry, webviews per program, IPC routing. Does not write UI.
-- **`programs`** — everything else. A tile that reads a scope is a program. A tool that touches the filesystem is a program. A sidebar that lists what's in the session is a program. The claude agent is a program.
-
-The unification of view and tool into one concept — the program — is what lets the interface be generated rather than designed. There is no separate category for UI elements.
-
 Though called "the pilot," this is **v0.1** — the seed that grows. Architecture is evergreen; feature scope is intentionally narrow. What's deferred is deferred *for shipping*, not for design — decisions made here shape what comes after, so the architecture is built to accommodate horizon work without redesign even when that work itself stays out of v0.1.
+
+This file carries only what is v0.1's own: what it establishes and defers, how a project declares its mounts, the repo layout, and the order it gets built in. Every mechanism it once restated lives once, in the spec that owns it — the index is under *Specs* below.
 
 ---
 
@@ -37,29 +30,9 @@ Though called "the pilot," this is **v0.1** — the seed that grows. Architectur
 
 ---
 
-## Architecture
+## Multi-project mounts
 
-### Names and roots
-
-A **root scope** is a chunk with no owner. By convention, a project intended as a mountable peer has one root named after itself, so absolute names like `engine/program` read cleanly. The substrate permits any structure; a db can hold any number of roots.
-
-Absolute names walk the ownership chain: `engine/program` is the chunk named `program` owned by the root `engine` (substrate.md, *Five Connection Kinds*). Mounting doesn't add a layer — a root in a mounted db stays a root; ownership never crosses mounts.
-
-A scope query answers across the five connection kinds — what lives here (`owned`), what is a member (`instance`), what is about it (`relates`), plus the derived links (`field`, `mention`) in the separate `linked` result. Same-named chunks under separate owners are separate chunks; the host disambiguates visually when names collide across mounts.
-
-Two virtual scopes appear per db: `db/commits` (the commit graph) and `db/branches` (the branch list). The `db/` prefix is reserved for substrate-machinery virtual scopes.
-
-The pilot's first-party projects ship the system's archetypes:
-
-- **`engine`** — `engine/program`, `engine/process`, `engine/status` (the lifecycle value chunks), and `engine/mount` (instances synthesized at query time from the live registry).
-- **`host`** — `host/session`, `host/tab`, `host/tile`, `host/overlay`, `host/recipe`.
-- **`agents`** — first-party active project for v0.1. Its own scopes (the agent program, tool programs, the agent's working sessions). Invocables placed `instance` on `engine/program`; sessions placed `instance` on `host/session`. Placements live in the agents project's db; archetypes live in the mounted engine and host dbs. Other active projects, by users or for other purposes, follow the same pattern.
-
-### Multi-project mounts
-
-A host launches with one **active project** (read-write) and one or more **mounts** (read-only — other projects on the local filesystem). At minimum the host and engine projects must be mounted; the mounts file declares them deliberately, no implicit mounting. Boot-time validation refuses a half-loaded state — every placement in the active project's db must have its `scope_id` resolve in some mount, or the host errors clearly with the list of unresolved references.
-
-Mount declarations live in `.ol/project.toml`:
+A host launches with one **active project** (read-write) and one or more **mounts** (read-only — other projects on the local filesystem). The mounts file declares them deliberately; there is no implicit mounting. Declarations live in `.ol/project.toml`:
 
 ```toml
 [project]
@@ -74,52 +47,11 @@ path = "../engine"
 branch = "main"
 ```
 
-Mounts cascade transitively, deduplicated by canonical path; cycles rejected. Branches pin versions — track `main` to follow upstream, name a stable branch (`v1.2.3`) for predictability. A future `commit` field would route queries through db's existing `at` parameter for frozen snapshots.
+Branches pin versions — track `main` to follow upstream, name a stable branch (`v1.2.3`) for predictability. A future `commit` field would route queries through db's existing `at` parameter for frozen snapshots.
+
+How the cascade is walked, which mounts are mandatory, and what boot refuses: [`host.md`](host.md#boot-sequence). What a mount contributes to the field, and how reads, boundary walks and read-only enforcement federate across mounts: [`engine.md`](engine.md#engine-api-callable-from-the-host).
 
 **Open: peering fragility.** Cross-mount references across evolving peers carry a fragility — when a peer advances, the active project's reads and validations can shift underneath it in ways that aren't yet fully reasoned about. The shape of this needs to mature with use; v0.1's read-only filesystem-local mounts are the narrow surface from which to learn.
-
-A mount contributes its substrate (federated read-only into the field), its invocables (peer filesystem mounted at `/peers/<id>/` inside the active project's VM), and its archetypes. Federation lives at the engine layer: reads and boundary walks across all mounts, reactivity from the active project only — read-only mounts have no in-process writer in v0.1. Writes referencing a chunk in a read-only mount return `READ_ONLY_MOUNT`. See [`engine.md`](engine.md) for federation mechanics.
-
-**Sharing scopes across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's invocables are placed there and discoverable across the field.
-
-What v0.1's mounts don't yet support: read-write across mounts, remote (network) mounts, identity verification, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, scope-filtered mounts. See [`horizon.md`](../horizon.md).
-
-### The substrate (`db`)
-
-A SQLite-backed Rust library. Chunks, placements, commits. See [`substrate.md`](substrate.md). Compiled into the host binary; not a separate process.
-
-### The engine
-
-Sits between the substrate and anything that would run against it. Creates a `process` chunk when a program is run, enforces boundaries, spawns the program's executable, mediates all substrate access the running program attempts. See [`engine.md`](engine.md).
-
-A Rust library linked into the host. The host's wry IPC handlers and engine APIs call engine functions directly; VM programs reach the engine over stdio JSON-lines spawned and read by the engine. In v0.1 there is no separate engine process, no inter-process hop between host and engine — but the protocol seam deliberately preserves the engine-as-daemon direction (hosts as attaching windows, network reach; see [`horizon.md`](../horizon.md)).
-
-### The host
-
-A native Rust process built on **tao** (windowing) and **wry** (webview) — the primitives Tauri is built on, used directly without the framework. Owns the window, tile geometry and its direct manipulation, webview lifecycles, and the wry IPC surface that webview programs reach. Links the engine and substrate as Rust libraries. The frame machinery — window, tiling, background — renders natively (quality on par with an operating system; native-graphics tiles stay reachable); program content it never renders. Sidebar and tab bar are surface programs positioned nakedly on the background (going host-native later is held open — `programs.md` §1). See [`host.md`](host.md).
-
-### Programs
-
-A program is a chunk whose body carries an `executable` path and a `runtime` declaration. Programs with `runtime: 'webview'` are rendered in webviews the host mounts into tiles. Programs with `runtime: 'vm'` run inside the active project's Linux VM (with shebang-declared interpreter) — programs declared in mounted projects spawn from their peer FS mount inside the same VM.
-
-A program is authored however its runtime allows — TSX + React for the first-party programs of the pilot, any WASM target or native executable later. The substrate doesn't care. The shebang on the program's executable determines how it runs.
-
-### Transport
-
-The program-to-engine protocol is a single JSON-lines shape — see [`engine.md`](engine.md) for the full operation set. The shape is the same regardless of where a program runs; the transport differs:
-
-- **Webview programs** — the SDK serializes to JSON, the host's wry IPC handler receives the message and calls the engine library directly. One hop, no extra process between.
-- **VM programs** — the SDK writes JSON lines to stdout. The engine spawns the program inside its VM and reads its stdout, processing each line through the same op handlers.
-
-The SDK hides which transport is active. `scope(ids)` feels local regardless.
-
----
-
-## Containment
-
-v0.1 uses **split containment**. `runtime: 'vm'` programs run inside the active project's Linux VM (the substrate's containment for capability-bearing programs); peer projects' filesystems are mounted read-only at `/peers/<project-id>/` so peer-defined invocables run from their mounted paths within the same VM. `runtime: 'webview'` programs (a read tile, the sidebar) run on the host inside their webviews. The webview sandbox and the engine's boundary enforcement contain webview programs together; the VM contains VM programs. This is the simpler path, and putting capability-bearing programs in a VM gives v0.1 the safety floor it needs to host agentic programs without inventing new mechanism.
-
-The uniform alternative — every program in one VM with DOM streamed to host webviews — is architecturally cleaner but heavier engineering. It belongs on the horizon. See [`horizon.md`](../horizon.md). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
 
 ---
 
@@ -174,6 +106,8 @@ agents/              — first user-facing project for v0.1. The agent program
 
 The first pilot's TypeScript implementations were deleted outright (git history keeps them); they were never a source of truth. The spec is. Rust impl flows from the spec; tests verify against the spec.
 
+---
+
 ## Build Order
 
 The implemented foundation is drawn whole in `.md` before any of it is coded. The substrate's outward face is already settled, so its conceptual spec can be audited in isolation — but its *implementation drawing* (how the Rust db actually works, both contracts) is its own document. Engine, host, and SDK are mutually-defining and grow as one holistic drawing.
@@ -202,23 +136,17 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 
 ## Specs
 
-- [`substrate.md`](substrate.md) — chunk, placement, spec language, commits, queries. The primitive layer (concept, two contracts).
-- [`db.md`](db.md) — implementation drawing of the Rust db. Top-to-bottom, derived holistically from the substrate spec.
-- [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, containment.
-- [`host.md`](host.md) — the native shell, tile geometry, IPC dispatch, the UI composition types, visual language.
+Each spec is the single home for its subject; this file points, it does not restate.
+
+- [`substrate.md`](substrate.md) — chunk, placement, spec language, commits, queries, the five connection kinds, names and roots, peers. The primitive layer (concept, two contracts).
+- [`db.md`](db.md) — implementation drawing of the Rust db, including the virtual places `db/commits` and `db/branches`. Top-to-bottom, derived holistically from the substrate spec.
+- [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, federation across mounts, containment.
+- [`host.md`](host.md) — the native shell, boot sequence and the mounts cascade walk, tile geometry, IPC dispatch, the UI composition types, visual language.
 - [`sdk.md`](sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
 - [`programs.md`](programs.md) — the actual programs: the catalog, per-program contracts, the interface concretely (sidebar, palette, `form`, `reader`, `process-view`).
-- [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately.
-- [`bootstrap.md`](bootstrap.md) — the seed data.
+- [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately; and the lived experience of agent work.
+- [`bootstrap.md`](bootstrap.md) — the seed data: the archetypes each first-party project ships.
 
 ## What Is Open
 
-Held in the specs rather than closed prematurely. These do not block the pilot's structure; they need decisions as implementation reaches them.
-
-- **Overlay anchor escalation** — how a program anchors an overlay above its own tile. Leaning arranger-mediated (host.md).
-- **Cross-workspace wrap policy** — when composing tiles into a container, what happens to children visible in other tabs.
-- **Service lifecycle UX** — when a program is long-lived and mounted in multiple tiles, identity, termination, and display semantics.
-- **Sidebar disambiguation** — visual scheme for multiple processes with the same program + args.
-- **React hooks surface** — `useScope` is the current guess for reading. The full hook vocabulary will refine through building real programs.
-
-The design-level opens live in place in each spec, beside the mechanism each one qualifies. The current arc's ledgers are [`research/arc/selection.md`](research/arc/selection.md) §16 and [`research/arc/dimensions.md`](research/arc/dimensions.md) §8.
+The design-level opens live in place in each spec, beside the mechanism each one qualifies — [`host.md`](host.md#what-is-open), [`engine.md`](engine.md#what-is-open), [`substrate.md`](substrate.md), [`sdk.md`](sdk.md#what-is-open), [`programs.md`](programs.md) and [`agent.md`](agent.md) marked in place. None of them block the pilot's structure; they need decisions as implementation reaches them. The current arc's ledgers are [`research/arc/selection.md`](research/arc/selection.md) §16 and [`research/arc/dimensions.md`](research/arc/dimensions.md) §8.

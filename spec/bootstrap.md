@@ -38,7 +38,7 @@ Composition primitives for the interface layer. Mounted by every project a user 
 
 ## The `agents` project's bootstrap
 
-Concrete programs and the agent's steering vocabulary. No session or conversation container is seeded — **threads derive** from citation ([`session.md`](session.md)); a conversation materializes as a named location only when named, shared, bound, or peopled.
+Concrete programs and the agent's steering vocabulary. No session or conversation container is seeded — **threads derive** from citation ([`agent.md`](agent.md)); a conversation materializes as a named location only when named, shared, bound, or peopled.
 
 1. `agents` — root scope.
 2. `control` — the steering archetype: instance spec `{ signal: ref(signal), target: ref }`; `signal` beside it with four value chunks — `pause`, `resume`, `abort-completion`, `adjust`. Controls are placed `relates` on the turn they steer.

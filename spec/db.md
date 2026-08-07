@@ -170,7 +170,7 @@ The substrate's discipline is that everything is chunks and placements. Branches
 - `db.read(&[db/branches, branch_id], opts)` — a single branch.
 - `db.read(&[db/commits, branch_id], opts)` — commits in the branch's ancestry, ordered.
 
-`db/branches` and `db/commits` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded specs (the `branch` and `commit` archetypes).
+`db/branches` and `db/commits` are well-known ids recognized by the read layer. They are not stored — they are projection anchors with hardcoded specs (the `branch` and `commit` archetypes). Two of them appear per db, and the `db/` prefix is reserved for substrate-machinery virtual scopes.
 
 Virtual chunks are read-only via `read`/`get`. Writes targeting them are rejected (`WriteToVirtualChunk`). Their state is owned by db-level operations: `commit` (advances a branch's head), `create_branch` / `delete_branch` (manipulate the branch graph).
 

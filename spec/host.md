@@ -126,6 +126,7 @@ The window is a quiet canvas:
 - Tiles appear as rounded cards with a small gap between them
 - A quiet gray canvas — `hsl(0 0% 98%)`; dark mode is a later refinement, not a day-one requirement
 - iOS-flavored rounding — subtle, not dramatic
+- Same-named chunks under separate owners are separate chunks; where names collide across mounts, the host disambiguates visually
 
 Depth speaks in **two registers**. *In-flow cards* — strip items — carry a surface fill and a centered soft glow, in CSS. *Floating surfaces* — tiles — carry no CSS shadow at all: their aura is frame chrome the host casts on the webview's compositor layer, not page style. One convention for rounding: the card radius lives in the rim (`CARD_RADIUS`), and `@openlight/react`'s `--ol-radius` mirrors it.
 
@@ -254,14 +255,14 @@ The cascade walk and FS-mount-table assembly are host code (file-aware). The mou
 - **Recipe referencing.** Settled identity-based for v0.1 (`programs.md` §7): a leaf records `{ program, argument declarations, boundary roots, view state }`; spawning re-declares fresh. Slot-based recipes (placeholders filled at spawn) are a later layer on the same shape.
 - **The ensemble tile.** A leaf tile relates one process today; citizen ensembles (`programs.md` §5) need a leaf relating a group container of citizen processes — or subtiling within tiles. Settles by building the conversation tile.
 - **Host-native sidebar/tabs.** Held open (`programs.md` §1): they stay webview programs for now; going native later would buy visual coherence with the frame's card treatment and performance, when the demand justifies the exception.
-- **Multi-mount of services.** One long-running program mounted in two tiles — shared single surface, or two surfaces over one backing state?
+- **Multi-mount of services.** One long-running program mounted in two tiles — shared single surface, or two surfaces over one backing state? Identity, termination, and display semantics for a long-lived program are open together.
 - **Sidebar disambiguation.** The exact visual scheme for distinguishing multiple processes of the same program with identical arguments.
 - **Color coding.** Whether scopes or programs carry a color attribute, and how it surfaces in the visual language.
 - **Cross-workspace wrap policy.** When wrapping tiles into a composition, if a child is visible in another tab, what happens to the other tab's view.
 - **Selection on padding.** Gesture for selecting a subtree of tiles to wrap, save as recipe, or delete as a group.
 - **Native visual effects.** The tile aura is already native compositor chrome (*Visual Language*); further effects (pixel-readback, GPU blur) are later.
 - **By-eye depth values.** The strip-bleed margins and the aura-truncation-vs-padding trade (a wide aura fades inside the strip's padding; the dials are padding width or aura radius) are by-eye values still settling.
-- **Direct-manipulation grammar.** Drag-to-resize, split creation and removal gestures, minimum tile sizes. pilot.md names the host as owner of tile geometry *and its direct manipulation*, but the gestures are unspecced — no test can be written for them yet. The geometry walk below stands testable without this layer; spec it before coding it.
+- **Direct-manipulation grammar.** Drag-to-resize, split creation and removal gestures, minimum tile sizes. The host owns tile geometry *and its direct manipulation*, but the gestures are unspecced — no test can be written for them yet. The geometry walk below stands testable without this layer; spec it before coding it.
 - **Visual tokens.** "Light padding," "small gap," and the rounding carry no values. The walk takes them as parameters — a pure function of (tree, viewport, spacing) — so tests parametrize over them; the values themselves settle by eye when the window exists.
 
 ---
