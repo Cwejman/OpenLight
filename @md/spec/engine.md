@@ -34,6 +34,8 @@ chunk engine/program {
     result?:       ref                 — an archetype; checked at program definition
     read?:         selection           — per key: absent = defers to the run;
     write?:        selection             present = exact ceiling (*Boundaries*)
+    run?:          selection           — over program chunks; which programs a run
+                                         may start; run: {} starts nothing
     capabilities?: set<string>
     timeout_ms?:   number
     grades?:       map<{ wmin?: number, wmax?: number,
@@ -48,7 +50,7 @@ chunk engine/program {
 
 Concrete programs — filesystem, shell, model, echo, reader, sidebar — are chunks `instance` on `engine/program`, owned by their project's root.
 
-*Open, owed to the author.* substrate.md's key-type list says **at most one `selection` per contract**; [`selection.md`](research/arc/selection.md) §3 states the same rule of `accepts` **entries**, where two selections would compete for the same elements. `read` and `write` are two selection-typed keys on one contract, so the narrower reading is the one this contract needs. Marked, not decided.
+*Open, owed to the author.* substrate.md's key-type list says **at most one `selection` per contract**; [`selection.md`](research/arc/selection.md) §3 states the same rule of `accepts` **entries**, where two selections would compete for the same elements. `read`, `write` and `run` are three selection-typed keys on one contract, so the narrower reading is the one this contract needs. Marked, not decided.
 
 ### `accepts` — what a program takes
 
@@ -87,13 +89,14 @@ chunk engine/process {
     status:   ref(status)      — draft | running | done | failed (value chunks)
     result?:  ref              — filled once at completion
     error?:   string           — written by cleanup on a failed transition
-    read:     selection        — the run's boundary, frozen as an expression
+    read:     selection        — the run's boundary, frozen as expressions
     write:    selection
+    run:      selection        — which programs the run may start (*Boundaries*)
   }
 }
 ```
 
-`status` is the substrate's own enum pattern: `engine/status` with four value chunks. Boundary chunks and their `relates` topology are retired — the run's boundary is two typed keys on the body, read in one hop.
+`status` is the substrate's own enum pattern: `engine/status` with four value chunks. Boundary chunks and their `relates` topology are retired — the run's boundary is three typed keys on the body, read in one hop.
 
 **The argument is a field, not a chunk.** A chunk can never *be* a set — bodies are one JSON object, always — so "arguments are sets" is a claim about the argument **value**. There is no argument chunk. The draft *is* the process chunk; composition edits `P.body.argument` directly; editable-iff-unconsumed is enforced on the field, by the engine, not by convention.
 
@@ -265,11 +268,11 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra plus `at`, `where`, `follow`, exactly. A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
 
-The boundary is **constructed at start** and recorded as the process body's `read` and `write`. Five sources:
+The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`.) Five sources:
 
 1. **The frame — `[self]`.** Read and write, always, never declared. Children and results are owned by the process, and that one relation is both their address and their membership in the process's own dimension.
 2. **Argument content, read-granted implicitly.** The offer *is* the grant: someone gestured the content into the argument, and that gesture is the consent read needs. **Write is never implicit.**
-3. **The program's stated ceiling** — the flat `read` and `write` keys. Per key: absent defers reach entirely to the run; present is exact, and a run may narrow it, never widen it. Members are static locs and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
+3. **The program's stated ceiling** — the flat `read`, `write` and `run` keys. Per key: absent defers reach entirely to the run; present is exact, and a run may narrow it, never widen it. Members are static locs and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
 
    ```ol
    program move {
@@ -280,9 +283,9 @@ The boundary is **constructed at start** and recorded as the process body's `rea
    chunk move/route { instance: { item: ref, from: loc, to: loc } }
    ```
 
-   At start each reference resolves to the **term chunks** of the bound element — `[a, b]` contributes both; an expression chunk contributes what its mentions name — and is snapshotted into the process record. `read: {}` / `write: {}`, present and empty, is the frame-only program — `model`, `web`, `filesystem`: nothing beyond the frame, enforced rather than promised.
-4. **Explicit additions at start** — whatever the starter grants (`RunArgs.read` / `RunArgs.write`). These render as the boundary chips a person sees before Go, and are narrowable there.
-5. **The parent's reach, as a cap.** Everything above is intersected with the caller's own boundary. **A cap, never a source** — reach narrows through the call stack and never widens, and detachment (`launch`) does not escape it.
+   At start each reference resolves to the **term chunks** of the bound element — `[a, b]` contributes both; an expression chunk contributes what its mentions name — and is snapshotted into the process record. `read: {}` / `write: {}` / `run: {}`, present and empty, is the fully contained program — `model`, `web`, `filesystem`: nothing beyond the frame, starts nothing, enforced rather than promised.
+4. **Explicit additions at start** — whatever the starter grants (`RunArgs.read` / `RunArgs.write` / `RunArgs.run`). These render as the boundary chips a person sees before Go, and are narrowable there.
+5. **The parent's reach, as a cap.** Everything above is intersected with the caller's own boundary, `run` included — a child can never be handed programs its caller could not run. **A cap, never a source** — reach narrows through the call stack and never widens, and detachment (`launch`) does not escape it. Widening happens only across a consented start: run-to-draft (*Lifecycle*), where an approver's own reach becomes the cap.
 
 **Content never carries reach.** Structural, not stated: all reach lives in the boundary keys or in explicit additions, never inferred from what happened to match.
 
@@ -332,6 +335,17 @@ Names gave keyed arguments their optionality; **types plus counting** give it to
 
 Surfaces are viewers, never owners: closing a tile unmounts a viewer, it kills nothing. Terminating is always an explicit act.
 
+### Run-to-draft — escalation
+
+A `run` that exceeds the caller's walls — the target outside the caller's `run` boundary, or requested `read`/`write` additions beyond the caller's reach — is neither rejected nor silently narrowed: the engine writes the child as a **draft** and returns its id; the caller `await`s it like any run. From there:
+
+- **Approve is starting the draft.** A holder of the needed reach starts it, and boundary source 5 takes **the approver's reach** as the cap — approval is lending authority, which is the only way reach ever widens. Chips are narrowable before Go, as at any start.
+- **Deny is `cancel` on the draft** — the terminal transition `failed` with `error: 'denied'`; the caller's `await` resolves and the refusal is the caller's to handle.
+- **Pending drafts are auto-surfaced** — the sidebar badges them as process chrome, and any process slot rendering the caller surfaces them inline: obligations penetrate the fold ([`programs.md`](programs.md), [`agent.md`](agent.md)).
+- A caller that knows it will exceed may relate explanation prose onto the draft before awaiting — ordinary aboutness, rendered by the draft's chrome.
+
+Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
+
 ### What the engine writes at start
 
 Starting — `run` with a program and an argument set, or a consumed draft — is one atomic `db.commit()`:
@@ -366,7 +380,7 @@ One JSON-lines protocol serves every program regardless of where it runs.
 | `commit` | Write a Declaration. Rejected if the boundary does not admit every touched dimension, and checked against the placement and link rules of *Governance at `commit`*; ref keys validate per substrate.md (federated through the mount registry). `dry_run: true` runs full validation without writing — the live-form affordance. |
 | `run` | Start a program. Returns the process id immediately. Takes a program plus an argument set, or a `draft` process id to consume. `mode: 'child' \| 'launch'` per *Lifecycle*. |
 | `await` | Wait for one or more processes to reach a terminal state. **Returns each process itself** (the chunk — status, result ref, one hop to the result). The call suspends the calling task; it doesn't block the engine. |
-| `cancel` | Request a process's terminal transition. Authorized when the target descends from the caller in the engine's own process tree — the cascade lineage, engine state rather than a reach claim — or when the caller's write boundary admits it. Idempotent. |
+| `cancel` | Request a process's terminal transition. Authorized when the target descends from the caller in the engine's own process tree — the cascade lineage, engine state rather than a reach claim — or when the caller's write boundary admits it. Idempotent. Cancel of a **draft** is deny: `failed`, `error: 'denied'` — the run-to-draft refusal path (*Lifecycle*). |
 | `exit` | The calling program requests its own terminal transition (`done`) — the self-dismissal path for surface programs; trivially safe. |
 | `subscribe` | Register on a set of places; returns a subscription id. The engine pushes `place_changed` events when commits touch them. |
 | `unsubscribe` | Cancel a subscription by id. |
@@ -476,6 +490,7 @@ pub struct RunArgs {
     pub mode:       RunMode,            // child (default) or launch
     pub read:       Selection,          // explicit additions — source 4 of the boundary
     pub write:      Selection,
+    pub run:        Selection,          // programs the run may start — the toolset
     pub timeout_ms: Option<u64>,        // overrides program body
 }
 
@@ -707,7 +722,7 @@ An agent making a tool call uses the same `run` operation:
 
 1. The agent composes the argument set, committing whatever payload or expression chunks it contains, then calls `run` in child mode.
 2. The engine runs the match and writes the child process owned by the agent's process — the trace nests by ownership, one hop at a time; reading the whole tree is a `follow`-shaped expression, not one read.
-3. The caps hold: child boundary ⊆ agent boundary ∩ the tool's stated ceiling. The model can never escalate.
+3. The caps hold: child boundary ⊆ agent boundary ∩ the tool's stated ceiling, `run` included. The model can never escalate — a start beyond the walls lands as a draft awaiting approval (*Run-to-draft*), never as a run.
 4. The engine asks the runtime to spawn and returns the process id immediately; the agent awaits when it needs the result — the process chunk, `result` one hop.
 
 Nothing discourse-shaped is written anywhere — the tool trace *is* the frame; providers wanting message history get it reconstructed from frames as serializer policy ([`agent.md`](agent.md)). Substrate operations (`read`, `resolve`, `commit`, `subscribe`) from the agent are not tool calls — they go directly through the protocol and create no processes.
@@ -902,7 +917,7 @@ Each file composes from small named functions; the public method reads as a top-
 ## What Is Open
 
 - **The existence oracle** — `BOUNDARY_VIOLATION` versus a silently empty read, under uniform filtering (*Boundary-Request Behavior*). Owed to the author.
-- **Two selection-typed keys on one contract** — whether substrate.md's "at most one `selection` per contract" binds body keys or only `accepts` entries (*The program body*).
+- **Three selection-typed keys on one contract** — whether substrate.md's "at most one `selection` per contract" binds body keys or only `accepts` entries (*The program body*).
 - **Buffer realization** — the engine-native driver registry or dissolution into live integrations (*Buffers*). Streaming-is-commits is unaffected either way; whether v0.1 streams model responses live is gated on this call, not deferred.
 - **Subscription invalidation over transitive boundaries** — the index under-covers `follow`-shaped boundaries (*Subscription invalidation*).
 - **Typed-content matching, one mechanism, decided at build** — `loc(X)` (a place whose resolved members are instances of X, checked at the match) *or* coercion (a location binding to `ref(X)` / `set<ref(X)>` by snapshot-resolution at bind). The commit-in-a-slot case needs exactly one of these; not both.

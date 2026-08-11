@@ -18,18 +18,18 @@ Runtime contracts and primitives. Mounted by every project that runs anything.
 2. `program` — the archetype of runnable things. Instance contract (the program body, [`engine.md`](engine.md)):
    ```ol
    { executable?: string, runtime: ref(runtime), accepts: list<type>,
-     result?: ref, read?: selection, write?: selection,
+     result?: ref, read?: selection, write?: selection, run?: selection,
      capabilities?: set<string>, timeout_ms?: number,
      grades?: map<{ wmin?: number, wmax?: number, hmin?: number, hmax?: number }>,
      uses?: set<ref(program)>, presets?: set<ref(collation)> }
    ```
-   `accepts` is **required**; `[]` is legal and says *takes nothing*, explicitly. `read` and `write` are selection-grade, and absent-versus-present is the whole meaning: absent defers reach to the run, present is an exact ceiling a run may narrow and never widen, present-and-empty (`{}`) is the frame-only program.
+   `accepts` is **required**; `[]` is legal and says *takes nothing*, explicitly. `read`, `write` and `run` are selection-grade, and absent-versus-present is the whole meaning: absent defers reach to the run, present is an exact ceiling a run may narrow and never widen, present-and-empty (`{}`) is none — all three empty is the fully contained program ([`engine.md`](engine.md), *Boundaries*).
 3. `process` — the archetype of runs. Instance contract (the process record, [`engine.md`](engine.md)):
    ```ol
    { argument: selection, at: ref(commit), status: ref(status), result: ref?,
-     error?: string, read: selection, write: selection }
+     error?: string, read: selection, write: selection, run: selection }
    ```
-   `argument` is the offered set — a field on the process body, never a chunk of its own — frozen at start; `read` and `write` are the run's boundary, frozen as expressions. The engine writes and protects instances from the start on; drafts are data.
+   `argument` is the offered set — a field on the process body, never a chunk of its own — frozen at start; `read`, `write` and `run` are the run's boundary, frozen as expressions. The engine writes and protects instances from the start on; drafts are data.
 4. `status` — the archetype whose instances are the lifecycle vocabulary: `draft`, `running`, `done`, `failed` — four value chunks owned by it (enums are the substrate's; substrate.md).
 5. `expression` — the archetype of lifted expressions; instance contract `{ nodes: map, out: string }` ([`engine.md`](engine.md), *The shapes*). Composition into an argument materializes an instance of it, which is what keeps provenance at the expression's own grain.
 
@@ -53,7 +53,7 @@ Composition primitives for the interface layer. Mounted by every project a user 
 
 ## The `agents` project's bootstrap
 
-Concrete programs and the agent's steering vocabulary. No session or conversation container is seeded — **threads derive** from citation ([`agent.md`](agent.md)); a conversation materializes as a named location only when named, shared, bound, or peopled. *That claim is itself under re-derivation — see item 4.*
+Concrete programs and the agent's steering vocabulary. No session container, no conversation container, no gate, no context archetype — **threads derive** from citation ([`agent.md`](agent.md)); a conversation materializes as a named location only when named, shared, bound, or peopled.
 
 1. `agents` — the root chunk.
 2. `control` — the steering archetype: instance contract `{ signal: ref(signal), target: ref }`; `signal` beside it with four value chunks — `pause`, `resume`, `abort-completion`, `adjust`. Controls are placed `relates` on the turn they steer.
@@ -64,7 +64,8 @@ Concrete programs and the agent's steering vocabulary. No session or conversatio
    - `echo` — payload `{ text: string }`; result `output` `{ text: string }`. The loop proof.
 
    *Open: the result archetypes are named ([`programs.md`](programs.md) §8); the payload archetypes on the `accepts` side are not named anywhere.*
-4. **`model` and `agent` — seeds owed, deliberately unwritten.** Both are owned by `agents` and `instance` on the mounted `engine/program`, both `runtime: vm`. `model` is the only program holding provider access (capabilities `net:<provider>` and `secret:<KEY>`), one completion per run ([`agent.md`](agent.md)); `agent` composes `model` and never touches a provider itself. Their **shape is not written here because the agent model is under re-derivation**: worklist item **E** ([`research/arc/conclusions.md`](research/arc/conclusions.md), *Not ruled*) re-derives what a turn, the cycle and the answer *are* under current law, and E is what settles what these two programs accept, what archetypes they own, and what reach they may state. The seed this replaces is named so it can be restored or refuted rather than lost: `model` owned `request` (`{ kind: string, model: string, … }`, provider keys `?`-optional) and result `output` (`{ kind: string, content?: markdown, vector?: list<number>, usage: map }`); `agent` owned `turn` (the draft's record: context expression + prompt, keys already marked open), result `answer` (`{ text: markdown, partial?: number }`), and `gate` (a frame chunk, not a result, declared in the body for the same enforcement reason — `{ action: string, status: ref(status) }`), and stated **no** boundary keys at all — intrinsically open, the run grant being the person's whole decision. Every one of those is an E question, including the intro's *threads derive* claim above.
+4. **Model programs — one per provider** (v0.1: `claude`), owned by `agents`, `instance` on the mounted `engine/program`, `runtime: vm`. Each declares `accepts: [ request ]`, `result: ref(output)`, `read: {}` / `write: {}` / `run: {}` — the fully contained program — and its provider capabilities (`net:<provider>`, `secret:<KEY>`). Each owns its `request` archetype (`{ kind: ref(kind), model: string, at: ref(commit), includes: set<ref>, body: map }`) with `kind`'s two value chunks — `complete`, `embed` — beside it, and its `output` archetype (`{ kind: ref(kind), content?: markdown, vector?: list<number>, stop_reason?: string, usage: map }`). ([`agent.md`](agent.md), *`model`*.)
+5. **`agent`** — owned by `agents`, `instance` on the mounted `engine/program`, `runtime: vm`, `accepts: [ selection ]`, `result: ref(answer)`, **no boundary keys** — intrinsically open; reach is entirely the run grant. Owns `answer` (`{ text: markdown }`) and `settings` (per-turn overrides: `{ model?: ref, … }`). The classification archetype `prompt` (`{ text: markdown }`) is owned by the `agents` root — project vocabulary, cited by any draft, not agent-internal. No gate archetype exists — action approval is run-to-draft ([`engine.md`](engine.md), *Lifecycle*); no context archetype exists — the context is the argument ([`agent.md`](agent.md)).
 
 **After bootstrap.** Each project's db holds its own root and contracts. Running the host against the active project mounts host and engine as peers, federates the substrate, and the system is reachable. Bootstrap creates no session instance and no tabs; the first launch creates an initial session and an empty tab — a program run, not part of any bootstrap commit.
 

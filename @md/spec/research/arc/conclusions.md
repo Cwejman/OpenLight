@@ -1,6 +1,6 @@
 # Conclusions — rulings from the worklist sittings
 
-What was decided, compact. [`worklist.md`](worklist.md) carries the queue; this file carries the rulings **and the brief the rewrite executes from**. Sections B, F, A, D are closed. E — the agent sitting — is not, and is the only thing standing between this and a finished worklist.
+What was decided, compact. [`worklist.md`](worklist.md) carries the queue; this file carries the rulings **and the brief the rewrite executes from**. All sections — B, F, A, G, D, E — are closed; the worklist is finished.
 
 **Protocol (author-corrected, 2026-08-06):**
 - **Dialog runs to its end before anything is written here.** A ruling lands once, whole — no incremental drafting mid-sitting, no edit rounds chasing a conversation still in motion.
@@ -52,6 +52,23 @@ Landed in substrate.md's type vocabulary and engine.md (process body `argument: 
 - **D5 — the location-mentions paragraph** is incomprehensible as written. Not a ruling — a drafting task riding the batch: rewrite it plainly in the selection vocabulary (a mention targeting a `loc` — a place-description whose resolution shifts over time). Author reads after.
 - **D6 — instance contracts stay open.** Undeclared body keys remain legal; a contract may not declare itself closed. Multi-typing is the reason: a chunk instance on a closed A and an open B would need "closed over the union of every archetype's declared keys" — a new composition rule for a small win. The win it wants (catching `citty` for `city`) is paid for instead by the type-mirror sketch generating TS types over the substrate, in the editor, before any write. **Record as a note in substrate.md's opens; do not build.**
 
+## E — the agent model (ruled 2026-08-08/11)
+
+Position paper [`agent-position.md`](agent-position.md) (steward re-derivation, stance: the agent needs no mechanism of its own); four dialog rounds; UX grounded scene-by-scene in [`composition-scenes.md`](composition-scenes.md). **agent.md rewritten whole from these rulings during the sitting** (author-directed — the one fold not batched); engine.md, bootstrap.md, board and worklist folded in the same pass.
+
+- **E1 — the context is the argument.** No context structure exists: no context list, no context chunk, no context items. `agent` declares `accepts: [selection]`; the turn's context is its argument — composed as a draft by place algebra, frozen at start, implicitly read-granted. The prompt is an element; a headless run is a promptless draft. Elements classify by archetype, and the convention (`prompt`, `agent/settings`) has one home: agent.md. Neither the residual-mouth amendment nor content-constraints-on-selection now — both noted as future options.
+- **The record — intent and fact (E6).** Intent: the frozen argument expression + `at` on the turn. Fact: per-cycle request chunks carrying `at` (resolution commit) and `includes: set<ref>` — one link row per element, so consumption tagging ("which windows included me") is a `linked` answer. The request body is ground truth; `includes` its index. Ordering is serialization policy, never structure. The per-model derivation place is dropped — process-instance-on-program already enumerates completions.
+- **`run` — the third boundary key.** `read`/`write`/`run`, uniform semantics (absent defers, present is exact, `{}` is none). The toolset *is* the run boundary — one home; leaf tools (`model`, `web`, `filesystem`) declare `run: {}` — enforced leaves; the cap composes (child run ⊆ parent run). Substrate ops are protocol, not programs — governed by `read`/`write`; exposing them as model tools is agent convention (default: exposed; pre-fed is the deliberate restriction).
+- **Escalation — run-to-draft.** Any act beyond the three keys becomes a draft child, auto-surfaced (sidebar badge, process slots). Approve = starting the draft, with the approver's reach as the cap — approval is lending authority; chrome marks lent-authority subtrees. Deny = `cancel` on the draft → `failed`, `error: 'denied'`; the caller's await resolves. **`gate` dies** — action gates are held drafts; a question with no action is discourse.
+- **E3 — controls.** Chunks `relates` on the turn (who may steer = who may write there; the write is the audit); UX is the context menu on the running process (pause + prompt, insert-at-next-cycle). Signals: pause · resume · abort-completion · adjust.
+- **E4 — purity, checkable.** Cycle N+1's request = the argument resolved at head plus exactly: `adjust` controls since N, and membership changes within the frozen expression (placing onto a named dimension — the turn included — is handing in). A residue in the request diff is a violation.
+- **E5 — assembly.** Include-everything-normalized is the default (dedup is lossless; the union ≈ shared context once + per-turn prompt and answer); **no silent reduction** — grades apply only when the person specified, the expression says so, or the agent's guidelines direct it. Filtering is expressible: spine `follow(refs(argument))`, per-element `prop(argument) | where(instance: prompt)` + `prop(result)`.
+- **E7 riders.** Summaries de-specialized (substrate law + a fold); `kind` as value chunks under the request archetype.
+- **Sub-agents — citizenship is flat.** Ownership means lifecycle (cascade) and the reach cap, nothing else; pause/steer/fork/discuss are governed by the interactor's boundary, never the tree.
+- **Model mechanics.** The model program takes one request payload (`accepts: [request]`) — it cannot take selections or expressions, being frame-only; assembly happens before the run, in the agent. Provider-shaped request body for v0.1; the canonical archetype settles at the second provider.
+
+**Queued riders (steward work, not sittings):** the follow drafting note — hops as named verbs (`members`, `placed`, `owner`, `refs`, `backrefs`), follow as closure-of-a-step (any pure chain; depth a parameter; visited-set termination), the edge-carrying output shape (pipe output has no home for walked edges — defect), `prop` promoted to load-bearing (face-follows-context needs it) · the context-menu/palette program spec (one family, two anchors) · escalation build-time details (policy staging in the launch grant; notification path built as ruled surfacing).
+
 ---
 
 ## The batch — what the rewrite executes
@@ -100,7 +117,6 @@ Compiled while writing substrate.md; this is what steps 3–5 must each clear. L
 
 ## Not ruled
 
-- **E — the agent sitting** (E1–E7). The author is sceptical of the agent plan as it stands and instructed that the steward re-derive it whole as a position paper *before* any dialog: what a turn, the cycle, and the answer *are* under current law — context as selection, set arguments, buffers for the token stream, resolve/planner, purity. E2–E8 resolve with it. This is a sitting, not a fold, and it is the last item on the worklist.
 - **Subscription invalidation over transitive boundaries** — a `follow`-shaped boundary names one dimension but its membership depends on chunks it never names, so the invalidation index under-covers it. Build-time question; three candidate answers in the review record (index the closure, exclude transitive boundaries from subscription-backed reach, or scan for that class).
 - The standing ledgers: [`selection.md`](selection.md) §16, [`dimensions.md`](dimensions.md) §8.
 - **Existence leakage — a policy choice, owed before engine.md is rewritten.** engine.md promises `BOUNDARY_VIOLATION` rather than a silently empty read, on the grounds that a clear error beats a confusing absence. Under uniform boundary-filtering that error is an **oracle for the existence of places outside your boundary** — ask for anything, and the difference between "empty" and "violation" tells you whether it is there. dimensions.md does not address it. Either the error narrows to something non-disclosing, or the leak is accepted as the price of a legible failure.
