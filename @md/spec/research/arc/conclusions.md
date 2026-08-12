@@ -90,6 +90,21 @@ Position paper [`agent-position.md`](agent-position.md) (steward re-derivation, 
 - **Temporal queries in v0.1 scope** — pilot.md's defer deleted; `history`'s *open at commit* ships (author: nothing is wrong with shipping `at`).
 - **Single-request is derived, never typed** — `runtime` says who executes; whether a verb lowers is the planner's own knowledge (the purity argument); boundary validation asks the planner. Native programs may be non-lowering — they just can't sit in walls.
 - **Steward calls under the technical-layer convention** (unobjected): governance enforced at db inside the write transaction, engine supplies boundaries; one type-term encoding (reified `$type` in storage; block text is authoring form); projections declare their own ordering (`db/commits`); `read_batch` entries carry identity tokens; the citizen return path is host-direct in both directions.
+- **The seat model (ruled after a reverted steward misfold — dialog, then the author's shape):** the root host program is a program like any other; sidebar and tab-bar are also programs, filling the shell's **pinned** chrome seats (`sidebar([session])`, `tab-bar([session])` — deliberate seats, no match, no swap); the host boots the shell alone, pinned seats start their programs as the shell's children; palette host-started, host-placed (no session write of its own); accepts are bare session refs — the `request` payloads die; `collation` seeded under engine, `reading` under the reader. *Direction, later:* root as a pure tiler, chrome as choices. The pilot stays simple.
+
+## The interface sitting — overlays, menus, the command surface (ruled 2026-08-12; provisional — "acceptable for now, learnings down the road", author under spec fatigue)
+
+Grounded scene-by-scene in [`menu-scenes.md`](menu-scenes.md); folded into programs.md §§1–2/5/7–8, host.md, bootstrap.md.
+
+- **The base page is host code** — root slot + overlay layer; renders, never decides; the root program (shell/tiler) is seated into it, decoupled and swappable. Overlay dismissal is a host-recorded field act.
+- **Overlay = `{anchor, content, grade?}`**, fields only, owned by the session, transient, surface-programs only, no reach conferred. **Grade chosen at dispatch** — no prior box exists for overlays; the box derives from the grade, viewport-clamped. Programs-as-overlays open by design.
+- **Gesture split**: secondary click is the seat machinery's (packages offer + anchor, intents to the anchor-holder); ordinary clicks are the surface's.
+- **Entry grain = payload archetype**; menus assemble from **field reads only**: registry match + declared **`actions`** (two scopes: render chain = view verbs; the offer's types = thing verbs — steering lives on `agent`) + derived choices + built-ins. Multi-select free via the match.
+- **One command program, two grades** (menu/palette forms); search in both; shortcuts = stored calls fired by host-caught or seat-caught keys; expand = re-summon larger; **name open, author's pick**.
+- **`board` → `arranger`** (author). **Starting and landing are two acts**: `arranger/open {content, position}`, `position` as value chunks — extending the landing vocabulary is committing a chunk. Run button = those calls pinned as a surface-authored split button; **the context-menu/value-select line**: entity menus are infrastructure and never surface-drawn; value selects are always the surface's own UI.
+- **Anchor inheritance** for follow-up surfaces. Draft-run mounts nothing — status flips in place; launcher overlays execute and exit.
+
+Opens riding to build: state-dependent enablement; the command program's name; `curate`/`steer` homes; append-only-across-scopes as enforcement.
 
 **Queued riders (steward work, not sittings):** ~~the follow drafting note~~ — **landed 2026-08-12** in engine.md (*Hops and `follow`*): `members`/`placed`/`owner`/`refs`/`backrefs`/`prop`, follow as closure-of-a-step (depth, visited-set), closure output carrying edges (wire shape at the SDK build) · the context-menu/palette program spec (one family, two anchors; composition-by-layer rule recorded in programs.md §5) · escalation build-time details (policy staging in the launch grant; notification path built as ruled surfacing).
 
