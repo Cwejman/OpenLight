@@ -22,7 +22,6 @@ This file carries only what is v0.1's own: what it establishes and defers, how a
 - **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, place-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](../horizon.md).
 - **Services as first-class.** A long-lived program is a code pattern, not a substrate distinction.
 - **Derived chunks** — summaries, embeddings. The pattern works; generation is not in the loop.
-- **Temporal queries.** `--at <commit>` for time travel is possible against the current schema, not wired into the interface.
 - **Shell language.** Programs are executables; the file's shebang determines its runtime.
 - **Streaming** model responses. The agent loop buffers.
 - **Retention.** Nothing is pruned.

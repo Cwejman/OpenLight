@@ -115,11 +115,11 @@ All wrap engine ops of the same name (`readBatch` → `read_batch`). Errors arri
 
 **Filtering is uniform.** Bodies, membership answers, adjacency, links, full-text search **and every count** pass the reader's boundary. `total` and the `in_place_*` counts describe what your boundary admits, exactly as `linked` and `dimensions` do — there is no privileged view of a full set (substrate.md, *Boundaries*). A program probing shape before pulling data is probing its own shape.
 
-*Open — the existence oracle.* A read the boundary does not admit rejects with `BOUNDARY_VIOLATION` rather than returning empty, so the difference between "empty" and "refused" discloses whether a place exists outside your reach. Carried unresolved from [`engine.md`](engine.md) (*Boundary-Request Behavior*); the SDK surfaces whatever the engine sends and changes shape with the ruling.
+*The existence oracle — ruled, accepted for v0.1.* A read the boundary does not admit rejects with `BOUNDARY_VIOLATION` rather than returning empty; the disclosure this implies is accepted while dbs are single-author and mounts chosen ([`engine.md`](engine.md), *Boundary-Request Behavior*). Revisit at peering.
 
 `readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on ([`programs.md`](programs.md) §5).
 
-*Open — per-sub-query identity.* [`engine.md`](engine.md)'s `read_batch` says each sub-query is authorized under its own identity, but neither the wire schema nor `TaggedRead` carries one, and a request's `Context` is attached from the single identity token that sent it. A provider coalescing hooks from several citizens therefore needs either per-entry identity on the wire or authorization at its own identity — and the second breaches *embedding never escalates* ([`programs.md`](programs.md) §5). Marked, not decided.
+*Per-sub-query identity — ruled.* Each `read_batch` entry carries its identity token on the wire; `TaggedRead` gains the field, and a provider coalescing hooks from several citizens authorizes each entry as its citizen — *embedding never escalates* holds ([`engine.md`](engine.md), *The Program Protocol*).
 
 ### Writes
 
@@ -407,7 +407,7 @@ The `__sdk` global on the webview side is the SDK's hook surface — a small obj
 
 **One realm, many identities.** The window holds one webview and one document, and every seated program is its own process ([`engine.md`](engine.md#containment)). Each seat's SDK instance holds the identity token issued at seat creation and stamps it on every request, so boundaries and commit attribution hold at seat granularity — a slot is a seat at the finest altitude ([`programs.md`](programs.md) §1). **How the token reaches the seat differs by containment tier and is [`host.md`](host.md)'s** (*Transport*): a same-DOM seat's token rides the parent's channel, which the tier's shared fate makes honest; an iframe citizen's is injected by the host directly, because a parent that handled the token could commit history *as* its citizen.
 
-*Open — the citizen's return path.* Requests from an iframe citizen are closed by that injection; responses and events are not. [`engine.md`](engine.md#reactivity-wiring) step 4 evaluates script against the shell document, "which routes to the addressed slot", while its *Containment* holds that a parent may gate a citizen but never read, drop, or forge its traffic — and a parent that routes can read and drop. Both cannot stand for a sovereign seat. The same open is carried in [`host.md`](host.md) (*What Is Open*); the SDK's demultiplexer is identical either way, so nothing here is blocked on the ruling.
+*The citizen's return path — ruled.* Delivery is **host-direct in both directions**: responses and events are evaluated against the seat's own context — an iframe citizen's origin document directly, the shell document only for same-DOM seats — so a parent may gate a citizen but never read, drop, or forge its traffic ([`engine.md`](engine.md#reactivity-wiring), step 4). The SDK's demultiplexer is identical either way.
 
 *Open — identity under a shared module instance.* Transport selection happens at module load, and a module-global identity token is sound only where one realm holds one process — a VM program, the shell, an iframe citizen. Same-DOM seats share a realm, and host.md's *shell-injected shared runtime* would have them share one SDK module instance as well; identity would then have to bind per seat rather than at module load. The shape settles with the slot protocol ([`programs.md`](programs.md) §5, declared open).
 
@@ -474,7 +474,7 @@ Same coherence pattern as the db crate: each file owns a topic; predictable shap
 
 ## What Is Open
 
-- **The citizen's return path.** Whether responses and events reach a sovereign seat directly or through its parent (*Webview transport*; carried with [`host.md`](host.md)).
+- ~~The citizen's return path~~ — ruled: host-direct in both directions (*Webview transport*).
 - **Per-seat identity under a shared module instance** (*Webview transport*), settling with the slot protocol.
 - **Per-sub-query identity in `readBatch`** (*Reads*) — the wire carries none, and coalescing across citizens needs one.
 - **The existence oracle** — `BOUNDARY_VIOLATION` versus a silently empty read (*Reads*); the engine's call, surfaced here.

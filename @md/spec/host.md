@@ -174,7 +174,7 @@ Shutdown reverses: cancel running processes, await `engine.shutdown()`, drop the
 
 ## What Is Open
 
-- **The sovereign citizen's return path.** Requests from an iframe citizen are closed by host-direct token injection, but responses and events are not: [`engine.md`](engine.md#reactivity-wiring) step 4 evaluates script *against the shell document, which routes to the addressed slot* — and a parent that routes can read and drop. The two claims cannot both stand for a sovereign seat. Either the host addresses frames directly, or the sovereign tier is honest about what it does not protect. Owed to the author; nothing else in the transport depends on which way it goes.
+- ~~The sovereign citizen's return path~~ — **ruled: the host addresses frames directly.** Responses and events are evaluated against the seat's own context — an iframe citizen's origin document, never routed through the shell — symmetric with request-side token injection, so a parent may gate but never read, drop, or forge ([`engine.md`](engine.md#reactivity-wiring), step 4).
 - **Per-frame token injection.** That host-direct injection lands per-frame on all three wry backends is confirmed for none of them yet. If a backend cannot, iframe seats degrade to the same-DOM guarantee on that platform, explicitly.
 - **The shell-injected shared runtime.** Hundreds of same-DOM seats should share one V8, one React copy, one scheduler — the shell injects the shared runtime and seats import it rather than each bundle carrying its own. This is also the exit from bundling debt. Shape unspecified.
 - **WebKitGTK.** WebGPU and site-isolation both lag there. A pilot policy is needed: test early, or demote Linux explicitly.
@@ -182,7 +182,7 @@ Shutdown reverses: cancel running processes, await `engine.shutdown()`, drop the
 - **React hooks surface.** `useRead(places)` is the starting hook; richer vocabulary (mutations, typed-event subscriptions, Suspense) may appear through use. The full surface is [`sdk.md`](sdk.md)'s.
 - **`.html` entries.** Whether a program may own its whole document, as the iframe-citizen escape (*Serving `ol://`*).
 - **The buffer driver**, contingent on engine.md's realization call (*Buffers*).
-- **What owns the first session.** Boot step 10 resolves an active session, and creates one when none exists — but a session must outlive the process that created it, so the frame default cannot own it. Carried with [`bootstrap.md`](bootstrap.md)'s same question.
+- ~~What owns the first session~~ — **ruled: the active project's root.** Boot runs host-initiated (`process_id: None`) and names the root as owner. Strictly project-based is the current model; a more unbounded compute environment may reopen this (author note, recorded).
 
 ---
 

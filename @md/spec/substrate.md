@@ -52,7 +52,7 @@ placement
   seq?       position, where what it is placed on is ordered — see *Ordered places*
 ```
 
-- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else**. Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses mounts. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per project, named after it.
+- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree is the precedent, [`programs.md`](programs.md) §1). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses mounts. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per project, named after it.
 - **instance** — *what it is.* Pure type membership: the chunk is an instance of the archetype it is placed on. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
 - **relates** — *what it is about.* Authored aboutness, published into the subject's room. Prose placed on its subjects — the chunk at the intersection *is* the relationship — stays the substrate's oldest pattern.
 - **field** — *related by key.* A typed ref in a body, declared by the owning archetype's instance contract (`person` declares `work` holds a `workplace`). Directional by nature — a body reads outward, which is what pointer-facts always needed and relates never was. Derived into the link index at write.
@@ -101,7 +101,7 @@ Towers are natural: `shell` fits `program`'s instance contract while carrying it
 **Key types** are a closed vocabulary of eleven words:
 
 - `string` · `number` · `time` · format-tagged string (`markdown`) — primitives. Never field content; they live inside bodies as payloads.
-- `ref` — one chunk, by name or id, optionally archetype-constrained (`ref(workplace)`). There is no `name` type: one name *is* a ref.
+- `ref` — one chunk, by name or id, optionally archetype-constrained: `ref(workplace)`, or a union `ref(A | B)` — the target must be instance on any listed archetype. There is no `name` type: one name *is* a ref.
 - `loc` — a place: an intersection of chunks. One chunk is itself a place, so `[c]` is the place *at* c — the chunk and what is placed on it.
 - `expr` — an expression: named nodes, its own closure, last unnamed line as `out` ([`engine.md`](engine.md)).
 - `list<T>` (ordered) · `set<T>` (unordered, uniqueness checked). Both take an exact cardinality: `list<ref(commit), 2>` is the ordered pair, `set<ref(commit), 2>` the symmetric one. Tuples are unnecessary.
@@ -204,7 +204,7 @@ Reach is one hop. What a hop carries, per kind and direction:
 | mention → the mentioned | the edge, boundary permitting; content by boundary | **no** |
 | field → the target | the address; content by boundary | **no** |
 
-Two rows are law-grade: **write never propagates through links, in either direction**, and **instance-read up to the archetype is free**. *Open: what that freedom shows of the archetype now that counts are boundary-admitted — its address and contract alone, or its membership too.*
+Two rows are law-grade: **write never propagates through links, in either direction**, and **instance-read up to the archetype is free** — ruled: the freedom shows the archetype's **address and contract alone**, never its membership; mechanically a derived admission in boundary evaluation ([`engine.md`](engine.md), *Boundaries*).
 
 **Depth is non-transitive by default.** `[hallway]` reaches what is placed on the hallway, not what is placed on those. Depth, when wanted, is stated as an expression (`follow`-shaped). Reorganizing the ownership tree therefore never reorganizes permission — the two jobs finally come apart.
 

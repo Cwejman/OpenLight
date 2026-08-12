@@ -264,7 +264,7 @@ The substrate's discipline is that everything is chunks and placements. Branches
 
 `Plan::Place` recognizes the same anchors and lowers them to the same projections, so the recognition has one home and a boundary term may name a commit or a branch exactly as a read may. **That is the first price of uniform filtering, paid here: the commit-touched projection is admissible in boundary evaluation.** Granting a single commit as a dimension makes its touched set readable in one gesture (substrate.md, *Commits*), which means `[commit_c]` must lower to a boundary term — `Touched(Commits { ids: [c] })`, one join against the version tables, inside the single statement.
 
-*Open, carried from engine.md: `db/commits` is read as an ordered place, but `seq: true` is a stored flag on an archetype and `db/commits` is projection-backed — a projected archetype cannot carry one.* Physically the projection synthesizes a per-row position from ancestry depth (*Query patterns*), which is what makes the read work; nothing declares the ordering, and the two facts are unreconciled.
+*Ruled (2026-08-12): a projection declares its own ordering.* The projection synthesizes a per-row position from ancestry depth (*Query patterns*), and that synthesis **is** the declaration — a projected archetype needs no stored flag; `seq: true` is the stored-archetype form of the same fact.
 
 Virtual chunks are read-only via `read`/`get`. Writes targeting them are rejected (`WriteToVirtualChunk`). Their state is owned by db-level operations: `commit` (advances a branch's head), `create_branch` / `delete_branch` (manipulate the branch graph).
 
@@ -315,7 +315,7 @@ Commit
 
 `chunks_modified`, `placements_modified`, and `links_modified` are the deltas — for caller convenience, for filtering on the change stream (a subscription on a chunk fires when links *to* it appear or disappear, engine.md), and for the boundary invalidation index below. `branch` is the event's only carrier of where the commit landed, so `SubscribeOpts.branch` has something to filter on.
 
-The first two deltas are **recoverable after the fact** — they are the version rows this commit wrote, which is what makes `read([db/commits, chunk_id])` answerable at all. `links_modified` is not: links are never part of commits and the table is rebuilt from current bodies (substrate.md, *Links*), so a commit's link delta exists only on the event that carried it. `[db/commits, chunk_id]` therefore answers "commits that changed this chunk or its placements", never "commits that changed who points at it".
+The first two deltas are **recoverable after the fact** — they are the version rows this commit wrote, which is what makes `read([db/commits, chunk_id])` answerable at all. `links_modified` is not: links are never part of commits and the table is rebuilt from current bodies (substrate.md, *Links*), so a commit's link delta exists only on the event that carried it. `[db/commits, chunk_id]` therefore answers "commits that changed this chunk or its placements", never "commits that changed who points at it". **Ruled (2026-08-12): this stays so** — the historical question remains derivable from body versions, and if a real consumer ever wants it cheap, the index is built as derived data; truth and performance indexes are different things (revisit with the object-model research).
 
 ### Branch operations
 
