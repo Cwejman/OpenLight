@@ -54,7 +54,7 @@ Concrete programs — filesystem, shell, model, echo, reader, sidebar — are ch
 
 ### `accepts` — what a program takes
 
-A program's argument is a **set of typed elements**, matched structurally. `accepts` is a required body key on every program — `[]` is legal and says *takes nothing*, explicitly. Each entry is a type, optionally marked optional, and nothing else:
+A program's argument is a selection — an **ordered list of typed elements**, matched structurally; order never affects the match. `accepts` is a required body key on every program — `[]` is legal and says *takes nothing*, explicitly. Each entry is a type, optionally marked optional, and nothing else:
 
 ```ol
 program summarize { accepts: [ loc, options? ] }          — one place, required; options allowed
@@ -164,7 +164,7 @@ The engine owns the expression layer: the data shapes, the written language, the
 location     [my-project, tasks]        — places, intersected; a value kind
 call         program(e1, e2, …)         — the parentheses ARE the offered set
 expression   one grouped unit — named nodes, its own closure, last unnamed line = out
-selection    set<loc | ref | expr>      — substrate.md; purity clause below
+selection    list<loc | ref | expr>     — ordered (substrate.md); purity clause below
 ```
 
 Two archetypes carry the lifted forms:
@@ -268,11 +268,11 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra plus `at`, `where`, `follow`, exactly. A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
 
-The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`.) Five sources:
+The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction. Five sources:
 
-1. **The frame — `[self]`.** Read and write, always, never declared. Children and results are owned by the process, and that one relation is both their address and their membership in the process's own dimension.
+1. **The frame — `[self]`.** Read and write, always, never declared. Children and results are owned by the process, and that one relation is both their address and their membership in the process's own dimension. *Open (steward lean, surfaced by the agent's worked walk): a caller must read its children's results, which live in the children's frames — two hops. The lean: the frame's read term is `[self] | follow(owned)` — a process reads its own trace at depth, write staying one hop. Awaiting the author.* A wall ignores the order a selection carries.
 2. **Argument content, read-granted implicitly.** The offer *is* the grant: someone gestured the content into the argument, and that gesture is the consent read needs. **Write is never implicit.**
-3. **The program's stated ceiling** — the flat `read`, `write` and `run` keys. Per key: absent defers reach entirely to the run; present is exact, and a run may narrow it, never widen it. Members are static locs and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
+3. **The program's stated ceiling** — the flat `read`, `write` and `run` keys. Per key: absent defers reach entirely to the run; present is exact, and a run may narrow it. No run widens its own walls mid-flight — more reach is always a new consented start (*Run-to-draft*). Members are static locs and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
 
    ```ol
    program move {
@@ -285,7 +285,7 @@ The boundary is **constructed at start** and recorded as the process body's `rea
 
    At start each reference resolves to the **term chunks** of the bound element — `[a, b]` contributes both; an expression chunk contributes what its mentions name — and is snapshotted into the process record. `read: {}` / `write: {}` / `run: {}`, present and empty, is the fully contained program — `model`, `web`, `filesystem`: nothing beyond the frame, starts nothing, enforced rather than promised.
 4. **Explicit additions at start** — whatever the starter grants (`RunArgs.read` / `RunArgs.write` / `RunArgs.run`). These render as the boundary chips a person sees before Go, and are narrowable there.
-5. **The parent's reach, as a cap.** Everything above is intersected with the caller's own boundary, `run` included — a child can never be handed programs its caller could not run. **A cap, never a source** — reach narrows through the call stack and never widens, and detachment (`launch`) does not escape it. Widening happens only across a consented start: run-to-draft (*Lifecycle*), where an approver's own reach becomes the cap.
+5. **The parent's reach, as a cap.** Everything above is intersected with the caller's own boundary, `run` included. **A cap, never a source** — within a call stack reach only narrows, and detachment (`launch`) does not escape it. Handing a child more than the caller holds is not forbidden — it is an **escalation**: the start lands as a draft, and an approver who holds the reach starts it, their reach becoming the cap (*Run-to-draft*).
 
 **Content never carries reach.** Structural, not stated: all reach lives in the boundary keys or in explicit additions, never inferred from what happened to match.
 

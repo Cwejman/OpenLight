@@ -61,7 +61,7 @@ The SDK encodes on every write and decodes on every read, driven by the tags alo
 
 ## Selections on the wire
 
-A **selection** is `set<loc | ref | expr>` (substrate.md, *Archetypes and Contracts*). It is the type behind a run's boundary, a program's stated ceiling, a process's frozen argument, a collation's members, and a seat's offer. On the wire it is an array of tagged terms and needs no tag of its own:
+A **selection** is `list<loc | ref | expr>` — ordered, duplicates rejected (substrate.md, *Archetypes and Contracts*). It is the type behind a run's boundary, a program's stated ceiling, a process's frozen argument, a collation's members, and a seat's offer. On the wire it is an array of tagged terms — array order *is* the selection's order — and needs no tag of its own:
 
 ```ts
 type LocTerm       = { $loc: ChunkId[] }   // a place; one id is the place at one chunk

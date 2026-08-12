@@ -2,45 +2,48 @@
 
 The programs that carry completion: **`model`** — one completion call per run, the only kind of program that touches a provider — and **`agent`** — the harness, one run per turn. Neither is architecturally special; the split is the system's modularity applied to itself. The center served: **completion from a point in the field** — context is addressable structure, never a pasted transcript.
 
-Settled in sitting E (2026-08-08/11; [`research/arc/agent-position.md`](research/arc/agent-position.md), UX grounding in [`research/arc/composition-scenes.md`](research/arc/composition-scenes.md)). This file is the single home for the agent model. The mechanics it stands on live where they belong: process, lifecycle, boundaries, the `run` key and run-to-draft escalation in [`engine.md`](engine.md); the seated argument, slots, citizens, `process-view` in [`programs.md`](programs.md); the type law in [`substrate.md`](substrate.md).
+Settled in sitting E (2026-08-08/12; [`research/arc/agent-position.md`](research/arc/agent-position.md), UX grounding in [`research/arc/composition-scenes.md`](research/arc/composition-scenes.md), the model-seam rework in [`research/arc/conclusions.md`](research/arc/conclusions.md) §E addendum). This file is the single home for the agent model. The mechanics it stands on live where they belong: process, lifecycle, boundaries, the `run` key and run-to-draft escalation in [`engine.md`](engine.md); the seated argument, slots, citizens, `process-view` in [`programs.md`](programs.md); the type law in [`substrate.md`](substrate.md).
 
 ---
 
 ## `model` — the provider seam
 
-A family: each provider model is its own program. What makes a program a model program:
-
-- **One call per run; contained absolutely.** `read: {}` · `write: {}` · `run: {}` — nothing beyond its own frame, starts nothing, enforced. A completion sees exactly what was rendered into its request; there is no path to exfiltrate field content beyond the caller's explicit rendering.
-- **The verbatim request is the artifact.** `accepts: [ request ]` — one payload chunk, the byte-exact window, frozen at start. Every prompt ever sent is inspectable, diffable, reproducible.
-- **Output lands in the frame**, `instance` on the program's result archetype. A process is `instance` on its program, so every completion is already enumerable — `read([<model-program>, engine/process])` is the usage ledger; cost is a read of `usage` keys, not a metering subsystem.
-- **Egress and secrets concentrate here.** Only model programs (and `web`) hold network capability; secrets are env vars injected from the host keychain at spawn — never chunks: a committed key in a lossless substrate is permanent.
+A family: each provider model is its own program, placed `instance` on the **`model` dimension** — `read([model])` lists the family. The dimension owns the shared vocabulary ([`bootstrap.md`](bootstrap.md)): `model/params`, `model/kind` (`complete` | `embed`), and one canonical **`model/output`** that every provider program declares as its result — the family shares one output shape, or the agent is not decoupled.
 
 ```ol
 program claude {
   runtime: vm
-  accepts: [ request ]
-  result:  ref(output)
-  read: {}  write: {}  run: {}
+  accepts: [ selection ]                  — the offered window; the offer is the grant
+  result:  ref(model/output)
+  read: {}  write: {}  run: {}            — sealed: reads its offer, starts nothing
   capabilities: { net:api.anthropic.com, secret:ANTHROPIC_API_KEY }
 }
-chunk claude/request {
+
+chunk model/output {
   instance: {
-    kind:     ref(kind)        — complete | embed; value chunks under this archetype
-    model:    string
-    at:       ref(commit)      — the head this window's content resolved against
-    includes: set<ref>         — every chunk rendered into the window
-    body:     map              — messages, tools, params — provider-shaped
+    content?:     markdown                — the reply
+    thinking?:    markdown                — the reasoning stream (L1 reads here)
+    residue?:     map                     — replay material the provider requires
+                                            (e.g. thinking signatures); opaque
+    calls:        list<ref>               — ordered refs to the draft processes
+                                            composed during the run; [] = none
+    stop_reason?: string
+    usage:        map
   }
-}
-chunk claude/output {
-  instance: { kind: ref(kind), content?: markdown, vector?: list<number>,
-              stop_reason?: string, usage: map }
 }
 ```
 
-The request `body` is provider-shaped, deliberately: v0.1 has one provider, and the canonical request archetype — mapped to each provider inside its own program, provider-unique features as documented passthrough keys — is settled against the *second* provider actually built, not before.
+What makes a program a model program:
 
-**Streaming.** The model program commits throttled partials to its output chunk (`partial: true`, ~4/s, finalized `partial: false`) — the streaming convention ([`engine.md`](engine.md)). When buffers are realized, partials become frames and the digest stays the commit; the agent depends only on a final output chunk and a live partial channel, so nothing here changes with that call.
+- **One call per run; sealed.** Its reach is exactly the offered selection — argument content, implicitly read-granted — and it starts nothing. A completion sees what was offered; there is no path to exfiltrate beyond the offer.
+- **In: a selection, rendered inside the program.** No request is assembled anywhere — serialization is deterministic provider code: doctrine → system, places → id-prefixed blocks, offered `[program]` places → tool schemas (the program body plus its payload contracts one hop down, which is why the toolset is offered as *places*), prior outputs and tool exchanges → the provider's replay. **The offer's order is the window's order** (a selection is ordered). Strategy variants are further programs in the family (`claude-compact`), never modes buried in a caller.
+- **Out: canonical output plus drafts.** The response is adapted to `model/output` — never raw provider JSON — and each tool call is composed as a **draft process** in the run's own frame, its argument citing its payload chunk, `calls` ordering them. A draft is inert data, so the seal holds: the act is the start, which is never the model's. **Wire identity is field identity** — replays emit tool_use ids as the draft chunk ids; providers need only internal consistency, and a provider strict about original ids keeps them privately as `residue`.
+- **Trust is derivation.** The wire request is a deterministic function of (argument, `at`, the versioned provider program) — re-render and compare; a first-class substrate property, stronger than stored bytes. The response is stored canonically because it cannot be re-derived.
+- **Egress and secrets concentrate here.** Only model programs (and `web`) hold network capability; secrets are env vars injected from the host keychain at spawn — never chunks: a committed key in a lossless substrate is permanent.
+
+Every completion is enumerable — `read([model, engine/process])` across the family, per-program by intersecting the program — and cost is a read of `usage` keys, not a metering subsystem.
+
+**Streaming.** The program commits `thinking`/`content` to its output as throttled partials (`partial: true`, ~4/s — [`engine.md`](engine.md)), finalized with `calls` complete. When buffers are realized, partials become frames and the digest stays the commit; the agent depends only on a final output chunk and a live partial channel, so nothing here changes with that call.
 
 ## `agent` — the context is the argument
 
@@ -69,27 +72,40 @@ program agent {
 Recorded twice, deliberately, both on structure that already exists:
 
 - **Intent** — the argument expression, frozen on the turn's body with `at`. Expression chunks file their own mentions, so "which turns cite this place" is a link-index answer.
-- **Fact** — each cycle's request chunk: `at` is the commit its content resolved against; `includes` files one link row per element, so any chunk answers *which windows included me* from its `linked`. Consumption tagging — retrieval's inverse — with no machinery. The request `body` is the ground truth; `includes` is its index, auditable against a re-render (hash direction: [`research/arc/object-model.md`](research/arc/object-model.md)).
+- **Fact** — each model run itself. Its **argument is the exact offered window** — selection-typed, so one link row files per element, and any chunk answers *which windows included me* from its `linked`; its `at` stamps what the offer resolved against. Consumption tagging — retrieval's inverse — is the law working, not a mechanism. The wire request re-renders from (argument, `at`, the versioned provider program); derivation over stored bytes ([`research/arc/object-model.md`](research/arc/object-model.md)).
 
-Order is serialization, not structure: guidelines-then-thread-then-prompt is the assembler's default policy, readable in the request it produced. Context deltas derive by diffing successive `includes` — never reported, never trusted.
+**Order is structural**: a selection is ordered, and the offer's order is the window's order — composed in the seated argument, visible, rearrangeable. Guidelines-then-thread-then-prompt is the assembler's default of *composition*, not hidden serializer policy; a stable head with the volatile tail last is the composer's cache lever. Context deltas derive by diffing successive runs' arguments — never reported, never trusted.
 
 ## The cycle
 
 1. **Orient.** `get` self — argument, the three boundary keys, `at`; one read, no walks. `subscribe([P])` — the steering channel.
-2. **Assemble.** `resolve` the argument's terms **at head** — deliberate: the turn must see its own writes; the living-head mode is the same gesture as the reader following its reading. Probe with body-less reads, then render:
-   - **Everything included renders whole, deduplicated.** Successive turns share most of their context, so the normalized union is the shared context once plus each turn's prompt and answer — the maximal include costs nearly the minimal one. **No silent reduction**: grades (name · summary · body) apply only where the person specified, the expression says so, or the agent's own guidelines direct it — with or without consultation, as they say.
-   - Filtering, when chosen, is expressible: spine `draft | follow(refs(argument))`; per element `prop(argument) | where(instance: prompt)` and `prop(result)` — prompts and answers only. Same filter as assembler policy: body grade for `prompt` instances and answers, name grade for the rest.
-3. **Complete.** Commit the request chunk into the frame; `run` the model child; `await`. Tool schemas compile from the toolset programs' reified `accepts` entries — the same data the seated argument renders. **The toolset is the `run` boundary** — one home, capped by the parent's, so a sub-agent can never be handed programs its parent couldn't run.
-4. **Act.** Substrate ops execute directly through the protocol — no processes; `VALIDATION_ERROR` and `BOUNDARY_VIOLATION` render back as tool results: **spec enforcement is the model's error signal.** The default toolset exposes `read`/`get`, so the model pulls more mid-turn — within the walls, every pull recorded in the next request's `includes`; a pre-fed turn (no read tools) is the deliberate restriction for fully pre-planned work. Program tools are child runs: caps intersect, the trace nests by ownership, the model can never escalate; parallel calls are parallel runs awaited together. Loop to 2.
+2. **Compose the offer.** Flatten what needs flattening — expressions resolve to refs and locs before offering; the model never resolves. **No silent reduction**: everything included renders whole, deduplicated (normalization is lossless — successive cycles share most of their elements, so the union is the shared context once plus each cycle's delta); grades (name · summary · body) apply only where the person specified, the expression says so, or the agent's own guidelines direct it. The offer, in order: doctrine, the window elements, `params`, the toolset as places — and from the second cycle, the prior outputs and each started draft with its result. Filtering, when chosen, is expressible: spine `draft | follow(refs(argument))`; per element `prop(argument) | where(instance: prompt)` and `prop(result)` — prompts and answers only.
+3. **Run the model child; `await`.** The child's argument is the offer; its `at` stamps the head it resolves against — the turn sees its own writes, cycle by cycle. **The toolset is the `run` boundary** — one home, capped by the parent's, so a sub-agent can never be handed programs its parent couldn't run.
+4. **Act on the drafts.** Read the output's `calls` and start each draft within the walls — child runs: caps intersect, the trace nests, the model can never escalate; parallel calls are parallel starts awaited together. A draft beyond the walls simply rests, awaiting approval (*Escalation*). Substrate ops the model called as tools execute directly through the protocol — no processes; `VALIDATION_ERROR` and `BOUNDARY_VIOLATION` render back as results: **spec enforcement is the model's error signal.** The default toolset exposes `read`/`get` — the model pulls more mid-turn, within the walls, every pull entering the next offer; a pre-fed turn (no read tools) is the deliberate restriction. Loop to 2.
 5. **Answer.** A chunk `instance` on `answer`, owned by the turn; streamed as throttled partials, finalized. Mentions ride the `ol:` scheme and file at commit — an answer's citations are queryable from both ends.
+
+One turn, whole, in the field:
+
+```
+P  (the turn)              argument: { doctrine, [project,tasks], prompt, params }
+ ├─ M1 (claude run)        argument: the offer + [shell], [filesystem]
+ │   ├─ O1: model/output   content · thinking · calls: [→D1] · usage
+ │   ├─ D1: shell draft    argument: {→p1} — started by the agent; runs; owns result Ra
+ │   └─ p1: payload        { command: "cargo test" }
+ ├─ M2 (claude run)        argument: the offer + O1 + D1 + Ra
+ │   └─ O2: model/output   content · calls: []
+ └─ answer                 P's result; streamed, finalized
+```
+
+Nothing is copied — every cycle's argument is refs and locs into chunks that exist once; the provider's replay is manufactured at the wire, inside `claude`, from these. A turn with no tool calls is one model run whose argument is exactly the window.
 
 Cycles are sequential; tools within a cycle run parallel; sub-agents are long child runs. Ownership is one hop, so reading the whole trace is a `follow` walk, never one read.
 
 ## Escalation — beyond the walls, uniformly
 
-A turn's walls are its three boundary keys. Any act beyond them — a read, a write, a start outside `run` — becomes a **draft child**, auto-surfaced for approval (run-to-draft, [`engine.md`](engine.md)). No gate archetype exists; the approval surface is the seated argument every draft already has.
+A turn's walls are its three boundary keys. Every tool call already *is* a draft (*`model`*, above): the agent starts the ones within its walls, and one beyond them simply **rests** — auto-surfaced for approval (run-to-draft, [`engine.md`](engine.md)). Escalation is not a path; it is the resting state of a call that could not start. No gate archetype exists; the approval surface is the seated argument every draft already has.
 
-- The agent knows when it will exceed: it composes the draft and relates explanation prose onto it before resting on `await`.
+- For acts the agent itself originates, the same shape: compose the draft, relate explanation prose onto it, rest on `await`.
 - **Approve is starting the draft** — with the approver's reach as the cap. Approval is lending authority; the process chrome marks lent-authority subtrees against the original grant ([`programs.md`](programs.md)).
 - **Deny is `cancel` on the draft** → `failed`, error `denied`. The caller's `await` resolves; the agent renders the refusal as a tool result and reasons on.
 - **Surfacing**: a pending draft badges the sidebar and surfaces in any process slot — obligations penetrate the fold, always.
@@ -113,17 +129,17 @@ A citation is a `ref` element in a draft's argument; selection-typed keys file o
 
 A `reader` whose collation holds the thread walk and the draft's argument — **face follows context**: what you see is what the next turn gets; deviation is marked, never silent (in-whole · in-as-summary · merely-open); reading is free, including is a gesture. Fork and merge render as inline sequence elements with branch TLDR slots; a diamond continues past its join — the line truly continues. UX charted scene-by-scene in [`composition-scenes.md`](research/arc/composition-scenes.md).
 
-The process slot holds ground plus citizens ([`programs.md`](programs.md) §5): the turn face, and the agent's shipped **context overview** — how the argument maps to the actual window: which elements, deduped how, rendered at what grade. It matches the process itself (`accepts: [ref(agent)]` — the renderer ladder), reading argument and request chunks; manual control of context is real only because this surface exists.
+The process slot holds ground plus citizens ([`programs.md`](programs.md) §5): the turn face, and the agent's shipped **context overview** — how the argument maps to the actual window: which elements, deduped how, rendered at what grade. It matches the process itself (`accepts: [ref(agent)]` — the renderer ladder), reading the turn's argument and its model runs' offers; manual control of context is real only because this surface exists.
 
 Turn rendering across the lifecycle is `process-view`'s: draft → the seated argument · running → the live frame with **derived status** (computed from children and commits; it cannot lie) · done → prompt + answer, mechanics folded, one drill away. Thinking in three layers: L0 derived status · L1 streamed thinking (the partial channel) · L2 `narrate`.
 
 ## Seeds
 
-What bootstrap ships for the agents project: the `agent` program; one program chunk per provider model; archetypes `prompt`, `agent/settings`, `agent/answer`, `<model>/request` with its `kind` value chunks, `<model>/output`, `control` with its signal value chunks. Nothing else — no session archetype, no conversation container, no gate, no context archetype.
+What bootstrap ships for the agents project: the `agent` program; the **`model` dimension** with its shared vocabulary — `model/output`, `model/params`, `model/kind` (`complete`, `embed`) — and one program chunk per provider (`claude`), placed `instance` on `model`; archetypes `prompt`, `agent/settings`, `agent/answer`, `control` with its signal value chunks. Nothing else — no session archetype, no conversation container, no gate, no context archetype, no request archetype.
 
 ## Open — deliberate
 
 - **Mixed human–human threads** — message-shaped discourse between people; settles when the second discourse kind is built.
-- **The canonical request archetype** — settles against the second provider.
+- **The second provider** — tests `model/output` and the serialization conventions rather than creates them; provider-unique needs land as `params` passthrough and output `residue` until they earn shared keys.
 - **Harness decomposition** — assembler, tool runner as separate programs the agent composes; likely, not yet forced.
 - **Selection policy under budget** — what the assembler chooses is agent code and the live research frontier of completion-from-place; the record makes every policy auditable.
