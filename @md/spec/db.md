@@ -85,7 +85,7 @@ pub struct CommitTerm {
 }
 ```
 
-**`Closure` is the primitive; the verb is not db's.** Four things in the tree now want a `follow`-shaped term — boundary depth, the frame's call-tree walk, thread lineage, and the shell's write reach over the tile tree — and *the surface verb `follow` is the engine's, its parameterization open and owed to the author*: which edge kinds it walks by default, whether citations count beside placements, how depth is expressed. This spec draws none of it. What it guarantees is that any parameterization the author settles on lowers here by choosing a kind-set, a direction and a depth bound — the primitive is general enough to receive the verb, whatever the verb turns out to be.
+**`Closure` is the primitive; the verb is the engine's — now specced.** `follow` is closure-of-a-step over the hop verbs ([`engine.md`](engine.md), *Hops and `follow`*): the step names its edge kinds and direction, depth is a parameter, termination is visited-set, and the closure reports the edges it walked. All of it lowers here by choosing a kind-set, a direction and a depth bound — which is exactly what this primitive was drawn to receive.
 
 Entry points:
 
@@ -1077,7 +1077,7 @@ What's genuinely non-obvious here and earns a comment (per [`conventions.md`](..
 
 ## What is open
 
-- **`follow`'s parameterization** — the surface verb is the engine's and is unspecified: default edge kinds, citations versus placements, how depth is written. `Plan::Closure` is drawn to receive whatever it becomes; nothing here presumes it.
+- ~~`follow`'s parameterization~~ — landed in [`engine.md`](engine.md) (*Hops and `follow`*); `Plan::Closure` receives it as drawn. The closure's edge-reporting joins the plan interface at the SDK build.
 - **The invalidation index under-covers transitive boundaries** — a `Closure` boundary registers its seeds only (*The boundary invalidation index*). Three candidates carried from engine.md; a build-time question.
 - **What an unreadable dimension looks like from outside** — vanish or opaque count (substrate.md). v0.1 vanishes, by the same semijoin as everything else.
 - **Who materializes the law's always-on boundary terms** — the frame and the free instance→archetype hop (*The plan interface*). db evaluates what it is handed; nothing says who assembles them.

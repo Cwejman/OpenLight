@@ -237,7 +237,7 @@ A thread holding a done turn, a running turn and a draft is one program renderin
 | `term` | webview | terminal surface; each command one `shell` run — sidebar-visible, re-runnable |
 | `sidebar`, `tab-bar`, `palette` | webview | chrome as programs, seated outside the tile tree (§1) |
 | `board` (arranger), `group` | vm | arrangement writer; container lifecycle (§7) |
-| `follow`, `at`, `where` | native | read-native pipe verbs — program chunks with no executable, the planner as their runtime ([`engine.md`](engine.md)); `follow` is the citation walk, point in and lineage out, branch/join points included |
+| `follow`, `at`, `where`, `prop`, `members`, `placed`, `owner`, `refs`, `backrefs` | native | read-native pipe verbs — program chunks with no executable, the planner as their runtime ([`engine.md`](engine.md), *Hops and `follow`*); `follow` is closure-of-a-step — the thread walk is `follow(refs(argument))`, edges reported for branch/join rendering |
 | `fold`, `group` | vm | compute pipe verbs — real runs fed by lowered sub-chains; `explode` is unclassified until it lands ([`engine.md`](engine.md), *What Is Open*) |
 | `narrate` | vm | live model-driven abstraction of any place or process (§6) |
 | `model` | vm | one model call per run — [`agent.md`](agent.md) |

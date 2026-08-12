@@ -234,10 +234,28 @@ Fenced expression blocks in prose are anonymous expressions — no chunk exists 
 
 The expression language is the **only** query surface; no author writes SQL, ever. The planner partitions the verb vocabulary:
 
-- **Read-native** — verbs with a relational lowering: `at` (time travel as composition), subtraction, `limit`, `where`-over-keys, and `follow` (the citation walk — transitive closure, lowered to a recursive CTE). A chain inside this subset compiles to **one** db query — the boundary filter included, since a boundary is itself a single-request selection and lowers into the same statement.
+- **Read-native** — verbs with a relational lowering: `at` (time travel as composition), subtraction, `limit`, `where`-over-keys, the hop vocabulary and `prop`, and `follow` (transitive closure of a step — below). A chain inside this subset compiles to **one** db query — the boundary filter included, since a boundary is itself a single-request selection and lowers into the same statement.
 - **Compute** — `fold`, `group`, anything model-touching: real program runs, fed by lowered sub-chains.
 
 **Single-request is derived, never typed** (ruled). `runtime` says only *who executes* — `native` means the planner, no executable. Whether a verb lowers is the planner's own knowledge: it holds a lowering or it does not, and a stored flag could only agree or lie (the purity argument, again). Boundary validation asks the planner whether the whole expression lowers; a native verb without a lowering is legal — it simply cannot appear in a wall.
+
+### Hops and `follow`
+
+The one-hop reads the system answers at every read, as composable verbs — each pure, each with a relational lowering:
+
+```
+members(kind?)    what is placed on the input — down a placement; kind narrows
+placed(kind?)     what the input is placed on — up
+owner             one hop up the naming chain
+refs(key?)        outbound links from the input's bodies; key narrows to a field
+backrefs(key?)    inbound links — who points here; the linked answer as a verb
+prop(key)         a body key's value projected as field structure — the narrow,
+                  single-key form of explode; face-follows-context is its consumer
+```
+
+**`follow(step, depth?)` is transitive closure of a step, and the step is itself a pure expression** (`selection → selection`): evaluate on the frontier, union, repeat to fixpoint or `depth`. No lambda — the step's input is the pipe input, like every verb. Composite hops are step composition (`refs(argument) | owner` alternates two edge types); cycles terminate by visited-set, so mutual citations cannot hang a wall. If the step lowers, `follow` lowers to a recursive CTE — single-request, wall-admissible; a compute step makes it compute, legal but never a wall. The yield orders deterministically: closure depth, then commit time.
+
+**Closure output carries its edges.** Nodes alone cannot render a branch or a join, so a closure evaluation reports the edges it walked — `(from, to, kind-or-key)` with depth — beside the chunks, in the result. This is the one extension pipe output needs; its wire shape lands with the SDK at build. The thread face is the consumer: **follow yields the line; dimensions orbit it** as per-element attribute pipes ([`programs.md`](programs.md) §3; [`agent.md`](agent.md)).
 
 `explode` is unclassified until it lands (*What Is Open*) — a projection of body keys reads as read-native, but nothing has priced its lowering.
 
@@ -268,7 +286,7 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 ## Boundaries
 
-A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra plus `at`, `where`, `follow`, exactly. A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
+A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra, the hop verbs, `at`, `where`, `follow` — what the planner can lower, exactly (*Single-request is derived*). A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
 
 The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction. Five sources:
 

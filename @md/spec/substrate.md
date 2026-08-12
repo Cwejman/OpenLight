@@ -175,7 +175,7 @@ Writing `ada` validates `work` (exists, instance of `workplace`) and `status` (i
 
 ## Boundaries — What You May See
 
-A boundary is a **selection** — the type just defined: places, and pure derivations of places. The derivations a boundary admits are the *single-request class* of the expression language: dimension algebra plus `at`, `where`, `follow`, exactly. That grammar belongs to [`engine.md`](engine.md) and is not restated here; what the law fixes is its ceiling — a wall must be evaluable instantly and deterministically at every read, so compute has no place in it. How a run comes by its boundary — the frame, grants, the program's stated ceiling, the parent cap — is engine.md's as well; this section is the law it enforces.
+A boundary is a **selection** — the type just defined: places, and pure derivations of places. The derivations a boundary admits are the *single-request class* of the expression language: dimension algebra, the hop verbs, `at`, `where`, `follow` — what lowers to one request, exactly. That grammar belongs to [`engine.md`](engine.md) and is not restated here; what the law fixes is its ceiling — a wall must be evaluable instantly and deterministically at every read, so compute has no place in it. How a run comes by its boundary — the frame, grants, the program's stated ceiling, the parent cap — is engine.md's as well; this section is the law it enforces.
 
 - **Sets are first class**: union, intersection, and **subtraction**, in boundaries and reads alike. `[project, controller, admin]` narrows; `engine − process` subtracts.
 - **One grammar, three jobs**: attention (the reader's members), context (the agent's), permission (boundaries). That one selection language serves all three is the design's proof of fit.
