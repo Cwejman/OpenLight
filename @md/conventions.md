@@ -33,6 +33,14 @@ When a change reworks a file's argument rather than a detail, **replace whole se
 
 The inverse holds for local changes — a rename, one correction. There a wholesale rewrite lets concepts shift invisibly under cover of a large diff, and the diff misstates its own scope. **Surgical when the constraint is *nothing else may change*; wholesale when the argument itself is what changed.**
 
+## Knowledge structure — *open, being refined*
+
+The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established skills and practices for prose — this file's rewriting rules included. Ground gathered so far (brain-picked 2026-08-20, to be refined; this section records the search, not a rule):
+
+- Folds are necessary, and bottom-up is sometimes required; dependency order is crucial.
+- Models and humans alike stand on a ground of comprehension, and comprehension grows bite-wise — naturally ordered by the dependency of knowledge.
+- In tension with that, the entry point — the actual reading order, top to bottom — must have strong engaging characteristics: values, requirements, goals before the folds that tell how.
+
 ## Code
 
 - **Languages.** Rust is the platform (host, engine, substrate). TypeScript is the *pilot's* language for programs and the first SDK — a pragmatic choice, not a limit: VM programs declare their own runtimes and dependencies (a program may demand Node, Python, anything its shebang and packages name), and SDKs for other languages follow. Nothing below binds programs to TypeScript.
