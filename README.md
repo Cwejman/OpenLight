@@ -11,29 +11,31 @@ OpenLight is built on one claim: **completion should happen from a point in a fi
 OpenLight is three things:
 
 - **A substrate** — typed, version-controlled structure. Units of meaning with identity (chunks), placed into places; contracts the substrate enforces on write; every change a commit on a branch.
-- **Programs** — the only unit of execution. A program reads places and writes commits inside an enforced boundary. Whether it renders a surface, touches a disk, or calls a model is what its body declares, not a different kind. Programs compose into new programs.
-- **A host** — makes substrate plus programs an operating environment initially built of windows, tiles and tabs with a process/program sidebar, command palette and built in bundle of programs. The interface is purely built on programs itself.
+- **Programs** — the only unit of execution, and headless. A program reads places and writes commits inside an enforced boundary; whether it touches a disk or calls a model is what its body declares, not a different kind. Programs compose into new programs.
+- **An interface that is itself field data** — what draws is a **component**: a declaration, realized by code or by data, mounted on a surface and judged like any call. The whole environment — the shell, the menus, even its own configuration — is components and chunks; a small platform binary (the **chassis**) hosts the surface, and the **engine**, its own installed artefact, coordinates everything against the substrate.
 
-A model-calling program reads the same typed structure a grep does (or any program of in the substrate), writes the same commits a human does, composes into the same surfaces. Human, classical program, and model in one typed, versioned medium — that bridge does not exist today. And because every write is a commit from a bounded process, trust is native rather than bolted on: boundaries before a run, inspection during, history after. Valuable — and secondary. The center is what completion from the field unlocks but it is of novel value even without models, just inherently expansive with them.
+A model-calling program reads the same typed structure a grep does, writes the same commits a human does; its output composes into the same surfaces. Human, classical program, and model in one typed, versioned medium — that bridge does not exist today. And because every write is a commit from a bounded process, trust is native rather than bolted on: boundaries before a run, inspection during, history after. Valuable — and secondary. The center is what completion from the field unlocks — of novel value even without models, inherently expansive with them.
 
 ---
 
-> Read in order. `@md/spec/` sub-specs and `@md/spec/research/` are reference depths — descend when work calls for them.
+## Reading order
 
-[`@md/spec/pilot.md`](@md/spec/pilot.md) and [`@md/spec/`](@md/spec/) — the substrate contract and the first end-to-end proof (v0.1). Mechanism: [`substrate.md`](@md/spec/substrate.md), [`db.md`](@md/spec/db.md), [`engine.md`](@md/spec/engine.md), [`chassis.md`](@md/spec/chassis.md), [`sdk.md`](@md/spec/sdk.md). Experience: [`view.md`](@md/spec/view.md), [`components.md`](@md/spec/components.md), [`desktop.md`](@md/spec/desktop.md), [`agent.md`](@md/spec/agent.md).
+Each step stands on the ones before it; stop when you have what you came for.
 
-[`@md/conventions.md`](@md/conventions.md) — principles and working agreements. Short.
+1. **This page** — the claim and the three things.
 
-[`@md/board.md`](@md/board.md) — the working board: current state, the queue, gates awaiting rulings, tracked debt.
+2. [`@md/conventions.md`](@md/conventions.md) — how we work: principles, working agreements, the prose and audit disciplines. Short, and everything else is written under it.
 
-[`@md/log.md`](@md/log.md) — session narratives, newest first; the history the board stands on.
+3. [`@md/spec/pilot.md`](@md/spec/pilot.md) — what v0.1 is, proves, and defers; the monorepo; the build order. The map of the spec tree — read it before descending.
 
-[`@md/horizon.md`](@md/horizon.md) — the vision beyond v0.1, by proximity and proof status.
+4. **The mechanism**, in dependency order — each file uses only what the ones before it define: [`substrate.md`](@md/spec/substrate.md) (the field's law: chunks, connections, types, boundaries) → [`engine.md`](@md/spec/engine.md) (running programs against it: stores and attach, the call context, expressions, lifecycle, the protocol) → [`chassis.md`](@md/spec/chassis.md) (the platform binding and the home) → [`sdk.md`](@md/spec/sdk.md) (the wire as client libraries). Implementation depth, when work calls for it: [`db.md`](@md/spec/db.md).
 
-[`@md/sketches.md`](@md/sketches.md) — mini-projects: small app ideas inside the environment, held open with their grounding.
+5. **The experience**, standing on the mechanism: [`view.md`](@md/spec/view.md) (components, mounts, the three selections, the glue) → [`components.md`](@md/spec/components.md) (the component packages and the design language) → [`desktop.md`](@md/spec/desktop.md) (the pilot environment) → [`agent.md`](@md/spec/agent.md) (the model programs and agent work) → [`bootstrap.md`](@md/spec/bootstrap.md) (what each store seeds).
 
-[`@md/spec/research/cleanroom/synthesis.md`](@md/spec/research/cleanroom/synthesis.md) — the synthesis behind the current program layer: clean-room provenance, the demand list on the mechanism specs, decisions taken.
+6. [`@md/board.md`](@md/board.md) — where the work stands now: the queue, the gates, the debt. [`@md/log.md`](@md/log.md) — the session narratives it stands on, newest first.
 
-[`@md/spec/research/`](@md/spec/research/) — reference depth. [`@md/spec/research/cleanroom/`](@md/spec/research/cleanroom/) holds the three blind re-derivations the program layer was rebuilt from.
+7. **Beyond v0.1**: [`@md/horizon.md`](@md/horizon.md) (the vision, by proximity and proof status) · [`@md/sketches.md`](@md/sketches.md) (mini-projects held open with their grounding).
+
+[`@md/spec/research/`](@md/spec/research/) is reference depth, not part of the order — exploration records and blind derivations the tree was built from; descend only when work calls for a decision's grounding.
 
 ![footer](.img/footer.png)
