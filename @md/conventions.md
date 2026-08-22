@@ -1,12 +1,12 @@
 # Conventions
 
-Principles and working agreements — how we operate together on this project.
+Principles and working agreements — how we operate together on this project. A convention is agreement made *before* the work: shared words settled in calm, so critique lands on the work rather than the person, and nothing is negotiated mid-task — with people and with agents alike.
 
 ## Principles
 
-Universal craft, held short:
+Universal craft, held short — in dependency order; the first is the ground the rest stand on:
 
-- **No mind holds complexity.** Not a person, not a model. Understanding goes outside the mind — written down, taken apart, anchored. Don't trust one pass of any reasoning, your own included.
+- **No mind holds complexity.** Not a person, not a model — a head and a context window are one limitation. Understanding goes outside the mind — written down, taken apart, anchored. Don't trust one pass of any reasoning, your own included.
 - **Simple is not easy.** Simple means nothing tangled together; easy means familiar. The costliest complexity is the kind that feels easy. Prefer plain repetition to a clever abstraction you must carry.
 - **Prefer data; keep functions pure.** Structured data over branching code; pure functions over it; effects real but at the edges.
 - **One source, one direction.** One home per fact; point, don't copy; derive on demand; flat over nested.
@@ -19,6 +19,7 @@ Universal craft, held short:
 The quality standard is yours to hold, not the user's to supply. Judge your own output against the principles; don't make the user your editor or close a turn asking "what's wrong?" — say where it stands, and why, in your own read.
 
 - **Check before you claim.** "Done," "covered," "nothing lost" are claims — verify each against the files before stating it, and show the check.
+- **Name what you leave out.** A coverage claim is judged by its omissions — the leave-out list is the first thing a good reader inspects. A deliberate "not folded: …" makes "nothing lost" checkable; silence about a cut reads as not knowing it was made.
 - **Say it once, terse.** Less is more, in the specs and in replies alike. Cut what doesn't earn its place; don't hedge, don't credential-drop.
 
 ## Build on ideas together
@@ -33,13 +34,21 @@ When a change reworks a file's argument rather than a detail, **replace whole se
 
 The inverse holds for local changes — a rename, one correction. There a wholesale rewrite lets concepts shift invisibly under cover of a large diff, and the diff misstates its own scope. **Surgical when the constraint is *nothing else may change*; wholesale when the argument itself is what changed.**
 
+**Outline before prose, where there is invention.** For a large recomposition, first lay out the outline — what each part establishes and what it depends on — and verify *that*, from more than one angle when the stakes earn it: an outline is far cheaper to check than prose, and a mistake remedied there is never written. Where there is nothing to invent — a 1:1 carry, a mechanical clean — skip the outline and write.
+
+## Records are events
+
+The specs are state; everything else is an event. A ratification record, a feedback note, a review's findings — each amends the state, is folded, and then retires from the tree; git keeps it. One source of truth, no standing record beside the law it produced. (Practiced: `ratification.md` and `feedback.md`, both retired 2026-08-20 after their live rows folded in.)
+
 ## Knowledge structure — *open, being refined*
 
-The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established skills and practices for prose — this file's rewriting rules included. Ground gathered so far (brain-picked 2026-08-20, to be refined; this section records the search, not a rule):
+The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established practices — this file's rewriting rules included. The search now runs in two projects: the wider distillation — a fifteen-rung ladder of principles and an open study, grown from this project's practice — lives in hjulverkstan (`~/git/hjulverkstan/wiki/drafts/`); this section keeps what is night's own ground (refined 2026-08-22 from the transcript round; this section records the search, not a rule):
 
-- Folds are necessary, and bottom-up is sometimes required; dependency order is crucial.
-- Models and humans alike stand on a ground of comprehension, and comprehension grows bite-wise — naturally ordered by the dependency of knowledge.
-- In tension with that, the entry point — the actual reading order, top to bottom — must have strong engaging characteristics: values, requirements, goals before the folds that tell how.
+- **Folds are closures.** What is established inside doesn't exist outside; a reference is a thread to pull, not a failure. The code-side anchor for why comprehension can grow bite-wise at all — and why a context, which cannot be refactored, needs folds in the first place.
+- **The entry has two forces.** From the top, something inviting — a reader must *want* in; from the bottom, everything properly in place. How they meet is not yet known. And the window's start is not ours to write — the harness occupies it; first words seem to weigh more, though not always, since they compress too.
+- **Two acceptance tests.** A senior reader finishes with *no questions* — disagreement is permitted residue; an unanswerable question is the failure. And a fresh session bootstraps against everything and can be trusted.
+- **Registers weight epistemic status.** Spec is law, research is structured-but-uncommitted, sketches are held-open ideas — kept apart so a reader, agent or person, knows what is meaningful before reading it.
+- **Hierarchy is the accepted compromise**, not the nature of knowledge — a knowledge structure has no top, just a field of relations; the entry point is the price paid, and worth paying. It is what this project's own substrate exists to supersede.
 
 ## Code
 
@@ -53,6 +62,8 @@ The principle for how a knowledge base is best structured is still being sought;
 ## Spend the model where it matters
 
 Frontier-model sittings are for design dialog, rulings, and writing that needs the whole context in one head. Mechanical work — renames, vocabulary sweeps, batched spec folds, reference retargeting — is never done live in a reasoning sitting: record the ruling in `spec/research/arc/conclusions.md`, queue the sweep, and let a cheap session or subagent execute it. Renaming is not a frontier task.
+
+**Context craft.** A window cannot be refactored — a mistake is baked in, and behaviour degrades as the window fills. So: **checkpoint** — end a sitting at a known, written state and let a fresh session continue, bloating less; keep a sitting steerable by delegating long reads and sweeps rather than performing them; and when purity matters, bootstrap a session from named files only — and say so in the instruction.
 
 ## Subagent grounding
 
