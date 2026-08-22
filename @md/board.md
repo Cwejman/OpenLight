@@ -67,7 +67,7 @@ Still standing:
 
 - ~~`follow`'s parameterization~~ — **landed** (engine.md, *Hops and `follow`*; Next 3).
 - **Streaming realization** — posture set (v0.1: throttled partials on main); the buffer realization open (selection.md §14.3).
-- **VM containment ruling** before the agents project; steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
+- **VM containment ruling** — *restated against the ratified cut (2026-08-22)*: `runtime-vm` is not in the first pilot (capabilities declared/shown, not enforced — engine.md, pilot.md); the containment ruling now gates the VM's own landing, not the agents project. Steward's visual-inspection duty blocked on the macOS Screen Recording grant (restart terminal between sessions).
 
 ## Tracked debt
 

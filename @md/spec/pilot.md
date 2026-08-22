@@ -1,135 +1,94 @@
 # Pilot
 
-The first working instance of the substrate. A person opens a window, sees a space, runs a program, and what happened is preserved in the field. The pilot exists to prove that the substrate's self-description is sufficient — that an interface, a program, and a history can all be generated from what the field knows about itself, with no external configuration carrying the weight.
+The first working instance of the substrate. A person opens a window, sees a space, mounts a component, runs a program, and what happened is preserved in the field. The pilot exists to prove that the substrate's self-description is sufficient — that an interface, a program, and a history can all be generated from what the field knows about itself, with no external configuration carrying the weight.
 
-Though called "the pilot," this is **v0.1** — the seed that grows. Architecture is evergreen; feature scope is intentionally narrow. What's deferred is deferred *for shipping*, not for design — decisions made here shape what comes after, so the architecture is built to accommodate horizon work without redesign even when that work itself stays out of v0.1.
+Though called "the pilot," this is **v0.1** — the seed that grows. Architecture is evergreen; feature scope is intentionally narrow. What's deferred is deferred *for shipping*, not for design — decisions made here shape what comes after, so the architecture accommodates horizon work without redesign even when that work stays out of v0.1.
 
-This file carries only what is v0.1's own: what it establishes and defers, how a project declares its mounts, the repo layout, and the order it gets built in. Every mechanism it once restated lives once, in the spec that owns it — the index is under *Specs* below.
+This file carries only what is v0.1's own: what it establishes and defers, the pilot cut, the repo layout, and the build order. Every mechanism it once restated lives once, in the spec that owns it — the index is under *Specs* below. **What you run, and the home**, are [`chassis.md`](chassis.md)'s.
 
 ---
 
 ## What v0.1 Establishes
 
-- **The self-describing field works.** A program's contract is its chunks. The host reads those chunks and produces the surface the user interacts with. Nothing is configured out-of-band.
-- **Read is the mechanism.** Programs read the field by intersecting places. No snapshots, no manual tool calls for retrieval.
-- **Boundaries are architectural.** A program running against the field sees only what its read boundary reaches, writes only where its write boundary allows. The engine enforces this uniformly.
-- **Everything is traceable.** Chunk → commit → process → program. Any change the field underwent can be walked back to the program that caused it and the user who ran it.
-- **Program and view are one.** The same mechanism creates a filesystem tool and a read-tile. Views declare `runtime: 'webview'`; tools declare `runtime: 'vm'`. Both pass through the same lifecycle.
-- **The loop closes.** A user opens a program. The program produces an answer. The answer is in the field. The next program reads from the field the previous one wrote.
+- **The self-describing field works.** A component's contract is its chunks; a program's contract is its body. The glue reads the field and produces the surface the person interacts with. Nothing is configured out-of-band — the chassis entry itself is field data.
+
+- **Read is the mechanism.** Programs and components read the field by intersecting places. No snapshots, no manual tool calls for retrieval.
+
+- **Boundaries are architectural.** Every act — a program's, a mount's, the interface's — is judged by the engine under one call context; reads reach what the boundary admits, writes land where it allows, uniformly.
+
+- **Everything is traceable.** Chunk → commit → process → program. Any change walks back to the program that caused it and the person who ran it.
+
+- **Drawing and running are decoupled, and both are field citizens.** What draws is a component — a declaration realized by code or by data; what runs is a headless program. A mount is a call as a process is a run; neither is configured outside the field.
+
+- **The loop closes.** A person mounts a component, starts a program; the answer lands in the field; the next read stands on it.
 
 ## What v0.1 Defers
 
-- **Peering beyond local read-only.** Symmetric (read/write) mounts, remote (network) mounts, identity/auth, sync, package merging into the VM image, schema migration on peer mount, cross-host reactivity, place-filtered mounts. v0.1 ships read-only filesystem-local mounts; the boundary mechanism already carries the model for symmetric peering. Detail and direction in [`horizon.md`](../horizon.md).
-- **Services as first-class.** A long-lived program is a code pattern, not a substrate distinction.
+- **Peering beyond local read-only.** Write-mode attach of shared stores ships (branch + write); symmetric remote peering, identity/auth, sync, schema migration on attach, cross-engine reactivity are horizon ([`horizon.md`](../horizon.md)).
+
+- **The VM.** `runtime-vm` is not in the first pilot: capabilities are declared, recorded, shown at Go — **not enforced** until the VM lands ([`engine.md`](engine.md), *Runtime providers*).
+
+- **After the first pilot** (the brief's cut): prose · the drag layer (move/swap and WYSIWYG rearrangement ride it) · tabs and sidebar in the shell · lift · `GLBox` · code-creating mounts · generated types.
+
+- **Services as first-class.** Daemons launch like any program (ruled); the resident lifecycle is deferred ([`engine.md`](engine.md), *Daemons*).
+
 - **Derived chunks** — summaries, embeddings. The pattern works; generation is not in the loop.
-- **Shell language.** Programs are executables; the file's shebang determines its runtime.
-- **Streaming** model responses. The agent loop buffers.
+
+- **Streaming** model responses — the posture is set: v0.1 is throttled partials on main; the buffer realization stays open ([`engine.md`](engine.md), *Buffers*).
+
 - **Retention.** Nothing is pruned.
-- **WebGPU-capable views.** Views render DOM. Pixel/GPU surfaces are a direction in [`horizon.md`](../horizon.md), not v0.1 scope.
+
+## The pilot cut
+
+Engine as its own artefact + attach-era db (the attach record, `attach`/`detach`, `[engine/attached]`, engine-served sources) · `chassis-desktop` hosting `web-dom` (the entry, layers, reservations, the `--mount` shorthand) · `engine/sdk` and `view/sdk` with `solid()` · `component/base` (leaves, `list`, `split`, the faces, `FrameBox`) · `desktop/` (the entry, the shell template — the simple tiler — and `projects`) · reader · table · process · command · overlay · secrets · agents.
 
 ---
 
-## Multi-project mounts
-
-A host launches with one **active project** (read-write) and one or more **mounts** (read-only — other projects on the local filesystem). The mounts file declares them deliberately; there is no implicit mounting. Declarations live in `.ol/project.toml`:
-
-```toml
-[project]
-name = "agents"
-
-[[mounts]]
-path = "../host"
-branch = "main"
-
-[[mounts]]
-path = "../engine"
-branch = "main"
-```
-
-Branches pin versions — track `main` to follow upstream, name a stable branch (`v1.2.3`) for predictability. A future `commit` field would route queries through db's existing `at` parameter for frozen snapshots.
-
-How the cascade is walked, which mounts are mandatory, and what boot refuses: [`chassis.md`](chassis.md#boot-sequence). What a mount contributes to the field, and how reads, boundary walks and read-only enforcement federate across mounts: [`engine.md`](engine.md#engine-api-callable-from-the-host).
-
-**Open: peering fragility.** Cross-mount references across evolving peers carry a fragility — when a peer advances, the active project's reads and validations can shift underneath it in ways that aren't yet fully reasoned about. The shape of this needs to mature with use; v0.1's read-only filesystem-local mounts are the narrow surface from which to learn.
-
----
-
-## Stack
-
-Rust for the host, the engine, and the substrate — one binary, three crates in a workspace, `rusqlite` for the database. TypeScript for the SDK and programs. The only runtime seam is between the host binary and VM-program processes (spawned inside the VM); webview programs cross no process boundary to reach the substrate via wry IPC.
-
-### Directory
-
-The repo's first-party projects each live as a top-level directory. Rust crates that ship substrate content also have their own `.ol/` (their bootstrap commits live there). Code-only crates have no `.ol/` in v0.1.
+## The monorepo
 
 ```
-db/                  — Rust crate. Substrate library (chunks, placements, commits,
-                       FTS, spec language). Code-only; no .ol/ in v0.1.
+db/                       the store
+engine/                   coordination — its own installed artefact; engine/sdk = the protocol client   < db
+view/                     the contract archetypes; view/sdk = the web-dom glue + adapters               < engine/sdk
+runtime-vm/               the VM runtime provider (rust; not in the first pilot)                        < engine
+secrets/                  stand-ins + read-secret (a module, not an integration)                        < engine
+agent/                    facets: headless < engine · viewing < component/process, component/reader
 
-engine/              — Rust crate. Engine library (process lifecycle, boundary
-                       enforcement, program protocol, runtime registry).
-  src/               — Rust source.
-  sdk/               — TypeScript SDK package (@openlight/sdk). Runtime-agnostic
-                       substrate access — programs in any TS-capable runtime
-                       import the same surface; transport is auto-detected at
-                       module load (window.__wry_ipc → wry; process.stdin → stdio).
-  .ol/
-    db               — the engine project's substrate database
-    project.toml     — engine project config
+component/base/           the base family: leaf components, layout primitives, faces, FrameBox
+component/reader/         reader + reading, collation                      < base
+component/table/          chunk-table, the list/table family              < base
+component/process/        process-view + the draft face                   < base
+component/prose/          (after the first pilot)                         < base
+component/command/        the command menu and palette                    < (base | overlay)
+component/overlay/        the anchored-presentation layer                 < base
 
-host/                — Rust binary. tao + wry. Window, tile geometry, webview
-                       lifecycle, wry IPC surface, the VM and webview runtime
-                       providers. Depends on db and engine crates.
-  src/               — Rust source.
-  react/             — TypeScript UI library (React components, hooks like
-                       useRead). Used by webview programs that the host renders.
-                       Lives here for v0.1; may extract later.
-  programs/          — first-party programs the host ships (sidebar, tab-bar,
-                       palette, form, read-tile → reader, process-view, …).
-                       The frame machinery itself — window, tiling,
-                       background — is host-native.
-  .ol/
-    db               — the host project's substrate database
-    project.toml     — host project config
-
-agents/              — first user-facing project for v0.1. The agent program
-                       and tool programs live here; this is what the host opens
-                       as its active project for the demo.
-  programs/          — claude, echo, filesystem, shell, web.
-  .ol/
-    db               — the agents project's substrate database
-    project.toml     — declares mounts on host and engine projects
+desktop/                  the pilot's desktop module: the chassis entry, the shell template, sidebar, projects   < (base | …)
+chassis-desktop/          rust binary: platform machinery; hosts web-dom; a client of engine; declares the entry contract
 ```
 
-`bootstrap.rs` (seed routines) lives inside whichever crate runs them; each project's bootstrap is its own concern (see [`bootstrap.md`](bootstrap.md)).
+Each `component/*` package ships its component declarations, their payload archetypes, and their default implementations; a second package may implement the same declarations differently. **The dependency law [R]: declarations depend on declarations; implementations depend on declarations plus a surface kind; nothing ever depends on an implementation.** **A module is a store** — each line above is a store directory by the settled recognition (`.ol/` inside, db and toml within), the module's files beside it; dependency is attach ([`engine.md`](engine.md)).
 
-The first pilot's TypeScript implementations were deleted outright (git history keeps them); they were never a source of truth. The spec is. Rust impl flows from the spec; tests verify against the spec.
+Migration from the built tree: `host/react` → `component/base` · `host/programs/*` → `component/*`, `desktop/`, or retired · `host/` → `chassis-desktop` + `runtime-vm` · `engine/sdk` stays, `view/sdk` is new. The first pilot's TypeScript implementations were deleted outright (git history keeps them); they were never a source of truth. The spec is.
+
+*Open — peering fragility (carried).* Cross-store references across evolving peers carry a fragility — when a peer advances, reads and validations can shift underneath in ways not yet fully reasoned about. The shape matures with use; read-only attachments are the narrow surface to learn from.
 
 ---
 
 ## Build Order
 
-The implemented foundation is drawn whole in `.md` before any of it is coded. The substrate's outward face is already settled, so its conceptual spec can be audited in isolation — but its *implementation drawing* (how the Rust db actually works, both contracts) is its own document. Engine, host, and SDK are mutually-defining and grow as one holistic drawing.
+The spec phase is done — the tree was rewritten from the ratified brief (2026-08-22; the surface rewrite). What follows is implementation, spec-first at every step: code never advances past what the spec carries.
 
-The rule across the spec phase: implementation drawings are derived from the inside — the conceptual spec, plus Rust and SQLite and tao and wry as materials — outward. Inside-out: the spec defines, the implementation flows.
+1. **The alignment pass, db + engine.** The built layer (db crate, engine ~6k lines, TS SDK) implements two spec generations ago; realign spec-first with fixtures rewritten from the new law (the board's tracked debt). The attach era and the artefact split land here — the engine becomes its own binary, the wire its only contract.
 
-**Spec phase — draw the foundation holistically.**
+2. **`chassis-desktop` + `view/sdk` + `component/base`.** The chassis's hospitality, the glue's boot/resolve/subscribe, the `solid()` adapter, the base family. The first few components are also the ctx-ergonomics evaluation [R — resolve by making; the family does not scale before it].
 
-1. **Substrate component.**
-   - **1a.** Audit [`substrate.md`](substrate.md) for gaps in the two contracts: consumer ↔ db (the program-facing operations and types), db ↔ sqlite (the schema, indexes, FTS, transaction discipline). Mostly there; small audit.
-   - **1b.** Write a new [`db.md`](db.md) — top-to-bottom drawing of how the Rust db actually works. Derived holistically from the substrate spec, Rust idiom, and SQLite idiom.
-2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`engine.md`](engine.md), [`chassis.md`](chassis.md), and a new [`sdk.md`](sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
+3. **`desktop/`** — the entry, the shell template (the simple tiler), `projects`. The first end-to-end: boot into the home, mount a reader.
 
-**Implementation phase — code from the settled drawings.**
+4. **The pilot components** — reader, table, process (the draft face), command, overlay.
 
-3. **Code the db crate** from [`db.md`](db.md).
-4. **Code the engine crate** from [`engine.md`](engine.md), including `engine/sdk/` (the runtime-agnostic TypeScript package).
-5. **Scaffold host** — tao + wry, window, one webview, the wry IPC handler dispatching to the engine library; the mounts cascade walk; VM and webview runtime providers; `host/ui/` React library scaffold.
-6. **First program: read tile.** Validates the webview ↔ host ↔ engine ↔ db loop end-to-end.
-7. **Remaining first-party host programs** — sidebar, tab-bar, command-palette, launch, inspector.
-8. **Agents project** — claude, echo, and tool programs (filesystem, shell, web). Active-project demo working end-to-end.
+5. **`secrets` + `agents`** — the model family, the agent, tools; run-to-draft live end-to-end.
 
-The implementation order in 3–6 is sequential because each layer compiles on the one below, but they were drawn as one piece — no design decisions are made in implementation that weren't already made in the spec phase.
+Each step compiles on the one below; no design decisions are made in implementation that weren't already made in the spec — where a step can't reach its contract with the mechanisms as specced, that lands on the board's demand list, not in silence.
 
 ---
 
@@ -137,14 +96,21 @@ The implementation order in 3–6 is sequential because each layer compiles on t
 
 Each spec is the single home for its subject; this file points, it does not restate.
 
-- [`substrate.md`](substrate.md) — chunk, placement, spec language, commits, queries, the five connection kinds, names and roots, peers. The primitive layer (concept, two contracts).
-- [`db.md`](db.md) — implementation drawing of the Rust db, including the virtual places `db/commits` and `db/branches`. Top-to-bottom, derived holistically from the substrate spec.
-- [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, federation across mounts, containment.
-- [`chassis.md`](chassis.md) — the native shell, boot sequence and the mounts cascade walk, tile geometry, IPC dispatch, the UI composition types, visual language.
-- [`sdk.md`](sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
-- [`view.md`](view.md), [`components.md`](components.md), [`desktop.md`](desktop.md) — the view contracts, the component packages, and the pilot environment.
+- [`substrate.md`](substrate.md) — chunk, placement, the type vocabulary, commits, boundaries, the five connection kinds, names and roots, peers.
+
+- [`db.md`](db.md) — implementation drawing of the Rust db, including the virtual places `db/commits` and `db/branches`.
+
+- [`engine.md`](engine.md) — the artefact, stores and attach, the call context, expressions and the planner, boundaries, lifecycle, the protocol, reactivity, runtime providers.
+
+- [`chassis.md`](chassis.md) — the platform binding: hospitality, the entry, the input floor, the home, flavors.
+
+- [`sdk.md`](sdk.md) — `engine/sdk` (the protocol client, one transport object) and `view/sdk` as packages.
+
+- [`view.md`](view.md), [`components.md`](components.md), [`desktop.md`](desktop.md) — the view contracts and glue, the component packages, the pilot environment.
+
 - [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately; and the lived experience of agent work.
-- [`bootstrap.md`](bootstrap.md) — the seed data: the archetypes each first-party project ships.
+
+- [`bootstrap.md`](bootstrap.md) — the seed data: the archetypes each first-party store ships.
 
 ## What Is Open
 
