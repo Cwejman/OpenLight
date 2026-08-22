@@ -48,7 +48,7 @@ branch = "main"
 
 Branches pin versions — track `main` to follow upstream, name a stable branch (`v1.2.3`) for predictability. A future `commit` field would route queries through db's existing `at` parameter for frozen snapshots.
 
-How the cascade is walked, which mounts are mandatory, and what boot refuses: [`host.md`](host.md#boot-sequence). What a mount contributes to the field, and how reads, boundary walks and read-only enforcement federate across mounts: [`engine.md`](engine.md#engine-api-callable-from-the-host).
+How the cascade is walked, which mounts are mandatory, and what boot refuses: [`chassis.md`](chassis.md#boot-sequence). What a mount contributes to the field, and how reads, boundary walks and read-only enforcement federate across mounts: [`engine.md`](engine.md#engine-api-callable-from-the-host).
 
 **Open: peering fragility.** Cross-mount references across evolving peers carry a fragility — when a peer advances, the active project's reads and validations can shift underneath it in ways that aren't yet fully reasoned about. The shape of this needs to mature with use; v0.1's read-only filesystem-local mounts are the narrow surface from which to learn.
 
@@ -118,7 +118,7 @@ The rule across the spec phase: implementation drawings are derived from the ins
 1. **Substrate component.**
    - **1a.** Audit [`substrate.md`](substrate.md) for gaps in the two contracts: consumer ↔ db (the program-facing operations and types), db ↔ sqlite (the schema, indexes, FTS, transaction discipline). Mostly there; small audit.
    - **1b.** Write a new [`db.md`](db.md) — top-to-bottom drawing of how the Rust db actually works. Derived holistically from the substrate spec, Rust idiom, and SQLite idiom.
-2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`engine.md`](engine.md), [`host.md`](host.md), and a new [`sdk.md`](sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
+2. **Foundation spec — engine, host, SDK as one drawing.** Grow [`engine.md`](engine.md), [`chassis.md`](chassis.md), and a new [`sdk.md`](sdk.md) together, cross-referencing. Settle: the program protocol shape, the host's IPC dispatch surface, the engine API the host calls, the reactivity mechanism end-to-end, the real run/await mechanics. Each contract appears in two specs at once and must read consistent across them. Done when no question remains about what any side does or what it exposes to the others.
 
 **Implementation phase — code from the settled drawings.**
 
@@ -140,12 +140,12 @@ Each spec is the single home for its subject; this file points, it does not rest
 - [`substrate.md`](substrate.md) — chunk, placement, spec language, commits, queries, the five connection kinds, names and roots, peers. The primitive layer (concept, two contracts).
 - [`db.md`](db.md) — implementation drawing of the Rust db, including the virtual places `db/commits` and `db/branches`. Top-to-bottom, derived holistically from the substrate spec.
 - [`engine.md`](engine.md) — program protocol, process lifecycle, boundary enforcement, federation across mounts, containment.
-- [`host.md`](host.md) — the native shell, boot sequence and the mounts cascade walk, tile geometry, IPC dispatch, the UI composition types, visual language.
+- [`chassis.md`](chassis.md) — the native shell, boot sequence and the mounts cascade walk, tile geometry, IPC dispatch, the UI composition types, visual language.
 - [`sdk.md`](sdk.md) — the program-facing surface. Two transports (wry IPC, stdio), one API.
-- [`programs.md`](programs.md) — the actual programs: the catalog, per-program contracts, the interface concretely (sidebar, palette, `form`, `reader`, `process-view`).
+- [`view.md`](view.md), [`components.md`](components.md), [`desktop.md`](desktop.md) — the view contracts, the component packages, and the pilot environment.
 - [`agent.md`](agent.md) — the model programs: `model` (one completion call per run, the only provider seam) and `agent` (the harness), split deliberately; and the lived experience of agent work.
 - [`bootstrap.md`](bootstrap.md) — the seed data: the archetypes each first-party project ships.
 
 ## What Is Open
 
-The design-level opens live in place in each spec, beside the mechanism each one qualifies — [`host.md`](host.md#what-is-open), [`engine.md`](engine.md#what-is-open), [`substrate.md`](substrate.md), [`sdk.md`](sdk.md#what-is-open), [`programs.md`](programs.md) and [`agent.md`](agent.md) marked in place. None of them block the pilot's structure; they need decisions as implementation reaches them. The current arc's ledgers are [`research/arc/selection.md`](research/arc/selection.md) §16 and [`research/arc/dimensions.md`](research/arc/dimensions.md) §8.
+The design-level opens live in place in each spec, beside the mechanism each one qualifies — [`chassis.md`](chassis.md#what-is-open), [`engine.md`](engine.md#what-is-open), [`substrate.md`](substrate.md), [`sdk.md`](sdk.md#what-is-open), [`view.md`](view.md), [`components.md`](components.md), [`desktop.md`](desktop.md) and [`agent.md`](agent.md) marked in place. None of them block the pilot's structure; they need decisions as implementation reaches them. The current arc's ledgers are [`research/arc/selection.md`](research/arc/selection.md) §16 and [`research/arc/dimensions.md`](research/arc/dimensions.md) §8.

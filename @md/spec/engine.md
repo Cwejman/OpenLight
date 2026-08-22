@@ -436,7 +436,7 @@ A `run` that exceeds the caller's walls — the target outside the caller's `run
 
 - A caller that knows it will exceed may relate explanation prose onto the draft before awaiting — ordinary aboutness, rendered by the draft's chrome.
 
-The consent for an escalation is the **consent face** — a component whose content derives from field reads over the consent place (view) — sealed by the **reserved native chord** the input floor captures ([`host.md`](host.md)): the chassis vouches for the seal, never the drawing [P — steward reconciliation of the brief's two phrasings, "host modal from field reads" and "the chord → the consent face"]. The principal the chord binds is open [O — lean: the mount of the draft face]. Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
+The consent for an escalation is the **consent face** — a component whose content derives from field reads over the consent place (view) — sealed by the **reserved native chord** the input floor captures ([`chassis.md`](chassis.md)): the chassis vouches for the seal, never the drawing [P — steward reconciliation of the brief's two phrasings, "host modal from field reads" and "the chord → the consent face"]. The principal the chord binds is open [O — lean: the mount of the draft face]. Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
 
 ### What the engine writes at start
 

@@ -52,7 +52,7 @@ placement
   seq?       position, where what it is placed on is ordered — see *Ordered places*
 ```
 
-- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree is the precedent, [`programs.md`](programs.md) §1). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses stores. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per store, named after it.
+- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree was the precedent; the session's `root` carries it on — [`desktop.md`](desktop.md)). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses stores. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per store, named after it.
 
 - **instance** — *what it is.* Pure type membership: the chunk is an instance of the archetype it is placed on. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
 
@@ -201,7 +201,7 @@ A boundary is a **selection** — the type just defined: places, and pure deriva
 
 **Hygiene, not holes.** Naming a dimension in a boundary — positively or negatively — delegates membership control to that dimension's writers: writers of `engine` shape what `[engine]` shows; writers of `process` shape what `engine − process` shows, since removal there moves chunks *in*. Both polarities, the same delegation. Permission is a question of hygiene: keep the dimensions you name well-governed. Subtraction stays.
 
-*Held open — the third player.* Everything here is viewer-side. Prose can say anything about what it mentions, and no viewer-side selection closes that. **Author-ruled open: openness is cheaper than restriction until experience says otherwise** — you may read prose that mentions chunks and dimensions beyond your reach, and the prose does not inherit their walls. The reader-side consequence belongs to the surface layer: a program cannot run over a chunk beyond reach, so citations pointing outside the boundary render as unresolved references rather than live surfaces ([`programs.md`](programs.md)).
+*Held open — the third player.* Everything here is viewer-side. Prose can say anything about what it mentions, and no viewer-side selection closes that. **Author-ruled open: openness is cheaper than restriction until experience says otherwise** — you may read prose that mentions chunks and dimensions beyond your reach, and the prose does not inherit their walls. The reader-side consequence belongs to the surface layer: a program cannot run over a chunk beyond reach, so citations pointing outside the boundary render as unresolved references rather than live surfaces ([`view.md`](view.md)).
 
 *Open: the default kind-set of a bare `[X]` grant.* Dimensionality spans all kinds, and a bare grant that included *inbound mentions* would sweep in the field's chatter. Lean, unruled: outbound field refs plus placements on X; inbound mentions excluded unless asked.
 
@@ -400,7 +400,7 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 
 - **`#` instance sugar** — unruled.
 
-- **Ref refinement** — closing a ref to targets by *body*, a `where` clause over the referenced body: `ref(view-mount | where(component: list | split))`. Wanted by view's slots; lawful in principle since `where` is single-request already; new type grammar all the same. Until it lands, consumers check at runtime and show a fault face (view). [O — the brief.]
+- **Ref refinement** — closing a ref to targets by *body*, a `where` clause over the referenced body: `ref(view/mount | where(component: list | split))`. Wanted by view's slots; lawful in principle since `where` is single-request already; new type grammar all the same. Until it lands, consumers check at runtime and show a fault face (view). [O — the brief.]
 
 - **Projection of fields as first-class placements** (a standing `explode` beyond the `linked` field) — nothing needs it yet; revisit against a real consumer.
 

@@ -1,6 +1,6 @@
 # Chassis
 
-*(This file was `host.md` — the host. The host dissolved with the surface arc: the engine became its own artefact, seats became view's mounts, and what remains platform-true is the chassis. The filename rename rides the mechanical sweeps.)*
+*(This file was `chassis.md` — the host. The host dissolved with the surface arc: the engine became its own artefact, seats became view's mounts, and what remains platform-true is the chassis. The filename rename rides the mechanical sweeps.)*
 
 A **chassis** is a platform binding and a client of the engine. It hosts a surface kind — the pilot's is `web-dom` — and knows neither overlays nor components: it provides the realm, the transport, identity, and the input floor, and everything it is told is field data. **Nothing in the chassis is policy.** The pilot's chassis is **`chassis-desktop`** — a Rust binary on **tao** and **wry**, one window, one webview.
 
@@ -36,12 +36,12 @@ Because the home is nothing special, **`--home` may point at any store directory
 
 ## The entry — the chassis declares its contract
 
-**The chassis's contract is the archetypes of its configuration, which it declares** — as a program declares its payloads — and a configuration is *instances* of them, shipped in a module (the pilot's desktop module ships one — [`programs.md`](programs.md)):
+**The chassis's contract is the archetypes of its configuration, which it declares** — as a program declares its payloads — and a configuration is *instances* of them, shipped in a module (the pilot's desktop module ships one — [`desktop.md`](desktop.md)):
 
 ```ol
-chunk chassis/entry { instance: { layers: list<ref(view-mount)>,                        -- required: root mounts, in order
+chunk chassis/entry { instance: { layers: list<ref(view/mount)>,                        -- required: root mounts, in order
                                   reservations?: list<{ input: chord | gesture, place: ref }>,  -- [O encoding]
-                                  surface?: ref(view-surface-config) } }              -- absent → inherit the home's default entry
+                                  surface?: ref(view/surface-config) } }              -- absent → inherit the home's default entry
 ```
 
 `layers` is the only required key; the rest inherits from the home's default entry — which is what makes the **shorthand** lawful: `ol desktop --mount "reader [reading/x]"` synthesizes an entry with that one layer. **Repairing a broken configuration is the same shorthand over the entry chunk itself** (`--mount "chunk-table [my-entry]"`); no safe mode exists. Root-from-config recovery pins with `--at <commit>` [R].
@@ -68,7 +68,7 @@ The host's half of the surface kind ([`sdk.md`](sdk.md) holds the glue's half):
 
 ## The input floor
 
-**Privileged input is captured natively, before any realm sees it.** What the floor captures is the entry's **reservations**: each names an input (a chord, a gesture) and the place its record lands. On a reserved input the chassis composes the **trusted record** — what happened plus a well-decided location (pointer → mount → the field location shown; realm code cannot synthesize one) — and **lands it in the configured place through its own engine connection**: native code, which is what keeps the record trusted; the glue never writes one ([`programs.md`](programs.md) carries `view/input-record` with the view family).
+**Privileged input is captured natively, before any realm sees it.** What the floor captures is the entry's **reservations**: each names an input (a chord, a gesture) and the place its record lands. On a reserved input the chassis composes the **trusted record** — what happened plus a well-decided location (pointer → mount → the field location shown; realm code cannot synthesize one) — and **lands it in the configured place through its own engine connection**: native code, which is what keeps the record trusted; the glue never writes one ([`view.md`](view.md) carries `view/input-record` with the view family).
 
 The record is a commit, session-owned, removed on dismiss — never ephemera: it is the act's record. Overlays, menus and consent are components whose content derives by expression over that place; dismiss is the record leaving. **No handlers.**
 
@@ -144,4 +144,4 @@ chassis-desktop/
   .ol/db, .ol/project.toml
 ```
 
-`chassis-desktop` speaks the engine's wire protocol only — it is a client. The old host's other cargo: the runtime providers live with the engine (`runtime-vm`); the React library and first-party programs became `component/*` and the desktop module ([`programs.md`](programs.md), [`pilot.md`](pilot.md)).
+`chassis-desktop` speaks the engine's wire protocol only — it is a client. The old host's other cargo: the runtime providers live with the engine (`runtime-vm`); the React library and first-party programs became `component/*` and the desktop module ([`components.md`](components.md), [`desktop.md`](desktop.md), [`pilot.md`](pilot.md)).

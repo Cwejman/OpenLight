@@ -10,7 +10,7 @@ Not everything will be built on the substrate, and nothing has to be. An integra
 
 The point is compute, not mirroring: once projected, the AI tooling native to this environment — completion from scope, derivation, reconciliation — runs over data that lives elsewhere. The substrate stores the projection contract and the references; the external system remains the owner.
 
-**Real today:** reference chunks with resolution parameters, the integration-archetype pattern, the git driver, and the `reconcile` program shape (`spec/programs.md`). **Open:** the driver contract (a driver is a program — what does it declare?), materialized sync versus virtual projection (chunks written and reconciled, or resolved live at query time), freshness semantics, and how projected history composes with the substrate's own commit graph.
+**Real today:** reference chunks with resolution parameters, the integration-archetype pattern, the git driver, and the `reconcile` program shape (`spec/components.md`). **Open:** the driver contract (a driver is a program — what does it declare?), materialized sync versus virtual projection (chunks written and reconciled, or resolved live at query time), freshness semantics, and how projected history composes with the substrate's own commit graph.
 
 ## The field as the model's cache — the substrate embodied
 
@@ -28,7 +28,7 @@ The host is a powerful compute environment — and some of what is built in it w
 
 ## The engine as a daemon
 
-v0.1 links the engine into the host binary. The direction: the engine runs as a daemon owning the field, and a host is a **window that attaches** — start a host in your OS, select a session, and you are purely in that session; several windows stand open on one field with no drift of state, because there is only one state. The same move takes the engine over the network — a remote field attached like a local one — and gives daemon *programs* a home: services that outlive any window, which a truly functional compute environment needs (`spec/programs.md` §2).
+v0.1 links the engine into the host binary. The direction: the engine runs as a daemon owning the field, and a host is a **window that attaches** — start a host in your OS, select a session, and you are purely in that session; several windows stand open on one field with no drift of state, because there is only one state. The same move takes the engine over the network — a remote field attached like a local one — and gives daemon *programs* a home: services that outlive any window, which a truly functional compute environment needs (`spec/engine.md`, *Daemons*).
 
 **Real today:** the engine sits behind a JSON-lines protocol already — the seam is transport-shaped, so daemonizing is moving the library behind a socket, not a redesign. **Open:** the daemon's own lifecycle, session attach/detach semantics, authentication at the socket, daemon-program start policy, and the reactivity fan-out across attached windows (kin to cross-host reactivity, below).
 
@@ -36,7 +36,7 @@ v0.1 links the engine into the host binary. The direction: the engine runs as a 
 
 The substrate is typed, so interface can be inferred from shape — that is a ladder, not a leap:
 
-1. **Inferred browsing (v0.1).** The read-tile derives its default presentation from what a scope structurally is — ordered → sequence, shared archetype with a schema → table, session-typed → transcript ([`spec/programs.md`](spec/programs.md), *Viewing the substrate*). Forms for running programs are generated from argument archetypes the same way.
+1. **Inferred browsing (v0.1).** The read-tile derives its default presentation from what a scope structurally is — ordered → sequence, shared archetype with a schema → table, session-typed → transcript ([`spec/components.md`](spec/components.md)). Forms for running programs are generated from argument archetypes the same way.
 2. **Authored overrides.** Where inference falls short, a program or a per-archetype hint supplies the form — hand-built views remain first-class, and a powerful UI stays cheap.
 3. **Generated interfaces.** On the far end, AI generates views — more tractable here than in conventional apps, because the substrate separates mechanics from form and the type system constrains what a view must honor.
 
@@ -50,7 +50,7 @@ Body schemas document key types today, but a chunk id in a body is an opaque str
 
 Several model programs sharing a field, each with its own face, running in oscillation — one's output enabling what another could not make alone. Kept deliberately, and marked honestly: this is the least proven idea in the project. It depends on completion-model performance over many cycles running together, which no one has demonstrated at this shape.
 
-What makes it worth holding: the mechanical floor already exists and required no new mechanism — delegation as nested runs, siblings coordinating through subscriptions on shared scopes, blackboard scopes with enforced specs, attribution on every commit (`spec/programs.md`). The band is what may emerge *above* that floor. It is not a mechanism to build first; it is what the working environment makes it possible to attempt.
+What makes it worth holding: the mechanical floor already exists and required no new mechanism — delegation as nested runs, siblings coordinating through subscriptions on shared scopes, blackboard scopes with enforced specs, attribution on every commit (`spec/engine.md`). The band is what may emerge *above* that floor. It is not a mechanism to build first; it is what the working environment makes it possible to attempt.
 
 ## Knowledge as resolutions
 

@@ -4,7 +4,7 @@ The SDK is the surface programs import to reach the substrate. It hides protocol
 
 Three runtime kinds exist ([`engine.md`](engine.md)); two of them spawn programs that import an SDK. Both use the same surface — only the transport differs.
 
-- **Surface programs** — `runtime: 'webview'`. A JS module the shell seats inside the window's one shell document ([`host.md`](host.md)). The runtime is that webview's V8: full DOM, full browser APIs, full client-side React, 60fps interactions. The SDK reaches the engine over wry IPC.
+- **Surface programs** — `runtime: 'webview'`. A JS module the shell seats inside the window's one shell document ([`chassis.md`](chassis.md)). The runtime is that webview's V8: full DOM, full browser APIs, full client-side React, 60fps interactions. The SDK reaches the engine over wry IPC.
 - **VM programs** — `runtime: 'vm'`. An executable file with a shebang the host's VM provider spawns inside the Linux VM. The shebang declares the interpreter (`#!/usr/bin/env bun`, `#!/usr/bin/env python`) — the runtime kind doesn't bind to one language. Any interpreter in the VM that speaks the JSON-lines protocol over stdio works.
 - **`runtime: 'native'`** programs — the read-native pipe verbs — have no executable and never import an SDK. They *are* the planner; the engine registers itself as their provider.
 
@@ -117,7 +117,7 @@ All wrap engine ops of the same name (`readBatch` → `read_batch`). Errors arri
 
 *The existence oracle — ruled, accepted for v0.1.* A read the boundary does not admit rejects with `BOUNDARY_VIOLATION` rather than returning empty; the disclosure this implies is accepted while dbs are single-author and mounts chosen ([`engine.md`](engine.md), *Boundary-Request Behavior*). Revisit at peering.
 
-`readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on ([`programs.md`](programs.md) §5).
+`readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — and is the resolution primitive slot-and-hook providers build on ([`view.md`](view.md) §8).
 
 *Per-sub-query identity — ruled.* Each `read_batch` entry carries its identity token on the wire; `TaggedRead` gains the field, and a provider coalescing hooks from several citizens authorizes each entry as its citizen — *embedding never escalates* holds ([`engine.md`](engine.md), *The Program Protocol*).
 
@@ -191,7 +191,7 @@ useRead(places: ChunkId[], opts?: ReadOpts): ReadResult | undefined
 
 **Subscribe-before-fetch ordering.** The order is load-bearing: subscribe first, then fetch. If the order were reversed, a commit landing between the fetch and the subscribe would not be reflected in either — the fetch read state before it, and the subscription registered after the broadcast had already fired. With subscribe first, any commit between subscribe and fetch produces an event the SDK receives (queued during the in-flight fetch); the subsequent re-fetch supersedes the initial fetch and reflects the new state. The cost is at most one extra fetch per mount; there is no lost-event window. Any imperative caller using `subscribe` + `read` together must follow the same ordering.
 
-*Open — no error channel.* `useRead` returns `ReadResult | undefined`, and `undefined` is its only failure form — a refused read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The reader's inline-error pin ([`programs.md`](programs.md) §3) is unreachable for reads until this closes.
+*Open — no error channel.* `useRead` returns `ReadResult | undefined`, and `undefined` is its only failure form — a refused read (`BOUNDARY_VIOLATION`) is indistinguishable from loading. The reader's inline-error pin ([`components.md`](components.md), table) is unreachable for reads until this closes.
 
 **Why re-fetch every event** rather than apply the event's `commit` payload as a delta. Single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available to the callback for delta optimization in custom uses, but the default discards it.
 
@@ -384,7 +384,7 @@ type EngineError = {
 
 *Open — one encoding for type terms, or two.* A program's `accepts` is `list<type>` and rides the wire as `$type` values, while an instance contract is typed here — and in [`db.md`](db.md) — as a map of type-expression **strings**. Both carry the same closed vocabulary, and substrate.md's *type terms are themselves data* argues for one form. Which encoding the stored `instance` column holds is unreconciled; the SDK mirrors db's string form until it is.
 
-Ambient globals a runtime installs — `window.__wry_ipc`, `window.__sdk`, `window.__openlight_process`, `globalThis.__openlight_transport` — are typed in one home, the SDK's `globals.d.ts`; no package re-declares them. `window.__openlight_process` is set for **whole-document** programs only (the shell, an iframe citizen); a same-DOM seat takes its process identity from the seat that mounted it ([`host.md`](host.md), *Authoring Programs*).
+Ambient globals a runtime installs — `window.__wry_ipc`, `window.__sdk`, `window.__openlight_process`, `globalThis.__openlight_transport` — are typed in one home, the SDK's `globals.d.ts`; no package re-declares them. `window.__openlight_process` is set for **whole-document** programs only (the shell, an iframe citizen); a same-DOM seat takes its process identity from the seat that mounted it ([`chassis.md`](chassis.md), *Authoring Programs*).
 
 ---
 
@@ -405,11 +405,11 @@ The SDK posts requests through `window.__wry_ipc.postMessage(<json>)`. The host'
 
 The `__sdk` global on the webview side is the SDK's hook surface — a small object the host calls to deliver responses and events. The host's routing only knows the function names.
 
-**One realm, many identities.** The window holds one webview and one document, and every seated program is its own process ([`engine.md`](engine.md#containment)). Each seat's SDK instance holds the identity token issued at seat creation and stamps it on every request, so boundaries and commit attribution hold at seat granularity — a slot is a seat at the finest altitude ([`programs.md`](programs.md) §1). **How the token reaches the seat differs by containment tier and is [`host.md`](host.md)'s** (*Transport*): a same-DOM seat's token rides the parent's channel, which the tier's shared fate makes honest; an iframe citizen's is injected by the host directly, because a parent that handled the token could commit history *as* its citizen.
+**One realm, many identities.** The window holds one webview and one document, and every seated program is its own process ([`engine.md`](engine.md#containment)). Each seat's SDK instance holds the identity token issued at seat creation and stamps it on every request, so boundaries and commit attribution hold at seat granularity — a slot is a seat at the finest altitude ([`view.md`](view.md) §3). **How the token reaches the seat differs by containment tier and is [`chassis.md`](chassis.md)'s** (*Transport*): a same-DOM seat's token rides the parent's channel, which the tier's shared fate makes honest; an iframe citizen's is injected by the host directly, because a parent that handled the token could commit history *as* its citizen.
 
 *The citizen's return path — ruled.* Delivery is **host-direct in both directions**: responses and events are evaluated against the seat's own context — an iframe citizen's origin document directly, the shell document only for same-DOM seats — so a parent may gate a citizen but never read, drop, or forge its traffic ([`engine.md`](engine.md#reactivity-wiring), step 4). The SDK's demultiplexer is identical either way.
 
-*Open — identity under a shared module instance.* Transport selection happens at module load, and a module-global identity token is sound only where one realm holds one process — a VM program, the shell, an iframe citizen. Same-DOM seats share a realm, and host.md's *shell-injected shared runtime* would have them share one SDK module instance as well; identity would then have to bind per seat rather than at module load. The shape settles with the slot protocol ([`programs.md`](programs.md) §5, declared open).
+*Open — identity under a shared module instance.* Transport selection happens at module load, and a module-global identity token is sound only where one realm holds one process — a VM program, the shell, an iframe citizen. Same-DOM seats share a realm, and chassis.md's *shell-injected shared runtime* would have them share one SDK module instance as well; identity would then have to bind per seat rather than at module load. The shape settles with the slot protocol ([`view.md`](view.md) §9, declared open).
 
 ### VM transport
 
@@ -419,7 +419,7 @@ VM programs run inside their own VM. Their fs/network/shell access is whatever t
 
 ### What the SDK does not do
 
-The SDK does not render, and it assumes nothing about the page. Where a program's DOM goes differs by seat ([`host.md`](host.md), *Serving `ol://`*):
+The SDK does not render, and it assumes nothing about the page. Where a program's DOM goes differs by seat ([`chassis.md`](chassis.md), *Serving `ol://`*):
 
 - A **whole-document** program — the shell, an iframe citizen — is served an empty document and mounts `document.body`: `createRoot(document.body).render(<App />)` directly, no SDK wrapper.
 - A **same-DOM seat** gets no document. The shell hands the program a root element and imports its entry into the shared realm; the program mounts what it is given.
@@ -484,4 +484,4 @@ Same coherence pattern as the db crate: each file owns a topic; predictable shap
 - **Type generation.** TS types are a hand-maintained mirror today. A codegen step from the Rust source could keep them in sync mechanically — and the same generator produces the payload-archetype types that catch a mistyped body key before any write (substrate.md, *What's Open*).
 - **Non-TS clients.** The protocol is JSON-lines; an SDK can be reimplemented in any language that runs as a VM program. The first non-TS port is a known horizon target. See [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) for what's deferred.
 - **Streaming intra-op results.** Settled engine-side as a convention rather than protocol machinery: streaming is throttled partial commits (`body.partial`), coalesced subscription events, re-fetch on event — see [`engine.md`](engine.md), *Streaming convention*. Intra-op streaming stays out of the protocol.
-- **The slot provider.** The coalescing resolver for slot-and-hook views (collect hook declarations per render pass → one `readBatch` → slices to hooks) belongs in the UI layer on top of `readBatch`; its exact shape settles by building the thread tile ([`programs.md`](programs.md) §5).
+- **The slot provider.** The coalescing resolver for slot-and-hook views (collect hook declarations per render pass → one `readBatch` → slices to hooks) belongs in the UI layer on top of `readBatch`; its exact shape settles by building the thread tile ([`view.md`](view.md) §8).
