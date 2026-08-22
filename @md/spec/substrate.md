@@ -52,10 +52,14 @@ placement
   seq?       position, where what it is placed on is ordered — see *Ordered places*
 ```
 
-- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree is the precedent, [`programs.md`](programs.md) §1). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses mounts. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per project, named after it.
+- **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree is the precedent, [`programs.md`](programs.md) §1). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses stores. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per store, named after it.
+
 - **instance** — *what it is.* Pure type membership: the chunk is an instance of the archetype it is placed on. Multi-typing is natural — a chunk may be instance of several archetypes. (`#` as instance sugar is an unruled candidate.)
+
 - **relates** — *what it is about.* Authored aboutness, published into the subject's room. Prose placed on its subjects — the chunk at the intersection *is* the relationship — stays the substrate's oldest pattern.
+
 - **field** — *related by key.* A typed ref in a body, declared by the owning archetype's instance contract (`person` declares `work` holds a `workplace`). Directional by nature — a body reads outward, which is what pointer-facts always needed and relates never was. Derived into the link index at write.
+
 - **mention** — *spoken of.* A reference in prose (the `ol:` scheme) or a chunk or place a fenced expression uses. The open end of the spectrum: where naming the relation would be false precision, prose carries the meaning and the mention carries the reference. Derived into the link index at write.
 
 Rigid pointers that once leaned on `relates` move into fields; relates is relieved, not removed — it goes back to reliably meaning aboutness.
@@ -75,7 +79,9 @@ Dimension and place are one thing from two sides: a chunk is a **dimension** whe
 **Three axes, never conflated:**
 
 - **Kinds are symmetric.** No connection kind is inherently hidden in one direction. Knowledge flows both ways; authorship never does.
+
 - **Boundaries decide what you may see.** Permission, viewer-side, uniform over everything: bodies, members, adjacency, links, search.
+
 - **Selections decide what you are looking at.** Reader configuration — instances only, exclude mentions — is attention, not permission.
 
 Selecting `[movie]` shows movies, not your note about one; selecting `[the-movie]` shows the note — if your boundary admits it. Membership, attention, permission: three different facts. The last two are law, and both need the type vocabulary first.
@@ -101,11 +107,17 @@ Towers are natural: `shell` fits `program`'s instance contract while carrying it
 **Key types** are a closed vocabulary of eleven words:
 
 - `string` · `number` · `time` · format-tagged string (`markdown`) — primitives. Never field content; they live inside bodies as payloads.
-- `ref` — one chunk, by name or id, optionally archetype-constrained: `ref(workplace)`, or a union `ref(A | B)` — the target must be instance on any listed archetype. There is no `name` type: one name *is* a ref.
+
+- `ref` — one chunk, by name or id, optionally archetype-constrained: `ref(workplace)`, or a union `ref(A | B)` — the target must be instance on any listed archetype. There is no `name` type: one name *is* a ref. (A *refinement* over the referenced body — `ref(X | where(…))`, wanted by view's slots — is an open extension: *What's Open*.)
+
 - `loc` — a place: an intersection of chunks. One chunk is itself a place, so `[c]` is the place *at* c — the chunk and what is placed on it.
+
 - `expr` — an expression: named nodes, its own closure, last unnamed line as `out` ([`engine.md`](engine.md)).
+
 - `list<T>` (ordered) · `set<T>` (unordered, uniqueness checked). Both take an exact cardinality: `list<ref(commit), 2>` is the ordered pair, `set<ref(commit), 2>` the symmetric one. Tuples are unnecessary.
+
 - `map` — untyped nesting. `map<T>` — named entries of typed values.
+
 - `selection` — `list<loc | ref | expr>`, **ordered**, with three stated clauses: expressions within one must derive pure ([`engine.md`](engine.md)); duplicate elements are rejected (offering the same thing twice in one offer is meaningless); at most one `selection` entry in a program's `accepts` — two would compete for the same offered elements. A selection is what you offer to be viewed or consumed: chunks, places, and derivations of places. **Order is carried by the value; whether it means anything is the consumer's choice** — the model family reads it as window order, a boundary ignores it. **A chunk and the place at it are different offers** — `X` is the chunk alone; `[X]` is the place at X, which carries the chunk *and* what is placed on it. Both are legitimate things to hand someone, so a selection admits both; without `ref` you would need an expression subtracting a place's members from itself to say "here is this one thing." The `accepts` clause is a rule about argument matching, not about contracts at large: a body may hold several selection-typed keys, as the program contract's `read`, `write` and `run` do. *Open: whether the general vocabulary ever needs an ordered-unique container word; selection's duplicate clause covers the only current case.*
 
 **Struct literals are types.** `{k: type, …}` in a type position types a nested value inline, no archetype involved: `grades?: map<{ wmin?: number, wmax?: number }>`. Typing goes as deep as you write it; anonymous nested maps stay untyped, as bodies always were. `instance:` means exactly one thing — the contract on chunk *instances* — and archetype names appear in key positions only inside `ref(X)`.
@@ -175,12 +187,16 @@ Writing `ada` validates `work` (exists, instance of `workplace`) and `status` (i
 
 ## Boundaries — What You May See
 
-A boundary is a **selection** — the type just defined: places, and pure derivations of places. The derivations a boundary admits are the *single-request class* of the expression language: dimension algebra, the hop verbs, `at`, `where`, `follow` — what lowers to one request, exactly. That grammar belongs to [`engine.md`](engine.md) and is not restated here; what the law fixes is its ceiling — a wall must be evaluable instantly and deterministically at every read, so compute has no place in it. How a run comes by its boundary — the frame, grants, the program's stated ceiling, the parent cap — is engine.md's as well; this section is the law it enforces.
+A boundary is a **selection** — the type just defined: places, and pure derivations of places. The derivations a boundary admits are the *single-request class* of the expression language: dimension algebra, the hop verbs, `at`, `where`, `follow` — what lowers to one request, exactly. That grammar belongs to [`engine.md`](engine.md) and is not restated here; what the law fixes is its ceiling — a wall must be evaluable instantly and deterministically at every read, so compute has no place in it. How a run comes by its boundary — the frame, grants, the program's ceiling, the parent cap, and the call context that judges every act — is engine.md's as well; this section is the law it enforces.
 
 - **Sets are first class**: union, intersection, and **subtraction**, in boundaries and reads alike. `[project, controller, admin]` narrows; `engine − process` subtracts.
+
 - **One grammar, three jobs**: attention (the reader's members), context (the agent's), permission (boundaries). That one selection language serves all three is the design's proof of fit.
+
 - **Filtering is uniform.** Bodies, membership answers, adjacency, links, and full-text search are all filtered by the reader's boundary. **Counts describe what your boundary admits** — there is no privileged view of a full set.
+
 - **Membership is always current, including under `at`.** A temporal read is filtered by the structure as it stands *now*, never as it stood at the read's commit. Placing a chunk on `secrets` today hides it throughout all history — which is what remediation requires — and removing it exposes history. Accepted: boundaries govern the current structure, and the past is read through it, not beside it. *Open: whether `at` is meaningful, ignored, or illegal inside a boundary expression itself.*
+
 - **A boundary is a standing licence, not a snapshot.** A run's boundary *expression* freezes at start; membership through it stays live, so a grant over a collection that grows keeps admitting what arrives.
 
 **Hygiene, not holes.** Naming a dimension in a boundary — positively or negatively — delegates membership control to that dimension's writers: writers of `engine` shape what `[engine]` shows; writers of `process` shape what `engine − process` shows, since removal there moves chunks *in*. Both polarities, the same delegation. Permission is a question of hygiene: keep the dimensions you name well-governed. Subtraction stays.
@@ -215,13 +231,16 @@ Reading is settled; writing splits the kinds differently. Every connection has t
 **Placements** (`owned`, `instance`, `relates`) land on the target's side. The act is publishing into the target:
 
 - **Create** requires **write over the dimension and read over the placed chunk.**
-- **Remove** requires **write over the dimension** — its stewards curate its member list.
+
+- **Remove** requires **write over the dimension** — its stewards curate its member list. (`instance` is the exception — below.)
+
 - *Why read over the chunk:* without it, anyone could place a bare *id* they never held, and the dimension's holders would gain a body the placer could not read — reach manufactured from an address. Same rule and reason as ref creation, below.
-- *Why not write over both:* the federation pattern requires placing *read-only* peer chunks onto your own dimensions. Reference is not modification; write-on-both kills mounting.
+
+- *Why not write over both:* the federation pattern requires placing *read-only* peer chunks onto your own dimensions. Reference is not modification; write-on-both kills attaching.
 
 **Links** (`field`, `mention`) land in the author's own body. The act is speaking from yourself: self-governed. The target is passive — read over it suffices.
 
-**Instancing is a claim**, not a publication: anyone may claim a type, the archetype untouched. Publish-governance here would strangle typing and enums, so the cost is carried instead, and stated plainly. The injected party **gains no reach** — reach flows to the boundary's holder, and an injector only exposes their own chunk; this is an **integrity** question (pollution and spoofing of trust-bearing membership), not a confidentiality one. The real mechanism is **federation**: placement rows union across mounted dbs, so a mounted peer can write members into any dimension you name. v0.1 is unaffected — one author per db, mounts chosen and read-only. *Direction recorded, unworked, author-ruled open and explicitly not an implementation blocker: provenance-scoped membership — every federated chunk already carries a synthesized mount marker, so selections could default to same-db members with peer members opted in per term. Rides with shared-db identity; not to be designed now.*
+**Instancing is a claim**, not a publication: anyone may claim a type, the archetype untouched — and the symmetry holds on removal: **removing an `instance` placement requires write over the placed chunk** [R — the claim is the chunk's own fact, never the archetype's], the archetype again untouched. Publish-governance here would strangle typing and enums, so the cost is carried instead, and stated plainly. The injected party **gains no reach** — reach flows to the boundary's holder, and an injector only exposes their own chunk; this is an **integrity** question (pollution and spoofing of trust-bearing membership), not a confidentiality one. The real mechanism is **federation**: placement rows union across attached stores, so an attached peer can write members into any dimension you name. v0.1 is unaffected — one author per db, attachments chosen, write declared at attach. *Direction recorded, unworked, author-ruled open and explicitly not an implementation blocker: provenance-scoped membership — every federated chunk already carries a synthesized attachment marker, so selections could default to same-store members with peer members opted in per term. Rides with shared-db identity; not to be designed now.*
 
 This is why the kinds differ, and it is worth saying once plainly: placements are written by whoever writes the chunk, and multi-typing is free. A boundary phrased over an archetype therefore admits whatever anyone claims. **You grant places, not types** — grant dimensions you govern.
 
@@ -234,6 +253,7 @@ Assignment governance falls out of the same rule with no new machinery: a role i
 When a body is saved, in the same transaction:
 
 - **Declared ref keys are validated** — target exists and is an instance of the constrained archetype — else the write fails like any contract violation.
+
 - **Every link the body contains** — typed refs, and mentions in prose or fenced expressions — is filed into one derived link table: delete-and-reinsert per chunk, the FTS pattern. The table is never part of commits and is rebuildable from current bodies. Typed refs make link-*finding* contract-free (tags announce refs); only archetype-constraint checking reads contracts, at write.
 
 **Both-sides reading.** `ReadResult` carries a separate `linked` field beside membership — who points here, labeled `field` (with its key) or `mention`, never mixed with placements. "Who works here" is one indexed lookup; open Turing and every prose that mentions him is there.
@@ -244,7 +264,7 @@ When a body is saved, in the same transaction:
 
 **A mention may name a place rather than a chunk.** Prose speaks of `loc` as readily as of chunks — and a place is a description, resolving to a hundred chunks today and ninety tomorrow. The link's target therefore holds one of two things: a chunk id, or a normalized location expression. "Who references this place" answers by matching the expression. Naming a place in prose never creates a chunk for it; lifting a description into a chunk stays the separate sharing gesture.
 
-**Cross-mount refs validate through the engine** — the federation seam ([`engine.md`](engine.md)). The db stays id-blind and validates locally resolvable targets only. Adopted as the simple thing; author reservation on record that it may prove the wrong seam.
+**Cross-store refs validate through the engine** — the federation seam ([`engine.md`](engine.md), *Stores and attach*). The db stays id-blind and validates locally resolvable targets only. Adopted as the simple thing; author reservation on record that it may prove the wrong seam.
 
 ## Mutations and validation
 
@@ -253,9 +273,13 @@ Mutations are atomic. A declaration — one or many chunks, with their placement
 Validation runs against the post-write state of the declaration: everything declared together is recorded before any contract is checked, so a chunk and the instance placement its body is judged by may arrive in one declaration without ordering failure. For each chunk touched:
 
 - the body must fit the union of the instance contracts of every archetype it is `instance` on;
+
 - declared ref keys must resolve, and must hit the constrained archetype where one is named;
+
 - the name must be unique within its owner, and present if the chunk has members;
+
 - a second `owned` placement for a chunk that already has an owner is rejected;
+
 - a placement landing on an instance of a `seq: true` archetype takes the seq given, or `max + 1` over that place when omitted.
 
 Governance rides alongside: every placement in the declaration is checked for write over its dimension and read over its chunk, every link for read over its target.
@@ -334,7 +358,7 @@ External content is **referenced, not stored**. A chunk whose body carries resol
 
 ## Peers
 
-Peers are separate databases, not partitions of one — each owns its data. They compose into one field by mounting: chunk ids are globally unique, so a placement in one db can reference a chunk in another, and reads union across the mounted set. Ownership never crosses mounts — a chunk is named within its own db. Other placements do cross, and that is the federation pattern working as designed, with the integrity cost stated under *Who may write what*. Backlinks are per-db: a peer's links to my chunk live in their table; a complete `linked` answer is a federated union across mounts, like reads generally. How projects declare and resolve mounts, and the read-write/read-only model, are the engine's — see [`pilot.md`](pilot.md#multi-project-mounts) and [`engine.md`](engine.md).
+Peers are separate stores, not partitions of one — each owns its data. They compose into one field by attaching: chunk ids are globally unique, so a placement in one store can reference a chunk in another, and reads union across the attached set. Ownership never crosses stores — a chunk is named within its own store. Other placements do cross, and that is the federation pattern working as designed, with the integrity cost stated under *Who may write what*. Backlinks are per-store: a peer's links to my chunk live in their table; a complete `linked` answer is a federated union across attached stores, like reads generally. How stores are attached — the record, declared write modes, write routing, per-store commits — is the engine's ([`engine.md`](engine.md), *Stores and attach*).
 
 ## Logical schema
 
@@ -361,13 +385,25 @@ A substrate. Not a database for a specific application. Not a retrieval layer fo
 ## What's Open
 
 - **Instance contracts stay open — a note, not a build.** Undeclared body keys remain legal, and a contract may not declare itself closed. Multi-typing is the reason: a chunk instance on a closed A and an open B would need "closed over the union of every archetype's declared keys" — a new composition rule for a small win. The win it wants (catching `citty` for `city`) is paid for instead by generating TS types over the substrate, in the editor, before any write. **Do not build the closed form.**
+
 - **Ref-constraint naming.** How `ref(workplace)` names its archetype — id vs closure name — couples to the bootstrap-ID debt; these settle together.
+
 - **Eager vs lazy re-derivation.** Editing an archetype's instance contract invalidates the derived link rows of every instance. Eager (write fan-out on contract edits) vs lazy (rows knowingly stale until each chunk's next write) is the sharpest open engineering decision.
+
 - **Expression normalization.** When two location descriptions count as the same place — for "who references this", and for cache keys. Settles at build.
+
 - **Temporal link queries.** v0.1 offers none; historical bodies remain in the version log, re-derivable if wanted.
+
 - **Mention/fence syntax edges.** The `ol:` scheme's location URIs and the fenced-expression tag settle at `prose` v0.
+
 - **Single owner, until evidence.** One owner per chunk is the law; a real case for shared residence would reopen it.
+
 - **`#` instance sugar** — unruled.
+
+- **Ref refinement** — closing a ref to targets by *body*, a `where` clause over the referenced body: `ref(view-mount | where(component: list | split))`. Wanted by view's slots; lawful in principle since `where` is single-request already; new type grammar all the same. Until it lands, consumers check at runtime and show a fault face (view). [O — the brief.]
+
 - **Projection of fields as first-class placements** (a standing `explode` beyond the `linked` field) — nothing needs it yet; revisit against a real consumer.
+
 - **Merge semantics — ruled.** Branches diverge freely; merge auto-takes the union of additions and fails hard only on true collision (the same chunk's body or contract changed on both sides). No conflict-resolution machinery in the primitives: an agent resolves a refused merge with existing tooling, committing the reconciliation as ordinary work. Substrate refuses, intelligence resolves. Protocol shape lands with branch ops ([`engine.md`](engine.md), *What Is Open*).
+
 - **Temporal validity.** Event time vs system time is expressible through body keys; whether `valid_from`/`valid_to` deserve first-class status depends on use.
