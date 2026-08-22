@@ -40,7 +40,7 @@ Mechanics, carried from the mount era and re-worded to it:
 
 ## Serving sources
 
-**`ol://` resolves through the engine** [R]: *the file of store s at path p* — served from the store as attached, so no client knows disk paths and the web flavor of a chassis is unchanged by it. Realization `source` strings (view) resolve here. **Pilot-grade plumbing, nothing more**: the pilot serves what components need and no further — file-at-commit serving, locking, and the rest of a real file story belong to the files integration, down the line; a module's files living under the store's version control is what keeps that door open.
+**`ol://` resolves through the engine** [R]: *the file of store s at path p* — served from the store as attached, so no client knows disk paths and the web flavor of a chassis is unchanged by it. Realization `source` strings (view) resolve here. **Pilot-grade plumbing, nothing more**: the pilot serves what components need and no further — file-at-commit serving, locking, and the rest of a real file story belong to the files integration, down the line; a module's files living under the store's version control is what keeps that door open. How the bytes travel — a serving channel beside the JSON-lines ops, or an op of their own — is a build-time shape, unstated here [O].
 
 ## What the Engine Owns
 
@@ -436,7 +436,7 @@ A `run` that exceeds the caller's walls — the target outside the caller's `run
 
 - A caller that knows it will exceed may relate explanation prose onto the draft before awaiting — ordinary aboutness, rendered by the draft's chrome.
 
-The consent for an escalation is a chassis modal composed from field reads, sealed by the reserved native chord (view, chassis); the principal it binds is open [O — lean: the mount of the draft face]. Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
+The consent for an escalation is the **consent face** — a component whose content derives from field reads over the consent place (view) — sealed by the **reserved native chord** the input floor captures ([`host.md`](host.md)): the chassis vouches for the seal, never the drawing [P — steward reconciliation of the brief's two phrasings, "host modal from field reads" and "the chord → the consent face"]. The principal the chord binds is open [O — lean: the mount of the draft face]. Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
 
 ### What the engine writes at start
 
@@ -929,7 +929,7 @@ Each file composes from small named functions; the public method reads as a top-
 
 - **The call context's encodings** — how the parent link is derived (containment backrefs vs a stored key); the frame's seat in the generic contract (cap-exempt, processes only); which ops beyond read/write/run are judged under `{ anchor }` (*The call context*).
 
-- **Attach-era encodings** — the dynamic-attach record in the personal store; the attach-time consent chip; the act journal, if a truly atomic cross-store case appears (*Stores and attach*).
+- **Attach-era encodings** — the dynamic-attach record in the personal store; the attach-time consent chip; the act journal, if a truly atomic cross-store case appears; and **whether attach is transitive** — an attached store's own `[[attach]]` entries attaching in turn (the old cascade recursed, deduped by canonical path, rejected cycles; "dependency is attach" leans that way and nothing restates the mechanics) (*Stores and attach*).
 
 - **The consent chord's principal** — lean: the mount of the draft face (*Run-to-draft*; view).
 

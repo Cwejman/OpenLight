@@ -1,209 +1,147 @@
-# Host
+# Chassis
 
-The host is the Rust authority under the environment: the window, OS input, the VM and its capabilities, the keychain, the engine and substrate crates, `ol://` serving, the transport, and boot. It draws no interface at all. There is one compositor — the web tree ([`engine.md`](engine.md#containment)) — so everything a person sees is program-authored DOM, and how that DOM is arranged is a program's concern ([`programs.md`](programs.md) §1).
+*(This file was `host.md` — the host. The host dissolved with the surface arc: the engine became its own artefact, seats became view's mounts, and what remains platform-true is the chassis. The filename rename rides the mechanical sweeps.)*
 
-Written in Rust against **tao** (cross-platform windowing) and **wry** (cross-platform webview) — the libraries under Tauri, used directly without adopting Tauri's app-level conventions. One window, one webview, one document: wry's own default shape, which is exactly what one compositor asks for.
+A **chassis** is a platform binding and a client of the engine. It hosts a surface kind — the pilot's is `web-dom` — and knows neither overlays nor components: it provides the realm, the transport, identity, and the input floor, and everything it is told is field data. **Nothing in the chassis is policy.** The pilot's chassis is **`chassis-desktop`** — a Rust binary on **tao** and **wry**, one window, one webview.
 
-The engine and substrate are Rust crates linked into the host binary. The host calls them directly — there is no separate engine process and no inter-process hop between host and engine. The host also implements and registers the runtime providers the engine asks to spawn programs; the engine ships none of its own.
+**What you run is the engine, and a chassis.** Two commands, one directory:
 
----
-
-## What the Host Does
-
-- Opens and manages a single native window, and takes OS input — keyboard, pointer, the palette's leader key, window-level shortcuts.
-- Holds that window's one webview and navigates it to the shell document, served over `ol://`.
-- Serves program source over the `ol://` protocol, transpiled per file and cached by mtime.
-- Mounts and unmounts a program's **seat** inside the shell document, on the engine's command.
-- Receives wry IPC from surface programs, attaches the calling process's `Context`, and calls the engine function.
-- Issues per-seat identity tokens, injecting them **directly** into iframe citizens so no parent can forge them.
-- Implements and registers the VM and surface runtime providers; owns the VM lifecycle, including peer FS mounts at `/peers/<project-id>/`.
-- Enforces capabilities at spawn through those providers — `net[:host]` egress allowlists, `fs`/`exec` gating, and `secret:<NAME>` injection as env vars from a host-held keychain (secrets are never chunks; [`engine.md`](engine.md), *Capabilities and secrets*).
-- Opens the active project's database, walks and opens the mounts cascade, opens the engine, and closes all of it on exit.
-
-## What the Host Does Not Do
-
-- **Render, or arrange.** The shell, tiles, chrome, overlays, sidebar and palette are programs; tile geometry, its direct manipulation and the visual language belong to the shell ([`programs.md`](programs.md) §1). The host owns no rectangle but the window's.
-- **Cast chrome.** Shadows, auras, padding and card treatment are CSS in the document. Per-tile webviews, transparent-webview tricks and native compositor chrome all dissolved with the one-compositor ruling.
-- **Interpret substrate operations.** They go to the engine.
-- **Hold session state.** Session state lives in the substrate.
-- **Own program lifecycle.** The engine does.
-
-The host stays small: window, webview, `ol://`, the VM, the keychain, the IPC surface. This is not an aesthetic preference — it is the line that keeps interface authorship in the language the substrate's self-description already describes, rather than in a second language that has to keep up.
-
----
-
-## One window, one base page
-
-The window holds one webview, navigated to one document — and that document's outermost layer is **host machinery, not a program**: the **base page** (ruled 2026-08-12), a fixed skeleton the host serves, holding exactly two things — a **root slot**, into which the root program (the shell/tiler) is mounted, and an **overlay layer**. The base page renders and never decides: it watches `[session]` through the host's own subscription (surfaced into the page on the event channel the host already owns), mounts each overlay's `content` at its `anchor` — point-anchored at the anchor seat's measured rect, session-anchored centered — realizes the overlay's dispatch-chosen grade clamped to the viewport, stacks by creation order, and on dismissal gestures (escape, outside click) the host removes the overlay chunk — a recorded field act. The root program is thereby decoupled: swap it, and overlays, the palette and recovery still work. Every surface program below the root is *seated* inside the document, either as a same-DOM slot or as an iframe on its own `ol://<program-id>` origin; the wall each tier gives is [`engine.md`](engine.md#containment)'s *Containment*.
-
-A **seat** is where a program's DOM lives. The host does not decide seats — the root program does (and the base page, mechanically, for overlays) — but the host mounts and unmounts them, because the engine's runtime providers are host-crate types and wry is main-thread.
-
-**Seat commands.** `Engine::open` hands the host an `mpsc::Receiver<HostCmd>`, drained on the event loop. The mount/unmount commands no longer create a native webview per program; they mount and unmount a seat inside the window's single document. **Decided here: `HostCmd::MountSeat` / `HostCmd::UnmountSeat`**, beside `EvaluateScript`. "Webview" named the mechanism that dissolved; "seat" names what actually mounts, and it is already the surface layer's own word (engine.md's `grades` are "read by the seat"). [`engine.md`](engine.md)'s *Code architecture* still lists the pair under the old names — that rename is owed there, not taken here.
-
-The shell itself is started like any other surface program (*Boot sequence*, step 10); the host navigates the webview to the **base page**, mounts the shell into the root slot, and stamps its process id before any of its code runs. Global shortcuts are host-caught (OS input is Rust's) and fire **stored calls** — the same call records menu entries are — through the ordinary summoning path; in-seat keys are seat-caught and do the same.
-
----
-
-## Program as interface
-
-Interface and tool are one kind of thing. A program is a chunk with an executable and a runtime declaration; nothing distinguishes a program that renders a reader from one that touches the filesystem beyond what their bodies declare ([`engine.md`](engine.md), *The program body*).
-
-The pilot supports two spawnable runtimes (the third, `native`, is the engine's own planner):
-
-- **`runtime: 'vm'`** — an executable spawned as a process inside the active project's Linux VM, v0.1's containment for capability-bearing work. A shebang declares the interpreter; the engine imposes no language. Whatever the interpreter gives the program is available, gated by its declared capabilities. A program declared in a mounted project runs its executable from its peer FS mount inside the same VM. No rendering; `process-view` renders a VM program's activity when someone wants to look in.
-- **`runtime: 'webview'`** — a surface program: a JS module the shell seats inside the shared document. The runtime is the window webview's V8 — full DOM, full client-side React, 60fps interactions. The SDK reaches the engine over wry IPC. The value keeps its name; what changed is that a seat is a region of one document rather than a webview of its own.
-
-Both kinds use the same SDK surface; only the transport differs. A UI that needs both DOM rendering *and* direct system access is built as a **composition** of two programs — one surface, one VM — bound by a shared place and communicating through the substrate. Compositions are the substrate's native shape for what other systems call islands: independent interactive regions, each with its own runtime, glued by shared state.
-
-The pilot ships a TypeScript SDK only. First-party VM programs use `#!/usr/bin/env bun` so they can import it directly; programs in other languages need their own SDK speaking the same JSON-lines protocol — not for the pilot, on the horizon. When future runtimes land (GPU canvas, terminal, DOM streamed from a VM program), they become new runtime values; see [`research/runtimes-and-surfaces.md`](research/runtimes-and-surfaces.md) for the topologies considered.
-
----
-
-## Serving `ol://`
-
-The host serves the shell document and all program source over its own **`ol://` custom protocol**. There is no build pipeline: each requested file is transpiled per file by a persistent bun helper and cached by mtime; every bare specifier resolves bun-style to a canonical URL — no import map, nothing special-cased — and CJS dependencies are ESM-ified once, as the general rule.
-
-Two document shapes are served:
-
-- **The shell document**, at the window's root: doctype, charset, one module script (the shell program's entry), nothing else. The shell mounts `document.body`.
-- **A citizen document**, at `ol://<program-id>`, for an iframe seat: the same empty shape, per origin, with that seat's identity token injected by the host (*Transport*). Its program mounts its own `document.body`.
-
-A same-DOM seat gets no document. The shell hands the program a root element and imports its entry module into the shared realm; the program mounts what it is given. *Held open:* an `.html` entry as the escape for a program that owns its whole document — now specifically the iframe-citizen case.
-
----
-
-## Transport
-
-One hop. One protocol shape.
-
-A surface program calls the SDK; the SDK serializes the call and posts it through wry's IPC channel via `window.__wry_ipc.postMessage(<json>)`. The host installs the `window.__wry_ipc` name itself — an initialization-script alias over the `window.ipc.postMessage` wry injects — and registers `WebView::set_ipc_handler` once, on the window's webview. Each call parses the JSON, resolves the sender to a process id, attaches a `Context { process_id }`, calls the matching engine function, and resolves the call by injecting `evaluate_script("__sdk.resolve(<id>, <payload>)")`. `<payload>` is the full response envelope (`{id, result|error}`), so the SDK's shape-based demultiplexing holds on both channels.
-
-Unsolicited events from the engine ride the same channel in the other direction: `__sdk.event(<payload>)`. The SDK distinguishes responses (`id` + `result|error`) from events (`event` field) by message shape. See [`engine.md`](engine.md#reactivity-wiring) for the end-to-end push chain.
-
-**Per-seat identity.** One webview now carries many protocol identities: every seated program is its own process ([`engine.md`](engine.md#containment)). At seat creation the host issues an identity token; every request from that program's SDK instance carries it, and the IPC handler maps token → process id before attaching `Context`. Everything downstream of `Context` is unchanged, so boundaries and commit attribution hold at seat granularity.
-
-**How the token gets there is the load-bearing part.** Commits attribute to process identity engine-side, so a parent that handled its citizen's token could write history *as* that citizen. Two tiers, two deliveries:
-
-- **Same-DOM seat** — the token rides the parent's channel, issued through the shell's seat provider. Shared realm, shared fate: the tier confers no wall, and the token claims none.
-- **Iframe seat** — the host injects the token into the frame directly, in the initialization script it serves with that origin's document. The parent may *gate* a citizen (a visible, auditable intent to the host) but never read, drop, or forge its traffic.
-
-The host does not interpret substrate operations — it hands them to the engine. VM programs speak the same protocol shape over stdio JSON-lines; the engine reads their stdout directly, without going through the host.
-
-### SDK surface
-
-A program imports the SDK and calls the substrate operations it needs; surface programs render with their DOM library of choice. The op surface is owned by [`sdk.md`](sdk.md); a worked example is under *Authoring Programs* below.
-
-React hooks live in the host's UI library (`host/react/`), shipped as `@openlight/react`. The starting hook is `useRead(places)` — registers a `subscribe` first, then fetches via `read`, re-fetches on `place_changed`, unsubscribes on unmount. The order is load-bearing; see [`sdk.md`](sdk.md). A richer hook vocabulary may emerge through use.
-
----
-
-## Authoring Programs
-
-Two shapes for the two kinds.
-
-**Surface program** (`runtime: 'webview'`). A TSX entry that renders its component tree. `body.executable` is the entry's path, resolved against the declaring project's root. No shebang, no bundle step — the host serves the source (*Serving `ol://`*).
-
-```tsx
-import { useRead } from '@openlight/react'
-import { createRoot } from 'react-dom/client'
-
-function MyProgram() {
-  const data = useRead([/* ... */])
-  return <div>{/* ... */}</div>
-}
-
-createRoot(document.body).render(<MyProgram />)
+```
+ol engine  --home <store>     the engine: opens the store, attaches, serves (engine.md)
+ol desktop --home <store>     the chassis: connects, reads the entry, hosts the surface
 ```
 
-The program is a substrate chunk with `body.executable` pointing at its entry source and `body.runtime: 'webview'`. When the engine starts it, the surface provider asks the host to mount a seat; the entry module then runs and mounts the root its seat gives it — `document.body` for a whole-document program, and for a same-DOM seat whatever element the shell hands in (the slot provider's shape is open — [`programs.md`](programs.md) §5).
+Flags: `--home` · `--engine` · `--entry` · `--at <commit>` (pinned recovery) · `--mount` (the shorthand, below).
 
-**VM program** (`runtime: 'vm'`). An executable file with a shebang, run as a standalone process inside the VM. The shebang determines the interpreter and what APIs the program has. The pilot's first-party VM programs use Bun because the SDK is TypeScript:
+---
 
-```ts
-#!/usr/bin/env bun
-import { read, commit, awaitRun } from '@openlight/sdk'
+## The home
 
-const self = await read([process.env.PROCESS_ID!])
-// ... do work, call APIs, write to substrate ...
-process.exit(0)
+**The home is a standard store directory** [R — the feedback fold; `field.ol` was the deviation]: recognized as every store is, `.ol/` inside, db and `project.toml` within (established naming kept [R — 2026-08-20]; the *contents* are superseded — `[[attach]]` replaces `[[mounts]]`, `[chassis]` is new):
+
+```
+~/.config/ol/              the home — a standard store directory; the personal
+  .ol/                     store by default, not by kind
+    db                     the personal store: dynamically attached stores, your own edits
+    project.toml           [[attach]] entries (path, branch, at?, write) · [chassis] entry = <chunk>
 ```
 
-**Lifecycle differs by kind.**
+Because the home is nothing special, **`--home` may point at any store directory — a project included**: the field you boot into is that store, and a session sits in the store it was opened for — the project-agent line ([`agent.md`](agent.md)) cashed with zero mechanism.
 
-- *VM programs* end when their process exits (`process.exit()` or stdout closing). Stateless tools exit when the work is done; resident programs stay alive in their own loop.
-- *Surface programs* don't end by reaching a last statement — the runtime keeps the page alive. A surface program ends when its seat unmounts (the person closes the tile), on `cancel`, on timeout, or when it calls the `exit` op ([`engine.md`](engine.md)) — the standard self-dismissal path.
+**The toml is the declared, version-pinned set — your package space, editable in any editor.** Dynamic attachments (opening a project) are recorded in the field, not the toml: *declared* and *opened* are two different things with two homes, no duplication ([`engine.md`](engine.md), *Stores and attach*). First run seeds the home from the engine distribution's bundled stores (`component/base`, `desktop/`, the guide) — packaging, not dependency; the seed's contents are open [O]. Flags override config; **the toml never grows a second home.**
 
-**State lives in the substrate.** Programs use `read` and `commit` (and `useRead` for reactive reads) for anything that persists. There is no separate state-persistence API. Per-run state that must stay separate from shared program state rides in the run's argument.
-
-**Process identity.** A program learns its own process id through its runtime's channel: a VM program reads `process.env.PROCESS_ID`; a surface program reads `window.__openlight_process` for a whole-document program (the shell, an iframe citizen), or takes it from the seat that mounted it. Each run is a distinct process chunk ([`engine.md`](engine.md)) — two runs of the same program with identical arguments coexist as different chunks.
+**Editing what you only read** — your desktop entry, a shipped template — is the git-shaped act, deliberate: clone the repo, attach the clone writable (or writable on a branch), point your entry at it. No in-field fork of modules; when the object model and remotes arrive, this is the seam they replace.
 
 ---
 
-## Buffers — the default agent driver
+## The entry — the chassis declares its contract
 
-Buffer *semantics* are settled and their *realization* is not ([`engine.md`](engine.md), *Buffers*; the call is open between an engine-native driver registry and dissolution into live integrations — [`research/arc/selection.md`](research/arc/selection.md) §14.3). The host's duty is contingent on it, and stated that way rather than assumed:
+**The chassis's contract is the archetypes of its configuration, which it declares** — as a program declares its payloads — and a configuration is *instances* of them, shipped in a module (the pilot's desktop module ships one — [`programs.md`](programs.md)):
 
-- **If the driver registry is taken**, the host ships the **default agent buffer driver**: an append-only file family in `.ol/` beside the db, registered at boot in the shape of a runtime provider, durable across engine stops, and living outside the VM so a killed program cannot take its own trace with it.
-- **If buffers dissolve into live integrations**, the host ships nothing here and the retention duty moves to the integration daemon.
+```ol
+chunk chassis/entry { instance: { layers: list<ref(view-mount)>,                        -- required: root mounts, in order
+                                  reservations?: list<{ input: chord | gesture, place: ref }>,  -- [O encoding]
+                                  surface?: ref(view-surface-config) } }              -- absent → inherit the home's default entry
+```
 
-Nothing else in this file depends on the call. v0.1's streaming is throttled partial commits either way ([`engine.md`](engine.md), *Streaming convention*).
+`layers` is the only required key; the rest inherits from the home's default entry — which is what makes the **shorthand** lawful: `ol desktop --mount "reader [reading/x]"` synthesizes an entry with that one layer. **Repairing a broken configuration is the same shorthand over the entry chunk itself** (`--mount "chunk-table [my-entry]"`); no safe mode exists. Root-from-config recovery pins with `--at <commit>` [R].
+
+The chassis reads the entry and mechanically hosts it; which components fill the layers, what the surface config names as faces and hosts, what the reservations capture — all field data, all history. The glue (view/sdk) decides nothing the config doesn't state; the chassis decides nothing at all.
 
 ---
 
-## Boot sequence
+## Hospitality — hosting `web-dom`
 
-Host startup has a fixed order. Steps 2–4 and 7–9 are the multi-mount duties: the cascade is file-aware and therefore host code, while the mount registry and federation are the engine's ([`engine.md`](engine.md#engine-api-callable-from-the-host)).
+The host's half of the surface kind ([`sdk.md`](sdk.md) holds the glue's half):
 
-1. **Initialize tokio runtime.** The engine and runtime providers need it; tao's event loop runs on the main thread.
-2. **Resolve active project path.** From CLI args or working directory.
-3. **Walk the mounts cascade.** Read the active project's `.ol/project.toml`; for each `[[mounts]]` entry, read that project's `.ol/project.toml` in turn; recurse. Deduplicate by canonical absolute path. Detect cycles; reject with an error. The host project and engine project must appear in the resolved cascade (most projects' data references their archetypes); if either is missing, refuse with a clear error naming the missing entry. v0.1 also refuses any peer whose db schema version differs from the active project's (migration is a v0.2 concern).
-4. **Open all dbs.** `Db::open(<active>)` read-write; `Db::open_read_only(<peer>)` for each peer. Both take the *project* path — the db resolves `.ol/db` beneath it. The read-only open never creates, migrates, or seeds, and refuses a schema version other than this build's — step 3's rule, enforced again at the file ([`db.md`](db.md#lifecycle)).
-5. **Open the engine.** `Engine::open()` returns `(Engine, mpsc::Receiver<HostCmd>)`. The host keeps the receiver to drain on its event loop.
-6. **Register runtime providers.** `engine.register_runtime("vm", …)` and `engine.register_runtime("webview", …)`. Both are host-crate types; the engine ships only `native`.
-7. **Configure the VM.** Hand the VM provider the FS-mount table: active project at `/active/` read-write, each peer at `/peers/<project-id>/` read-only. The VM starts; programs spawned later run inside it.
-8. **Mount projects.** `engine.mount_project(id, db, ReadOnly, branch)` for each peer; `engine.mount_project(active-id, active-db, ReadWrite, "main")` for the active project. The engine subscribes to the active project's commit broadcast for reactivity; read-only mounts contribute reads but not events.
-9. **Boot-time validation.** Ask the engine to validate that every placement in the active project's db has its `on` resolve in some mount. Missing references — most often a missing host or engine mount — return as a list; surface them and refuse to enter the event loop. No half-loaded state.
-10. **Open the window and start the shell.** The host creates the window and its one webview, resolves the active session, then starts the shell — one process, through `engine.run(…, Context { process_id: None })` in `launch` mode, passing the session as the process's place. Sidebar and tab-bar are not host-started: the shell's **pinned chrome seats** start them as its children ([`programs.md`](programs.md) §1). Two consequences of `process_id: None`, both law: the call carries **no frame**, so every chunk the declaration creates must name its owner — `launch` mode supplies it, the session — and the boundary is the host's own, full reach over the active project ([`engine.md`](engine.md), *Governance at `commit`*). The boot suite's own boundaries are narrow and stated at [`programs.md`](programs.md) §1. The host then navigates the webview to the shell's entry with the shell's process id stamped in; the shell seats the rest. The palette is started on demand when the leader key fires, with the host placing its session overlay.
-11. **Enter the event loop.** `event_loop.run(...)` on the main thread, draining `HostCmd`s from the engine, wry IPC messages, and tao's window events.
+- **A served document** — one empty node per **layer**, rendering nothing — plus the glue's boot script. The layers are the entry's: an ordered list of root mounts, each filling one node (the pilot's desktop entry: content, overlay; a kiosk has one).
 
-Shutdown reverses: cancel running processes, await `engine.shutdown()`, drop the VM (which unmounts FSes), drop dbs, exit.
+- **A realm** per document, and realms for isolation: a `FrameBox` citizen gets its own realm on an `ol://<id>` origin.
 
-**Single-host-per-db.** v0.1 assumes one host process per project; concurrent cross-host access and cross-host reactive notification are not implemented. Mechanism and rationale: [`engine.md`](engine.md#engine-api-callable-from-the-host); horizon path: [`horizon.md`](../horizon.md).
+- **The transport object, installed before the SDK loads** [P] — the chassis's init script provides the one `send`/`receive` object; the SDK embeds no variants ([`engine.md`](engine.md), *The Program Protocol*).
+
+- **Source serving through the engine.** The chassis serves nothing from disk: it registers the `ol://` scheme with the webview and **relays** each request over its engine connection — a dumb pipe, forwarding the URL and returning the bytes. Resolution — which store, which path, at which commit — is entirely the engine's ([`engine.md`](engine.md), *Serving sources*); the chassis knows no paths, which is why the web flavor differs only in transport (a browser's requests reach the engine with no relay at all).
+
+- **Identity into every realm it creates.** Injected host-direct — into an iframe realm's own document, never routed through a parent — so a parent may *gate* a citizen but never read, drop, or forge its traffic [R — carried ruling]. Commits attribute to the context's identity engine-side, which is what makes the injection path load-bearing.
+
+- **The input floor** — below.
+
+## The input floor
+
+**Privileged input is captured natively, before any realm sees it.** What the floor captures is the entry's **reservations**: each names an input (a chord, a gesture) and the place its record lands. On a reserved input the chassis composes the **trusted record** — what happened plus a well-decided location (pointer → mount → the field location shown; realm code cannot synthesize one) — and **lands it in the configured place through its own engine connection**: native code, which is what keeps the record trusted; the glue never writes one ([`programs.md`](programs.md) carries `view/input-record` with the view family).
+
+The record is a commit, session-owned, removed on dismiss — never ephemera: it is the act's record. Overlays, menus and consent are components whose content derives by expression over that place; dismiss is the record leaving. **No handlers.**
+
+The pilot's desktop entry reserves two inputs: the secondary gesture (→ the overlay place) and the **approval chord** (→ the consent place) — the reserved native chord that seals an escalation's consent ([`engine.md`](engine.md), *Run-to-draft*); its principal is open [O — lean: the mount of the draft face]. The OS's own consent stacks on ours.
+
+---
+
+## What the chassis does not do
+
+- **Render, arrange, or decide.** Components draw; the glue mounts; the entry and the field state everything else. The chassis owns no rectangle but the window's.
+
+- **Interpret substrate operations.** It is a client; ops go to the engine over the wire like everyone's.
+
+- **Own program lifecycle or runtimes.** The engine's ([`engine.md`](engine.md), *Runtime providers*). The chassis spawns nothing.
+
+- **Serve sources from disk.** The engine serves; the chassis relays.
+
+- **Hold durable state.** Persistent view state is commits; never-history state is **ephemera** (lifetimed, soft-persistent; home and encoding [O]). The interface holds no durable in-memory state [R].
+
+---
+
+## Boot
+
+1. Connect to the engine `--engine` names, or the home's default; the engine's own boot — opening the store, attaching — is engine.md's.
+
+2. Resolve the entry: `--mount` (synthesized) or `--entry`, else the toml's `entry` chunk, read through the engine; `--at` pins the read for recovery.
+
+3. Open the window; serve the document with one node per layer and the glue's boot script; install the transport object; inject identity.
+
+4. The glue boots and mounts each layer's root mount ([`sdk.md`](sdk.md)); the input floor arms the entry's reservations.
+
+Shutdown reverses; nothing the chassis holds is durable, so there is nothing to save.
+
+---
+
+## Flavors
+
+[O — breadth; one ships.] **Desktop** (wry — the pilot) · **web-SPA** (a browser tab is another host of `web-dom`, another client of the same engine; reserved-input limits [O]) · **static export** (server-rendered, read-only — the substrate-based website) · **kiosk** (one layer, one entry) · **packaged app**. Each flavor declares its hospitality and its input floor; under latency a chassis may run a local engine — horizon.
 
 ---
 
 ## What Is Open
 
-- ~~The sovereign citizen's return path~~ — **ruled: the host addresses frames directly.** Responses and events are evaluated against the seat's own context — an iframe citizen's origin document, never routed through the shell — symmetric with request-side token injection, so a parent may gate but never read, drop, or forge ([`engine.md`](engine.md#reactivity-wiring), step 4).
-- **Per-frame token injection.** That host-direct injection lands per-frame on all three wry backends is confirmed for none of them yet. If a backend cannot, iframe seats degrade to the same-DOM guarantee on that platform, explicitly.
-- **The shell-injected shared runtime.** Hundreds of same-DOM seats should share one V8, one React copy, one scheduler — the shell injects the shared runtime and seats import it rather than each bundle carrying its own. This is also the exit from bundling debt. Shape unspecified.
-- **WebKitGTK.** WebGPU and site-isolation both lag there. A pilot policy is needed: test early, or demote Linux explicitly.
-- **Crash blast radius** of the one-document model on the weaker site isolation of WebKit. Reload-recovery is cheap by design — surfaces are disposable and the view lives in the field — but it is unmeasured.
-- **React hooks surface.** `useRead(places)` is the starting hook; richer vocabulary (mutations, typed-event subscriptions, Suspense) may appear through use. The full surface is [`sdk.md`](sdk.md)'s.
-- **`.html` entries.** Whether a program may own its whole document, as the iframe-citizen escape (*Serving `ol://`*).
-- **The buffer driver**, contingent on engine.md's realization call (*Buffers*).
-- ~~What owns the first session~~ — **ruled: the active project's root.** Boot runs host-initiated (`process_id: None`) and names the root as owner. Strictly project-based is the current model; a more unbounded compute environment may reopen this (author note, recorded).
+- **Reservation and record encodings** — `chassis/entry.reservations`, `view/input-record` (with the view family).
+
+- **The ephemera home and encoding.**
+
+- **Per-frame identity injection on all three wry backends** — confirmed for none yet; where a backend cannot, iframe isolation degrades to the same-DOM guarantee on that platform, explicitly (carried).
+
+- **WebKitGTK** — WebGPU and site isolation both lag; test early or demote Linux explicitly (carried).
+
+- **Crash blast radius** of the one-document model on weaker site isolation — reload-recovery is cheap by design, unmeasured (carried).
+
+- **The web flavor's input-floor limits** — what a browser tab can and cannot reserve.
+
+- **The transpile step's home** — the old host transpiled TS per file at serve, resolved bare specifiers bun-style with no import map, and ESM-ified CJS dependencies once as the general rule; whether that duty lands in the engine's serving or a build step is unplaced (with `ol://` now engine-served), and those resolution rules ride the answer.
+
+- **The attach-time consent chip** — engine-owned open; drawn like any consent face, never by the chassis.
+
+- **The seed's contents** — what first run copies into the home.
+
+- **`.html` entries** — whether a component may own its whole document, as the FrameBox-citizen escape (carried).
 
 ---
 
 ## Directory
 
-The host project ships:
-
 ```
-host/
-  src/               — Rust source: window/tao/wry, ol:// protocol handler, IPC
-                       routing and seat commands, mounts cascade walker, VM and
-                       surface runtime provider implementations, keychain.
-  react/             — TypeScript UI library (@openlight/react): React
-                       components, tokens, and hooks (useRead, future
-                       useCommit/useRun) used by surface programs. Lives here
-                       for v0.1; may extract later.
-  programs/          — first-party host-shipped programs, one package each:
-                       shell, sidebar, tab-bar, palette, read-tile (grows into
-                       `reader`; programs.md §3, §8). Surface programs in TSX,
-                       served from source over ol://.
+chassis-desktop/
+  src/               — Rust: window/tao/wry, the served document and layer nodes,
+                       transport-object install, identity injection, the input
+                       floor, entry reading, ol:// relay to the engine
   .ol/db, .ol/project.toml
 ```
 
-The host depends on the `db` and `engine` crates. The runtime-agnostic SDK package (`@openlight/sdk`) lives in the engine crate; the React UI library is host-shipped because it is coupled to surface programs. The root bun workspace mirrors the cargo workspace — one package per program. See [`pilot.md`](pilot.md#stack) for the full repo layout and [`engine.md`](engine.md) for the SDK and runtime provider contracts.
+`chassis-desktop` speaks the engine's wire protocol only — it is a client. The old host's other cargo: the runtime providers live with the engine (`runtime-vm`); the React library and first-party programs became `component/*` and the desktop module ([`programs.md`](programs.md), [`pilot.md`](pilot.md)).
