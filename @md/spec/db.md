@@ -2,7 +2,7 @@
 
 The program that hosts the field. The substrate is delivered to consumers through this program; SQLite is the substrate's persistent body underneath.
 
-A single Rust crate, compiled into the host binary. Owns one SQLite database file per project at `.ol/db`. No in-memory cache that can drift from disk — SQLite is the single source of truth.
+A single Rust crate, compiled into the engine — its own artefact ([`engine.md`](engine.md)). Owns one SQLite database file per project at `.ol/db`. No in-memory cache that can drift from disk — SQLite is the single source of truth.
 
 The substrate spec defines what the field IS. This document defines two contracts:
 
@@ -32,7 +32,7 @@ Both take the *project* path; the database file is `<project>/.ol/db`. Closes vi
 
 `open` initializes the SQLite connection (creates the file with migrations if fresh, opens with `journal_mode = WAL` if existing), seeds the minimum the db needs, returns the handle.
 
-`open_read_only` is the peer-mount open ([`chassis.md`](chassis.md#boot-sequence) boot step 4). It opens with `SQLITE_OPEN_READ_ONLY` and **never creates, migrates, or seeds**: a missing file is `MissingDatabase`, a file whose schema version differs from this build's is `SchemaVersionSkew` (peer migration is a v0.2 concern — see *Settled choices*), and every write op refuses with `ReadOnly` before reaching SQLite — the open flag is the backstop, the explicit refusal is the legible error. The handle carries a change stream that never fires: a read-only mount contributes reads, not events.
+`open_read_only` is the read-only-attach open ([`engine.md`](engine.md), *Stores and attach*). It opens with `SQLITE_OPEN_READ_ONLY` and **never creates, migrates, or seeds**: a missing file is `MissingDatabase`, a file whose schema version differs from this build's is `SchemaVersionSkew` (peer migration is a v0.2 concern — see *Settled choices*), and every write op refuses with `ReadOnly` before reaching SQLite — the open flag is the backstop, the explicit refusal is the legible error. The handle carries a change stream that never fires: a read-only attachment contributes reads, not events.
 
 The db's own bootstrap is small: one row in `branches` (the bootstrap branch, `main`) and one initial commit in `commits`. The substrate's archetypes for branches and commits, and the anchors `db/branches` and `db/commits`, are **projected** by the read layer with hardcoded shapes — not stored as chunks. Field content (archetypes, user data, project-specific places — whatever this particular db holds) is not the db's concern; the host's bootstrap routine writes those via `db.commit()` after `Db::open` returns.
 
@@ -412,7 +412,7 @@ A declaration is one transaction. Inside:
 
 1. Insert version rows for everything in the declaration.
 2. Apply current-state transitions (FTS triggers fire; seq auto-assignment runs).
-3. Run validation against the post-write current state: instance-contract obligations for every touched chunk (the union of the contracts of every archetype it is `instance` on), ref-target checks for declared ref keys (locally resolvable targets — cross-mount targets are the engine's, substrate.md *Links*), name uniqueness within the owner, **a name present on every chunk that has members**, single-owner, and the two seq rules (`seq: true` only on a chunk with a non-empty instance contract; an explicit placement seq only onto an ordered place).
+3. Run validation against the post-write current state: instance-contract obligations for every touched chunk (the union of the contracts of every archetype it is `instance` on), ref-target checks for declared ref keys (locally resolvable targets — cross-store targets are the engine's, substrate.md *Links*), name uniqueness within the owner, **a name present on every chunk that has members**, single-owner, and the two seq rules (`seq: true` only on a chunk with a non-empty instance contract; an explicit placement seq only onto an ordered place).
 4. Run the governance checks against `opts.read` / `opts.write` (below).
 5. Refile `current_refs` for every touched chunk (delete-and-reinsert); collect the link delta.
 6. If everything passes: insert the commit row, advance the branch HEAD, COMMIT, push to the change stream.
@@ -833,7 +833,7 @@ SELECT id FROM reach;
 
 **`UNION`, not `UNION ALL`, is load-bearing.** The placement graph has cycles by construction — nothing forbids a chunk related onto something related back — and only SQLite's dedupe on the recursive term guarantees termination. `depth` is carried for the bound and is the *first* depth at which a node was reached, not a unique one.
 
-`follow` over `owned` stops at mount edges because ownership never crosses mounts, and the federated union is the engine's (engine.md); one db's closure never leaves its own tables.
+`follow` over `owned` stops at store edges because ownership never crosses stores, and the federated union is the engine's (engine.md); one db's closure never leaves its own tables.
 
 #### Virtual chunks (branches and commits)
 

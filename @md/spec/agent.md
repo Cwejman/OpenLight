@@ -57,7 +57,7 @@ program agent {
 
 `read`, `write`, `run` absent: intrinsically open — reach is entirely the run grant, the person's whole decision, shown as chips before Go. One run = one turn (or one delegated task); the agent process is disposable; the field is the persistent thing.
 
-**There is no context structure.** The turn's context *is* its argument: a selection, composed as a draft (place algebra, writable from any tile with the grant, the seated argument — [`components.md`](components.md), process), frozen at start, implicitly read-granted. The prompt is an element; guidelines are a `loc`; the thread is a `follow` expression; a staged document a `ref`. *Talk about this* on any entity is a draft citing it. A headless run is a draft started with no one watching.
+**There is no context structure.** The turn's context *is* its argument: a selection, composed as a draft (place algebra, writable from any mount with the grant, the seated argument — [`components.md`](components.md), process), frozen at start, implicitly read-granted. The prompt is an element; guidelines are a `loc`; the thread is a `follow` expression; a staged document a `ref`. *Talk about this* on any entity is a draft citing it. A headless run is a draft started with no one watching.
 
 **Elements classify by archetype, and the convention has one home — here.** The match validates nothing (`[selection]` admits any set; a turn with no prompt is a delegated task), so consumers read placements, never guess:
 

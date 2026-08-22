@@ -22,21 +22,19 @@ Three substrate properties make this native rather than bolted on: chunk identit
 
 ## Authoring here, shipping out
 
-The host is a powerful compute environment — and some of what is built in it will leave it. A solution authored here — programs, their scopes, their seed knowledge — is packaged as an app, or shipped to a cloud environment: engine and substrate embedded as libraries, running headless, no host, no tiles (unless the app is actually composed by them). You write the solution in the environment because that is where writing it is tractable; you deploy it where it needs to run.
+The host is a powerful compute environment — and some of what is built in it will leave it. A solution authored here — programs, their scopes, their seed knowledge — is packaged as an app, or shipped to a cloud environment: engine and substrate embedded as libraries, running headless, no chassis, no shell (unless the app is actually composed by them). You write the solution in the environment because that is where writing it is tractable; you deploy it where it needs to run.
 
-**Real today:** db and engine are libraries by design; one binary already embeds both; programs are executables with declared runtimes. **Open:** the packaging format (programs + snapshot of their scopes + mounts, pinned at commits), secret provisioning outside the host keychain, and the headless lifecycle (what replaces the session).
+**Real today:** the engine is its own artefact and db is its crate; programs are executables with declared runtimes. **Open:** the packaging format (programs + snapshot of their places + attachments, pinned at commits), secret provisioning beyond the OS keychain `read-secret` reaches, and the headless lifecycle (what replaces the session).
 
-## The engine as a daemon
+## The engine as a daemon — landed in law, remainder here
 
-v0.1 links the engine into the host binary. The direction: the engine runs as a daemon owning the field, and a host is a **window that attaches** — start a host in your OS, select a session, and you are purely in that session; several windows stand open on one field with no drift of state, because there is only one state. The same move takes the engine over the network — a remote field attached like a local one — and gives daemon *programs* a home: services that outlive any window, which a truly functional compute environment needs (`spec/engine.md`, *Daemons*).
-
-**Real today:** the engine sits behind a JSON-lines protocol already — the seam is transport-shaped, so daemonizing is moving the library behind a socket, not a redesign. **Open:** the daemon's own lifecycle, session attach/detach semantics, authentication at the socket, daemon-program start policy, and the reactivity fan-out across attached windows (kin to cross-host reactivity, below).
+The direction this entry held **landed at the surface rewrite** (2026-08-22): the engine is its own installed artefact, a binary or OS service; the chassis is a client; several windows on one field with no drift of state is now the architecture, not a vision ([`spec/engine.md`](spec/engine.md)). What remains horizon: **the engine over the network** — a remote field attached like a local one (the transport is the seam; authentication at the socket is the work); the **resident lifecycle for daemon programs** — services that outlive any window (the launch posture is ruled, the lifecycle-as-policy open — engine.md, *Daemons*); and the **reactivity fan-out** across many attached clients (kin to cross-engine reactivity, below).
 
 ## Interface inference — the ladder
 
 The substrate is typed, so interface can be inferred from shape — that is a ladder, not a leap:
 
-1. **Inferred browsing (v0.1).** The read-tile derives its default presentation from what a scope structurally is — ordered → sequence, shared archetype with a schema → table, session-typed → transcript ([`spec/components.md`](spec/components.md)). Forms for running programs are generated from argument archetypes the same way.
+1. **Inferred browsing (v0.1).** The reader derives its default presentation from what a scope structurally is — ordered → sequence, shared archetype with a schema → table, session-typed → transcript ([`spec/components.md`](spec/components.md)). Forms for running programs are generated from argument archetypes the same way.
 2. **Authored overrides.** Where inference falls short, a program or a per-archetype hint supplies the form — hand-built views remain first-class, and a powerful UI stays cheap.
 3. **Generated interfaces.** On the far end, AI generates views — more tractable here than in conventional apps, because the substrate separates mechanics from form and the type system constrains what a view must honor.
 
@@ -44,7 +42,7 @@ The substrate is typed, so interface can be inferred from shape — that is a la
 
 Body schemas document key types today, but a chunk id in a body is an opaque string — untyped, unvalidated, invisible to the placement graph. The direction: schema keys can be **reference-typed** — a key declared as holding a chunk id (optionally constrained by archetype), validated on write, resolvable by readers, surfaced to queries. Until then, anything that must point at a chunk *and be seen doing so* uses a `relates` placement even where the grain rule would prefer a body key (the reader's current-reading relates is the standing example — author-flagged, the reason this entry exists).
 
-**Real today:** `body.schema` documents keys; references-are-never-capabilities is settled; R12 `attach` (engine.md, open) is the run-argument face of the same need. **Open:** enforcement shape, whether reference-typed keys project as placements (which would dissolve the relates workaround), migration of existing id-strings.
+**Real today:** instance contracts type keys; references-are-never-capabilities is settled; typed refs are the honest channel the old argument-`attach` dissolved into. **Open:** enforcement shape, whether reference-typed keys project as placements (which would dissolve the relates workaround), migration of existing id-strings.
 
 ## The band
 
@@ -84,27 +82,27 @@ Placements and chunks that carry a lifespan — a role membership that expires o
 
 ## Uniform VM containment via DOM streaming
 
-The pilot uses split containment — capability-bearing programs in a VM, view-programs in host webviews. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels: a thin shim in each host webview applies DOM operations streamed from the VM-side view program and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for the same pattern.
+The pilot uses split containment — capability-bearing programs in a VM; what draws is components in the chassis's realms. The uniform alternative — every program in one VM — becomes viable because views produce DOM, not pixels: a thin shim in each realm applies DOM operations streamed from a VM-side implementation and forwards events back. Phoenix LiveView, Hotwire Turbo, and HTMX are production-tested shapes for the same pattern.
 
 What it buys: uniform security posture, a cleaner peer model (a peer is a VM image), one protocol shape across all programs. What it costs: VM lifecycle engineering, a DOM-diff protocol, and discipline about browser APIs that don't cross cleanly. Cross-platform VM backends differ (Apple Virtualization.framework, QEMU/Firecracker, Hyper-V) but the DOM-streaming surface above them is consistent. The split/uniform choice is a containment detail; the program/process/boundary primitives serve both, so the migration stays reachable.
 
 ## Peering — symmetric, remote, packaged
 
-v0.1 ships read-only filesystem-local mounts. The full picture is larger; the architecture preserves the path without forcing the work now.
+v0.1 ships filesystem-local attachments — read-only by default, branch + write for shared stores. The full picture is larger; the architecture preserves the path without forcing the work now.
 
 - **Symmetric peering.** Read/write peers. The boundary mechanism already carries the model — a write boundary naming a peer's identity and reach; the engine's federation already routes reads, and routing writes follows the same shape. The work is the trust and identity layer, not substrate semantics.
-- **Remote mounts.** Across a network: zero-trust transport (Tailscale, Iroh, libp2p) plus a substrate-level sync protocol over the commit graph. Replication, conflict resolution, and partial-state semantics are unsketched — a substantial dimension of its own.
-- **Author identity.** Keypairs, signed commits, verifiable attribution; layers onto commit metadata (`process_id` already exists); verification at mount and sync time.
-- **Package merging.** `[packages]` in `.ol/project.toml` as a declarative system spec (Nix-flavored): at launch, resolve all mounted projects' packages, build the active project's VM image from the merged set.
-- **Cross-host reactivity.** Two host processes on one db each have their own broadcast today. WAL watching, `MAX(commits.id)` polling, or an out-of-band channel — load-bearing the moment two devices share a workspace.
-- **Snapshot pinning, scope-filtered mounts, schema migration on mount, dynamic mount/unmount** — each tractable, each deferred; db's `at:` parameter, the federation layer, and `mount_project` already carry the shapes.
+- **Remote attach.** Across a network: zero-trust transport (Tailscale, Iroh, libp2p) plus a substrate-level sync protocol over the commit graph. Replication, conflict resolution, and partial-state semantics are unsketched — a substantial dimension of its own.
+- **Author identity.** Keypairs, signed commits, verifiable attribution; layers onto commit metadata (`process_id` already exists); verification at attach and sync time.
+- **Package merging.** `[packages]` in `.ol/project.toml` as a declarative system spec (Nix-flavored): at launch, resolve all attached stores' packages, build the home's VM image from the merged set.
+- **Cross-host reactivity.** Two engine processes on one db each have their own broadcast today. WAL watching, `MAX(commits.id)` polling, or an out-of-band channel — load-bearing the moment two devices share a workspace.
+- **Snapshot pinning and dynamic attach landed** (the attach record's `at`; `attach`/`detach` as engine programs). **Selection-filtered attachments and schema migration on attach** remain — tractable, deferred; db's `at:` and the one evaluator carry the shapes.
 
 ## View modes beyond tabs
 
-Tabs are one lens. A zoomable canvas — workspaces as nested regions, navigation spatial, containers abstracting with zoom — is the most charted alternative (Figma, tldraw, Muse). The composition types hold for either geometry; what changes is the layout a view program imposes and one new host geometry interpreter (rect walk + viewport transform beside the split-tree walk). The clean-room audit confirmed the delta is that small ([`spec/research/cleanroom/composition.md`](spec/research/cleanroom/composition.md) §3.4). Because view modes are programs, lenses — canvas, outline, timeline, graph — are additive, not forks.
+Tabs are one lens. A zoomable canvas — workspaces as nested regions, navigation spatial, containers abstracting with zoom — is the most charted alternative (Figma, tldraw, Muse). The composition types hold for either geometry; what changes is the layout a view program imposes and one new geometry interpreter — itself a component (rect walk + viewport transform beside the split-tree walk). The clean-room audit confirmed the delta is that small ([`spec/research/cleanroom/composition.md`](spec/research/cleanroom/composition.md) §3.4). Because view modes are programs, lenses — canvas, outline, timeline, graph — are additive, not forks.
 
-In the canvas lens the drawable outruns the window: the host's canvas extends beyond the viewport and the viewport becomes a **camera** over it. Fixed strips lose their claim to edges — a sidebar becomes a floating, minimizable overlay widget among a launcher of overlays (Figma's pattern), spawned rather than always-mounted. The overlay archetype already carries the shape; what changes is that anchoring goes spatial.
+In the canvas lens the drawable outruns the window: the canvas extends beyond the viewport and the viewport becomes a **camera** over it. Fixed strips lose their claim to edges — a sidebar becomes a floating, minimizable overlay widget among a launcher of overlays (Figma's pattern), spawned rather than always-mounted. The overlay archetype already carries the shape; what changes is that anchoring goes spatial.
 
 ## WebGPU-capable views
 
-Pilot views render DOM. Some views will want GPU surfaces — WebGL/WebGPU canvases for visualization and simulation. DOM streaming doesn't help (you can't stream pixels as DOM ops); the shape is pixel-level passthrough, which under uniform containment needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun/Venus). The type system already accommodates it (`surface: 'wgpu'` on a program body). Deferred until a view demands it.
+Pilot components render DOM. Some will want GPU surfaces — WebGL/WebGPU canvases for visualization and simulation. DOM streaming doesn't help (you can't stream pixels as DOM ops); the shape is pixel-level passthrough, which under uniform containment needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun/Venus). The type system already accommodates it (a `wgpu` surface kind — view.md). Deferred until a view demands it.
