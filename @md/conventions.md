@@ -71,6 +71,10 @@ A subagent is an agent without your context. By default, instruct it to bootstra
 
 Even with bootstrap context, verify a subagent's conclusions against the core files before relaying. If a claim doesn't match the files, investigate or spawn another — don't pass it through.
 
+## Markdown
+
+Bulleted and numbered lists carry a blank line between items — readable as raw markdown, where long single-line items otherwise congeal.
+
 ## Commit messages
 
 Subject lines under 72 characters. Use the body for details.

@@ -2,22 +2,65 @@
 
 The engine is the authority on running programs against the substrate. A program is a chunk with an executable; to run one is to create a process. The engine creates processes, constructs and enforces boundaries, evaluates expressions, asks runtimes to spawn executables, and mediates every substrate operation a running program attempts. Nothing runs without going through the engine, and no program touches the database directly.
 
-The engine is a Rust crate compiled into the host binary. The host calls engine functions directly — there is no separate engine process and no JSON-lines hop between host and engine. Programs reach those functions through one protocol over two transports — wry IPC for surface programs, stdio JSON-lines for VM programs — identical in shape regardless of transport; the SDK hides the difference. Mechanics are in *The Program Protocol* below and [`sdk.md`](sdk.md).
+**The engine is its own installed artefact.** It runs as its own process — `ol engine`, a binary or an OS service — and the wire is its only contract: every client — the chassis, a VM program, a browser page — speaks one JSON-lines protocol over a transport the environment provides; no client links the engine or knows its internals. Runtimes are the engine's own: it loads runtime providers at boot (`runtime-vm` is a provider crate) and registers `native` — the planner — itself. [`engine/sdk`](sdk.md) is the protocol expressed as a client library.
 
-The engine federates across multiple substrate dbs — one read-write **active project** plus zero or more read-only **mounts**. Programs see one logical field; the engine routes reads and boundary evaluation across all mounts transparently. Reactivity flows only from the active project's commits in v0.1 — read-only mounts have no in-process writer to fire events. See [`pilot.md`](pilot.md#multi-project-mounts) for the project/mount model.
+The engine opens a home store and attaches others; programs see one logical field, evaluated as one. Reactivity flows from the commits of writable attached stores.
 
 ---
 
+## Stores and attach
+
+**A store is a directory carrying `.ol/`** — db and `project.toml` within; the recognition is the whole of it (substrate.md, db.md). The engine boots by opening the store `--home` names, attaching every `[[attach]]` entry in its toml, then what the field records as dynamically attached (the home's contents: [`pilot.md`](pilot.md)). **Attach brings a store into the running field**, and the attach record is one shape everywhere — the toml, the engine API, the field:
+
+```
+{ path, branch = "main", at?: commit, write = false }
+```
+
+`at` makes the attachment read-only by construction; `branch` with `write: true` is work on a branch of a shared store — the middle ground; `write` with `at` is refused; a URL is fetch-then-attach, read-only. **Write mode is declared at attach, by the person, enforced by the engine** — nothing infers writability. Writes **route to the owning store** ([`db.md`](db.md)); a commit that would modify a record resident in a store attached without `write` is rejected (`READ_ONLY_ATTACH`). Reference is not modification: placements and refs stored in a writable store whose targets resolve to read-only attachments are legal — the federation pattern depends on exactly this. Checked at commit entry, before validation.
+
+**Attach is dynamic [P]**, and **`attach` and `detach` are engine programs** — `runtime: native`, owned by `engine` — so the `run` wall (*Boundaries*, below) and run-to-draft escalation (*Lifecycle*, below) govern them like any act. **`[engine/attached]`** is a virtual place projecting the attach state — archetype and instances synthesized at query time from the engine's registry, not stored; every chunk surfaced from store *s* carries a synthesized `relates` placement on *s*'s attachment instance, so provenance rides native plumbing and any read can narrow to one store. **Dynamic attachments are persisted in the personal store**: *declared* (the toml) and *opened* (the field) are two different things with two homes, no duplication. Detaching a store whose chunks are on screen yields `unresolved` → the fault face (view). Admitting a store that ships components is a loud act — an attach-time consent chip [O — its shape].
+
+**One connection, all attached stores, one evaluator** [P — supersedes the settled per-store-evaluate-then-union law, which provably leaks]. Reads, boundary evaluation and the planner run over the union of attached stores as a single evaluation; programs see one field. **Commits are per-store** [R]; a cross-store act is a sequence of per-store commits, ordered so that every prefix is safe. An act journal is the escape if a truly atomic cross-store case ever appears — never spanning commits [O]. Remote federation stays sync-then-evaluate.
+
+Mechanics, carried from the mount era and re-worded to it:
+
+- **Cross-store placements work because dbs are dumb.** A placement stored in one store may reference an `on` whose chunk lives in another — placements store ULIDs, globally unique. Listing an archetype's instances queries every attached store and unions; validation that needs an instance contract reads it from whichever store holds the archetype. Ref validation splits by residence — the db validates locally resolvable targets only, the engine resolves the rest at commit entry; whether the one evaluator re-homes this split is the alignment pass's to draw. Brokenness — a placement referencing a chunk no attached store has — surfaces at use time as an unresolved root, never at storage time; the db enforces no placement residency (ruled; substrate.md, *Peers*). *Status, honestly: the anchor-row bridge built while db still required residency (`engine/src/mounts.rs`) outlived its reason; retirement rides the alignment pass.*
+
+- **Unresolved roots federate by intersection** — a root lands in `ReadResult.unresolved` only when no attached store resolves it.
+
+- **Sharing places across stores.** The archetype is the unification point: place `instance` on a shared archetype defined in a store everyone attaches, and instances from every attaching store surface together in queries against it; place on your own archetype to isolate. `engine/program` already works this way — every store's programs are placed there and discoverable across the field.
+
+- **`follow` over `owned` stops at store edges** — ownership never crosses stores (substrate.md); `linked` answers union per-store link tables.
+
+- **Cost.** Under one evaluator, federation cost is the planner's problem, not a per-read loop; negligible at pilot scale (a handful of stores). A lazily populated `chunk_id → store` index is the natural optimization at larger N; not v0.1 work.
+
+- **Single host per db.** Each `Db` owns its own in-process broadcast; two engine processes on one db file are not connected. Cross-engine reactivity is horizon.
+
+- **Boot-time validation.** Before serving, the engine validates the home store: every placement's `on` must resolve in some attached store. Unresolved references are surfaced; the engine refuses to run half-loaded.
+
+## Serving sources
+
+**`ol://` resolves through the engine** [R]: *the file of store s at path p* — served from the store as attached, so no client knows disk paths and the web flavor of a chassis is unchanged by it. Realization `source` strings (view) resolve here. **Pilot-grade plumbing, nothing more**: the pilot serves what components need and no further — file-at-commit serving, locking, and the rest of a real file story belong to the files integration, down the line; a module's files living under the store's version control is what keeps that door open.
+
 ## What the Engine Owns
 
-- **Process creation.** Starting a program writes a `process` chunk in one atomic `db.commit()` — its body and connections are defined in *Program and Process*. From start on the process chunk is engine-domain: a running program cannot rewrite its own record.
-- **Boundary construction and enforcement.** A run's boundary is a selection expression built at start from the frame, the argument, the program's stated ceiling, explicit additions, and the parent's cap. Every read, write, subscription, and nested start passes it, and filtering is uniform — bodies, membership, adjacency, links, search, counts.
-- **Write governance.** Placement and link rules are substrate law; they are checked **at db, inside the write transaction**, against boundaries the engine supplies — the engine's role is supplying the lowered boundaries and the frame default a newborn chunk lands in (ruled; db.md is the enforcement home).
-- **Program lifecycle.** The engine asks the runtime to spawn, tracks status through `running → done | failed` (a `draft` precedes the start and is data, not engine-domain), updates the process chunk as state changes, kills on timeout or cancel. The program itself does not set its status — it simply exits.
+- **Process creation.** Starting a program writes a `process` chunk in one atomic `db.commit()` — body and connections in *Program and Process*. From start on the process chunk is engine-domain: a running program cannot rewrite its own record.
+
+- **Boundary construction and enforcement.** A run's boundary is a selection expression built at start from the frame, the argument, the program's ceiling, explicit additions, and the parent's cap — judged under the engine's own **call context** (below), the same law for processes and for view's mounts. Every read, write, subscription, and nested start passes it; filtering is uniform.
+
+- **Write governance.** Placement and link rules are substrate law, checked **at db, inside the write transaction**, against boundaries the engine supplies (ruled; db.md is the enforcement home).
+
+- **Program lifecycle.** The engine asks the runtime to spawn, tracks status through `running → done | failed` (a `draft` precedes the start and is data, not engine-domain), updates the process chunk as state changes, kills on timeout or cancel.
+
 - **Expression evaluation.** The engine is the planner. Core verbs are program chunks with `runtime: native`; a chain in the single-request class lowers to one db query; programs never interpret expressions and no author writes SQL.
-- **Protocol mediation.** The engine receives every substrate operation a running program attempts, validates it, executes it via the substrate library, returns the result. Programs do not carry database access; the protocol is the boundary.
-- **Containment.** The engine asks the registered runtime provider to spawn each program. Containment lives in the provider, not in engine code; engine knows runtime kinds only as registry keys.
-- **Mount registry.** The engine holds the active project and all mounted peer projects. Federated reads and boundary evaluation iterate the registry; reactivity subscribes only to read-write mounts (one in v0.1). Writes referencing read-only mounts are rejected. Cross-mount ref validation (substrate.md, *Links*) runs through this registry — the db validates locally resolvable targets only; the engine resolves the rest at commit entry.
+
+- **Protocol mediation.** The engine receives every substrate operation a running program or client attempts, validates it, executes it, returns the result. Programs do not carry database access; the protocol is the boundary.
+
+- **Containment.** The engine asks the registered runtime provider to spawn each program. Containment lives in the provider; the engine knows runtime kinds only as registry keys.
+
+- **The attach registry.** The engine holds what is attached, routes writes to owning stores, enforces declared write modes, and projects `[engine/attached]`.
+
+- **Source serving.** `ol://`, per *Serving sources*.
 
 ## Program and Process
 
@@ -29,26 +72,24 @@ The engine federates across multiple substrate dbs — one read-write **active p
 chunk engine/program {
   instance: {
     executable?:   string              — absent for runtime: native
-    runtime:       ref(runtime)
+    runtime:       vm | native         — programs are headless [P]; the surface
+                                         runtime retired with the seat mechanism
     accepts:       list<type>          — required; entries as reified type values
     result?:       ref                 — an archetype; checked at program definition
-    read?:         selection           — per key: absent = defers to the run;
-    write?:        selection             present = exact ceiling (*Boundaries*)
-    run?:          selection           — over program chunks; which programs a run
-                                         may start; run: {} starts nothing
-    capabilities?: set<string>
+    read?:         selection           — the ceiling, per key (*Boundaries*):
+    write?:        selection             absent means {}; `caller` names the
+    run?:          selection             parent's reach, composably
+    capabilities?: set<string>         — net[:host] · fs · exec, nothing else
     timeout_ms?:   number
-    grades?:       map<{ wmin?: number, wmax?: number,
-                         hmin?: number, hmax?: number }>
-    uses?:         set<ref(program)>
-    presets?:      set<ref(collation)>
   }
 }
 ```
 
-**Role is conferred by reference.** An archetype is this program's result because the program's body says so. Interface archetypes are found from the program, never by global name or path — every program having an `output` collides nowhere. `uses` names the programs it runs, for the launch surface; `presets` names shipped collations; `grades` declares the size bands a surface offers, read by the seat ([`programs.md`](programs.md)).
+**Role is conferred by reference.** An archetype is this program's result because the program's body says so. Interface archetypes are found from the program, never by global name or path — every program having an `output` collides nowhere.
 
-Concrete programs — filesystem, shell, model, echo, reader, sidebar — are chunks `instance` on `engine/program`, owned by their project's root.
+*Retired from this body:* `grades` (a component's `serves` carries the size contract now — view) · `uses` and `presets` (both served the retired launch surface; menus derive from declared `actions` and the match, and a program's shipped views are offers — view). `runtime: webview` retires: what draws is a component, and no component is a process.
+
+Concrete programs — filesystem, shell, model, echo, `attach`, `detach` — are chunks `instance` on `engine/program`, owned by their store's root.
 
 *Open, owed to the author.* substrate.md's key-type list says **at most one `selection` per contract**; [`selection.md`](research/arc/selection.md) §3 states the same rule of `accepts` **entries**, where two selections would compete for the same elements. `read`, `write` and `run` are three selection-typed keys on one contract, so the narrower reading is the one this contract needs. Marked, not decided.
 
@@ -68,12 +109,16 @@ Entry types: `ref(X)` · `ref(X | Y)` (union — instance on any listed; ruled) 
 The rules, plainly:
 
 - **Boundary facts never sit here** — they live in the `read`/`write` keys (*Boundaries*).
+
 - **Entries may not compete for the same elements.** Checked at definition, structurally: the same archetype twice is illegal, and so is value-kind containment (`[loc, selection]` — a selection's elements include locs). What definition *cannot* forecast is multi-typing, since any chunk may carry two instance placements; those ties surface at start and reject (*The match*).
+
 - **Payload discipline.** Same-typed inputs with different roles never appear bare — they ride inside a typed payload chunk whose *keys* are the roles (`diff/pair {old, new}`). Payload archetypes are owned: shared vocabulary by ownership and import, never a global predicate space.
+
 - `set<T>` claims its whole type: an "any number of X" mouth must be the contract's only consumer of X.
+
 - **Primitives never appear as entries.** `string`, `number`, `time`, `markdown` are payload content, living inside chunk bodies. That is what makes matching uniform — "matchable" has exactly one meaning.
 
-One convention feeds three consumers with no duplication: the draft's argument, seated, renders each entry by its matched surface ([`programs.md`](programs.md)); the agent compiles provider tool schemas from the same reified entries ([`agent.md`](agent.md)); expressions type-check plans against them before anything runs.
+One convention feeds three consumers with no duplication: the draft's argument, seated, renders each entry by its matched surface (view); the agent compiles provider tool schemas from the same reified entries ([`agent.md`](agent.md)); expressions type-check plans against them before anything runs.
 
 *Open (steward direction, not author-resolved): `ref(X & Y)` conjunctions — instance on all listed archetypes, the trait case. And, if nested conjunction contracts ever appear, most-specific-wins as a bind tiebreak; incomparable overlaps still reject. Default is strict-reject until real contracts hit the wall.*
 
@@ -96,7 +141,7 @@ chunk engine/process {
 }
 ```
 
-`status` is the substrate's own enum pattern: `engine/status` with four value chunks. Boundary chunks and their `relates` topology are retired — the run's boundary is three typed keys on the body, read in one hop.
+`status` is the substrate's own enum pattern: `engine/status` with four value chunks. The run's boundary is three typed keys on the body, read in one hop.
 
 **The argument is a field, not a chunk.** A chunk can never *be* a set — bodies are one JSON object, always — so "arguments are sets" is a claim about the argument **value**. There is no argument chunk. The draft *is* the process chunk; composition edits `P.body.argument` directly; editable-iff-unconsumed is enforced on the field, by the engine, not by convention.
 
@@ -125,13 +170,12 @@ Concrete topology for a run:
 
 ```
 process P
-  owned by: the caller's process (child mode) — or the session (launch, top-level)
-  instance on: engine/process, <program>, <caller-supplied places, e.g. the session>
-  body: { argument, at, status, result?, read, write }
+  owned by: the caller's process (child mode) — or the configured launch owner (top-level)
+  instance on: engine/process, <program>, <caller-supplied places>
+  body: { argument, at, status, result?, read, write, run }
 
 composition chunks (payloads, expressions cited by the argument)
   owned by: wherever they were composed — the composing process's frame by default
-  instance on: their own archetypes
 
 result R
   owned by: P — which is its membership in [self]
@@ -141,22 +185,33 @@ children
   owned by: P — the trace; instance on engine/process + their own programs
 ```
 
-*Open:* re-homing on re-run and cross-project composition settle at the draft build. And substrate.md's naming rule — *a chunk that has members must have a name* — fires on process chunks, which are id-addressed and typically nameless yet own their children and results; either the rule needs an exception or processes need generated names. Carried, not decided.
+*Open:* re-homing on re-run and cross-store composition settle at the draft build. And substrate.md's naming rule — *a chunk that has members must have a name* — fires on process chunks, which are id-addressed and typically nameless yet own their children and results; either the rule needs an exception or processes need generated names. Carried, not decided.
+
+---
+
+## The call context
+
+The engine judges every act under one structural contract of its own — **the call context**. [R — the direction: the engine never names view; the shape and the `anchor` name are steward-drafted, P.]
+
+A **conforming chunk** names a *declaration* carrying ceilings, an *argument* (a selection), its own *grant* (`read` / `write` / `run` additions), and has a derivable *parent* conforming chunk. Effective reach at any link in the chain:
 
 ```
-engine/mount  (virtual)
-  — Both archetype and instances synthesized by the engine at query time
-    from its in-memory mount registry; not stored in any db.
-  body carries: project_id, branch, mode, commit?
+(the argument, read-granted as any argument is  ∪  the declaration's ceiling  ∪  the grant)  ∩  the parent's reach
 ```
 
-`engine/mount` is a virtual place, in the same family as `db/commits` and `db/branches`. Every chunk surfaced from mount X carries a synthesized `relates` placement on X's mount instance — provenance through native substrate plumbing. Programs can read the mount root to list mounts, or intersect any place with a mount instance to narrow to its chunks.
+The chain caps at the **machine context** — `Context::process_id = None`: full reach over what is attached, and no frame — so a machine-context declaration must name each new chunk's owner; chunks with no owner at all exist only through the bootstrap carve-out ([`bootstrap.md`](bootstrap.md)).
+
+**A process is the near-conformer, not a conformer by construction**: its **frame** is a fifth reach source, exempt from the parent cap — where the frame sits in the generic contract is the rewrite's named open seam [O]. **`view/mount` conforms from the view side** — the engine never references a view archetype; the dependency law holds at this seam too.
+
+`Context` carries **`{ anchor }`** [P — the name]: a ref to any conforming chunk. Batch reads carry the anchor per entry (*The Program Protocol*). The engine derives the chain from field data — cacheable — and judges `read`, `commit` and starts exactly as for a process; rendering under a mount reads under its anchor's reach. **Intents are dissolved** [R]: what interface code emits is an ordinary `commit` or start, judged here.
+
+*Open:* how the parent link is derived (containment backrefs vs a stored key) [O — encoding] · which ops beyond read/write/run are judged under `{ anchor }` (`cancel`, `subscribe`) [O].
 
 ---
 
 ## Expressions — locations, calls, and the planner
 
-The engine owns the expression layer: the data shapes, the written language, their evaluation, and their lowering. Display rules — the spine, pills, the editor — live with the reader ([`programs.md`](programs.md)).
+The engine owns the expression layer: the data shapes, the written language, their evaluation, and their lowering. Display rules live with the components that render them (view).
 
 ### The shapes
 
@@ -167,23 +222,15 @@ expression   one grouped unit — named nodes, its own closure, last unnamed lin
 selection    list<loc | ref | expr>     — ordered (substrate.md); purity clause below
 ```
 
-Two archetypes carry the lifted forms:
+One archetype carries the lifted form:
 
 ```ol
 chunk engine/expression {
   instance: { nodes: map, out: string }     — the graph as compressed structure
 }
-
-chunk collation {                           — a value; edits branch, nothing deleted
-  instance: {
-    selections:  list<selection>            — ordered, tab-like
-    settings:    map                        — collation-wide only
-    predecessor: ref(collation)?            — the collation this was edited from
-  }
-}
 ```
 
-**Why a collation holds a list, not a map.** Collation expressions are chunks, and a chunk cannot reference a sibling by a collation-local kv string — its references are refs. So expressions drive each other by direct chunk reference, the kv names lose their one load-bearing function, and members collapse into an ordered `list<selection>`. Display names come from the expression chunks' own optional `name` — field-native and rename-safe. The closure rule no longer reaches across collation siblings — that half retires with the map; names resolve within an expression's own nodes, then outward to its root.
+(`collation` — the reader's ordered members — moved to the view family: its members are mounts now, calls rather than bare selections.)
 
 ### The written language
 
@@ -222,6 +269,7 @@ Nodes hold their args inline as data — the plan. Type-checking a plan is readi
 Text plans must be runnable — prose fences, palette one-liners, agent-written `ol` — so **composition into an argument materializes**: every inline expression and payload literal entering an argument becomes a chunk at that moment, and the argument holds a ref to it. Composition into an argument *is* the sharing gesture that lifts a value to a chunk (substrate.md, *Values and chunks*). Two reasons, recorded because they govern future grain decisions:
 
 - **Deletion symmetry.** Drafts already compose real chunks — a document written as an argument. Deliberate draft-deletion cascades to composition chunks related solely to that draft: one gesture, covering documents and expressions identically. The cascade walks placements, not ownership.
+
 - **Graph fidelity.** Inline, an expression's mentions would attribute to the draft, flattening provenance — "which expressions depend on this place" would be unaskable. As a chunk, the graph is traceable and foldable. For a system whose center is retrieval's inverse, provenance grain is the point.
 
 The field is fractally infinite; abundance is not a cost; veiling structure for tidiness is itself the hygiene problem.
@@ -235,6 +283,7 @@ Fenced expression blocks in prose are anonymous expressions — no chunk exists 
 The expression language is the **only** query surface; no author writes SQL, ever. The planner partitions the verb vocabulary:
 
 - **Read-native** — verbs with a relational lowering: `at` (time travel as composition), subtraction, `limit`, `where`-over-keys, the hop vocabulary and `prop`, and `follow` (transitive closure of a step — below). A chain inside this subset compiles to **one** db query — the boundary filter included, since a boundary is itself a single-request selection and lowers into the same statement.
+
 - **Compute** — `fold`, `group`, anything model-touching: real program runs, fed by lowered sub-chains.
 
 **Single-request is derived, never typed** (ruled). `runtime` says only *who executes* — `native` means the planner, no executable. Whether a verb lowers is the planner's own knowledge: it holds a lowering or it does not, and a stored flag could only agree or lie (the purity argument, again). Boundary validation asks the planner whether the whole expression lowers; a native verb without a lowering is legal — it simply cannot appear in a wall.
@@ -255,7 +304,7 @@ prop(key)         a body key's value projected as field structure — the narrow
 
 **`follow(step, depth?)` is transitive closure of a step, and the step is itself a pure expression** (`selection → selection`): evaluate on the frontier, union, repeat to fixpoint or `depth`. No lambda — the step's input is the pipe input, like every verb. Composite hops are step composition (`refs(argument) | owner` alternates two edge types); cycles terminate by visited-set, so mutual citations cannot hang a wall. If the step lowers, `follow` lowers to a recursive CTE — single-request, wall-admissible; a compute step makes it compute, legal but never a wall. The yield orders deterministically: closure depth, then commit time.
 
-**Closure output carries its edges.** Nodes alone cannot render a branch or a join, so a closure evaluation reports the edges it walked — `(from, to, kind-or-key)` with depth — beside the chunks, in the result. This is the one extension pipe output needs; its wire shape lands with the SDK at build. The thread face is the consumer: **follow yields the line; dimensions orbit it** as per-element attribute pipes ([`programs.md`](programs.md) §3; [`agent.md`](agent.md)).
+**Closure output carries its edges.** Nodes alone cannot render a branch or a join, so a closure evaluation reports the edges it walked — `(from, to, kind-or-key)` with depth — beside the chunks, in the result. This is the one extension pipe output needs; its wire shape lands with the SDK at build. The thread face is the consumer: **follow yields the line; dimensions orbit it** as per-element attribute pipes ([`agent.md`](agent.md)).
 
 `explode` is unclassified until it lands (*What Is Open*) — a projection of body keys reads as read-native, but nothing has priced its lowering.
 
@@ -269,16 +318,21 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 **Pure means effects confined to the own frame.** A pure program still commits — its result lands in `[self]`, and that is the memoized value.
 
-1. `write: {}` — present and empty: the deliberate purity gesture. One key covers every channel, since static locs and argument references live in the same key.
+1. `write: {}` — the purity condition; with the ceiling law (*Boundaries*) an absent `write` already means `{}`, so purity is the default posture and impurity is declared.
+
 2. No capabilities. `fs`, `exec` and `net` are world-effects regardless of field writes. This does **not** put the filesystem or network off limits for pure work — external content enters through an integration projecting it into the field; purity is about *this run's* effects, never where the data originated.
+
 3. The engine refuses start-time write additions to a pure program.
+
 4. Transitive: a pure program starting an impure one is rejected at start.
 
 1–2 hold at definition, 3–4 at start. Badges derive from the predicate; a `pure:` flag could only agree or lie. This is the predicate substrate.md's `selection` purity clause names.
 
+**Purity is never the launch gate** [R — 2026-08-20]. It decides what the planner may evaluate as an expression — nothing else. Impure programs are as launchable as pure ones; the walls (`run`, capabilities) govern (*Lifecycle*, daemons).
+
 **Result production vs placement.** A result is what a run *produced* — frame-only, always. Commits are what it *mutated*. Placing a result onto other places is a second, visible act: declared in the program body, where the targets count into `write` and the program is honestly impure, or performed by the caller within its own reach.
 
-**Automations and the pin.** A selection admits `loc | pure expr` only. Impure chains are **automations** — started processes, viewport-independent; their *results* are field content a selection may include. You seat the output, never the automation. A final call resolving to a *surface* program **pins** the expression: it yields a view rather than data, legal only in seat positions — member, widget, slot — and never referenceable from another expression. Grammar, not purity bookkeeping; purity is asked of the content beneath the pin.
+**Automations and the pin.** A selection admits `loc | pure expr` only. Impure chains are **automations** — started processes, viewport-independent; their *results* are field content a selection may include. You seat the output, never the automation. A final call resolving to a *component* **pins** the expression: it yields a view rather than data, legal only in mount positions — where a slot or a member names content (view) — and never referenceable from another expression. Grammar, not purity bookkeeping; purity is asked of the content beneath the pin.
 
 **Dead nodes are legal.** An expression is a composition, not a contract: dormant chains are held alternatives, and an editor must be able to save a broken connection — the editing state *is* the proof. Evaluation is **lazy from `out`**, so dead never computes; **normalization prunes to the live graph**, so cache identity is shared across dead-node variants; **mentions file from the authored whole**, so provenance sees dormant citations correctly. *Strict at contracts, abundant in compositions* — the match rejects orphans; expressions keep their dead.
 
@@ -288,11 +342,15 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra, the hop verbs, `at`, `where`, `follow` — what the planner can lower, exactly (*Single-request is derived*). A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
 
-The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction. Five sources:
+The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`. But a `resolve` whose chain contains compute verbs starts real runs, and **those pass the `run` wall** — resolve respects it.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction.
 
-1. **The frame.** Read: `[self] | follow(owned)` — a process reads its **own trace at depth**: its children, their results, recursively down its own frame and never beyond it (ruled — without this a caller could not read its children's results, which live in the children's frames). Write: `[self]`, one hop — a process writes its own frame, never its children's. Always granted, never declared. Children and results are owned by the process, and that one relation is both their address and their membership. A wall ignores the order a selection carries.
+**The formula, plainly** [R]: *a run reaches its frame, plus what was offered in its argument, plus what its program's ceiling names, plus what the starter adds — cut down to what the parent holds.* Five sources:
+
+1. **The frame.** Read: `[self] | follow(owned)` — a process reads its **own trace at depth**: its children, their results, recursively down its own frame and never beyond it (ruled — without this a caller could not read its children's results, which live in the children's frames). Write: `[self]`, one hop — a process writes its own frame, never its children's. Always granted, never declared, and **exempt from the parent cap** — the near-conformer clause of the call context; where the frame sits in the generic contract is the named open. A wall ignores the order a selection carries.
+
 2. **Argument content, read-granted implicitly.** The offer *is* the grant: someone gestured the content into the argument, and that gesture is the consent read needs. **Write is never implicit.**
-3. **The program's stated ceiling** — the flat `read`, `write` and `run` keys. Per key: absent defers reach entirely to the run; present is exact, and a run may narrow it. No run widens its own walls mid-flight — more reach is always a new consented start (*Run-to-draft*). Members are static locs and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
+
+3. **The program's ceiling** — the `read`, `write` and `run` keys, **a source, not a cap**: what the ceiling names is added to the run's reach. **An absent key means `{}`.** The parent's reach enters only where the ceiling names **`caller`** — composable like any term (`caller − [secrets]`); a ceiling with no `caller` takes nothing from the parent beyond what the other sources carry. No run widens its own walls mid-flight — more reach is always a new consented start (*Run-to-draft*). Members are static locs, `caller`, and **argument references** — an entry's type name, unique by the disjointness rule, or a payload-key path:
 
    ```ol
    program move {
@@ -303,9 +361,10 @@ The boundary is **constructed at start** and recorded as the process body's `rea
    chunk move/route { instance: { item: ref, from: loc, to: loc } }
    ```
 
-   At start each reference resolves to the **term chunks** of the bound element — `[a, b]` contributes both; an expression chunk contributes what its mentions name — and is snapshotted into the process record. `read: {}` / `write: {}` / `run: {}`, present and empty, is the fully contained program — `model`, `web`, `filesystem`: nothing beyond the frame, starts nothing, enforced rather than promised.
+   At start each reference resolves to the **term chunks** of the bound element — `[a, b]` contributes both; an expression chunk contributes what its mentions name — and is snapshotted into the process record. A body with no ceiling keys at all is the fully contained program — `model`, `web`, `filesystem`: nothing beyond the frame and the argument, starts nothing, enforced rather than promised.
 4. **Explicit additions at start** — whatever the starter grants (`RunArgs.read` / `RunArgs.write` / `RunArgs.run`). These render as the boundary chips a person sees before Go, and are narrowable there.
-5. **The parent's reach, as a cap.** Everything above is intersected with the caller's own boundary, `run` included. **A cap, never a source** — within a call stack reach only narrows, and detachment (`launch`) does not escape it. Handing a child more than the caller holds is not forbidden — it is an **escalation**: the start lands as a draft, and an approver who holds the reach starts it, their reach becoming the cap (*Run-to-draft*).
+
+5. **The parent's reach, as a cap.** Sources 2–4 are intersected with the caller's own boundary, `run` included; the frame alone is exempt (source 1). **A cap, never a source** — within a call stack reach only narrows, and detachment (`launch`) does not escape it. Handing a child more than the caller holds is not forbidden — it is an **escalation**: the start lands as a draft, and an approver who holds the reach starts it, their reach becoming the cap (*Run-to-draft*).
 
 **Content never carries reach.** Structural, not stated: all reach lives in the boundary keys or in explicit additions, never inferred from what happened to match.
 
@@ -322,10 +381,12 @@ The boundary is **constructed at start** and recorded as the process body's `rea
 Beside the boundary check, the engine applies substrate's write law to every declaration:
 
 - **`owned` and `relates` placements** — creating one requires **write over the dimension and read over the placed chunk**; removing one requires **write over the dimension**, since its stewards curate its member list.
-- **`instance` placements are a claim**, not a publication: anyone may claim a type, the archetype untouched (substrate.md, *Who May Write What*). This is why a run may place its own result on the declared result archetype without holding write over it.
+
+- **`instance` placements are a claim**, not a publication: anyone may claim a type, the archetype untouched — and the symmetry holds on removal: **removing an instance placement requires write over the placed chunk** [R — the claim is the chunk's own fact, never the archetype's], the archetype again untouched. This is why a run may place its own result on the declared result archetype without holding write over it.
+
 - **Links** — a typed ref or a mention requires **read over its target** and nothing more; the fact lands in the author's own body, self-governed.
-- **Chunk birth is never placementless.** A declared chunk carrying no `owned` placement is created owned by the running process — the frame default. Owning it elsewhere at birth is an ordinary placement, needing write over that owner.
-- **Under `Context::process_id = None`** there is no frame to default into, so a host-initiated declaration must name each new chunk's owner. Chunks with no owner at all exist only through the bootstrap carve-out ([`bootstrap.md`](bootstrap.md)).
+
+- **Chunk birth is never placementless.** A declared chunk carrying no `owned` placement is created owned by the running process — the frame default. Owning it elsewhere at birth is an ordinary placement, needing write over that owner. Under the machine context there is no frame, so the declaration must name each new chunk's owner (*The call context*).
 
 *Open, carried from substrate.md and not decided here: creating a placement requires read over the placed chunk, but at birth the chunk does not yet exist to be read — the two rules are stated and never reconciled. And who may remove a whole **chunk**, dropping every placement at once, is unspecified.*
 
@@ -335,75 +396,90 @@ Beside the boundary check, the engine applies substrate's write law to every dec
 
 ## Lifecycle — draft, the match, start
 
-A process may exist before start — **status `draft`**, its argument under composition. A draft is ordinary field data: written by whoever holds the grant (the seated argument, the palette), substrate-resident (there is no in-memory draft state), resting visibly where it was begun until an explicit gesture deletes it — nothing auto-sweeps. Deleting one deliberately cascades to the composition chunks related solely to it. A draft whose argument cites a previous turn joins that thread's lineage ([`agent.md`](agent.md)). From start on, the process chunk is engine-domain.
+A process may exist before start — **status `draft`**, its argument under composition. A draft is ordinary field data: written by whoever holds the grant, substrate-resident (there is no in-memory draft state), resting visibly where it was begun until an explicit gesture deletes it — nothing auto-sweeps. Deleting one deliberately cascades to the composition chunks related solely to it. A draft whose argument cites a previous turn joins that thread's lineage ([`agent.md`](agent.md)). From start on, the process chunk is engine-domain.
 
 ### The match
 
 Starting checks the offered argument set against the program's `accepts` — four steps, no search:
 
 1. **Bind.** Each element maps to the one entry it satisfies. Two kinds of check, per the law's union rule — tag membership, then per-tag shape: for value-kind entries (`loc`, `expr`, `selection`) the element must *be* that kind of value; for chunk entries (`ref(X)`, payload archetypes) the element must be *instance on* that archetype. An element satisfying two entries — always multi-typing, which definition cannot forecast — **rejects as ambiguous**, never guessed.
-2. **Count.** Required entries satisfied exactly once; optional entries at zero or one.
-3. **No orphans.** An element the contract does not recognize refuses the *run*. A start is a consented exchange; unconsumed offerings would be silent lies.
-4. **The draft is free.** Anything may sit in a draft's argument, unrecognized elements included; it simply cannot start until the match passes. The match guards the door, not the desk — which is why required entries show as must-fill and optional ones fold away while composing.
 
-Names gave keyed arguments their optionality; **types plus counting** give it to sets, and entry disjointness keeps counting from becoming search. Failure is `VALIDATION_ERROR`, with nothing written.
+2. **Offers bind the rest** [P]. Unbound *optional* entries bind from the caller's **standing offer** — a run's from the caller's offer, a mount's from its ancestors' (view) — by this same binding; explicit binding wins; two offered elements at the same distance matching one entry is ambiguity, and **ambiguity binds nothing and says so**.
+
+3. **Count.** Required entries satisfied exactly once; optional entries at zero or one.
+
+4. **No orphans.** An element the contract does not recognize refuses the *run*. A start is a consented exchange; unconsumed offerings would be silent lies. (**Selection mouths consume the unbound rest** — a `selection`-typed entry is the one legal home for it.)
+
+The draft is free: anything may sit in a draft's argument, unrecognized elements included; it simply cannot start until the match passes. The match guards the door, not the desk — which is why required entries show as must-fill and optional ones fold away while composing. Names gave keyed arguments their optionality; **types plus counting** give it to sets, and entry disjointness keeps counting from becoming search. Failure is `VALIDATION_ERROR`, with nothing written.
 
 ### Two modes
 
 - **`run` (child).** Composed work. The child is owned by the caller's process — the trace — and cancellation cascades: cancel an agent turn, its in-flight tool calls die with it.
-- **`launch` (detached).** The process is owned by the session, not the caller; it survives the launcher. The parent cap still applies at start — detachment never escalates. Everything a surface or the palette initiates.
 
-Surfaces are viewers, never owners: closing a tile unmounts a viewer, it kills nothing. Terminating is always an explicit act.
+- **`launch` (detached).** The process is owned by the **configured owner**, not the caller, and survives the launcher. The owner is configuration, not engine law — the pilot's desktop module configures its session as that owner; a session is desktop-module state, not an engine concept [R — 2026-08-20]. The parent cap still applies at start — detachment never escalates. Every start from the interface is a `launch` [P]: a mount has no frame to own a child (view), so the interface starts work the way any caller does, watched by subscription.
+
+Components are viewers, never owners: closing one is a body edit that unmounts a viewer — it kills nothing. Terminating is always an explicit act.
+
+### Daemons
+
+[R — 2026-08-20.] A component that needs a running service names an ordinary program — impure programs are as launchable as pure ones; the walls (`run`, capabilities) govern, and purity is never the gate (*Purity*). **Nothing auto-starts**: in the pilot a daemon is started by a person's act — `launch` from the interface, or outside the field entirely — and a component whose service is absent draws the honest fault face (view); the docker-cli-without-engine posture, accepted for now. Whether a component may ever dispatch a start without a gesture is deferred with it [O]. The resident lifecycle — a terminal transition as *policy* (stop, restart) rather than the end of a job — remains open and must not be foreclosed (*What Is Open*).
 
 ### Run-to-draft — escalation
 
 A `run` that exceeds the caller's walls — the target outside the caller's `run` boundary, or requested `read`/`write` additions beyond the caller's reach — is neither rejected nor silently narrowed: the engine writes the child as a **draft** and returns its id; the caller `await`s it like any run. From there:
 
 - **Approve is starting the draft.** A holder of the needed reach starts it, and boundary source 5 takes **the approver's reach** as the cap — approval is lending authority, which is the only way reach ever widens. Chips are narrowable before Go, as at any start.
+
 - **Deny is `cancel` on the draft** — the terminal transition `failed` with `error: 'denied'`; the caller's `await` resolves and the refusal is the caller's to handle.
-- **Pending drafts are auto-surfaced** — the sidebar badges them as process chrome, and any process slot rendering the caller surfaces them inline: obligations penetrate the fold ([`programs.md`](programs.md), [`agent.md`](agent.md)).
+
+- **Pending drafts are auto-surfaced** — process chrome badges them, and any process view rendering the caller surfaces them inline: obligations penetrate the fold (view, [`agent.md`](agent.md)).
+
 - A caller that knows it will exceed may relate explanation prose onto the draft before awaiting — ordinary aboutness, rendered by the draft's chrome.
 
-Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
+The consent for an escalation is a chassis modal composed from field reads, sealed by the reserved native chord (view, chassis); the principal it binds is open [O — lean: the mount of the draft face]. Purity is untouched: a pure program handed write additions is still refused outright — purity beats escalation. *Build-time, deliberately unspecced: how the launch grant stages which acts auto-run versus draft first.*
 
 ### What the engine writes at start
 
 Starting — `run` with a program and an argument set, or a consumed draft — is one atomic `db.commit()`:
 
 1. **The match.** Fail → `VALIDATION_ERROR`, nothing written.
-2. **The boundary is constructed.** The five sources are assembled and intersected, argument references resolve to their term chunks, and the result is the `read` / `write` expressions. A pure program handed start-time write additions is refused here.
-3. **The process chunk** — fresh for a direct start (owned per mode, `instance` on `engine/process`, the program, and each caller-supplied place), or the existing draft flipped. Body written whole: `argument` as offered, `at` stamped to the branch head, `status → running`, `read` / `write` as constructed.
+
+2. **The boundary is constructed.** The five sources are assembled per the formula, argument references resolve to their term chunks, and the result is the `read` / `write` / `run` expressions. A pure program handed start-time write additions is refused here.
+
+3. **The process chunk** — fresh for a direct start (owned per mode, `instance` on `engine/process`, the program, and each caller-supplied place), or the existing draft flipped. Body written whole: `argument` as offered, `at` stamped to the branch head, `status → running`, the boundary keys as constructed.
+
 4. **The argument freezes.** From this commit, writes to the process's `argument` field are rejected — consumed.
 
 At completion the mirror check runs: the result chunk must be `instance` on the archetype the program's `result` names; the engine fills `body.result` and flips status in the terminal commit.
 
 Pre-generated ids let the engine reference the process from its own declaration.
 
-**Frozen safety or rolling head.** The record freezes, but the chunks it references live on. The SDK makes the choice explicit: resolving the argument's refs **at the stamped commit** (`at`) is the default — reproducible, exactly what the run was given; following the **living head** is the deliberate choice for programs that want liveness (the reader following its reading). Same temporal machinery, two honest modes ([`sdk.md`](sdk.md)).
+**Frozen safety or rolling head.** The record freezes, but the chunks it references live on. The SDK makes the choice explicit: resolving the argument's refs **at the stamped commit** (`at`) is the default — reproducible, exactly what the run was given; following the **living head** is the deliberate choice for programs that want liveness ([`sdk.md`](sdk.md)).
 
-**Terminal cleanup never severs the frame.** A terminal process's argument, results, children, and boundary remain readable forever — cleanup writes status, it does not dismantle topology. Re-run clones from dead frames; the process-view autopsies them.
+**Terminal cleanup never severs the frame.** A terminal process's argument, results, children, and boundary remain readable forever — cleanup writes status, it does not dismantle topology. Re-run clones from dead frames; the process view autopsies them.
 
 ---
 
 ## The Program Protocol
 
-One JSON-lines protocol serves every program regardless of where it runs.
+One JSON-lines protocol serves every client regardless of where it runs. **The transport is one object** [P]: `send(text)` / `receive(handler)`, found in one place, **installed by the environment before the SDK loads** — the chassis's init script, a VM preamble over stdio, a browser page's websocket shim. The SDK embeds no variants; provisioning the transport is the host environment's duty ([`sdk.md`](sdk.md)).
 
-**Operations a running program can call on the engine:**
+**Operations a connected program can call on the engine:**
 
 | Operation | Description |
 |---|---|
 | `read` | Read the intersection of places. Filtered by the read boundary — bodies, membership, adjacency, links, counts, alike. Membership across the three stored kinds plus the `linked` answer, per substrate.md (*Read*). FTS via `ReadOpts.match_`; an **empty places list with `match_`** is a whole-field FTS query, boundary-filtered and federated like any read. Negation via `exclude`. Pagination and body-less projection per substrate.md. |
-| `resolve` | Evaluate a location or an expression chunk and return its `ReadResult`. The planner does the work — programs never interpret expressions. Boundary-filtered like `read`; compute verbs in the chain become real runs. |
+| `resolve` | Evaluate a location or an expression chunk and return its `ReadResult`. The planner does the work — programs never interpret expressions. Boundary-filtered like `read`; compute verbs in the chain become real runs, each passing the `run` wall, and the call returns after those sub-runs complete — which is why the planner keeps compute out of boundary grammar (*Boundaries*). |
 | `get` | Fetch a single chunk by id. Returns `null` if the chunk does not exist; rejected if outside the read boundary. Honors `at` for temporal point reads. |
-| `read_batch` | Multiple tagged `read`/`get` sub-queries resolved together at **one commit snapshot**, each authorized under its own identity — each entry carries its identity token on the wire (ruled), so a coalescing provider never authorizes at its own. One request, coherent results — the resolution primitive behind slot-and-hook views (programs.md). |
-| `commit` | Write a Declaration. Rejected if the boundary does not admit every touched dimension, and checked against the placement and link rules of *Governance at `commit`*; ref keys validate per substrate.md (federated through the mount registry). `dry_run: true` runs full validation without writing — the live-form affordance. |
+| `read_batch` | Multiple tagged `read`/`get` sub-queries resolved together at **one commit snapshot**, each authorized under its own context — each entry carries its **anchor** on the wire (ruled; *The call context*), so a coalescing client never authorizes at its own. One request, coherent results — the resolution primitive behind composed views. |
+| `commit` | Write a Declaration. Rejected if the boundary does not admit every touched dimension, and checked against the placement and link rules of *Governance at `commit`*; ref keys validate per substrate.md, federated across attached stores; the write routes to the owning store. `dry_run: true` runs full validation without writing — the live-form affordance. |
 | `run` | Start a program. Returns the process id immediately. Takes a program plus an argument set, or a `draft` process id to consume. `mode: 'child' \| 'launch'` per *Lifecycle*. |
 | `await` | Wait for one or more processes to reach a terminal state. **Returns each process itself** (the chunk — status, result ref, one hop to the result). The call suspends the calling task; it doesn't block the engine. |
 | `cancel` | Request a process's terminal transition. Authorized when the target descends from the caller in the engine's own process tree — the cascade lineage, engine state rather than a reach claim — or when the caller's write boundary admits it. Idempotent. Cancel of a **draft** is deny: `failed`, `error: 'denied'` — the run-to-draft refusal path (*Lifecycle*). |
-| `exit` | The calling program requests its own terminal transition (`done`) — the self-dismissal path for surface programs; trivially safe. |
 | `subscribe` | Register on a set of places; returns a subscription id. The engine pushes `place_changed` events when commits touch them. |
 | `unsubscribe` | Cancel a subscription by id. |
+
+(The old `exit` op — surface self-dismissal — retires with surface programs: a VM program exits by exiting; nothing else is a process.)
 
 ### Schema
 
@@ -412,16 +488,15 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 ```jsonl
 {"id":1,"op":"read","places":["chunk_abc","chunk_def"],"opts":{"match_":"session today","exclude":["chunk_hidden"],"limit":50}}
 {"id":2,"op":"get","chunkId":"chunk_abc","opts":{"at":"...","branch":"...","include":{"body":false}}}
-{"id":3,"op":"read_batch","reads":[{"tag":"a","places":["s1"]},{"tag":"b","places":["s2"],"opts":{...}}]}
+{"id":3,"op":"read_batch","reads":[{"tag":"a","anchor":"m_1","places":["s1"]},{"tag":"b","anchor":"m_2","places":["s2"],"opts":{...}}]}
 {"id":4,"op":"commit","declaration":{"chunks":[...]},"dry_run":false}
-{"id":5,"op":"run","program":"diff","argument":[{"$ref":"chunk_pair"}],"mode":"child","read":[{"$loc":["their-project"]}],"write":[]}
+{"id":5,"op":"run","program":"diff","argument":[{"$ref":"chunk_pair"}],"mode":"child","read":[{"$loc":["their-store"]}],"write":[]}
 {"id":6,"op":"run","draft":"p_draft"}
 {"id":7,"op":"await","processes":["p_1","p_2"]}
 {"id":8,"op":"cancel","process":"p_1"}
-{"id":9,"op":"exit"}
-{"id":10,"op":"subscribe","places":["my-session"]}
-{"id":11,"op":"unsubscribe","subscriptionId":"sub_1"}
-{"id":12,"op":"resolve","target":{"$ref":"expr_1"},"opts":{"limit":50}}
+{"id":9,"op":"subscribe","places":["my-place"]}
+{"id":10,"op":"unsubscribe","subscriptionId":"sub_1"}
+{"id":11,"op":"resolve","target":{"$ref":"expr_1"},"opts":{"limit":50}}
 ```
 
 | Op | Result shape |
@@ -433,7 +508,6 @@ Every request has an `op` and a monotonic `id`. Every response pairs the same `i
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ChunkItem>` — process id → the process chunk |
 | `cancel` | `{}` |
-| `exit` | `{}` — terminal transition follows |
 | `subscribe` | `{ subscriptionId: string }` |
 | `unsubscribe` | `{}` |
 
@@ -444,22 +518,22 @@ The wire carries the tagged value encoding for typed bodies (`$ref`, `$loc`, `$s
 | Code | Meaning |
 |---|---|
 | `BOUNDARY_VIOLATION` | Read or write the boundary does not admit |
-| `READ_ONLY_MOUNT` | Commit modifies a record resident in a read-only mount (reference alone is legal — see *Read-only enforcement*) |
+| `READ_ONLY_ATTACH` | Commit modifies a record resident in a store attached without `write` (reference alone is legal — *Stores and attach*) |
 | `VALIDATION_ERROR` | Declaration fails spec validation — instance-contract key check, ref-target check, the match at start, or the result placement check at completion |
 | `NOT_FOUND` | Referenced chunk, program, or subscription does not exist |
 | `RUN_FAILED` | A run the program started ended non-zero |
 | `INVALID_REQUEST` | Malformed JSON, unknown op, missing fields |
-| `TRANSPORT_CLOSED` | The program's transport closed mid-response; the pending call rejects on the SDK side |
+| `TRANSPORT_CLOSED` | The transport closed mid-response; the pending call rejects on the SDK side |
 
 ### Events
 
-A program receives unsolicited messages from the engine on the same channel it sends requests over. An event has no `id`; it is identified by its `event` field.
+A connected program receives unsolicited messages from the engine on the same channel it sends requests over. An event has no `id`; it is identified by its `event` field.
 
 | Event | Shape | Meaning |
 |---|---|---|
 | `place_changed` | `{ event: "place_changed", subscriptionId, commit }` | A commit touched a place this subscription registered on. The SDK re-fetches via `read`. |
 | `lagged` | `{ event: "lagged", subscriptionIds: [string] }` | The engine's input channel overflowed; the named subscriptions may have missed events. Re-fetch to recover. |
-| `subscription_invalid` | `{ event: "subscription_invalid", subscriptionId, reason }` | A subscribed place fell out of the process's read boundary. The engine has unsubscribed; the SDK treats the subscription as dead. |
+| `subscription_invalid` | `{ event: "subscription_invalid", subscriptionId, reason }` | A subscribed place fell out of the subscriber's read boundary. The engine has unsubscribed; the SDK treats the subscription as dead. |
 
 Subscriptions fire on membership changes and on link changes — a commit that adds or removes links *to* a subscribed chunk fires like one that changes its placements (computed from the link delta in the same transaction; churn rides the required coalescing). The contract remains: re-fetch on event. Process state changes are not events; programs track them through `await`.
 
@@ -479,132 +553,28 @@ Subscriptions fire on membership changes and on link changes — a commit that a
 
 Parallel calls are several runs awaited together; fire-and-forget is a run awaited later. Every process chunk exists in the substrate immediately — any program whose boundary admits it can read into a running process and watch.
 
-### Engine API (callable from the host)
-
-The host calls the engine library directly to drive top-level runs from user action and to handle surface protocol messages. VM-program protocol messages reach the same functions through the engine's stdio reader.
-
-```rust
-pub struct Engine { /* mounts, processes, subscriptions, runtime registry, ... */ }
-
-pub struct Context {
-    pub process_id: Option<ProcessId>,  // None = host-initiated; Some = caller's process
-}
-
-/// A selection value: the set unions its terms.
-pub struct Selection(pub Vec<SelectionTerm>);
-
-pub enum SelectionTerm {
-    Loc(Vec<ChunkId>),                  // an intersection of places — `$loc`
-    Ref(ChunkId),                       // one chunk: content, payload, or an
-                                        // expression chunk — `$ref`. A stored
-                                        // expression is always the chunk form,
-                                        // so it needs no variant of its own;
-                                        // in a boundary it must lower to the
-                                        // single-request class
-}
-
-pub struct RunArgs {
-    pub target:     RunTarget,          // program + argument set, or a draft to consume
-    pub placements: Vec<ChunkId>,       // additional instance places for the new
-                                        // process (host passes the session id)
-    pub mode:       RunMode,            // child (default) or launch
-    pub read:       Selection,          // explicit additions — source 4 of the boundary
-    pub write:      Selection,
-    pub run:        Selection,          // programs the run may start — the toolset
-    pub timeout_ms: Option<u64>,        // overrides program body
-}
-
-pub enum RunTarget {
-    Start { program: ChunkId, argument: Selection },
-    Draft(ProcessId),                   // consume an existing draft process
-}
-
-pub enum ResolveTarget { Loc(Vec<ChunkId>), Expr(ChunkId) }
-
-pub enum RunMode { Child, Launch }
-
-pub struct ProjectId(String);           // canonical absolute filesystem path
-pub enum MountMode { ReadWrite, ReadOnly }
-
-impl Engine {
-    pub fn open() -> Result<(Engine, mpsc::Receiver<HostCmd>), OpenError>;
-    pub async fn shutdown(self) -> Result<(), ShutdownError>;
-
-    // mount registry — host calls these at boot, before the first run
-    pub fn mount_project(&self, id: ProjectId, db: Arc<Db>, mode: MountMode, branch: BranchName)
-        -> Result<(), MountError>;
-    pub fn unmount_project(&self, id: &ProjectId) -> Result<(), MountError>;
-
-    // runtime registry — host registers providers at boot
-    pub fn register_runtime(&self, kind: RuntimeKind, provider: Arc<dyn RuntimeProvider>)
-        -> Result<(), RegisterError>;
-
-    // sync — return immediately
-    pub fn read(&self, ctx: &Context, places: &[ChunkId], opts: ReadOpts)
-        -> Result<ReadResult, EngineError>;
-    pub fn resolve(&self, ctx: &Context, target: &ResolveTarget, opts: ReadOpts)
-        -> Result<ReadResult, EngineError>;
-    pub fn get(&self, ctx: &Context, chunk_id: &ChunkId, opts: GetOpts)
-        -> Result<Option<ChunkItem>, EngineError>;
-    pub fn commit(&self, ctx: &Context, decl: Declaration) -> Result<Commit, EngineError>;
-    pub fn run(&self, ctx: &Context, args: RunArgs) -> Result<ProcessId, EngineError>;
-    pub fn cancel(&self, ctx: &Context, process_id: &ProcessId) -> Result<(), EngineError>;
-    pub fn subscribe(&self, ctx: &Context, places: &[ChunkId])
-        -> Result<SubscriptionId, EngineError>;
-    pub fn unsubscribe(&self, sub_id: SubscriptionId);
-
-    // async — Future resolves on terminal-state transition
-    pub async fn await_processes(&self, ctx: &Context, ids: &[ProcessId])
-        -> Result<HashMap<ProcessId, ChunkItem>, EngineError>;
-}
-```
-
-**Boot lifecycle.** Host opens engine (no db yet), registers runtime providers, then mounts projects. The active project is `ReadWrite`; peers `ReadOnly`. Reconciliation of zombie processes (`running` from a previous run) happens on `ReadWrite` mounts only; drafts are data and survive restarts by design.
-
-**The engine is program-agnostic and runtime-agnostic.** It resolves the program's `runtime` ref to a registry key and asks the registered `RuntimeProvider` to spawn — no built-in knowledge of `vm`, `webview`, or `native` beyond the registration.
-
-**`Context::process_id = None`** marks a host-initiated call (the user opening a tile, the host's bootstrap). The engine treats it as admitting everything in the active project for read and write — full reach across mounts is read-only by default. It carries **no frame**, so a host-initiated declaration must name each new chunk's owner. `Some(process_id)` evaluates the run's boundary from the process body's `read` / `write` expressions.
-
-**Federated reads and boundary evaluation.** `read`, `resolve`, and boundary evaluation iterate the mount registry. Reads union and dedupe across mounts; membership answers are filtered by the boundary evaluated across the same set; `follow` over `owned` stops at mount edges, since ownership never crosses mounts (substrate.md); `linked` answers union per-db link tables. Programs see one field. Unresolved roots federate by **intersection**: a root lands in `ReadResult.unresolved` only when no mount resolves it.
-
-**Reactivity is single-source in v0.1.** Only read-write mounts fire commits in-process, and v0.1 has exactly one: the active project. The dispatcher holds one `broadcast::Receiver`, filtered by the active project's branch. When cross-host reactivity or dynamic mount writes land (horizon), the dispatcher extends to more receivers — it's just `select!`.
-
-**Cross-db placements work because dbs are dumb.** A placement stored in db_active can reference an `on` whose chunk lives in db_engine — placements store ULIDs, globally unique. To list `engine/program`'s instances, the engine queries every mount's placements for that place and unions. Validation that needs an archetype's instance contract (ref constraints, the result placement check) reads it from whichever mount holds the archetype. Brokenness — a placement referencing a chunk no mounted db has — surfaces at use time as an unresolved root, not at storage time; the db enforces no placement residency (ruled by spec precedence; substrate.md, *Peers*). Status, honestly: the anchor-row bridge built while db still required residency (`engine/src/mounts.rs`) is still in the code although its stated reason is gone; retirement queued.
-
-**Sharing places across projects.** The archetype is the unification point. Place `instance` on a shared archetype defined in a peer everyone mounts — instances from every mounting project surface together in queries against it. Place on your own archetype to isolate. This is the mechanism `engine/program` already uses: every project's programs are placed there and discoverable across the field.
-
-**Federation cost is O(N) per resolution**, N = mount count. For v0.1's 3–5 mounts, negligible. A lazily populated `chunk_id → mount_id` index is the natural optimization at larger N; not v0.1 work.
-
-**Single-host-per-db.** Each `Db` owns its own in-process broadcast. Two host processes on one db file are not connected; cross-host reactivity is horizon.
-
-**Boot-time validation.** Before entering the event loop the host asks the engine to validate the active project: every placement's `on` must resolve in some mount. The engine returns unresolved references; the host surfaces them and refuses to run half-loaded.
-
-**Read-only enforcement.** A commit is rejected with `READ_ONLY_MOUNT` only when it **modifies a record resident in** a read-only mount. Placements and refs stored in the active db whose targets resolve to mounted chunks are legal — the federation pattern depends on exactly this. Reference is not modification. Checked at commit entry, before validation.
-
-**Sync vs async.** The substrate is sync (SQLite is sync), so `read`, `resolve`, `get`, `commit`, `run`, `subscribe`, `unsubscribe`, `cancel` and the mount ops return without awaiting — a `resolve` whose chain contains compute verbs returns after those sub-runs complete, which is why the planner keeps compute out of boundary grammar. `await_processes` and `shutdown` are async. Outgoing event delivery to surfaces rides the `HostCmd` channel returned at `Engine::open`.
-
 ---
 
 ## Reactivity Wiring
 
-How a `subscribe` op becomes a `place_changed` event in the calling program.
+How a `subscribe` op becomes a `place_changed` event in the subscribing client.
 
 ### The chain
 
 ```
-db                    engine                    transport               program
-──                    ──────                    ─────────               ───────
-broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─→   SDK event handler
-(post tx.commit)      (one, from               (per window)             (dispatches by
-                       db.subscribe                                      message shape)
-                       at engine startup)
-                                                stdio JSON lines
-                                                (per VM program)
+db                    engine                    transport               client
+──                    ──────                    ─────────               ──────
+broadcast::Sender ─→  broadcast::Receiver  ─→   the client's       ─→   SDK event handler
+(post tx.commit)      (one per writable         connection              (dispatches by
+                       attached store)          (stdio line to a         message shape)
+                                                 VM program; the
+                                                 protocol channel
+                                                 to any client)
 ```
 
 1. **db.** Each successful write op pushes a `Commit` onto the substrate's broadcast channel after `tx.commit()` returns. Settled in db.md.
 
-2. **engine.** On `mount_project` for a `ReadWrite` mount, the engine subscribes to that mount's `db.subscribe(&[db/commits], ..)`. A background task drains the receiver, filters by the mount's branch, and runs the dispatcher.
+2. **engine.** On attaching a writable store, the engine subscribes to that store's `db.subscribe(&[db/commits], ..)`. A background task drains each receiver, filters by the attachment's branch, and runs the dispatcher.
 
 3. **dispatcher.** For each incoming `Commit`, the engine computes the *touched place set* — the union of:
    - `commit.chunks_modified` — chunks whose body, instance contract, or name changed.
@@ -612,17 +582,19 @@ broadcast::Sender ─→  broadcast::Receiver  ─→   wry IPC channel    ─�
    - the link delta — chunks that gained or lost links *to* them, computed in the write transaction and carried **on the live event only**: links are outside history by law, so no stored commit column exists and no historical link index is promised (ruled; a fast index, if ever wanted, is derived data — truth and performance indexes are different things).
    - For each chunk in `chunks_modified`, the places it is currently placed on (all three stored kinds) — so a subscriber on a dimension sees a member's body change. One bulk lookup per commit.
 
-   The dispatcher fires `place_changed` on every subscription whose places intersect the touched set, filtered by the subscribing process's boundary.
+   The dispatcher fires `place_changed` on every subscription whose places intersect the touched set, filtered by the subscriber's boundary.
+4. **transport.** A JSON line on the subscriber's own connection — stdin for a VM program, the protocol channel for any other client. What a chassis does with an event inside its realms is its own duty as a client (view/sdk); the engine's delivery ends at the connection.
 
-4. **transport.** Surface: the engine asks the host (main thread, as wry requires) to `evaluate_script("__sdk.event(<json>)")` **against the seat's own context** — an iframe citizen's origin document directly, the shell document for same-DOM seats — so delivery is host-direct in both directions and a parent may gate a citizen but never read, drop, or forge its traffic (ruled; closes the citizen return path). VM: a JSON line to the child's stdin.
-
-5. **SDK.** Distinguishes by message shape, routes to the subscription's callback; `useRead` re-fetches and re-renders.
+5. **SDK.** Distinguishes by message shape, routes to the subscription's callback; the read hook re-fetches and re-renders.
 
 ### Subscription lifecycle
 
-- `subscribe(ctx, places)` — boundary-checked against the process's read selection. On pass: registered, id returned. On fail: `BOUNDARY_VIOLATION`, delivered by the SDK as the dead-subscription path (sdk.md).
-- Subscriptions are owned by the calling process; terminal state drops them before further dispatch.
+- `subscribe(ctx, places)` — boundary-checked against the subscriber's read selection. On pass: registered, id returned. On fail: `BOUNDARY_VIOLATION`, delivered by the SDK as the dead-subscription path (sdk.md).
+
+- Subscriptions are owned by the subscribing process; terminal state drops them before further dispatch. (Whether `subscribe` under a bare `{ anchor }` context is judged by the same rule is the call context's open.)
+
 - `unsubscribe(id)` — idempotent removal.
+
 - Boundaries are checked **at subscribe time**, and again only when membership through the frozen expression could have moved (below).
 
 ### Race-tolerant delivery
@@ -656,14 +628,18 @@ Some flow must never become history: an agent's token stream, audio and video, a
 **The semantics, independent of realization:**
 
 - **Identity.** A buffer is an ordinary chunk, `instance` on `engine/buffer`, its driver/source kind and retention policy in its body.
+
 - **Frames.** Timestamped, append-only, **commit-free**, and not rebuildable — a third storage class beside the field and derived-rebuildable data, living outside the db. **The db needs nothing.**
+
 - **Taps.** A boundary-checked subscription on a lightweight channel beside `place_changed`.
+
 - **Digestion is the commit.** Using frames commits a reference `{ buffer, from, to }`, pinning the range. Retention is a ring plus pins.
+
 - **Results stay substrate-shaped.** A stream-serving program returns the buffer's identity chunk; stream-ness lives in tap machinery, never in a return type. A live source reaches subscribers in exactly two ways: commit digests (`place_changed`) or a tap.
 
 **v0.1 posture:** streaming-is-commits stands — throttled partials, per *Streaming convention*. The buffer is the ship-early precursor, not its replacement.
 
-*Open — the realization, between two.* **(A) An engine-native driver registry** — `register_buffer_driver(kind, provider)`, the runtime-provider shape; integrations choose storage freely (files, object stores, compression, no lock-in), and the host ships the default agent driver: an append-only file family in `.ol/` beside the db, durable across engine stops, outside the VM. **(B) Dissolution into live integrations** — no engine machinery at all; a buffer is a reference chunk and a live-integration daemon projects it, never committing while flowing, digestion pinning. The tension that keeps (B) honest: projection presumes a re-readable source, and some streams have none — the agent's own tokens, a live microphone. Someone must retain frames, or digestion has nothing to pin and taps nothing to replay; where that retention duty lives is the deciding question. Tap event shape, buffer-feeding purity, and content-hash pinning ride the same call.
+*Open — the realization, between two.* **(A) An engine-native driver registry** — `register_buffer_driver(kind, provider)`, the runtime-provider shape; integrations choose storage freely, and the engine ships the default agent driver: an append-only file family in `.ol/` beside the db, durable across engine stops, outside the VM. **(B) Dissolution into live integrations** — no engine machinery at all; a buffer is a reference chunk and a live-integration daemon projects it, never committing while flowing, digestion pinning. The tension that keeps (B) honest: projection presumes a re-readable source, and some streams have none — the agent's own tokens, a live microphone. Someone must retain frames, or digestion has nothing to pin and taps nothing to replay; where that retention duty lives is the deciding question. Tap event shape, buffer-feeding purity, and content-hash pinning ride the same call.
 
 ---
 
@@ -676,7 +652,7 @@ The engine holds a per-active-process slot:
 ```rust
 struct ProcessSlot {
     status:  watch::Sender<ProcessStatus>,   // running | done | failed
-    spawn:   SpawnHandle,                    // child process, or surface handle
+    spawn:   SpawnHandle,                    // the runtime's child handle
     timeout: Option<JoinHandle<()>>,         // pending timeout future
     config:  RunConfig,                      // resolved boundary, timeout_ms
 }
@@ -689,11 +665,17 @@ struct ProcessSlot {
 The slot is inserted *before* the substrate write so `cancel` and `timeout` can always land on a known process id.
 
 1. **The match, boundary construction, and the declaration** (see *What the engine writes at start*).
+
 2. **Insert the slot.** Register the timeout JoinHandle.
-3. **`db.commit(declaration)`** — atomic. On failure, remove the slot and return the error.
+
+3. **`db.commit(declaration)`** — atomic, routed to the owning store. On failure, remove the slot and return the error.
+
 4. **Status check.** If `cancel` or timeout fired between 2–3, skip the spawn and run cleanup (writes `status: failed`, removes the slot). Cleanup always has a substrate chunk to write to, since step 3 completed.
+
 5. **Look up the runtime provider** for the program's `runtime` and call `provider.spawn(SpawnContext { process_id, program, request_tx })`. Provider returns a `RuntimeHandle` with `transport`, `ready`, `terminal`.
+
 6. **Wire signals.** One task awaits `ready` (the run is live); another awaits `terminal` and triggers cleanup.
+
 7. **Return `process_id`.**
 
 The start commit writes `status: running`; the commit-to-spawn gap is engine-internal, never a field state. A cancel landing in the gap is caught at step 4 or by the watcher tasks; the substrate always carries a complete record and `await_processes` resolves to the terminal state.
@@ -717,7 +699,6 @@ pub async fn await_processes(&self, ctx: &Context, ids: &[ProcessId])
 | Runtime | `done` signal | `failed` signal |
 |---|---|---|
 | VM | stdout closed AND exit code 0 | stdout closed AND exit ≠ 0; OR `cancel`; OR timeout; OR malformed output |
-| Surface | The `exit` op; OR the seat unmounts (the person closes the tile) | `cancel`; OR timeout |
 | Native | The planner's evaluation returns | An evaluation error; OR `cancel`; OR timeout |
 
 Multiple programs may await one process; `watch::Receiver` broadcasts terminal state to every awaiter.
@@ -725,11 +706,17 @@ Multiple programs may await one process; `watch::Receiver` broadcasts terminal s
 ### Cleanup on terminal state
 
 1. **Update the process chunk** — `body.status`, `body.result` (if declared and produced; the result placement check runs here), `body.error?`.
-2. **Drop the spawn.** Kill the executable / unmount the surface if still alive.
+
+2. **Drop the spawn.** Kill the executable if still alive.
+
 3. **Cancel the timeout** if pending.
+
 4. **Unregister all subscriptions** owned by the process.
-5. **Cascade to children.** Every active process owned by this one gets the same terminal transition with `error: 'parent ended'`. Recursive over the engine's own process tree.
+
+5. **Cascade to children.** Every active process owned by this one gets the same terminal transition with `error: 'parent ended'`. Recursive over the engine's own process tree — kill cascades ownership.
+
 6. **Resolve awaiting receivers.**
+
 7. **Remove the slot.**
 
 A child never outlives its parent — its results would be orphaned. The slot's existence is ground truth for "active"; once removed, `await` reads terminal state from the substrate.
@@ -741,8 +728,11 @@ A child never outlives its parent — its results would be orphaned. The slot's 
 An agent making a tool call uses the same `run` operation:
 
 1. The agent composes the argument set, committing whatever payload or expression chunks it contains, then calls `run` in child mode.
+
 2. The engine runs the match and writes the child process owned by the agent's process — the trace nests by ownership, one hop at a time; reading the whole tree is a `follow`-shaped expression, not one read.
-3. The caps hold: child boundary ⊆ agent boundary ∩ the tool's stated ceiling, `run` included. The model can never escalate — a start beyond the walls lands as a draft awaiting approval (*Run-to-draft*), never as a run.
+
+3. The caps hold: child boundary per the formula, `run` included. The model can never escalate — a start beyond the walls lands as a draft awaiting approval (*Run-to-draft*), never as a run.
+
 4. The engine asks the runtime to spawn and returns the process id immediately; the agent awaits when it needs the result — the process chunk, `result` one hop.
 
 Nothing discourse-shaped is written anywhere — the tool trace *is* the frame; providers wanting message history get it reconstructed from frames as serializer policy ([`agent.md`](agent.md)). Substrate operations (`read`, `resolve`, `commit`, `subscribe`) from the agent are not tool calls — they go directly through the protocol and create no processes.
@@ -751,13 +741,15 @@ Nothing discourse-shaped is written anywhere — the tool trace *is* the frame; 
 
 ## Traceability
 
-Every commit carries a `process_id` — the run that caused it, or null for host-level commits. Commits stay in their own table; the read layer projects them under the virtual place `db/commits`:
+Every commit carries a `process_id` — the run that caused it, or none for machine-context commits. Commits stay in their own table, **per store**; the read layer projects them under the virtual place `db/commits`, federated across attached stores like any read:
 
 - `read([db/commits])` — all commits
+
 - `read([db/commits, processId])` — commits from this run
+
 - `read([db/commits, chunkId])` — commits that modified this chunk
 
-Chunk → commit → process → program: any change walks back to the program that caused it and the person who ran it. Virtual places accept the parameter shapes listed in [`db.md`](db.md#virtual-chunks-branches-and-commits); unrecognized shapes return empty, never error.
+Chunk → commit → process → program: any change walks back to the program that caused it and the person who ran it. A cross-store act appears as its per-store commits, each carrying the same `process_id` — the sequence reassembles by trace. Virtual places accept the parameter shapes listed in [`db.md`](db.md#virtual-chunks-branches-and-commits); unrecognized shapes return empty, never error.
 
 **Commits are rows, and that is what makes them safe as dimensions.** A commit carries message and timestamp; its deltas live in the touched-chunks and touched-placements columns, which the read layer projects as queryable intersections. **The edits are not in a body.** So granting the commits archetype lists history — metadata and touched addresses, never contents; contents come through the chunks, gated as always. A diff is two temporal reads compared, each filtered by the reader's boundary over the chunks themselves. And granting a *single* commit as a dimension makes its touched set readable — "see exactly what this run changed", in one gesture. Kept deliberately.
 
@@ -769,7 +761,7 @@ The consequence for the planner, budgeted rather than assumed: **the commit-touc
 
 ## Runtime providers
 
-Runtime kinds are not built into the engine; they are plugged in at boot via `register_runtime(kind, provider)`. v0.1 ships three — VM, surface, and `native` (the planner, registered by the engine itself); VM and surface are implemented in the host crate.
+Runtime kinds are not built into the engine's law; they are provider crates the engine loads and registers at boot. v0.1 ships two — **`vm`** (`runtime-vm`, the provider crate; the floor for `net`/`fs`/`exec`) and **`native`** (the planner, registered by the engine itself). `webview` retires: programs are headless [P], and what draws is a component, not a process (view).
 
 ```rust
 pub trait RuntimeProvider: Send + Sync {
@@ -789,29 +781,17 @@ pub struct RuntimeHandle {
 }
 ```
 
-The provider drives readiness and terminal on its own schedule; the engine awaits them. No runtime-specific entry points exist on the Engine API.
+The provider drives readiness and terminal on its own schedule; the engine awaits them. No runtime-specific entry points exist on the engine's API.
 
-**Capabilities and secrets.** A program's `capabilities` is a small vocabulary — `net[:host]`, `fs`, `exec`, `secret:<NAME>` — **enforced by the runtime provider at spawn**: egress allowlisted, filesystem and exec gated, secrets injected as env vars from a host-held keychain. Secrets are **never chunks** — the substrate is lossless; a committed key would be permanent. The effective capability set is recorded on the process body for inspection. Capabilities are also one leg of the purity predicate (*Purity*). (Held open: whether capabilities/secrets and integrations are one family — both declare reach into the world outside the field.)
+**Capabilities.** A program's `capabilities` is a closed vocabulary — **`net` · `fs` · `exec`, nothing else** [R]; each has *modes* (`net:host`; `exec` bare in v0.1; `fs` limited to the store directories is one mode, a direction), and they compose parent-to-child by **intersection**. The keychain is an OS citizen reached through them — `read-secret` declares `exec`; secrets are a module, never engine vocabulary and **never chunks** (the substrate is lossless; a committed key would be permanent). Enforcement is the runtime provider's, **at spawn**: egress allowlisted, filesystem and exec gated. Staged honestly: **before the VM lands, capabilities are declared, recorded on the process body, and shown at Go — not enforced.** The OS's own consent stacks on ours. Capabilities are one leg of the purity predicate (*Purity*). (Held open: whether capabilities and integrations are one family — both declare reach into the world outside the field.)
 
 ## Containment
 
 Containment is the runtime provider's concern. What the engine guarantees regardless of provider: every substrate operation passes the boundary check, so containment and boundary enforcement compose.
 
-**One compositor.** There is one compositor — the web tree. The host's visual duty is a single rect: one webview per window, holding one shell document, with every surface program authored as DOM inside it. Rust keeps window, OS input, the VM and capabilities, the keychain, the engine, and `ol://` serving. Per-tile webviews, transparent-webview tricks and host-cast chrome dissolve with that ruling, and arrangement becomes one language floor to ceiling — a tile tree, a collation, and a slot are the same kind of thing at three altitudes ([`programs.md`](programs.md)).
+`runtime: vm` programs run inside the Linux VM — the substrate's containment for capability-bearing programs; attached stores' files mount read-only at their store paths, so store-defined programs run from their attached paths in the same VM. What *draws* is never a process: realm containment for components — same-DOM trust, `FrameBox` isolation on `ol://` origins, identity into realms — is the surface host's duty, specced with view (view/sdk, chassis). The engine requires only that `Context` arrives correct on every request; commits attribute to the context's identity.
 
-Three containment tiers, by the wall each gives a program:
-
-| Tier | Wall | Transport |
-|---|---|---|
-| Same-DOM slot | none — shared realm, shared fate | the parent's channel, with a per-slot identity token |
-| Iframe slot | real — separate global on an `ol://<program-id>` origin; out-of-process on Chromium | host-direct token injection: a parent may *gate* a citizen but never read, drop, or forge its traffic |
-| VM program | the Linux VM | stdio JSON lines |
-
-**Identity is per process, not per transport.** One physical transport carries several protocol identities: each citizen's SDK instance holds a slot identity token issued at slot creation and stamped on every request; the host maps token → process id before attaching `Context`. Each citizen is its own process — boundaries and commit attribution hold at slot granularity. The forge risk is the load-bearing one: commits attribute to process identity engine-side, so parent-mediated tokens would let a parent write history *as* its citizen. Host-direct injection closes it; mechanics are host.md's and sdk.md's, and the engine requires only that `Context` arrives correct.
-
-`runtime: vm` programs run inside the active project's Linux VM — the substrate's containment for capability-bearing programs; peer projects' filesystems mount read-only at `/peers/<project-id>/`, so peer-defined programs run from their mounted paths in the same VM. `runtime: webview` programs — surface programs — are contained by the realm their seat gives them, same-DOM or iframe, together with the engine's boundary enforcement.
-
-**Not built, deliberately:** no host tile-walker, no hole-punching subsystem, no guest-layer protocol. If a program ever demands a native surface it arrives then, as a priced and dated exception, not as architecture in advance. The uniform alternative — every program in one VM with DOM streamed to the host — is architecturally cleaner and heavier engineering; it belongs on the horizon ([`horizon.md`](../horizon.md)). The same program/process/boundary primitives serve both paths, so the migration stays reachable.
+**Not built, deliberately:** no hole-punching subsystem, no guest-layer protocol. If a program ever demands a native surface it arrives then, as a priced and dated exception, not as architecture in advance ([`horizon.md`](../horizon.md) for the uniform alternative).
 
 ---
 
@@ -835,29 +815,30 @@ Not every error kills a program. Informational errors return as protocol respons
 | Exec exits non-zero | `failed` |
 | Timeout | Kill; `failed`, `error: 'timeout'` |
 | VM stdout closes, exit unreadable | `failed`, `error: 'killed'` |
-| Surface destroyed mid-response | Pending request rejects `TRANSPORT_CLOSED` SDK-side; engine cancels the process if not already terminal |
 
 Parse failures and crashes are terminal. Everything else is informational.
 
 ### Startup Reconciliation
 
-At start the engine marks every `running` process `failed` with `error: 'engine restart'` — those executables are gone. Drafts are untouched: they are data, resting where composed. Subscriptions are not persisted; they live in memory and vanish with the engine. Children of failed parents fall out of the cascade rule; no special logic.
+At start the engine marks every `running` process in writable attached stores `failed` with `error: 'engine restart'` — those executables are gone. Drafts are untouched: they are data, resting where composed. Subscriptions are not persisted; they live in memory and vanish with the engine. Children of failed parents fall out of the cascade rule; no special logic. Read-only attachments are not reconciled — a peer store may carry stale `running` processes from when it was live; they surface as-is.
 
 ### Boundary-Request Behavior
 
 An explicit `BOUNDARY_VIOLATION` beats a silently empty read. The engine returns the error when a queried place is not admitted, so empty results mean genuinely empty places, not withheld ones.
 
-*Ruled (2026-08-12): the leak is accepted for v0.1* — a legible failure wins while dbs are single-author and mounts are chosen. Under uniform boundary-filtering the error discloses existence: ask for anything, and the difference between "empty" and "violation" tells you whether it is there. Revisit at peering, where strangers gain the probe.
+*Ruled (2026-08-12): the leak is accepted for v0.1* — a legible failure wins while stores are single-author and attachments are chosen. Under uniform boundary-filtering the error discloses existence: ask for anything, and the difference between "empty" and "violation" tells you whether it is there. Revisit at peering, where strangers gain the probe.
 
 ---
 
-## Client Library
+## engine/sdk
 
-The engine exposes only Rust functions; it ships no TS client. Programs reach those functions through the SDK, which serializes calls into the protocol JSON and selects the transport. The SDK ships from the engine crate ([`engine/sdk/`](../../engine/sdk/)) because it is the engine's protocol expressed as TypeScript; surface and transports in [`sdk.md`](sdk.md).
+The engine ships no UI and no framework — [`engine/sdk`](sdk.md) is the protocol expressed as a client library: it serializes calls into the protocol JSON and speaks through the one transport object the environment installed. It ships from the engine's own repository because it is the engine's contract in TypeScript; `view/sdk` and every other client build on it ([`sdk.md`](sdk.md)).
 
 ---
 
 ## Code architecture
+
+*The built engine implements the linked-crate generation; realignment to the artefact shape is the alignment pass's first engine work. This section states the target at the same altitude as before — no deeper.*
 
 ### Module layout
 
@@ -865,42 +846,48 @@ The engine exposes only Rust functions; it ships no TS client. Programs reach th
 engine/
   src/
     lib.rs              — public re-exports
-    types.rs            — Context, RunArgs, RunTarget, Selection,
-                          SelectionTerm, ResolveTarget, ProcessId, SubscriptionId,
-                          ProjectId, MountMode, RuntimeKind, ProcessStatus, Event,
-                          HostCmd, plus Display/From impls
-    errors.rs           — EngineError (single enum); MountError, RegisterError
-    engine.rs           — Engine struct; open returns (Engine, mpsc::Receiver<HostCmd>);
-                          shutdown(self); impl Drop
-    mounts.rs           — MountedProject { db, mode, branch }; the registry;
-                          read-only enforcement; federated ref resolution
-    runtime.rs          — RuntimeProvider trait; SpawnContext, RuntimeHandle;
-                          the runtime registry; the built-in `native` provider
-    bootstrap.rs        — reconcile_zombies(&Db): one read, one commit.
-                          Read-write mounts only; drafts untouched.
-    process.rs          — ProcessSlot; SpawnHandle enum; set_terminal, cascade
+    types.rs            — Context (process_id?, anchor?), RunArgs, RunTarget,
+                          Selection, SelectionTerm, ResolveTarget, ProcessId,
+                          SubscriptionId, StoreId, AttachRecord, RuntimeKind,
+                          ProcessStatus, Event
+    errors.rs           — EngineError (single enum); AttachError, RegisterError
+    engine.rs           — Engine struct; open/shutdown; the serve loop
+    server.rs           — the transport server: accepts client connections,
+                          frames JSON lines, attaches Context per connection
+    stores.rs           — the attach registry: AttachedStore { db, record };
+                          write routing; READ_ONLY_ATTACH enforcement;
+                          [engine/attached] projection; federated ref resolution
+    sources.rs          — ol:// serving from attached stores at their commits
+    runtime.rs          — RuntimeProvider trait; provider loading and the
+                          registry; the built-in `native` provider
+    bootstrap.rs        — reconcile_zombies: writable attachments only;
+                          drafts untouched
+    process.rs          — ProcessSlot; SpawnHandle; set_terminal, cascade
     subscription.rs     — Subscription, TransportRef, SubscriptionRegistry
-    reactivity.rs       — loop_task; handle_commit composed from compute_touched,
-                          gather_fanout, gather_invalidations, apply
-    protocol.rs         — Request | Response | Event JSON shapes; dispatch_request;
+    reactivity.rs       — per-writable-store drain tasks; handle_commit composed
+                          from compute_touched, gather_fanout,
+                          gather_invalidations, apply
+    protocol.rs         — Request | Response | Event JSON shapes; dispatch;
                           tagged-value passthrough; wire ErrorCode mapping
-    boundary.rs         — construct (the five sources, intersected at start),
-                          evaluate (a selection against the mounts, federated),
+    context.rs          — the call context: chain derivation, effective reach,
+                          the machine context; caching
+    boundary.rs         — construct (the five sources, per the formula),
+                          evaluate (one evaluation over attached stores),
                           admits (the per-answer filter)
-    validate.rs         — the match (bind, count, no orphans); entry disjointness
-                          at program definition; the result placement check;
-                          placement and link governance at commit
-    expressions.rs      — the expression shapes; parse (recursive descent);
-                          plan type-check against accepts; compose-time
-                          materialization; the planner partition and lowering
-                          to db's plan interface
-    ops/                — public surface; one module per Engine method
+    validate.rs         — the match (bind, offers, count, no orphans); entry
+                          disjointness at definition; the result placement
+                          check; placement and link governance at commit
+    expressions.rs      — the expression shapes; parse; plan type-check;
+                          compose-time materialization; the planner partition
+                          and lowering to db's plan interface
+    ops/                — public surface; one module per protocol op
       read.rs resolve.rs get.rs commit.rs run.rs cancel.rs subscribe.rs
       await_processes.rs
+  sdk/                  — engine/sdk: the protocol client (sdk.md)
   tests/                — integration tests against the spec
 ```
 
-Each `ops/*.rs` owns its method end-to-end via `impl Engine`. Internal modules are flat siblings; one structuring axis (the public ops), one folder. The engine crate ships **zero external runtime implementations** — VM and surface providers live in the host crate and register at boot; only `native` is the engine's own.
+Each `ops/*.rs` owns its op end-to-end. Internal modules are flat siblings; one structuring axis (the public ops), one folder. The engine ships **one external runtime provider dependency** — `runtime-vm`, loaded at boot; `native` is its own.
 
 ### Within-file shape
 
@@ -910,26 +897,28 @@ Each file composes from small named functions; the public method reads as a top-
 
 **State authority follows lifecycle.** A started process has two homes — its slot (live runtime) and its substrate chunk (durable). The slot is authoritative while active; the substrate once the slot is gone. Authority transfers in one ordered step at terminal: cleanup writes the terminal status, then drops the slot. One truth at any moment; the seam is the cleanup commit.
 
-**Reactivity owns event emission.** The reactivity task is the engine's only consumer of the db change feed and the only emitter of `place_changed` / `lagged` / `subscription_invalid`. Cleanup paths trigger reactivity by writing terminal commits; they never emit events directly.
-
-**Surface transport as commands.** wry/tao machinery is main-thread and `!Send`; the engine never holds a `WebView`. `Engine::open` returns `(Engine, mpsc::Receiver<HostCmd>)`; the host drains the receiver on its event loop and translates each `HostCmd` (`MountWebview`, `UnmountWebview`, `EvaluateScript`) into a wry call. Under one compositor these mount and unmount a program's seat *inside* the window's single shell document rather than creating a native webview per program — the command names are due a sweep with host.md. The engine's only seam to non-`Send` code, expressed as data.
+**Reactivity owns event emission.** The reactivity tasks are the engine's only consumers of the db change feeds and the only emitters of `place_changed` / `lagged` / `subscription_invalid`. Cleanup paths trigger reactivity by writing terminal commits; they never emit events directly.
 
 **Errors as one vocabulary.** One wire surface, one `EngineError` enum; the response builder maps to wire codes via a single `match`.
 
 **Single writer where it matters; locks where it doesn't.** Registries are `Mutex<HashMap>` held only for insert/remove, never across an `await`.
 
-**Async runtime.** Reactivity and per-VM stdio pumps run on tokio via a `Handle` stored at `open`; the host calls `Engine::open` inside its tokio context.
+**Async runtime.** The serve loop, reactivity, and per-VM stdio pumps run on tokio; the binary owns its runtime.
 
 ### Settled choices
 
-- **Mount registry as `Mutex<HashMap<ProjectId, MountedProject>>`.**
+- **Attach registry as `Mutex<HashMap<StoreId, AttachedStore>>`**; `StoreId` = canonical absolute path of the store directory.
+
 - **Runtime registry without dynamic loading** — a HashMap of trait objects, registered at boot.
-- **`ProjectId` = canonical absolute filesystem path.**
-- **Federation in Rust, not SQL.** Each `Db` stays single-file and portable; broadcasts stay per-db.
+
+- **One evaluator over attached stores** [P] — supersedes per-store-evaluate-then-union and the "federation in Rust, not SQL" settled choice; each `Db` stays single-file and portable; broadcasts stay per-db.
+
 - **Single `EngineError` enum** — principled divergence from db's per-op enums, justified by the single wire surface.
-- **`HostCmd` channel** as the host seam; commands as data.
-- **`tokio::sync::watch`** for `ProcessStatus`; **`broadcast::Receiver`** for the db feed; **`mpsc`** for `HostCmd` and per-VM stdin queues; **`std::sync::Mutex`** for registries.
+
+- **`tokio::sync::watch`** for `ProcessStatus`; **`broadcast::Receiver`** per writable store's feed; **`mpsc`** for per-VM stdin queues; **`std::sync::Mutex`** for registries.
+
 - **`Engine::shutdown(self)`** consumes self: cancels reactivity, awaits the join, terminal-cleans every active process. `Drop` aborts as best-effort fallback.
+
 - **`thiserror`** with `From<DbError>` / `From<ProtocolError>`.
 
 ---
@@ -937,18 +926,35 @@ Each file composes from small named functions; the public method reads as a top-
 ## What Is Open
 
 - **Three selection-typed keys on one contract** — whether substrate.md's "at most one `selection` per contract" binds body keys or only `accepts` entries (*The program body*).
+
+- **The call context's encodings** — how the parent link is derived (containment backrefs vs a stored key); the frame's seat in the generic contract (cap-exempt, processes only); which ops beyond read/write/run are judged under `{ anchor }` (*The call context*).
+
+- **Attach-era encodings** — the dynamic-attach record in the personal store; the attach-time consent chip; the act journal, if a truly atomic cross-store case appears (*Stores and attach*).
+
+- **The consent chord's principal** — lean: the mount of the draft face (*Run-to-draft*; view).
+
+- **Gestureless starts** — whether a component may ever dispatch a start without a person's gesture; deferred with the daemon posture (*Daemons*).
+
 - **Buffer realization** — the engine-native driver registry or dissolution into live integrations (*Buffers*). Streaming-is-commits is unaffected either way; whether v0.1 streams model responses live is gated on this call, not deferred.
+
 - **Subscription invalidation over transitive boundaries** — the index under-covers `follow`-shaped boundaries (*Subscription invalidation*).
+
 - **Typed-content matching, one mechanism, decided at build** — `loc(X)` (a place whose resolved members are instances of X, checked at the match) *or* coercion (a location binding to `ref(X)` / `set<ref(X)>` by snapshot-resolution at bind). The commit-in-a-slot case needs exactly one of these; not both.
+
 - **`ref(X & Y)` conjunctions** and, if nested conjunction contracts ever appear, most-specific-wins as a bind tiebreak (*`accepts`*). Steward direction, unresolved.
-- ~~`seq: true` on projected archetypes~~ — ruled: **a projection declares its own ordering**; `db/commits` synthesizes position from ancestry depth and that synthesis *is* the declaration ([`db.md`](db.md)).
+
 - **Placement governance edges carried from substrate.md** — read-over-the-placed-chunk at birth; who may remove a whole chunk (*Governance at `commit`*).
+
 - **Branch operations over the protocol.** The substrate is fully branch-aware, but the protocol cannot yet create a branch, commit to a named branch, write a merge, or bind a run to a branch. The settled shape when taken: a `branch` op, `Declaration.branch?`, a merge form of `commit`, and a run's branch routing the process and its children to a work branch. Unlocks the acceptance workflow — agent works a branch, human reviews, merge is the yes — and branch-parked streaming partials. Merge semantics ruled (substrate.md, *What's Open*): union of additions, hard fail on true collision, an agent resolves refusals as ordinary work.
-- **Daemons (services).** A process whose executable stays resident. The lifecycle must extend without a new primitive: a daemon's terminal transition is a *policy* (stop, restart), not the end of a job. Not v0.1; must not be foreclosed. The engine-as-daemon direction ([`horizon.md`](../horizon.md)) is where resident programs get a home outliving any window.
+
+- **Resident lifecycle for daemons.** A process whose executable stays resident: its terminal transition is a *policy* (stop, restart), not the end of a job. The launch posture is ruled (*Daemons*); the lifecycle must extend **without a new primitive**, is not v0.1, and must not be foreclosed.
+
 - **Pause/resume.** A control signal honored between cycles of cycle-driven programs — program-level convention first ([`agent.md`](agent.md)); promoted to an engine op only if it generalizes.
-- **`attach` — demoted.** Typed refs are the honest channel `attach` existed to provide: an argument element that references an existing chunk is a ref, validated, link-indexed, boundary-gated. Re-examine what narrow case remains before building anything.
+
 - **`explode` — virtual chunks from body keys.** A pure transform projecting a body's keys as virtual chunks, same family as `db/commits`. The principle: pipe output is substrate-shaped, so the algebra composes over results. Materializing is committing the same output — promotion when a query proves hot, never upfront. Lands with the pipe vocabulary.
-- **Draft and composition residence edges.** Re-homing on re-run and cross-project drafts settle at the draft build; so does whether process chunks take generated names under substrate.md's naming rule.
-- **Schema version skew on peer mount.** v0.1 refuses to mount peers whose db schema differs; migrating a mounted db is v0.2. See [`horizon.md`](../horizon.md).
-- **Stale process chunks in peer dbs.** A peer may carry `running` processes from when it was active. v0.1 does not reconcile them (peers are read-only); they surface as-is.
-- **Symmetric peering.** v0.1 mounts are read-only, local-filesystem. Read-write peering, remote mounts, identity/auth, sync live on horizon; the boundary mechanism already carries the model.
+
+- **Draft and composition residence edges.** Re-homing on re-run and cross-store drafts settle at the draft build; so does whether process chunks take generated names under substrate.md's naming rule.
+
+- **Schema version skew on attach.** v0.1 refuses to attach stores whose db schema differs; migrating an attached db is v0.2. See [`horizon.md`](../horizon.md).
+
+- **Symmetric peering.** v0.1 remote attachment is fetch-then-attach, read-only. Read-write peering, identity/auth, sync live on horizon; the boundary mechanism already carries the model.
