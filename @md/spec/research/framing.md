@@ -35,22 +35,14 @@ The system lives in dualities; a good name will sit inside one of them.
 - **The interface counted in**: most framings forget that what draws is field data too — the rarest part of the claim, keep it in the sentence rung.
 - **Room to grow**: knowledge is the first tenant, not the last (sound, image, each other — README); a framing bound to "documents" or "AI" ages badly.
 
-## Name directions — seeds only, none proposed
+## Name directions
 
-A name should be one rung of the ladder survived to a word. By pairing:
-
-- *field/place*: Field, Openfield, Locus — plain, spatial, matches "completion from a place".
-- *ground/medium*: Loam, Ground, Bedrock — the compounding-substrate feel; loam is alive where bedrock is inert.
-- *joining*: Loom, Ply, Splice — composition-forward. (**Weft is taken** — a documented peer project, [`weft.md`](weft.md).)
-- *growth/compounding*: Coppice, Mycelium-family — organic compounding; risk of trend-scent.
-- *light* (the incumbent): OpenLight — openness and clarity; says nothing of field, type, or compute; carries the project's history.
-
-Test for any candidate: put it in the sentence rung — "*X* is a compute environment where …" — and see whether the name pulls its weight or rides along.
+Moved to their own file: [`naming.md`](naming.md). The test stays here because it is a framing test: put a candidate in the sentence rung — "*X* is a compute environment where …" — and see whether the name pulls its weight or rides along.
 
 ## The GitHub description
 
 Current (superseded generation): *"A substrate where knowledge is the ground intelligence grows from — listened for, not built."*
 
-Adopted (2026-08-23): *"A compute environment on one typed, versioned field — knowledge, programs, models and the interface itself share the medium, and everything written is structure the next reader stands on."*
+Adopted (2026-08-23, lightened same day): *"A compute environment on a typed, versioned field — knowledge, programs, models and the interface in one medium, where everything compounds."*
 
-Runner-up, shorter: *"One typed, versioned field for knowledge, programs, models and interface — completion from a place, not a transcript."*
+Runners-up: the fuller first take (*"… share the medium, and everything written is structure the next reader stands on"*) · the claim-led short form (*"One typed, versioned field for knowledge, compute and interface — completion from a place, not a transcript."*)
