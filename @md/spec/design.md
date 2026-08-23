@@ -1,6 +1,6 @@
 # The design language — unpacked
 
-2026-08-20. The comprehension depth behind the brief's condensed design-language paragraph ([`proposal.md`](proposal.md), *component/base*). The brief stays authoritative on *what* is proposed; this page carries the *why* — the reasoning a future session needs to hold the rules rather than recite them. Status matches the brief: **[P] as a whole** — the shipped implementation's judgment, a family's settings, never law; another implementation of the same component declarations may use borders and boxes throughout and be equally lawful.
+2026-08-20; moved beside the specs 2026-08-23. The comprehension depth behind [`components.md`](components.md)'s condensed design-language paragraph (*component/base*). Neither law nor research: **the base family's held judgment** [P] — a family's settings, evaluated by building, never a contract. components.md stays authoritative on *what* is proposed; this page carries the *why* — the reasoning a future session needs to hold the rules rather than recite them.
 
 ## Why flat — the newspaper precedent
 

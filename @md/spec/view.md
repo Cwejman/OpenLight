@@ -48,12 +48,14 @@ chunk task-card : view/component {
   write:   { task.status }
   serves:  { wmin: 240 }
 }
-chunk task-card/settings { instance: { density?: enum(tight, loose) } }
+-- a closed vocabulary is ref(X) over owned value chunks — no enum word
+-- (substrate.md); tight and loose are chunks instance on density
+chunk task-card/settings { instance: { density?: ref(task-card/density) } }
 ```
 
 A **component** is a declaration: what it takes (**`accepts`**, the same shape and rules as a program's — entries are types, optional marked, distinct by the disjointness rule; two elements of one type ride in a payload archetype), what box it draws in (**`serves`**: absent = any; below it the collapsed face — §7; within it, internal adaptation, undeclared — container queries, never data), and its **ceiling** — `read`/`write`/`run` phrased over entry names and payload paths (`read: { reading.current }`, `write: { task.status }`, `run: caller`); absent means the argument is read-granted and nothing else ([`engine.md`](engine.md), *Boundaries*). A component addresses only what it is handed.
 
-**Settings need no mechanism.** Optional entries whose elements carry defaults are a component's **settings** — and since settings are ordinary optional entries, **families** share them by *offering* them (§5): no defaults machinery of its own. A chosen setting persists as field data wherever the choice was made — a mount's argument, a collation, a family's root offer.
+**Settings need no mechanism** [P — verbose on paper, by the author's read; evaluated only by building, under §6's gate — no further speccing cycles]. Optional entries whose elements carry defaults are a component's **settings** — and since settings are ordinary optional entries, **families** share them by *offering* them (§5): no defaults machinery of its own. A chosen setting persists as field data wherever the choice was made — a mount's argument, a collation, a family's root offer.
 
 ## 3. view/mount — the call
 
@@ -73,13 +75,15 @@ chunk view/mount {
 chunk m1 : view/mount { component: task-card, argument: [ task/42 ] }
 ```
 
-A **mount** is a call: a component and an argument, validated by the match against the component's `accepts` exactly as a run's is; plus its **grant** — explicit additions, as a run's — and its `draw` / `offer` (§5). Effective reach = (argument ∪ ceiling ∪ grant) ∩ the parent's, judged by the engine under the call context — `view/mount` conforms from the view side ([`engine.md`](engine.md), *The call context*); narrowing is simply not adding. A mount is a chunk (identity, history, a place in a field) or an inline value conforming to the contract — two grains, as everywhere.
+A **mount** is a call: **one specific component** and an argument, validated by the match against the component's `accepts` exactly as a run's is; plus its **grant** — explicit additions, as a run's — and its `draw` / `offer` (§5). Effective reach = (argument ∪ ceiling ∪ grant) ∩ the parent's, judged by the engine under the call context — `view/mount` conforms from the view side ([`engine.md`](engine.md), *The call context*); narrowing is simply not adding. A mount is a chunk (identity, history, a place in a field) or an inline value conforming to the contract — two grains, as everywhere.
+
+**The match judges; a read picks; the mount records the pick** [R — 2026-08-23]. The engine never infers a component (or a program) from an argument: a call names its callee. *Which* component could take this content is a question the composer answers — the parent's defaults table (§7), a menu, a person in the composer — by reading `[view/component]` for declarations whose `accepts` would bind the offer; the answer is written into the mount as its `component`, and from then on the mount is strict. A loose contract (`chunk-table`) binds nearly anything, which is why it is a last resort and why the pick is recorded rather than resolved live: a tie between two fitting components is the composer's to break, never the engine's to guess, and what you saw must not depend on a table that can change underneath.
 
 **Closing is a body edit** — removing a mount from the field it sits in; nothing dies, because no component is a process. The tree's old "close is layout, unmount ≠ death", phrased for processes, dissolves into this.
 
 **Reach facts are delivered, never computed**: may-write / may-start per element, in `ctx` (§6); the component renders an input or text, a button or a disabled one. **Editability is boundary-derived** — a component offers editing iff its mount holds write reach over the target and the target is unconsumed; the engine enforces regardless, so a lying component cannot write. One component, mode by reach: `prose` *is* the editor when writable and the viewer when not.
 
-**No commit on event.** A component answers a subscription event by reading only; anything that writes on events is a launched program — an automation ([`engine.md`](engine.md), *Purity*). Without this, unmounting would change behaviour rather than only cost.
+**No commit on event.** A component is a pure function of **argument and field**: a subscription event means re-read and redraw, nothing more. There is no effect hook, because there is nothing to *do* on change — everything derivable is derived at draw. The one thing an event could tempt is a write ("when X changes, set Y"), and a write on field change is not viewing but an **automation**: a launched program — visible, walled, with a process record ([`engine.md`](engine.md), *Purity*). Its effect lands as a commit, the field changes, and the components redraw; the aggregation is rerun, never patched. The guarantee this buys: unmounting changes **cost only, never behaviour** — if views could write on events, closing one would silently stop something.
 
 Per-mount marks that are not argument ride as placements: `relates` onto **`view/locked`** (no drops) or **`view/isolated`** (mount in a new realm — §8, isolation).
 

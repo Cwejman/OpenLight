@@ -74,7 +74,7 @@ chunk engine/program {
     executable?:   string       — absent for runtime: native
     — programs are headless [P]; the surface runtime retired with the
     — seat mechanism
-    runtime:       vm | native
+    runtime:       ref(engine/runtime)   — vm | native as value chunks
     accepts:       list<type>   — required; entries as reified type values
     result?:       ref          — an archetype; checked at program definition
     — the ceiling, per key (*Boundaries*); absent means {};

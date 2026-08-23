@@ -16,11 +16,11 @@ Runtime contracts and primitives. Attached by every store that runs anything.
 
 1. `engine` — the root.
 
-2. `program` — the archetype of runnable things; instance contract = the program body ([`engine.md`](engine.md)): `{ executable?, runtime: vm | native, accepts, result?, read?/write?/run?, capabilities?, timeout_ms? }`. `accepts` required; ceilings per the boundary law — an absent key means `{}`, `caller` composes the parent's reach in.
+2. `program` — the archetype of runnable things; instance contract = the program body ([`engine.md`](engine.md)): `{ executable?, runtime: ref(runtime), accepts, result?, read?/write?/run?, capabilities?, timeout_ms? }`. `accepts` required; ceilings per the boundary law — an absent key means `{}`, `caller` composes the parent's reach in.
 
 3. `process` — the archetype of runs; instance contract = the process body: `{ argument, at, status, result?, error?, read, write, run }`. The engine writes and protects instances from the start on; drafts are data.
 
-4. `status` — the lifecycle vocabulary: `draft`, `running`, `done`, `failed` as value chunks owned by it (enums are the substrate's).
+4. `status` — the lifecycle vocabulary: `draft`, `running`, `done`, `failed` as value chunks owned by it (enums are the substrate's). `runtime` — the same pattern: `vm`, `native` as value chunks; a provider crate registers under the name its chunk carries [R — 2026-08-23, with the `enum(…)` leak swept from the view family: a closed vocabulary is always `ref(X)` over owned value chunks].
 
 5. `expression` — the archetype of lifted expressions: `{ nodes: map, out: string }`. Composition into an argument materializes an instance of it.
 
@@ -65,7 +65,7 @@ Concrete programs and the agent's steering vocabulary. No session container, no 
 
 **After bootstrap.** Each store's db holds its own root and contracts. The engine attaches them per the home's toml, the field federates, and the system is reachable.
 
-*Open — archetypes the law names and nothing seeds.* `runtime: vm | native` reads as a closed value union, but the type vocabulary has no such word — whether `runtime` is `ref(runtime)` with seeded value chunks (the `status` parallel) or a new tag union is unresolved; engine.md writes the informal form. `engine/buffer` stays unseeded while the realization is open. `chassis/entry`'s archetype is declared by the chassis ([`chassis.md`](chassis.md)) and shipped in the desktop store — whether the archetype chunk itself seeds under `desktop` or a `chassis` root is unpicked.
+*Open — archetypes the law names and nothing seeds.* `engine/buffer` stays unseeded while the realization is open. `chassis/entry`'s archetype is declared by the chassis ([`chassis.md`](chassis.md)) and shipped in the desktop store — whether the archetype chunk itself seeds under `desktop` or a `chassis` root is unpicked.
 
 *Open — no migration path.* Bootstrap is idempotent by marker (db.md): once seeded, the routine never re-runs, so changed declarations never reach an already-seeded store. Reseeding is the current answer; a real migration path is unruled debt.
 
