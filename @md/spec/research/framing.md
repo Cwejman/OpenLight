@@ -8,13 +8,26 @@ Each rung must be true alone; shorter buys reach, longer buys precision.
 
 - **Two words.** *The field.* — what everything else is said against. (Runner-up: *a typed field*; *one medium*.)
 
-- **A phrase.** *A compute environment on a typed, versioned field.* — the author's phrase kept, grounded. (Runners-up: *knowledge that computes* · *one medium for knowledge, compute and interface* · *substrate to surface*.)
+- **A phrase.** *A computing medium.* [R — 2026-08-23, the author's ruling closing the noun search: knowledge is one thing you *do* with it — a field synthesizer is another; *medium* holds for the substrate, the application and the interface alike, given what media means. "Operating environment" acceptable second; "knowledge computer"/"knowledge runtime" rejected — they bind the medium to one use.] Fuller form where wanted: *a computing medium on a typed, versioned field.* (The earlier "compute environment" stands superseded; the live GitHub description still carries it — update owed, the author's call.)
 
 - **One sentence.** *A compute environment where knowledge, programs, models and the interface itself share one typed, versioned field — so everything anyone or anything writes is structure the next can stand on.*
 
 - **The mechanism sentence.** *Completion from a place: a model's context is an address in the field, its output typed structure back into it — and the interface composes from the same contracts.*
 
 - **The paragraph** is the README's head — the ladder's proof is that each rung compresses the rung below without lying.
+
+## The enablement rung *(added same day, author steer: the strongest framing may name what it enables, not what it is made of)*
+
+What the system enables, phrased to stand alone — the replacement of the monoliths (search, feeds, the app-per-thing world) implied, never listed:
+
+- *Where everything builds on everything.*
+- *The common ground that computes.*
+- *Work that compounds. Insight that travels.*
+- *What anyone makes, everyone can stand on.*
+- *One living medium for knowledge, tools and people.*
+- *After the monolith.*
+
+Two meaning-finds from this vein: **ground** in the musical sense — the repeating bass over which every voice composes freely — makes "ground" a four-way carrier (earth · common ground · grounds-as-evidence · the compositional base); and **interest** is etymologically *inter-esse*, "it is between us" — between-ness, engagement, and compounding in one unownable word.
 
 ## Pairings that hold the tension
 

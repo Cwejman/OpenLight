@@ -1,0 +1,313 @@
+# Round three — the targeted field
+
+*Six generators inside the taste profile (one-two syllables, concrete, quiet, closed endings, working/joining/ground words, native Nordic resonance, and the compound strategy). Deduped against every name from rounds one and two. × marks multi-territory convergence. Unranked; triage marks follow the same convention as before.*
+
+
+## Sound-neighborhood (42)
+
+- **Kevel** — a heavy ship's cleat where the working line is made fast. Sound-twin of Kelda/Mycel; a joining thing almost nobody has claimed.
+- **Kedge** ×2 — the small anchor set ahead so the ship can warp itself forward; progress by fixed, committed points — versions as kedges.
+- **Reeve** — the steward who runs the estate; also *to reeve* = to thread a line through a block. A working office AND a joining act in one closed syllable.  ⚠ *Medieval official title, scattered usage*
+- **Whorl** — the spindle-whorl that keeps the thread spinning + the spiral of living growth (shell, fingerprint). Working thing and growth-pattern at once.
+- **Skep** ×3 — the woven straw beehive: a made thing housing a living colony that compounds its store. Closed, dark, rare.
+- **Skald** — the Norse keeper of lore, who holds knowledge by crafting it into durable form. Dark vowel, liquid-stop ending.
+- **Kenning** — the Norse compound that names a thing by joining two others + "beyond one's ken" = knowledge itself. Compounding-as-naming.
+- **Thorp** — a small settlement (Norse); a working cluster on the land.
+- **Grith** — OE: peace protected under law within a bounded place. Frith's rarer, harder sibling.
+- **Carse** — Scots: fertile alluvial lowland along a river. Living ground, one dark closed syllable, essentially unclaimed.
+- **Vidda** — Norse high plateau (Hardangervidda). Kelda's exact sound-shape; wide open ground above the valleys.
+- **Noust** ×2 — Orkney/Shetland: the hollow cut in the shore where the boat rests between voyages. A carved berth for a working vessel.
+- **Stell** ×3 — Scots: a stone shelter for the flock on open ground; also *to stell* = to set firmly. Refuge + fixing, one closed liquid syllable.
+- **Hemmel** — Northumbrian open-fronted cattle shelter. Sound-twin of Mycel; rare to the point of invisibility.
+- **Quench** — the smith's act that fixes the temper for good — commitment as craft. Closed, dark.  ⚠ *Tool/framework usage possible, minor*
+- **Frit** ×2 — glass pre-fused, ground, and carried into the next glaze — fired knowledge reused as raw material.
+- **Glost** — the glaze firing itself (glost kiln). Rare, dark, closed; coinage-feeling but real.
+- **Skarn** — rock formed at the contact where magma meets limestone: transformation exactly at the boundary of two media.
+- **Drumlin** — a hill sculpted under moving ice; land shaped by flow. Two closed syllables, soft stops.
+- **Gley** — waterlogged living soil, gray-blue at depth. One syllable, rare, real; distinct root from Ley.
+- **Culm** — the jointed stem of a grass; also anthracite dust. Dark vowel, liquid close; growth in segments.
+- **Sedge** — the grass of wet living ground. Soft stop close, quiet, night-compatible.
+- **Burl** — the figured living growth in wood, prized for what the disturbance made. Dark, liquid, closed.
+- **Spalt** — spalted wood: fungus writing figure into the grain — mycelium's mark made beautiful. Closed, dark.
+- **Treen** — small wooden household wares: humble working things made from living material. One closed syllable, near-forgotten.
+- **Helve** — the axe handle; where the hand meets the work. Kelda-neighborhood consonants, rare.
+- **Haft** ×2 — the handle, and *to haft* = to join blade to handle: tool-making as a joining act. Closed, dark.
+- **Adze** — the shaping axe that works toward the holder. One syllable, soft-stop close.
+- **Kist** ×3 — Scots/Norse chest: the household's durable store. Closed, dark, plain.
+- **Trug** — the garden basket, made for carrying what the ground gives. Dark vowel, closed; charming without being cute.
+- **Stook** ×3 — sheaves stood together to cure: single works joined so they keep. A joining act from the harvest field.
+- **Hain** ×2 — Scots (from Norse hegna): to enclose ground so it recovers; to save, to spare. Preservation as an act on living land.
+- **Stave** ×3 — the barrel stave (a part shaped to join into a whole), the musical stave (where the notes live), the stave church. Triple meaning, all craft.
+- **Orlog** — Norse ørlög: the primal law laid down beneath all that happens — and it carries "log" inside it. [Orlog dice game in AC Valhalla]
+- **Lode** ×3 — the vein worked over generations + the lodestar's guidance. Dark, closed. [homophone "load"]
+- **Sill** ×2 — in geology, the intrusion that spreads between strata; in building, the foundation timber. Two quiet structural meanings. [common word]
+- **Corf** — the miner's basket that brings the ore up. Dark, closed, rare.
+- **Delf** ×3 — archaic: a quarry, a dug place; Delft-kiln echo for free. Kelda-neighborhood mouth.
+- **Wick** — the living-place suffix (-wick) + the wick that draws fuel up to feed a flame. [John Wick — significant]  ⚠ *Small settlement, minor usage scattered*
+- **Weld** — joining by fusion; two things made one thing. [Weld: several dev projects]
+- **Meld** — to merge into one; also to declare what you hold (cards). [Meld diff tool — known in dev circles]
+- **Withe** — the flexible living twig used for binding: a joining act performed by living material.
+
+## Old & dialect landwords (59)
+
+- **Royd** — Yorkshire for a clearing won from the wood (Mytholmroyd, Ackroyd); a workspace cut out of the wild, one dark closed syllable; [minor surname]
+- **Breck** — Norfolk/Norse for land newly broken in for cultivation; fresh ground brought under the system
+- **Assart** — a clearing legally made from forest for tillage; the act of claiming new working ground; [Old French origin, but plain in the mouth]
+- **Swidden** — ground cleared by burning and worked in cycles; regenerative, versioned land use
+- **Worth** — Old English enclosure (-worth place names); enclosure + value in one common syllable; [everyday word — the double may be too loud]
+- **Ings** — northern water-meadows, ground that floods and fattens
+- **Carr** — wet alder-and-willow woodland, fen scrub; ground and wood in one; [common surname]  ⚠ *Fen/bog, surname usage scattered*
+- **Wern** — Welsh alder-marsh (gwern); one dark closed syllable, near-zero collisions
+- **Machair** — Hebridean shell-sand grassland, famously fertile ground made by wind and sea; MAH-kher
+- **Turlough** — Irish lake that appears and vanishes through the limestone; ephemeral state over a persistent substrate
+- **Mere** — pool, and also a boundary (mere-stone); water + edge in one; [the adjective "mere" drags it down]
+- **Syke** — small stream or field ditch, northern; quiet moving water
+- **Gill** — narrow ravine with its stream; [gill the unit, the name — soft g/hard g ambiguity]  ⚠ *Stream/ravine, some tool usage*
+- **Goit** — the channel that carries water to the mill wheel; infrastructure that feeds work
+- **Lade** ×2 — Scots mill-lade, same office; also "to lade" = to load — carrying capacity as double meaning
+- **Cauld** — Scots for a weir, the low dam that pools the water; also "cold" — night-compatible double; [homophone]
+- **Linn** — deep pool below a fall, Scots; soft, dark; [Linn the hi-fi maker]
+- **Sough** — drainage adit driven to unwater a mine (pron. "suff"); also the sigh of wind — two quiet meanings
+- **Yair** — Scots river fish-weir, a woven trap that gathers from the current
+- **Foss** — Norse waterfall (force/foss); [FOSS the acronym is a real collision in a computing context]
+- **Wath** — Norse ford; where the way crosses the water, one closed syllable
+- **Clough** — northern steep wooded valley (pron. "cluff"); dark vowel, closed end
+- **Heugh** — Scots crag or steep bank over water
+- **Griff** — Yorkshire narrow valley; [Griff Rhys Jones, griffin-adjacent]
+- **Hause** — Lakeland pass, the "neck" that joins two valleys; a connector by name
+- **Trod** — northern word for a worn path (monks' trod); a way made by repeated passage — usage compounding into a route
+- **Sarn** — Welsh causeway, a built firm way over soft ground; one dark closed syllable, almost collision-free
+- **Wynd** — Scots narrow lane threading between buildings; [wind homophone]
+- **Drang** — West Country narrow passage; [Sturm und Drang echo]
+- **Pend** — Scots covered passage through a building into the court; [reads as "pending"]
+- **Hafod** — Welsh summer steading, the high seasonal working place; soft, two syllables
+- **Bield** — Scots shelter on open ground; also means refuge, protection
+- **Fank** — Scots gathering-fold for sheep (from Gaelic fang); one closed syllable
+- **Bawn** — Irish fortified cattle enclosure; one dark syllable
+- **Crannog** — built timber-and-stone island dwelling on a lake; a made platform standing on water — a constructed environment on a living medium
+- **Zawn** — Cornish sea-chasm in the cliffs; striking, real, climbers keep it alive
+- **Sett** ×3 — badger's dug and inherited home + a granite paving block + the repeating unit of a tartan pattern; three concrete meanings, one closed syllable
+- **Heft** ×2 — the learned bond of a flock to its own ground, taught ewe to lamb down generations; knowledge bound to land and compounding — plus the everyday sense of weight in the hand; [common word, but that IS the double]
+- **Hirsel** — Scots: the whole ground and flock under one shepherd's care; everything one keeper tends, as a single named thing
+- **Cleit** — St Kilda drystone store (pron. "clate"); wind blows through, contents keep for years — durable storage as vernacular architecture
+- **Girnal** — Scots grain chest, the household's store of staple
+- **Laithe** — Yorkshire barn (Norse hlaða); the working store, one syllable
+- **Thrave** — Norse counted measure of sheaves; units of gathered work
+- **Kern** ×2 — the last sheaf, the kernel of the harvest; also the typographic kern — an honest tech double; [Kern County, kernel-adjacent in a good way]  ⚠ *Typography term and historical soldier, minor overlap*
+- **Mell** — the last sheaf brought home; also a maul (working tool) and "to mell" = to mix; triple, soft-dark
+- **Rowen** — second-growth hay after the first mowing; the regrowth crop — knowledge regrowing after harvest; [Rowan homophone]
+- **Cruck** — the paired curved timbers that frame and carry a whole house; [crook homophone]
+- **Bole** — a tree's trunk; also a bole-hill, an early hilltop smelting hearth — living wood + working fire; [bowl homophone]
+- **Ingle** — the hearth and its corner; the warm working center of the house
+- **Whin** — gorse, and whinstone, the hard dark dolerite; living plant + hard rock in one syllable
+- **Sarsen** — the hard ancient blocks lying in chalk fields, the stones Stonehenge is built of; quiet, dark, durable
+- **Grike** — the fissure in limestone pavement where sheltered life grows; a protected niche in hard ground
+- **Clint** — the limestone pavement block between grikes; [Clint Eastwood]  ⚠ *Names exist (Clint Eastwood), not tech company*
+- **Vug** — Cornish mining: a cavity in rock lined with crystals — a small geode by its working name; near-zero collisions
+- **Gossan** — the rusty weathered cap that betrays the rich lode below; surface signal of buried value
+- **Stope** ×2 — the worked chamber that follows the vein upward; one dark closed syllable
+- **Corrie** — Gaelic coire, a cauldron: the mountain bowl carved by ice — landform named for a working vessel; [the soap "Corrie"]
+- **Tobar** — Irish/Gaelic well, spring, source; the Gaelic sibling of Kelda
+- **Oxgang** — the land one ox could plow in a season; ground measured in units of work
+
+## Working verbs (32)
+
+- **Writ** — the old verb-noun of write: a written command that stands ("holy writ", "writ large"). Literally the noun of the system's first act, dark and closed, centuries of weight, unbranded
+- **Limn** — to limn: to illuminate a manuscript, to depict in words. One quiet syllable of writing-as-craft, almost unclaimed
+- **Redd** — Scots verb: to redd up, set in order; also a salmon redd, the gravel bed where eggs are laid in living water. Laying-down + tending + living ground; [reddit-scent; Animal Crossing character]
+- **Stet** — the proofreader's mark: "let it stand" — the act of keeping what was written, in one closed syllable; Latin but as plain as a nail
+- **Fell** — a flat-felled seam (the strongest join in cloth); also fell, the Norse open upland — joining act and living ground in one dark word; [fell = grim, archaic]
+- **Felt** — to felt: work loose fibers until they bond into one continuous medium; also the past of feel — what is made and what is known share the word
+- **Hew** — to hew: shape by cutting; and to hew to a line: keep faithfully to it. Making + keeping in one stroke; [homophone of "hue"]
+- **Thole** ×2 — to thole: to endure, to bear and keep on; also the thole-pin, the working pivot the oar bears against. Keep + working joint
+- **Kempt** — the lost positive of unkempt: combed, tended, in good order. The state a kept field should be in
+- **Strake** ×2 — one plank-run of a clinker hull, each strake lapped onto the one below — the whole vessel is build-on; [aerodynamic strake; minor]
+- **Darn** — to darn: mend knit fabric by reweaving new thread through the old — repair as continuation of the making; [mild expletive]
+- **Fettle** ×2 — to fettle: to put in working order, trim, make ready ("in fine fettle"); Norse root. Tending as craft
+- **Etch** — to etch: write into the surface so it stays; one closed syllable of durable inscription; [Balena Etcher; minor]
+- **Knap** — to knap flint: the first human act of making, shaping by strike; also a knap, a hilltop; [homophone "nap"]
+- **Bight** — the working loop of a rope from which knots are made; also a bay in a coastline; homophone of byte. Joining + ground + compute
+- **Bend** — in ropework, a bend is the knot that joins two lines end to end — joining as the word's own trade meaning; [Bend, Oregon; minor]
+- **Screed** — the laid and leveled layer that everything above builds on; also a long piece of writing. Laying-down + write; [pejorative "rant" sense]
+- **Ply** — to ply: work steadily at; a ply is one layer laminated with others into strength. Work + build-on
+- **Weft** — the thread carried across and beaten in, row upon row — composition by accumulation
+- **Thrum** ×2 — the loom's end-threads, and the low continuous working sound of something alive and running
+- **Stow** — to stow: place so it carries well and keeps; ship-work made verb; [GNU Stow; minor]
+- **Tend** — to tend: keep watch over living things so they grow — the system's stance toward its field; [Tend, dental startup; minor]
+- **Mend** — to mend: make whole again, keep in repair; [Mend.io, security vendor]
+- **Till** — to till: work ground so it bears; also a till, the drawer where takings are kept, and glacial till, laid ground; [fintech collisions; minor]
+- **Whet** — to whet: sharpen against the stone; to whet appetite — the edge kept keen
+- **Hone** — to hone: refine an edge by patient passes — improvement as tending; [Hone, edtech; minor]
+- **Slake** — to slake lime: wake stone into workable stuff; to slake thirst. Dark vowel, working chemistry
+- **Tamp** — to tamp: press the laid material firm so it bears load — the quiet closing act of laying-down
+- **Berm** — the laid shoulder of earth: ground made by placing ground
+- **Copse** — the coppiced wood: cut and regrowing, yield that compounds because it is worked; the act lives in the word
+- **Adit** — the horizontal entry driven into the hill: the made interface between daylight and the field below; [minor]
+- **Pen** — to pen: to write, and a pen: the fold that keeps the flock — write + keep in three letters; [generic word]
+
+## Nordic second pass (55)
+
+- **Ren** — the unplowed boundary strip between fields (åkerren); in Swedish simultaneously "clean/pure" and the reindeer — triple native meaning, two dark letters and a closed end; [Ren Protocol (crypto) existed; short-word squatting likely]
+- **Vret** — small enclosed field broken from the woods (survives in Swedish place names, -vreten); obscure, closed, no baggage
+- **Torva** — turf, the cut sod: living ground you can lift, carry, and lay down elsewhere — a portable piece of field
+- **Sved** — the burned clearing itself (from svedja); one closed syllable; also past tense of svida, "it stung"
+- **Myr** — mire, bog: dark, wet, preserving ground (bogs keep things for millennia — a natural archive); one syllable, night-colored
+- **Hed** — heath: open unowned ground; short and flat, maybe too bare
+- **Alv** — Swedish for the subsoil, the layer beneath the plow-depth that everything cultivated stands on; romanized älv (river) and alv (elf) fold in — substrate, flow, and myth in three letters
+- **Skel** — Danish for the boundary line between properties (markskel): the typed edge where one holding ends and another begins
+- **Akur** — Icelandic for tilled field; two closed syllables; [Akureyri adjacency; kin of the excluded Åker family — flag]
+- **Lyng** — heather, the living ground-cover of the heath (English "ling"); one dark closed syllable
+- **Kvarn** — the mill — the exact Swedish cognate-kin of quern from the taste profile; where grain becomes meal, raw becomes usable; one closed syllable
+- **Harv** — the harrow: the tool that breaks, levels, and readies the plowed field; "harva" also means to grind away at something; closed, dark, sits in the varp/varv sound family
+- **Ard** — the ard, the primal scratch-plow (Swedish årder) — the first tool of cultivation, and the archaeological English term too; [ARD is Germany's public broadcaster]
+- **Smedja** — the smithy: where things are made and mended at the fire; romanizes intact, unmistakably Nordic
+- **Hytta** — the smelting-hut, the furnace house (glashytta, masugnshytta): a small building organized around one transforming fire
+- **Lod** — plumb-bob AND solder: the weight that finds true vertical and the metal that joins — measure and bond in one closed dark syllable; English lodestone/lodestar resonance for free
+- **Krets** — Swedish for circuit (kretskort = circuit board), social circle, and district — the native compute word that is also a ring of people and a bounded ground; crisp, closed
+- **Verk** — work/works/opus (kraftverk, verket): the thing wrought and the institution that wroughts; [generic; a few small design studios]
+- **Orv** — the snath, the long handle of the scythe: the working thing you actually hold; one closed syllable, zero collisions, pleasingly strange
+- **Mila** — the charcoal kiln (kolmila): the slow covered burn in the forest that turns wood to concentrated fuel — Kiln's Swedish cousin; [FATAL for this audience: Mila is Bengio's AI institute]  ⚠ *could be personal name*
+- **Kolna** — romanized kölna, the malt-drying kiln; [Cologne/Köln adjacency]
+- **Fyr** — lighthouse, fire, and colloquially "a fellow" (en glad fyr): the kept flame that guides at night — night-compatible by definition; [reads "fyre" to Anglophones; Fyre Festival stink]
+- **Skarv** — the splice: where two lengths of timber or rope are joined into one continuous run; also the cormorant, and "skarva" = to stretch the truth; closed, dark; [Skarv is an Aker BP oil field]
+- **Laft** — the Norwegian notched corner-joint of log building (lafting): the cut that lets whole timbers interlock without nails — structures that hold by shape alone; one closed syllable, essentially collision-free
+- **Knut** — knot, and the interlocking log-corner of knuttimring: the joint that gets tighter under load; [King Canute, the name Knut, Knuth adjacency]
+- **Tvinn** — the twist that plies single threads into cord: strands joined by turning, stronger together; closed, obscure noun form of tvinna
+- **Solv** — the heddle in Swedish weaving: the loop that lifts chosen warp threads so the weft can pass — the selecting mechanism of the loom; happy accidental adjacency to "solve"
+- **Veft** — Norwegian weft: the thread thrown across the warp, the act that actually makes cloth; the natural partner-word to Varp
+- **Hake** — the catch/hook, and idiomatically exactly English "catch": "det finns en hake" = there's a catch — the same prized double, in Swedish; [hake is a fish in English]
+- **Vidja** — the withy, the twisted willow band that binds fence-poles ("hank och stör"): the flexible living join; romanizes intact
+- **Karve** — romanized kärve, the bound sheaf: the harvest joined into a carryable unit; also the karve, a small Norse longship — sheaf and ship in one
+- **Skyl** — the shock of sheaves stood together to dry; "skyla" also = to shelter/cover — gathered and protected in one closed dark syllable
+- **Ymp** — the scion, the graft-shoot (Swedish ymp/ympkvist): the piece you join onto rootstock so both grow as one — join, keep, and grow in a single closed syllable; essentially collision-free, strange the way Mycel is strange
+- **Ympa** — the verb: to graft (and, older Swedish, to inoculate) — the act of joining living material so it takes
+- **Torp** — the croft: a smallholding cleared and worked by its holder; every Swede has a torp in the family or wants one — quiet, dark, deeply native
+- **Bod** — the storehouse (sjöbod, redskapsbod): small, unheated, holds what keeps; English "bode" resonance — what it bodes; [Bode plot, Bode Miller]
+- **Skrin** — the casket/small chest (cognate of shrine): the box for what is most worth keeping; closed, spare, collision-free
+- **Hegn** — Danish/Norwegian for the hedge/fence that protects; Swedish hägn, "i hägn av" = under the protection of — enclosure as care, not exclusion
+- **Vard** — romanized vård: care/keeping (vårdträd, the guardian tree of the farmstead) and the vårdkase beacon; archaic "varde" = let there be; [Vard is a Norwegian shipbuilder]
+- **Hävd** — the concept this whole system is: land kept fertile by continuous use, and the legal right ("urminnes hävd") that continuous use confers — knowledge that stays alive because it is worked; [romanization to "Havd" loses it — concept-perfect, form-broken]
+- **Gro** — Swedish/Norwegian: to sprout, to take root, to heal ("det gror" — it is mending/growing); one syllable, wholly native; [Gro Intelligence (defunct); Gro Harlem Brundtland]
+- **Grodd** — the sprout, the germinated seed itself; closed ending; [sound-adjacent to "groda", frog/blunder — a Swede will smirk]
+- **Brodd** — the first green blade of sown grain showing above the soil, AND the ice-stud that grips in winter: new growth and traction, both night-and-frost compatible
+- **Gren** — branch: of a tree, of a river, of a sport (idrottsgren = a discipline) — and every Swedish programmer's word for a git branch; one closed syllable
+- **Sav** — the sap, rising in spring (savstigning); Danish sav = the saw — living flow in one language, working tool in the next; three letters, dark
+- **Arv** — inheritance: what compounds across generations, and the literal Swedish term for inheritance in programming — the versioned field's own mechanism, named in one closed dark syllable; [ARV = antiretroviral in medical contexts]
+- **Bygge** — the build: a construction site in everyday Swedish, and precisely what programmers call "bygget"; double lands squarely on the system
+- **Bryn** — the forest's edge (skogsbryn), the brow, and bryna = to whet/sharpen: the line where cultivated meets wild, which is where all growth happens — plus the sharpening; one dark closed syllable; [Bryn is a Welsh given name / Bryn Mawr]
+- **Rön** — findings, established empirical knowledge ("nya rön" = new findings) — semantically the best word in Swedish for this system; [romanization to "Ron" is fatal; usable only with the diacritic]
+- **Vett** — sense, practical knowing ("vett och etikett", "ha vett att"): folk-epistemology in one closed syllable
+- **Emne** — Danish/Norwegian: a topic AND a workpiece blank (Swedish ämne carries both plus "element/substance") — subject matter that is literally material to be worked; romanizes clean where ämne does not
+- **Bok** — book AND beech (same etymology — beech staves were the first pages); bokföra = to keep records; one dark closed syllable; [bok choy jokes; short-word squatting]
+- **Blad** — leaf, blade, and page/sheet (tidningsblad): the plant's unit of growth and the document's unit of record in one word; closed, dark
+- **Dygn** — the full 24-hour round, a word English lacks; "dygnet runt" = around the clock — the system that runs through night and day; closed, dark, collision-free, quietly untranslatable
+- **Vaka** — the vigil: "vaka över" = to keep watch over through the night — the system as night-watchman of the field; open -a ending
+
+## Craft joints & materials (41)
+
+- **Dowel** — a plain round pin that joins two members by passing through both. Maps: the simple join — one primitive, structural, invisible once made.
+- **Rabbet** — a step cut along an edge so the next board seats into it. Maps: each part is shaped to receive the next; composition is prepared in the material, not added after.
+- **Scarf** — the joint that tapers two timbers into one continuous member, as strong as either. Maps: versions and branches rejoined into one continuous body — continuation without a visible break.
+- **Trunnel** — treenail: a wooden pin driven through plank and frame that swells with the wood and never rusts out. Maps: the join made of the same medium as the joined — contracts are chunks in the field they govern. [Trunnel, a Tor binary-format tool — minor]
+- **Cleat** — the small fixed block a line or board is made fast to. Maps: the attachment point — attach a peer's store and make fast to it. [common word for boat/shoe hardware — low brand risk]
+- **Batten** — the strip that holds many planks fair to one curve; also "batten down" (make secure). Maps: the light member that holds independent parts to one shared line — conventions as thin strips, not walls.
+- **Dwang** — Scots/NZ: the short blocking nailed between joists so each stiffens the next. Maps: peer-to-peer bracing — parts strengthening each other sideways, no hierarchy. One blunt Norse-sounding syllable.
+- **Joggle** — masonry-and-timber: a small projection cut on one piece and a matching sinking in the next so they cannot slide. Maps: type-checked adjacency — neighbors that can only fit the intended way.
+- **Arris** — the sharp line where two dressed surfaces meet; the edge that proves both planes true. Maps: the boundary as a first-class thing — where two contexts meet, exactly and inspectably.
+- **Snib** — Scots: the small catch that holds a door or window fast; a joining act you do with a thumb. Maps: the light, reversible bind — attach, hold, release. One closed syllable, quiet.
+- **Reed** — the comb the warp passes through; it spaces every thread and beats each new pick home against the cloth. Maps: the one structure that both orders the field and drives each new addition into the accumulated body. [Reed.co.uk, Reed College — real but diffuse]
+- **Shed** — the opening made in the warp through which the shuttle passes; no shed, no weaving. Double meaning: also the plain working building. Maps: the addressable opening in the field a program passes through — context as a place you open, act in, and close. Dark vowel, hard stop.  ⚠ *multiple products, tool projects*
+- **Heald** — the wire that lifts its one warp thread to make the shed; kin of heddle but its own word. Maps: the per-thread selector — a typed selection lifting exactly the chunks a run needs. [heddle itself is banned; heald is the surviving sibling]
+- **Sley** — to draw the warp threads through the reed in order; the act that fixes the field's density before weaving. Maps: declaring structure before running — boundaries before a run. One soft syllable.
+- **Pirn** — the small spool inside the shuttle that pays out weft as it flies. Maps: the program's own payload — what it carries and yields as it crosses the field. One dark closed syllable, Kelda-family mouthfeel.
+- **Dent** — one space in the reed; each warp thread lives in its dent. Maps: the addressed slot — every thread has a place, every chunk an address. [DENT, a crypto token — note]
+- **Creel** — the rack of many bobbins all feeding one warp at once. Maps: many attached stores feeding one field. Also a fisherman's basket — second craft meaning free.
+- **Gait** — to gait a loom: thread every end through heald and reed in its order; also a way of walking. Maps: the declared order of passage — how the field is threaded is how the work will move.
+- **Ingot** — metal cast into a regular block so it can be stored, traded, and worked later; potential held in standard form. Maps: the typed chunk — knowledge in a form that keeps, moves, and takes the next blow.
+- **Sprue** — the channel through which molten metal enters the mold; every cast carries its sprue mark. Maps: the one typed way in — content lands in the field through a declared gate, and the record of entry stays on the piece. [sprue, also a disease name and a model-kit term — note]
+- **Ferrule** — the ring driven over the joint of blade and handle that keeps the two one thing under load. Maps: the binding contract at a boundary — small, tight, load-bearing.
+- **Clench** — to turn the point of a nail back on itself so it can never draw out; the smith-and-boatwright's permanent fastening. Maps: the commit — a write turned back into the record so it cannot be silently undone.
+- **Saggar** — the rough clay box that shields fine ware in the kiln; fired around the work, protecting it through transformation. Maps: the bounded process — boundaries before the run, the work inspectable inside.
+- **Lute** — to lute: seal two clay parts with soft clay; the verb of joining vessels. Double meaning: the instrument. Maps: joining act with a second life in music. One soft dark syllable.  ⚠ *musical instrument, some software*
+- **Keelson** — the internal timber bolted down over the keel, binding every floor to the spine. Maps: the substrate — the inner member everything is fastened through, unseen from outside.
+- **Clinker** — lapped construction: each plank overlaps the one below and is clenched to it; the hull's strength is the overlap itself. Maps: the thesis in one word — everything built on, and fastened through, what stands beneath it. [clinker also = furnace slag, and US slang for a dud — note]  ⚠ *nautical construction term*
+- **Garboard** — the first strake, the plank that lands directly on the keel; everything above stands on it. Maps: the bootstrap layer — what each store seeds.
+- **Rove** — the small washer a clinker nail is clenched over; the piece that turns a nail into a permanent join. Double meaning: to rove — to wander. Maps: the tiny artifact that makes a write hold. [Karl Rove; rove.me — note]
+- **Oakum** — old rope picked apart and driven into the seams to make the hull tight; retired material re-entering as the thing that keeps the water out. Maps: nothing is waste in the field — the record of the past seals the present. Dark first syllable, closed second.
+- **Chine** — the line where the bottom of a hull meets its side; the angle that defines the boat's whole behavior. Double meanings: a backbone; a steep coastal ravine. Maps: the load-bearing boundary — where two surfaces meet is where the character lives.
+- **Skeg** — the fixed fin aft of the keel that makes a hull track straight. Maps: the small permanent structure that gives all motion direction. One Norse closed syllable, Kelda-kin mouthfeel.
+- **Spile** — a small tapered peg; and spiling, the craft of taking a plank's true shape off the boat itself. Maps: shape read from the thing, not imposed on it — the interface forms around the data.
+- **Sneck** — the small stone in snecked rubble that bonds the big courses together; also Scots for a door latch. Two craft meanings in one closed syllable: the binder in the wall and the catch on the door. Maps: the small typed piece whose whole job is joining.
+- **Wythe** — a single vertical leaf of a wall; walls are wythes tied through by headers. Maps: one store, one leaf — tied through to its peers. One soft syllable. [obscure spelling; often misread]
+- **Dook** — Scots: the wooden plug set into masonry so something can later be fixed to stone. Maps: the extension point built into the substrate — a place left, on purpose, to attach to. One dark closed syllable.
+- **Croze** — the groove cut inside the barrel's end into which the head is sprung; the vessel holds because the groove receives it. Maps: the typed socket — the field is grooved to receive what lands in it. One dark syllable, almost no collisions.
+- **Nave** — the hub of a wheel, into which every spoke is mortised; also the body of a church. Double meaning: the joining center, and the gathered space. Maps: the field as hub — all work mortised into one turning center. [homophone "knave" — note]  ⚠ *wheel hub term, multiple usages*
+- **Welt** — the strip sewn between a shoe's upper and sole; because the welt exists, the shoe can be taken apart and rebuilt forever. Maps exactly: the interface layer that makes recomposition possible for the life of the thing. [Welt = German "world" — a quiet third meaning]  ⚠ *sewing seam term, could be used*
+- **Cullet** — broken and waste glass returned to the melt; every new batch runs better with cullet in it. Maps: prior output as necessary input — the field remelts nothing away.
+- **Lehr** — the long slow oven finished glass passes through so it keeps its integrity; German *Lehre* — teaching, doctrine. Double meaning across languages: the annealing passage, and the body of what is taught. Maps: knowledge tempered so it can be stood on. [obscure; pronunciation not obvious]
+- **Wale** — basketry and boatbuilding both: the woven row or thick plank that binds all the uprights into one structure. Maps: the binding course — one row that makes many parts a body. [Wale, the rapper — note]
+
+## Constructed compounds (58)
+
+- **Nightfield** — the field worked at night; a dark expanse that is nonetheless cultivated ground. "Night" gives the quiet, "field" gives the working ground — each keeps the other from being either gothic or agricultural-generic.
+- **Nightfold** — the fold (sheepfold, paper-fold, mathematical fold) closed up for the night; the place everything is gathered when the day ends. Fold is a survivor-word; night domesticates it.
+- **Nightkiln** — kilns fire through the night and someone tends them till morning; the long-running work that must not be left. Kiln is a survivor; night names the tending. Encodes long-running compute watched over, without a single tech word.
+- **Nighthearth** — the fire banked overnight so it can be woken in the morning: state that persists between sessions. Hearth is the working center of a house; night makes it about keeping, not cooking.
+- **Nightstead** — a stead (fixed dwelling-place, as in homestead) for the night; where the work lives when you are not standing in it.
+- **Stillground** — ground that holds still: stable, versioned, unmoving under you. "Still" also = quiet, the night register. Two dark closed syllables.
+- **Stillfield** — the field at rest; a calm working surface. Softer sibling of Stillground.
+- **Stillfold** — the fold in stillness; a quiet gathering-in. Almost a description of a committed state.
+- **Stillgarth** — garth is real English dialect (Old Norse garðr): an enclosed yard — cloister garth, applegarth. A quiet enclosure. Obscure, concrete, closed ending.
+- **Stillacre** — one measured piece of quiet ground; the acre makes it concrete and owned, the still makes it night-compatible.
+- **Longfield** — the field held for the long term; long strips of the open-field system were literally called long fields. Persistence claim in two farm-plain syllables. [surname/place-name frequency]  ⚠ *common place name, real estate usages*
+- **Longfold** — the fold that runs long: a structure that keeps extending as you add to it. Compounding in one image.
+- **Longstone** — real: standing stones named "the Longstone" dot Britain. A stone set upright to outlast everyone who set it. Durability without saying durability. [several place names]
+- **Longbarrow** — the neolithic long barrow: a mound built by accretion, holding what a community kept. Dark, real, ancient. [funerary shade may be too dark]
+- **Longhearth** — the fire kept burning across years; the longhouse hearth that never fully went out.
+- **Deepfold** — geology's deep folds: strata bent far under the surface. Fold is a survivor; deep gives it the vertical, geological dimension — Geode's cousin.
+- **Deepseam** — a real mining phrase: the deep coal seam, the rich layer you work far down. Seam was gut-liked but collision-killed alone; deep may rescue it. Knowledge as the worked layer.
+- **Deephearth** — the fire at the bottom of the house; the kiln-heart of the system.
+- **Deepcroft** — croft: a small enclosed field with a dwelling; deep makes it a holding far down in the ground of the system.
+- **Everfold** — the fold that never stops folding: everything compounds, nothing is discarded. "Ever" is the plainest Anglo-Saxon word for permanence; fold is the survivor act.
+- **Everfield** — the permanent field; land never let go fallow. Softer than Everfold, slightly more fantasy-scented.
+- **Everground** — ground that is always there; the persistent substrate. Blunt and honest, borderline heavy.
+- **Openfield** — real historical term: the open-field system, the great shared arable of a medieval village, worked in strips by every household. The commons-of-computation claim, in the exact OpenLight pattern. [openfield.io and small brands exist; nothing major]  ⚠ *historical agricultural system term*
+- **Openhearth** — real: the open-hearth process (steelmaking) AND the welcoming fire anyone may sit at. A working thing and a commons in one word. [historical steel term, no big brand]  ⚠ *industrial furnace type, known term*
+- **Openground** — ground open to all comers; also builder's term for unobstructed soil. Plainest of the open- family.
+- **Berggrund** — real Swedish: bedrock, literally rock-ground. Heavy, honest, load-bearing. [Swedish geological-survey usage only]
+- **Grunnfjell** — real Norwegian: the basement rock, the Precambrian foundation everything on the peninsula stands on. Romanizes clean; double-n reads fine.
+- **Bergrum** — real Swedish: a room cut into the mountain — Cold War vaults, and today literally where Nordic data centers live (Pionen). Knowledge kept in the rock. Quiet, real, startlingly on-claim.
+- **Bergfast** — real Swedish: firm-as-rock, unshakeable (bergfast övertygelse — rock-fast conviction). The versioned-and-immutable claim as an everyday Swedish adjective.
+- **Jordfast** — real Swedish: earthfast — a jordfast stone is one fixed in the ground, immovable in law. Jord alone was banned; the compound is a different, real word.
+- **Fastmark** — real Swedish: firm ground, as opposed to bog — the ground you can build on. Typed = fastmark; untyped = mire. Two closed syllables.
+- **Innmark** — real Norse agrarian term: the infield — the enclosed, manured, tended land nearest the farm, opposite of utmark. The cultivated home-ground of the system, the field you actually work. Obscure outside Scandinavia, warm inside it.
+- **Nattmark** — constructed but Swedish-natural: night-ground (natt + mark). The project's own register, romanizes with no diacritics.
+- **Grundbok** — real Swedish: the land register — the official, versioned book of who holds which ground. A versioned register of a field of knowledge, in one existing word. Almost too exact.
+- **Grundlag** — real Swedish: the constitution, literally ground-law — the base layer no other law may contradict. The type system as grundlag. [Scandinavian legal term; no brand]
+- **Grundton** — real Swedish: the fundamental tone, the keynote a chord is built over. What Continuo wanted to say, in two Nordic syllables.
+- **Grundval** — real Swedish: foundation, groundwork ("på denna grundval" — on this foundation). Soft-dark vowels, closed ending.
+- **Grundsten** — real Swedish: foundation stone. Plain and heavy; the ceremonial first stone of a building.
+- **Bofast** — real Swedish: settled, resident — one who dwells fixed in a place (bo = dwell + fast = firm). The field-citizen claim as a common Swedish word: to be bofast on the field. Two syllables, lovely mouthfeel.
+- **Urskog** — real Swedish: old-growth forest, never cleared — accumulation nothing has interrupted. Everything compounds like urskog. [skog cluster hard for English mouths]
+- **Landfast** — real English: landfast ice is ice frozen fast to the shore — attached, immovable, part of the land. Knowledge fastened to its place; the commit that cannot drift. Two closed syllables, real double meaning, zero brands of note.
+- **Earthfast** — real archaeology term: earthfast posts, timbers set directly into the ground — the oldest way of building. Structures whose foundation IS the medium. [archaeological usage only]
+- **Rootfast** — real dialect word: firmly rooted, unable to be pulled up. Living-ground family; the citizen who has taken root in the field.
+- **Holdfast** — real botany: the holdfast is the organ by which kelp grips bare rock — a living thing's commit to its substrate. Also the imperative: hold fast. [Holdfast: Nations at War (game); assorted small brands — crowded]  ⚠ *woodworking clamp and botanical term*
+- **Freehold** — real land tenure: land held outright, forever, owing no one. The ownership claim over your own knowledge-ground. [very common word; conveyancing brands]  ⚠ *property law term, well-established concept*
+- **Longhold** — a holding kept for the long term; land + tenure + persistence in two syllables. Constructed but reads as if it always existed.
+- **Fieldstone** — real: the stones the field itself yields when worked, gathered and built into the walls that bound it. The medium furnishing its own structure — knowledge quarried from the field builds the field. Quiet, complete.  ⚠ *common building material name, brand possible*
+- **Merestone** — real archaic English (mearcstan): the boundary stone marking where one holding ends and another begins. Types are merestones. Deeply obscure, fully real. [mere- may misread as "mere/merely"]
+- **Markstone** — plainer sibling of Merestone: the stone that marks. Constructed from real parts (cf. German Markstein).
+- **Quernstone** — real: the stone of the quern, the hand-mill that grinds grain into meal — the working thing that turns raw knowledge into something usable. Quern was cited in the taste profile itself; this is its buildable form. Compute as grinding, no tech word in sight.
+- **Fieldwright** — wright = maker (wheelwright, shipwright): one who makes in and of the field. The citizen as craftsman of the medium. Constructed on a fully productive real pattern.
+- **Seamwright** — one whose craft is the join. The system's whole claim is that everything shares one medium — the seamwright makes the seams. Rescues the killed Seam inside a compound.
+- **Foldyard** — real farming term: the enclosed yard where the fold's animals are gathered and kept. The survivor Fold given a place. Homely, real, unbranded.
+- **Stackgarth** — real Yorkshire dialect: the rickyard where the harvest stacks stand — the store of everything the year compounded. And "stack," unbidden, is also ours. [dialect-obscure; consonant cluster]
+- **Wordhoard** — Old English kenning, wordhord: the treasury of words a speaker unlocks. The knowledge-medium claim straight from Beowulf. [known to every English student; slightly precious]  ⚠ *literary database and poetic term known*
+- **Commonfield** — real historical term alongside openfield: the shared arable worked by all households. Field + citizen said plainly. [three syllables; flatter than Openfield]
+- **Fieldcraft** — real: the naturalist's and soldier's craft of moving and working in open country. Skill exercised in the medium. [minor outdoor brands]  ⚠ *military outdoor skills discipline term*
+- **Deepfield** — real astronomy: the Hubble Deep Field — point at darkness long enough and accumulated light resolves into everything. Long-horizon compounding in one image. [Deepfield: network analytics co. acquired by Nokia — real collision]  ⚠ *Hubble Deep Field astronomical reference*
+
+## Removed as SEO-dead — named, not silently dropped
+
+
