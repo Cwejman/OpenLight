@@ -1,5 +1,7 @@
 # Conventions
 
+*Status (author, 2026-08-23): this file has grown steward-driven — the author has not read it whole for weeks. A turnover is owed, like the one the README received; the name itself may change with it. Not blocking other work; stated so the state is explicit.*
+
 Principles and working agreements — how we operate together on this project. A convention is agreement made *before* the work: shared words settled in calm, so critique lands on the work rather than the person, and nothing is negotiated mid-task — with people and with agents alike.
 
 ## Principles
@@ -42,7 +44,17 @@ The specs are state; everything else is an event. A ratification record, a feedb
 
 ## Knowledge structure — *open, being refined*
 
-The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established practices — this file's rewriting rules included. The search now runs in two projects: the wider distillation — a fifteen-rung ladder of principles and an open study, grown from this project's practice — lives in hjulverkstan (`~/git/hjulverkstan/wiki/drafts/`); this section keeps what is night's own ground (refined 2026-08-22 from the transcript round; this section records the search, not a rule):
+The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established practices — this file's rewriting rules included. The search runs in two projects: the wider distillation — a fifteen-rung ladder of principles, an open study and a first chart of the surrounding practices — lives in hjulverkstan (`~/git/hjulverkstan/wiki/drafts/`); this section keeps what is night's own ground. This section records the search, not a rule.
+
+**As much as we know (2026-08-23, from dialogue; stated, not proven).** The same code appears wherever things compound — Unix, the internet, this project's substrate: small self-standing units, one medium, one way to join. For knowledge the unit is the fold and the join is the reference, and the code reads:
+
+- **Why before how, at every scale.** A fold is readable on its own because it opens with what it is for; then what must hold; then how; then practice. Values, principles, mechanisms, methods — stability rises upward, volume downward, and what compounds is what holds still, so the core is written first and is the smallest part.
+
+- **Reading order is goal order; definition order is dependency order.** They conflict. Goal order governs the entry and each fold's opening; dependency order governs the body; the reference absorbs the forward dependency. *This is where the tree fails today — the specs define before they motivate; the why sits at the bottom of the files, where comprehension arrives last.* Not yet tested; the README is the first file written by it.
+
+- **Folds compose only by reference** — one home, many paths. **Status is part of the writing.** **Shallow** — two levels, three at most.
+
+*Open, honestly:* whether every fold really carries every ring, or only the entry; what the proven instruction set is — this is the shape, not yet the method. One method finding stands (2026-08-23, the blind-variant experiment): prose regenerated from a proposition inventory converges on the inventory's own wording — a tightly compressed proposition *is* prose, so the brief's compression level sets the writer's freedom; loosen the inventory and vary the entry angle to buy real variance. Earlier ground, still standing (refined 2026-08-22 from the transcript round):
 
 - **Folds are closures.** What is established inside doesn't exist outside; a reference is a thread to pull, not a failure. The code-side anchor for why comprehension can grow bite-wise at all — and why a context, which cannot be refactored, needs folds in the first place.
 - **The entry has two forces.** From the top, something inviting — a reader must *want* in; from the bottom, everything properly in place. How they meet is not yet known. And the window's start is not ours to write — the harness occupies it; first words seem to weigh more, though not always, since they compress too.
