@@ -101,7 +101,7 @@ impl Db {
 }
 ```
 
-`resolve` is `read`'s general form: `read(places, opts)` is exactly `resolve(Place(places), opts)` once `exclude` and `match_` fold in as `Minus` and `Filter`. One query builder serves both doorways; `read` survives as the named case because it is the shape the protocol's `read` op carries.
+`resolve` is `read`'s general form: `read(places, opts)` is exactly `resolve(Place(places), opts)` once `exclude` and `match_` fold in as `Minus` and `Filter`. One query builder serves both doorways. **Since 2026-08-23 the protocol's `read` carries an expression, not places and options** ([`sdk.md`](sdk.md), *Reads*): the planner lowers every verb — `match`, `skip`, `limit`, `survey` included — into `Plan` and `ReadOpts`, so the options below are the **plan interface's**, engine-internal, never author-facing; db's `read` and `get` survive as named cases the engine calls, not as wire shapes.
 
 `admits` is the point membership test — one semijoin, no hydration. The engine uses it to decide `BOUNDARY_VIOLATION` on a named root before a read runs, and on `get`. Whether that error is the right answer at all is engine.md's open (*the existence oracle*); the physical primitive is neutral either way.
 

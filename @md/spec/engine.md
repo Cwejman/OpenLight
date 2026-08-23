@@ -291,7 +291,7 @@ Text plans must be runnable — prose fences, palette one-liners, agent-written 
 
 The field is fractally infinite; abundance is not a cost; veiling structure for tidiness is itself the hygiene problem.
 
-Starting validates the chunks that already exist, runs the match, and freezes the record — the same call frame as every run; expressions add no second execution path. The program receives locs and refs and hands them to the **`resolve` op**; the planner evaluates. **Programs never interpret expressions.**
+Starting validates the chunks that already exist, runs the match, and freezes the record — the same call frame as every run; expressions add no second execution path. The program receives locs and refs and hands them to the **`read` op** as they are; the planner evaluates. **Programs never interpret expressions.**
 
 Fenced expression blocks in prose are anonymous expressions — no chunk exists until lifted, since sharing confers identity; every chunk and location an expression uses files a mention (substrate.md, *Links*).
 
@@ -299,7 +299,7 @@ Fenced expression blocks in prose are anonymous expressions — no chunk exists 
 
 The expression language is the **only** query surface; no author writes SQL, ever. The planner partitions the verb vocabulary:
 
-- **Read-native** — verbs with a relational lowering: `at` (time travel as composition), subtraction, `limit`, `where`-over-keys, the hop vocabulary and `prop`, and `follow` (transitive closure of a step — below). A chain inside this subset compiles to **one** db query — the boundary filter included, since a boundary is itself a single-request selection and lowers into the same statement.
+- **Read-native** — verbs with a relational lowering: `at` (time travel as composition), subtraction, `limit` and `skip` (pagination), `match` (FTS — over the piped input, or the whole field with none), `survey` (the body-less projection), `where`-over-keys, the hop vocabulary and `prop`, and `follow` (transitive closure of a step — below). [P — `skip`, `match`, `survey` entered 2026-08-23 when the protocol's read options dissolved into the language (sdk.md, *Reads*).] A chain inside this subset compiles to **one** db query — the boundary filter included, since a boundary is itself a single-request selection and lowers into the same statement.
 
 - **Compute** — `fold`, `group`, anything model-touching: real program runs, fed by lowered sub-chains.
 
@@ -360,7 +360,7 @@ The cost, named: db.md grows an engine-internal **plan interface** — relationa
 
 A run's boundary is a **selection expression** — places, and pure derivations of places — drawn from the **single-request class** of the language above: dimension algebra, the hop verbs, `at`, `where`, `follow` — what the planner can lower, exactly (*Single-request is derived*). A wall must be evaluable instantly and deterministically at every read, so compute has no place in it (substrate.md, *Boundaries*).
 
-The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `get`, `commit`, `resolve`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`. But a `resolve` whose chain contains compute verbs starts real runs, and **those pass the `run` wall** — resolve respects it.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction.
+The boundary is **constructed at start** and recorded as the process body's `read`, `write` and `run`. **Three kinds of act, three walls**: reads are governed by `read`, writes by `write`, program starts by `run` — a selection over program chunks, so **the toolset is the run boundary**, one home rather than a convention beside the grant. (Substrate ops — `read`, `commit`, `subscribe` — are protocol, not programs: every connected program has them, and they are walled by `read` and `write`, never by `run`. But a `read` whose chain contains compute verbs starts real runs, and **those pass the `run` wall** — read respects it.) `run` is selection-grade like the others — typed `selection`, not `set<ref(program)>` — precisely so a wall may be an expression: `[engine/program] | where(runtime: native)`, a toolset location, a subtraction.
 
 **The formula, plainly** [R]: *a run reaches its frame, plus what was offered in its argument, plus what its program's ceiling names, plus what the starter adds — cut down to what the parent holds.* Five sources:
 
@@ -486,15 +486,13 @@ One JSON-lines protocol serves every client regardless of where it runs. **The t
 
 | Operation | Description |
 |---|---|
-| `read` | Read the intersection of places. Filtered by the read boundary — bodies, membership, adjacency, links, counts, alike. Membership across the three stored kinds plus the `linked` answer, per substrate.md (*Read*). FTS via `ReadOpts.match_`; an **empty places list with `match_`** is a whole-field FTS query, boundary-filtered and federated like any read. Negation via `exclude`. Pagination and body-less projection per substrate.md. |
-| `resolve` | Evaluate a location or an expression chunk and return its `ReadResult`. The planner does the work — programs never interpret expressions. Boundary-filtered like `read`; compute verbs in the chain become real runs, each passing the `run` wall, and the call returns after those sub-runs complete — which is why the planner keeps compute out of boundary grammar (*Boundaries*). |
-| `get` | Fetch a single chunk by id. Returns `null` if the chunk does not exist; rejected if outside the read boundary. Honors `at` for temporal point reads. |
-| `read_batch` | Multiple tagged `read`/`get` sub-queries resolved together at **one commit snapshot**, each authorized under its own context — each entry carries its **anchor** on the wire (ruled; *The call context*), so a coalescing client never authorizes at its own. One request, coherent results — the resolution primitive behind composed views. |
+| `read` | **Evaluate an expression** — ol text, or one selection term — and return its `ReadResult`. The one read op [P — 2026-08-23]: the old `read`/`resolve`/`get` triplet and the option struct beside it (`match_`, `exclude`, `limit`, `offset`, `at`, `include`) dissolved into the expression language — every option is a native verb (*The planner partition*); `X` reads one chunk, `[X]` the place at it; a name naming a lifted expression evaluates it, `[E]` fetches it ([`sdk.md`](sdk.md), *Reads*). The planner does the work — programs never interpret expressions. Filtered by the read boundary — bodies, membership, adjacency, links, counts, alike; membership across the three stored kinds plus the `linked` answer, per substrate.md (*Read*). Compute verbs in the chain become real runs, each passing the `run` wall, and the call returns after those sub-runs complete — which is why the planner keeps compute out of boundary grammar (*Boundaries*). `branch` is the one option left. |
+| `read_batch` | Multiple tagged `read` expressions evaluated together at **one commit snapshot**, each authorized under its own context — each entry carries its **anchor** on the wire (ruled; *The call context*), so a coalescing client never authorizes at its own. One request, coherent results — the resolution primitive behind composed views. |
 | `commit` | Write a Declaration. Rejected if the boundary does not admit every touched dimension, and checked against the placement and link rules of *Governance at `commit`*; ref keys validate per substrate.md, federated across attached stores; the write routes to the owning store. `dry_run: true` runs full validation without writing — the live-form affordance. |
 | `run` | Start a program. Returns the process id immediately. Takes a program plus an argument set, or a `draft` process id to consume. `mode: 'child' \| 'launch'` per *Lifecycle*. |
 | `await` | Wait for one or more processes to reach a terminal state. **Returns each process itself** (the chunk — status, result ref, one hop to the result). The call suspends the calling task; it doesn't block the engine. |
 | `cancel` | Request a process's terminal transition. Authorized when the target descends from the caller in the engine's own process tree — the cascade lineage, engine state rather than a reach claim — or when the caller's write boundary admits it. Idempotent. Cancel of a **draft** is deny: `failed`, `error: 'denied'` — the run-to-draft refusal path (*Lifecycle*). |
-| `subscribe` | Register on a set of places; returns a subscription id. The engine pushes `place_changed` events when commits touch them. |
+| `subscribe` | Register on what an expression reads; returns a subscription id. The engine pushes `place_changed` events when commits touch it. (The same `follow`-shaped under-coverage as boundaries — *Subscription invalidation*.) |
 | `unsubscribe` | Cancel a subscription by id. |
 
 (The old `exit` op — surface self-dismissal — retires with surface programs: a VM program exits by exiting; nothing else is a process.)
@@ -504,24 +502,22 @@ One JSON-lines protocol serves every client regardless of where it runs. **The t
 Every request has an `op` and a monotonic `id`. Every response pairs the same `id` with either `result` or `error`.
 
 ```jsonl
-{"id":1,"op":"read","places":["chunk_abc","chunk_def"],"opts":{"match_":"session today","exclude":["chunk_hidden"],"limit":50}}
-{"id":2,"op":"get","chunkId":"chunk_abc","opts":{"at":"...","branch":"...","include":{"body":false}}}
-{"id":3,"op":"read_batch","reads":[{"tag":"a","anchor":"m_1","places":["s1"]},{"tag":"b","anchor":"m_2","places":["s2"],"opts":{...}}]}
+{"id":1,"op":"read","expr":"[chunk_abc, chunk_def] − [chunk_hidden] | match(\"session today\") | limit(50)"}
+{"id":2,"op":"read","expr":{"$ref":"chunk_abc"},"opts":{"branch":"..."}}
+{"id":3,"op":"read_batch","reads":[{"tag":"a","anchor":"m_1","expr":"[s1]"},{"tag":"b","anchor":"m_2","expr":"[s2] | survey"}]}
 {"id":4,"op":"commit","declaration":{"chunks":[...]},"dry_run":false}
 {"id":5,"op":"run","program":"diff","argument":[{"$ref":"chunk_pair"}],"mode":"child","read":[{"$loc":["their-store"]}],"write":[]}
 {"id":6,"op":"run","draft":"p_draft"}
 {"id":7,"op":"await","processes":["p_1","p_2"]}
 {"id":8,"op":"cancel","process":"p_1"}
-{"id":9,"op":"subscribe","places":["my-place"]}
+{"id":9,"op":"subscribe","expr":"[my-place]"}
 {"id":10,"op":"unsubscribe","subscriptionId":"sub_1"}
-{"id":11,"op":"resolve","target":{"$ref":"expr_1"},"opts":{"limit":50}}
 ```
 
 | Op | Result shape |
 |---|---|
-| `read` · `resolve` | `ReadResult` |
-| `get` | `ChunkItem \| null` |
-| `read_batch` | `{ head: CommitId, results: Record<tag, ReadResult \| ChunkItem \| null \| EngineError> }` |
+| `read` | `ReadResult` — one chunk, a place, or a chain alike |
+| `read_batch` | `{ head: CommitId, results: Record<tag, ReadResult \| EngineError> }` |
 | `commit` | `Commit` (with `dry_run`: `{ valid: boolean, errors: [...] }`) |
 | `run` | `{ process: string }` — the process chunk id |
 | `await` | `Record<string, ChunkItem>` — process id → the process chunk |
@@ -549,7 +545,7 @@ A connected program receives unsolicited messages from the engine on the same ch
 
 | Event | Shape | Meaning |
 |---|---|---|
-| `place_changed` | `{ event: "place_changed", subscriptionId, commit }` | A commit touched a place this subscription registered on. The SDK re-fetches via `read`. |
+| `place_changed` | `{ event: "place_changed", subscriptionId, commit }` | A commit touched what this subscription's expression reads. The SDK re-fetches via `read`. |
 | `lagged` | `{ event: "lagged", subscriptionIds: [string] }` | The engine's input channel overflowed; the named subscriptions may have missed events. Re-fetch to recover. |
 | `subscription_invalid` | `{ event: "subscription_invalid", subscriptionId, reason }` | A subscribed place fell out of the subscriber's read boundary. The engine has unsubscribed; the SDK treats the subscription as dead. |
 
@@ -613,7 +609,7 @@ client      SDK event handler
 
 ### Subscription lifecycle
 
-- `subscribe(ctx, places)` — boundary-checked against the subscriber's read selection. On pass: registered, id returned. On fail: `BOUNDARY_VIOLATION`, delivered by the SDK as the dead-subscription path (sdk.md).
+- `subscribe(ctx, expr)` — the expression's roots boundary-checked against the subscriber's read selection. On pass: registered, id returned. On fail: `BOUNDARY_VIOLATION`, delivered by the SDK as the dead-subscription path (sdk.md).
 
 - Subscriptions are owned by the subscribing process; terminal state drops them before further dispatch. (Whether `subscribe` under a bare `{ anchor }` context is judged by the same rule is the call context's open.)
 
@@ -759,7 +755,7 @@ An agent making a tool call uses the same `run` operation:
 
 4. The engine asks the runtime to spawn and returns the process id immediately; the agent awaits when it needs the result — the process chunk, `result` one hop.
 
-Nothing discourse-shaped is written anywhere — the tool trace *is* the frame; providers wanting message history get it reconstructed from frames as serializer policy ([`agent.md`](agent.md)). Substrate operations (`read`, `resolve`, `commit`, `subscribe`) from the agent are not tool calls — they go directly through the protocol and create no processes.
+Nothing discourse-shaped is written anywhere — the tool trace *is* the frame; providers wanting message history get it reconstructed from frames as serializer policy ([`agent.md`](agent.md)). Substrate operations (`read`, `commit`, `subscribe`) from the agent are not tool calls — they go directly through the protocol and create no processes.
 
 ---
 
@@ -834,7 +830,7 @@ Not every error kills a program. Informational errors return as protocol respons
 
 | Condition | Engine response |
 |---|---|
-| Boundary violation (read, resolve, subscribe, commit) | `BOUNDARY_VIOLATION` response; process continues |
+| Boundary violation (read, subscribe, commit) | `BOUNDARY_VIOLATION` response; process continues |
 | Spec violation (commit) | `VALIDATION_ERROR` response; process continues |
 | Write to protected record | `BOUNDARY_VIOLATION` response; process continues |
 | Malformed request | `INVALID_REQUEST` response; process continues |
@@ -908,7 +904,7 @@ engine/
                           compose-time materialization; the planner partition
                           and lowering to db's plan interface
     ops/                — public surface; one module per protocol op
-      read.rs resolve.rs get.rs commit.rs run.rs cancel.rs subscribe.rs
+      read.rs commit.rs run.rs cancel.rs subscribe.rs
       await_processes.rs
   sdk/                  — engine/sdk: the protocol client (sdk.md)
   tests/                — integration tests against the spec

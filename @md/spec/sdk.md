@@ -20,7 +20,7 @@ Requests and responses pair by monotonic `id`; unsolicited events carry an `even
 
 ## One package, runtime-agnostic
 
-`engine/sdk` exposes typed functions at the package root: `read`, `resolve`, `get`, `readBatch`, `commit`, `run`, `awaitRun`, `cancel`, `subscribe`, plus the local predicate `isPure`. No DOM, no rendering, no framework. (`exit` is retired with surface programs — a VM program exits by exiting.)
+`engine/sdk` exposes typed functions at the package root: `read`, `readBatch`, `commit`, `run`, `awaitRun`, `cancel`, `subscribe`, plus the local predicate `isPure`. No DOM, no rendering, no framework. (`exit` is retired with surface programs — a VM program exits by exiting.)
 
 The component adapters — `solid()`, `customElement()` — and the glue live in `view/sdk` and are specced with the view family ([`view.md`](view.md) §6, §8). The old React hook library (`host/react`, `useRead`) retires with surface programs; its one load-bearing lesson is kept below (*Subscribe before fetch*).
 
@@ -30,7 +30,7 @@ The component adapters — `solid()`, `customElement()` — and the glue live in
 
 Typed bodies exist in three forms; translation between them is the SDK's job, invisible to consumer code:
 
-- **In hand — native values.** A `ref` key is a `Ref` object (id plus a convenience `get`), `time` is a `Date`, `set` is a `Set`, `markdown` is a string tagged by its type. Consumer code works with real values, never tag envelopes.
+- **In hand — native values.** A `ref` key is a `Ref` object (id plus a convenience `read`), `time` is a `Date`, `set` is a `Set`, `markdown` is a string tagged by its type. Consumer code works with real values, never tag envelopes.
 - **On the wire — tagged JSON.** Values self-describe. Six tags, and no others:
 
   ```
@@ -73,7 +73,7 @@ type Selection = SelectionTerm[]
 
 **`$loc` and `$ref` suffice.** An `expr` element is always the chunk form wherever a selection is stored: expressions and payload literals materialize into chunks at composition ([`engine.md`](engine.md), *Plan-form, run-form, and composition*), so the element referencing one is a `$ref`. Inline anonymous expressions live only in prose fences, which are not selections. There is no `$expr` tag, no `$call`, no `$inst`.
 
-**A selection is not a list of roots.** `X` and `[X]` are different offers — the chunk alone, versus the place at X, which carries the chunk *and* what is placed on it. A `ChunkId[]` field can express only the second, and only for one-term places, so every wire field carrying a selection is typed `Selection`. `read`'s and `subscribe`'s `places` stay `ChunkId[]` — they name **one** place, an intersection, not a set of them.
+**A selection is not a list of roots.** `X` and `[X]` are different offers — the chunk alone, versus the place at X, which carries the chunk *and* what is placed on it. A `ChunkId[]` field can express only the second, and only for one-term places, so every wire field carrying a selection is typed `Selection`. Nothing on the wire carries a bare `ChunkId[]` as a query: `read` and `subscribe` take an **expression** (below), of which a term is the one-node case.
 
 **Selection terms are the one value kind the SDK does not un-tag.** The tag is the discriminant consumer code actually needs — a `$loc` and a `$ref` are different offers — and terms travel between `run`, `resolve`, and a process body unchanged.
 
@@ -83,7 +83,7 @@ type Selection = SelectionTerm[]
 
 ## Resolution modes — frozen or head
 
-A process's argument is frozen at start, but the chunks it references live on. When a program reads through its argument's refs, the SDK resolves **at the stamped commit by default** (`at:` from the process body) — reproducible. Following the **living head** is the deliberate, explicit choice (`{ at: 'head' }`) for programs that want liveness. Same temporal machinery, two honest modes ([`engine.md`](engine.md), *Frozen safety or rolling head*).
+A process's argument is frozen at start, but the chunks it references live on. When a program reads through its argument's refs, the SDK reads **at the stamped commit by default** — inside a process it composes `| at(<the body's at>)` onto every expression that carries no `at` of its own — reproducible. Following the **living head** is the deliberate, explicit choice — `| at(head)`, `head` being the one reserved word the verb accepts — for programs that want liveness. Same temporal machinery, two honest modes, one verb ([`engine.md`](engine.md), *Frozen safety or rolling head*).
 
 **`at` reproduces content, not reach.** Chunks and placements resolve as of the stamped commit; what the boundary *admits* is judged against the structure as it stands now, always, including under `at` (substrate.md, *Boundaries*). "Exactly what the run was given" is a claim about versions, never about admission.
 
@@ -91,24 +91,38 @@ A process's argument is frozen at start, but the chunks it references live on. W
 
 ## The Substrate Surface
 
-### Reads
+### Reads — one op, the expression language
 
 ```ts
-read(places: ChunkId[], opts?: ReadOpts): Promise<ReadResult>
-resolve(target: SelectionTerm, opts?: ReadOpts): Promise<ReadResult>
-get(chunkId: ChunkId, opts?: GetOpts): Promise<ChunkItem | null>
+read(expr: Expr, opts?: ReadOpts): Promise<ReadResult>
 readBatch(reads: TaggedRead[]): Promise<BatchResult>
 ```
 
-All wrap engine ops of the same name (`readBatch` → `read_batch`). Errors arrive as rejected Promises typed `EngineError`.
+**One act: evaluate an expression against the field through a boundary.** [P — 2026-08-23; the lighter settledness.] The old triplet — `read(places)`, `resolve(term)`, `get(id)` — was three names for it, with a second query grammar (`ReadOpts`: `match_`, `exclude`, `limit`, `offset`, `at`, `include`) standing beside the expression language the law calls the **only** query surface ([`engine.md`](engine.md), *The planner partition*). Both dissolve into `read(expr)`. What the options said is said by verbs — native programs, discoverable and walled like any:
 
-`read` answers at the intersection of the named places. `read([])` with `opts.match_` is a whole-field FTS query; `opts.exclude` subtracts places; `limit` / `offset` / `include: { body: false }` per substrate.md.
+```ts
+read('[a, b]')                                  // the intersection — was read(places)
+read('x')                                       // one chunk — was get(id)
+read('[a] − [hidden] | at(c1) | limit(50)')     // exclude, at, limit as verbs
+read('match("session today")')                  // whole-field FTS
+read('[project, tasks] | match("urgent") | skip(50) | limit(50) | survey')
+```
 
-`resolve` evaluates one selection term and returns the same `ReadResult` shape: `{ $loc: […] }` resolves the intersection, `{ $ref: … }` evaluates an **expression chunk** — a ref to ordinary content is a `get`, not a `resolve`. This is how an argument element that is an expression reaches its content: the program hands the term straight back, because **programs never interpret expressions**. A chain inside the single-request class costs one db query; a chain containing compute verbs starts real runs first — each passing the `run` wall — so `resolve` returns after those runs complete.
+- `X` and `[X]` already tell the chunk from the place at it (*Selections on the wire*); a one-chunk result is a `ReadResult` with that chunk and empty membership, `unresolved` if it does not exist. `null` is gone.
+
+- **`match(text)`** is FTS within the piped input — or over the whole field with no input; **`skip(n)`** pages (tail-first on an ordered place, as substrate.md states); **`survey`** is the body-less projection — names, contracts, placements, counts. `at`, subtraction, `limit`, `where` and the hops were verbs already. All lower; all are wall-admissible.
+
+- **An `Expr` is ol text, or one selection term** (`Expr = string | SelectionTerm`). The term form is the degenerate expression, so a program hands an argument element straight back unchanged — `read(arg[0])` — because **programs never interpret expressions**. Text is parsed by the engine (`expressions.rs`); ids interpolate as strings, nothing more. **No builder, no tagged template** [P]: the written language is valid TS expression grammar, and the first component that wants an interpolation helper is the moment to price one — in `view/sdk`, never here. The flat named graph is the *stored* form, reached through composition, never hand-authored.
+
+- **A name evaluates; a place fetches** [P]. A `$ref` — or a bareword — naming a lifted expression chunk yields the expression's **value**, as a named node one closure out would; lifting changed its identity, not its meaning. To read such a chunk *as a chunk*, read the place at it: `[E]` carries E and its members. Which it is, the engine tells by placement on `engine/expression` — the same discriminant the match uses for `expr` entries; the wire needs no new tag.
+
+- A chain inside the single-request class costs one db query; a chain containing compute verbs starts real runs first — each passing the `run` wall — so `read` returns after those runs complete.
+
+What stays outside the expression is not query: `branch` (consumer-level state — whether it becomes a verb beside `at` is open, below) and the **anchor**, the call context an entry is judged under.
 
 **Filtering is uniform.** Bodies, membership answers, adjacency, links, full-text search **and every count** pass the reader's boundary; there is no privileged view of a full set. *The existence oracle — ruled, accepted for v0.1:* a read the boundary does not admit rejects with `BOUNDARY_VIOLATION` rather than returning empty ([`engine.md`](engine.md), *Boundary-Request Behavior*). Revisit at peering.
 
-`readBatch` resolves tagged sub-queries together at one commit snapshot — per-tag results or per-tag boundary errors — the resolution primitive composed views build on. **Each entry carries its anchor** (ruled; [`engine.md`](engine.md), *The call context*): the glue coalescing reads for many mounts authorizes each entry as its mount, so embedding never escalates.
+`readBatch` evaluates tagged expressions together at one commit snapshot — per-tag results or per-tag boundary errors — the resolution primitive composed views build on. **Each entry carries its anchor** (ruled; [`engine.md`](engine.md), *The call context*): the glue coalescing reads for many mounts authorizes each entry as its mount, so embedding never escalates.
 
 ### Writes
 
@@ -132,7 +146,7 @@ cancel(processId: ProcessId): Promise<void>
 
 **What the mode decides.** Ownership carries naming and containment and nothing else, so residence confers no reach either way: both modes are capped by the caller's own boundary, and `launch` never escalates. The mode picks **address and lifetime**. The cascade is the engine's own process tree, engine state rather than a reach claim.
 
-`awaitRun` resolves when each named process reaches a terminal state and **returns the process chunk itself** — status and `result` ref in the body, the result one `get` away. `cancel` is authorized for descendants in the engine's process tree or targets within the caller's write boundary; idempotent; cancel of a draft is deny. (`awaitRun` is named to dodge `await`, a reserved word; the engine op is `await`.)
+`awaitRun` resolves when each named process reaches a terminal state and **returns the process chunk itself** — status and `result` ref in the body, the result one `read` away. `cancel` is authorized for descendants in the engine's process tree or targets within the caller's write boundary; idempotent; cancel of a draft is deny. (`awaitRun` is named to dodge `await`, a reserved word; the engine op is `await`.)
 
 ### Derived predicates
 
@@ -152,12 +166,12 @@ type SubEvent =
   | { kind: 'lagged' }
   | { kind: 'invalid', reason: string }
 
-subscribe(places: ChunkId[], callback: (event: SubEvent) => void): () => void
+subscribe(expr: Expr, callback: (event: SubEvent) => void): () => void
 ```
 
-Imperative subscription. The callback receives `{ kind: 'changed', commit }` per `place_changed` (re-fetch via `read`); `{ kind: 'lagged' }` when the engine's channel overflowed (re-fetch to recover — the wire event lists affected subscription ids; the SDK fires only those callbacks); `{ kind: 'invalid', reason }` when the engine invalidated the subscription — a subscribed place fell out of what the boundary admits; the subscription is dead. The returned thunk unsubscribes; calling it after `invalid` is a no-op.
+Imperative subscription **on what an expression reads** — the same `Expr` as `read`, so the glue subscribes on exactly the expression it fetched ([`view.md`](view.md) §8). The callback receives `{ kind: 'changed', commit }` per `place_changed` (re-fetch via `read`); `{ kind: 'lagged' }` when the engine's channel overflowed (re-fetch to recover — the wire event lists affected subscription ids; the SDK fires only those callbacks); `{ kind: 'invalid', reason }` when the engine invalidated the subscription — a subscribed place fell out of what the boundary admits; the subscription is dead. The returned thunk unsubscribes; calling it after `invalid` is a no-op.
 
-**Subscribe before fetch — load-bearing ordering.** Any consumer pairing `subscribe` with `read` — the glue included ([`view.md`](view.md) §8) — must register the subscription *first*, then fetch. Reversed, a commit landing between fetch and subscribe is reflected in neither. With subscribe first, a commit in the gap produces an event (queued during the in-flight fetch) and the re-fetch supersedes the initial state. The cost is at most one extra fetch per mount; there is no lost-event window.
+**Subscribe before fetch — load-bearing ordering.** Any consumer pairing `subscribe` with `read` — the glue included ([`view.md`](view.md) §8) — must register the subscription *first*, then fetch, on the same expression. Reversed, a commit landing between fetch and subscribe is reflected in neither. With subscribe first, a commit in the gap produces an event (queued during the in-flight fetch) and the re-fetch supersedes the initial state. The cost is at most one extra fetch per mount; there is no lost-event window.
 
 **Why re-fetch on every event** rather than apply the commit as a delta: single source of truth lives in the substrate; the SDK never derives state from events. The `commit` payload is available for delta optimization in custom uses; the default discards it.
 
@@ -178,6 +192,10 @@ type LocTerm       = { $loc: ChunkId[] }
 type RefTerm       = { $ref: ChunkId }
 type SelectionTerm = LocTerm | RefTerm
 type Selection     = SelectionTerm[]       // ordered
+
+// what read and subscribe evaluate: ol text, parsed by the engine, or one
+// term — the degenerate expression, handed back from an argument unchanged
+type Expr = string | SelectionTerm
 
 type TypeTerm = { $type: { of: string, opt?: boolean, card?: number } }
 
@@ -243,25 +261,8 @@ type PlacementSpec = {
 // — reads —
 
 type ReadOpts = {
-  branch?: string
-  at?: CommitId
-  match_?: string
-  // negation — set difference over any stored kind; a subtracted place
-  // is boundary-checked like a positive one
-  exclude?: ChunkId[]
-  // tail-first where the place is ordered; offset pages backward
-  limit?: number
-  offset?: number
-  include?: Includes    // { body: false } = survey read, no bodies
+  branch?: string       // consumer-level state; everything else is a verb
 }
-
-type GetOpts = {
-  branch?: string
-  at?: CommitId         // temporal point lookup
-  include?: Includes
-}
-
-type Includes = { body?: boolean }   // the wire subset of db's Includes
 
 type ReadResult = {
   head: CommitId
@@ -329,14 +330,13 @@ type RunArgs = {
 }
 
 type TaggedRead =
-  | { tag: string, anchor?: ChunkId, places: ChunkId[], opts?: ReadOpts }
-  | { tag: string, anchor?: ChunkId, chunkId: ChunkId, opts?: GetOpts }
+  { tag: string, anchor?: ChunkId, expr: Expr, opts?: ReadOpts }
   // anchor: the conforming chunk this entry is authorized under (the call
   // context); absent = the connection's own context
 
 type BatchResult = {
   head: CommitId   // the one snapshot every sub-query resolved at
-  results: Record<string, ReadResult | ChunkItem | null | EngineError>
+  results: Record<string, ReadResult | EngineError>
 }
 
 type EngineError = {
@@ -370,8 +370,7 @@ engine/sdk/   — the protocol client
                         selection terms, which stay tagged; Ref class
     protocol.ts       — Request | Response | Event shapes; id counter;
                         shape-based demultiplexing
-    surface.ts        — read, resolve, get, readBatch, commit, run, awaitRun,
-                        cancel
+    surface.ts        — read, readBatch, commit, run, awaitRun, cancel
     purity.ts         — isPure over a program chunk: the definition-time legs
     subscriptions.ts  — subscribe, registry, event router
     transport.ts      — the one transport object's interface; fails loudly
@@ -400,6 +399,10 @@ Each file owns a topic; predictable shape inside. What earns a comment (per [`co
 - **The existence oracle** — `BOUNDARY_VIOLATION` versus a silently empty read; the engine's call, surfaced here.
 
 - **One encoding for type terms, or two** (*Types*).
+
+- **`branch` as a verb.** `at(commit)` is a verb; `branch` is the last read option standing. Substrate calls the active branch consumer-level state, which argues for the option; symmetry argues for `branch(x)`. Settles with branch ops ([`engine.md`](engine.md), *What Is Open*).
+
+- **Projection grade.** `survey` as a verb is the lean; a second grade (names only) or a per-key projection would make it a family. Lands by use.
 
 - **The error channel for glue-driven reads** — the old `useRead` open, re-homed: a refused read must be distinguishable from loading where a component's fault face depends on it ([`view.md`](view.md) §7).
 

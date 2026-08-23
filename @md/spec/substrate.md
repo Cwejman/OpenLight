@@ -336,7 +336,7 @@ Follow connections. From an identity chunk: its members and residents by placeme
 
 ### Full-text search
 
-A native substrate feature. Entry point into the structure when the place vocabulary isn't known yet. The index covers chunk names and string values in bodies; find chunks by keyword, discover their places, then navigate structurally. Maintained by the substrate, consistent with current state on each commit, and filtered by the reader's boundary like every other answer.
+A native substrate feature — the `match(text)` verb, over a piped place or the whole field. Entry point into the structure when the place vocabulary isn't known yet. The index covers chunk names and string values in bodies; find chunks by keyword, discover their places, then navigate structurally. Maintained by the substrate, consistent with current state on each commit, and filtered by the reader's boundary like every other answer.
 
 ### Temporal reads
 
@@ -344,7 +344,7 @@ Reconstruct state at any commit: a read at `at: <commit>` resolves all chunks an
 
 ### Pagination and projection
 
-Ordered places grow large; reads are bounded by default. A read takes `limit` and `offset`: for an ordered place the default window is tail-first (the latest entries), `offset` pages backward. **Counts describe what your boundary admits**, so a reader probes the shape of what it may see before pulling data. Reads also project: `include: { body: false }` returns names, instance contracts, placements, and counts without bodies — the cheap survey read that context assembly and pickers depend on. Single-chunk reads (`get`) honor `at` for temporal point lookups.
+Ordered places grow large; reads are bounded by default. Pagination is two verbs, `limit` and `skip`: for an ordered place the default window is tail-first (the latest entries), `skip` pages backward. **Counts describe what your boundary admits**, so a reader probes the shape of what it may see before pulling data. Reads also project: `survey` returns names, instance contracts, placements, and counts without bodies — the cheap survey read that context assembly and pickers depend on. A single chunk is read by name, `X` against `[X]`, and honors `at` like any read. All of these are verbs of the one expression language ([`engine.md`](engine.md), *The planner partition*); there is no second option grammar.
 
 ### Derived data — summaries, embeddings, and beyond
 
