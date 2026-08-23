@@ -71,15 +71,18 @@ Mechanics, carried from the mount era and re-worded to it:
 ```ol
 chunk engine/program {
   instance: {
-    executable?:   string              — absent for runtime: native
-    runtime:       vm | native         — programs are headless [P]; the surface
-                                         runtime retired with the seat mechanism
-    accepts:       list<type>          — required; entries as reified type values
-    result?:       ref                 — an archetype; checked at program definition
-    read?:         selection           — the ceiling, per key (*Boundaries*):
-    write?:        selection             absent means {}; `caller` names the
-    run?:          selection             parent's reach, composably
-    capabilities?: set<string>         — net[:host] · fs · exec, nothing else
+    executable?:   string       — absent for runtime: native
+    — programs are headless [P]; the surface runtime retired with the
+    — seat mechanism
+    runtime:       vm | native
+    accepts:       list<type>   — required; entries as reified type values
+    result?:       ref          — an archetype; checked at program definition
+    — the ceiling, per key (*Boundaries*); absent means {};
+    — `caller` names the parent's reach, composably
+    read?:         selection
+    write?:        selection
+    run?:          selection
+    capabilities?: set<string>  — net[:host] · fs · exec, nothing else
     timeout_ms?:   number
   }
 }
@@ -98,10 +101,14 @@ Concrete programs — filesystem, shell, model, echo, `attach`, `detach` — are
 A program's argument is a selection — an **ordered list of typed elements**, matched structurally; order never affects the match. `accepts` is a required body key on every program — `[]` is legal and says *takes nothing*, explicitly. Each entry is a type, optionally marked optional, and nothing else:
 
 ```ol
-program summarize { accepts: [ loc, options? ] }          — one place, required; options allowed
-program revert    { accepts: [ set<ref(commit)>, loc? ] } — any number of commits; maybe a place
-program sequence  { accepts: [ selection ] }              — the content mouth
-program compare   { accepts: [ set<ref(commit), 2> ] }    — symmetric pair
+program summarize { accepts: [ loc, options? ] }
+    — one place, required; options allowed
+program revert { accepts: [ set<ref(commit)>, loc? ] }
+    — any number of commits; maybe a place
+program sequence { accepts: [ selection ] }
+    — the content mouth
+program compare { accepts: [ set<ref(commit), 2> ] }
+    — symmetric pair
 ```
 
 Entry types: `ref(X)` · `ref(X | Y)` (union — instance on any listed; ruled) · `ref(X & Y)` · `loc` · `expr` · `selection` · a payload archetype · `set<T(,n)?>` · `list<T(,n)?>`.
@@ -170,12 +177,14 @@ Concrete topology for a run:
 
 ```
 process P
-  owned by: the caller's process (child mode) — or the configured launch owner (top-level)
+  owned by: the caller's process (child mode)
+            — or the configured launch owner (top-level)
   instance on: engine/process, <program>, <caller-supplied places>
   body: { argument, at, status, result?, read, write, run }
 
 composition chunks (payloads, expressions cited by the argument)
-  owned by: wherever they were composed — the composing process's frame by default
+  owned by: wherever they were composed
+            — the composing process's frame by default
 
 result R
   owned by: P — which is its membership in [self]
@@ -196,7 +205,10 @@ The engine judges every act under one structural contract of its own — **the c
 A **conforming chunk** names a *declaration* carrying ceilings, an *argument* (a selection), its own *grant* (`read` / `write` / `run` additions), and has a derivable *parent* conforming chunk. Effective reach at any link in the chain:
 
 ```
-(the argument, read-granted as any argument is  ∪  the declaration's ceiling  ∪  the grant)  ∩  the parent's reach
+( the argument, read-granted as any argument is
+  ∪  the declaration's ceiling
+  ∪  the grant )
+∩  the parent's reach
 ```
 
 The chain caps at the **machine context** — `Context::process_id = None`: full reach over what is attached, and no frame — so a machine-context declaration must name each new chunk's owner; chunks with no owner at all exist only through the bootstrap carve-out ([`bootstrap.md`](bootstrap.md)).
@@ -216,10 +228,14 @@ The engine owns the expression layer: the data shapes, the written language, the
 ### The shapes
 
 ```
-location     [my-project, tasks]        — places, intersected; a value kind
-call         program(e1, e2, …)         — the parentheses ARE the offered set
-expression   one grouped unit — named nodes, its own closure, last unnamed line = out
-selection    list<loc | ref | expr>     — ordered (substrate.md); purity clause below
+location     [my-project, tasks]
+             — places, intersected; a value kind
+call         program(e1, e2, …)
+             — the parentheses ARE the offered set
+expression   one grouped unit
+             — named nodes, its own closure, last unnamed line = out
+selection    list<loc | ref | expr>
+             — ordered (substrate.md); purity clause below
 ```
 
 One archetype carries the lifted form:
@@ -243,13 +259,14 @@ sequence([a, b], [c], [d, e])
 ```
 
 ```
-bareword              ref — resolves within its own closure outward to its own root;
-                      crossing roots always requires the full path (engine/program)
+bareword              ref — resolves within its own closure outward to its
+                      own root; crossing roots always requires the full
+                      path (engine/program)
 [a, b]                intersection location (value position)
 {v1, v2}              set literal
 {k: v}                struct literal
-archetype({k: v, …})  typed instance literal — a name resolving to an archetype
-                      constructs; resolving to a program calls
+archetype({k: v, …})  typed instance literal — a name resolving to an
+                      archetype constructs; resolving to a program calls
 program(e1, e2, …)    call — the parentheses are the offered set (varargs)
 a | verb(…)           pipe; groups, named nodes, last unnamed line = out
 ```
@@ -298,8 +315,9 @@ placed(kind?)     what the input is placed on — up
 owner             one hop up the naming chain
 refs(key?)        outbound links from the input's bodies; key narrows to a field
 backrefs(key?)    inbound links — who points here; the linked answer as a verb
-prop(key)         a body key's value projected as field structure — the narrow,
-                  single-key form of explode; face-follows-context is its consumer
+prop(key)         a body key's value projected as field structure — the
+                  narrow, single-key form of explode; face-follows-context
+                  is its consumer
 ```
 
 **`follow(step, depth?)` is transitive closure of a step, and the step is itself a pure expression** (`selection → selection`): evaluate on the frontier, union, repeat to fixpoint or `depth`. No lambda — the step's input is the pipe input, like every verb. Composite hops are step composition (`refs(argument) | owner` alternates two edge types); cycles terminate by visited-set, so mutual citations cannot hang a wall. If the step lowers, `follow` lowers to a recursive CTE — single-request, wall-admissible; a compute step makes it compute, legal but never a wall. The yield orders deterministically: closure depth, then commit time.
@@ -562,14 +580,20 @@ How a `subscribe` op becomes a `place_changed` event in the subscribing client.
 ### The chain
 
 ```
-db                    engine                    transport               client
-──                    ──────                    ─────────               ──────
-broadcast::Sender ─→  broadcast::Receiver  ─→   the client's       ─→   SDK event handler
-(post tx.commit)      (one per writable         connection              (dispatches by
-                       attached store)          (stdio line to a         message shape)
-                                                 VM program; the
-                                                 protocol channel
-                                                 to any client)
+db          broadcast::Sender
+            (post tx.commit)
+  │
+  ↓
+engine      broadcast::Receiver
+            (one per writable attached store)
+  │
+  ↓
+transport   the client's connection
+            (a stdio line to a VM program; the protocol channel to any client)
+  │
+  ↓
+client      SDK event handler
+            (dispatches by message shape)
 ```
 
 1. **db.** Each successful write op pushes a `Commit` onto the substrate's broadcast channel after `tx.commit()` returns. Settled in db.md.
@@ -775,9 +799,12 @@ pub struct SpawnContext {
 }
 
 pub struct RuntimeHandle {
-    pub transport: TransportRef,                       // engine pushes outgoing events
-    pub ready: oneshot::Receiver<()>,                  // runtime alive → slot Running
-    pub terminal: oneshot::Receiver<TerminalReason>,   // resolves on terminal
+    // engine pushes outgoing events
+    pub transport: TransportRef,
+    // runtime alive → slot Running
+    pub ready: oneshot::Receiver<()>,
+    // resolves on terminal
+    pub terminal: oneshot::Receiver<TerminalReason>,
 }
 ```
 

@@ -59,10 +59,14 @@ The SDK encodes on every write and decodes on every read, driven by the tags alo
 A **selection** is `list<loc | ref | expr>` — **ordered**, duplicates rejected (substrate.md). It is the type behind a run's boundary, a program's or component's ceiling, a process's frozen argument, a mount's argument, and an offer. On the wire it is an array of tagged terms — **array order is the selection's order** — and needs no tag of its own:
 
 ```ts
-type LocTerm       = { $loc: ChunkId[] }   // a place; one id is the place at one chunk
-type RefTerm       = { $ref: ChunkId }     // a chunk: content, a payload, or an expression
+// a place; one id is the place at one chunk
+type LocTerm = { $loc: ChunkId[] }
+// a chunk: content, a payload, or an expression
+type RefTerm = { $ref: ChunkId }
+
 type SelectionTerm = LocTerm | RefTerm
-type Selection     = SelectionTerm[]       // ordered; whether order means anything is the consumer's choice
+// ordered; whether order means anything is the consumer's choice
+type Selection = SelectionTerm[]
 ```
 
 **Order is carried by the value; meaning is the consumer's** (substrate.md): the match and a boundary ignore it; the model family reads it as window order. The SDK preserves it and never sorts.
@@ -110,7 +114,8 @@ All wrap engine ops of the same name (`readBatch` → `read_batch`). Errors arri
 
 ```ts
 commit(declaration: Declaration): Promise<Commit>
-commit(declaration: Declaration, opts: { dryRun: true }): Promise<{ valid: boolean, errors: EngineError[] }>
+commit(declaration: Declaration, opts: { dryRun: true })
+  : Promise<{ valid: boolean, errors: EngineError[] }>
 ```
 
 One-shot atomic write through the engine, routed to the owning store. The engine validates against the caller's boundary and substrate's placement and link governance; rejected writes throw `BOUNDARY_VIOLATION` or `VALIDATION_ERROR`. A declared chunk carrying no `owned` placement is created owned by the calling process — the frame default; under a bare anchor there is no frame, and the declaration names each owner ([`engine.md`](engine.md), *The call context*). `dryRun` runs full validation without writing — the live-form affordance editors build on.
@@ -182,16 +187,17 @@ type ChunkItem = {
   id: ChunkId
   name?: string
   instance?: Instance
-  seq?: boolean          // legal only on an archetype: its instances are ordered
-                         // places (substrate.md, *Ordered places*). Owed db-side —
-                         // db.md carries no physical home for it yet.
+  // legal only on an archetype: its instances are ordered places
+  // (substrate.md, *Ordered places*). Owed db-side — db.md carries
+  // no physical home for it yet.
+  seq?: boolean
   body?: Record<string, unknown>
   placements?: Placement[]
 }
 
-type Instance = Record<string, string>  // the flat instance contract — key → type
-                                        // expression ("string", "ref(workplace)",
-                                        // "set<ref(commit), 2>", "selection", …)
+// the flat instance contract — key → type expression
+// ("string", "ref(workplace)", "set<ref(commit), 2>", "selection", …)
+type Instance = Record<string, string>
 
 type Placement = {
   on: ChunkId
@@ -201,9 +207,10 @@ type Placement = {
 
 type Link = {
   source_id: ChunkId
-  target: ChunkId | string        // chunk id, or normalized location expression
+  // chunk id, or normalized location expression
+  target: ChunkId | string
   kind: 'field' | 'mention'
-  key?: string                    // declaring key when kind = 'field'
+  key?: string   // declaring key when kind = 'field'
 }
 
 // — writes —
@@ -215,21 +222,22 @@ type Declaration = {
 }
 
 type ChunkDeclaration = {
-  id?: ChunkId                   // omitted = generated
+  id?: ChunkId          // omitted = generated
   name?: string
   instance?: Instance
   seq?: boolean
   body?: Record<string, unknown>
   placements?: PlacementSpec[]   // chunk-bound; `chunk_id` implied
-  removed?: boolean              // logical removal — history retains everything
+  removed?: boolean     // logical removal — history retains everything
 }
 
 type PlacementSpec = {
-  chunk_id?: ChunkId             // implied inside a ChunkDeclaration
+  chunk_id?: ChunkId    // implied inside a ChunkDeclaration
   on: ChunkId
   kind: 'owned' | 'instance' | 'relates'
-  seq?: number                   // honored where the place is ordered; omitted = max + 1
-  active?: boolean               // false removes the placement (default true)
+  // honored where the place is ordered; omitted = max + 1
+  seq?: number
+  active?: boolean      // false removes the placement (default true)
 }
 
 // — reads —
@@ -238,9 +246,11 @@ type ReadOpts = {
   branch?: string
   at?: CommitId
   match_?: string
-  exclude?: ChunkId[]   // negation — set difference over any stored kind;
-                        // a subtracted place is boundary-checked like a positive one
-  limit?: number        // tail-first where the place is ordered; offset pages backward
+  // negation — set difference over any stored kind; a subtracted place
+  // is boundary-checked like a positive one
+  exclude?: ChunkId[]
+  // tail-first where the place is ordered; offset pages backward
+  limit?: number
   offset?: number
   include?: Includes    // { body: false } = survey read, no bodies
 }
@@ -255,19 +265,20 @@ type Includes = { body?: boolean }   // the wire subset of db's Includes
 
 type ReadResult = {
   head: CommitId
-  unresolved?: ChunkId[]   // roots resolving in no attached store (federated
-                           // intersection, engine.md) — dead references as
-                           // metadata, not error; optional because the engine
-                           // wire does not carry it yet (the db does)
-  total: number            // every count describes what the boundary admits
+  // roots resolving in no attached store (federated intersection,
+  // engine.md) — dead references as metadata, not error; optional
+  // because the engine wire does not carry it yet (the db does)
+  unresolved?: ChunkId[]
+  total: number     // every count describes what the boundary admits
   in_place: number
   in_place_owned: number
   in_place_instance: number
   in_place_relates: number
   chunks: ChunkItem[]
-  linked: Link[]           // fields and mentions pointing at the roots — derived,
-                           // never mixed with placements
-  dimensions: Dim[]        // places you can add to narrow
+  // fields and mentions pointing at the roots — derived,
+  // never mixed with placements
+  linked: Link[]
+  dimensions: Dim[]   // places you can add to narrow
 }
 
 type Dim = {
@@ -277,33 +288,43 @@ type Dim = {
   owned: number
   instance: number
   relates: number
-  edges?: Edge[]           // db-level opt-in, not wire-reachable in v0.1
+  edges?: Edge[]   // db-level opt-in, not wire-reachable in v0.1
 }
 
-type Edge = { id: ChunkId, name?: string, count: number, owned: number, instance: number, relates: number }
+type Edge = {
+  id: ChunkId
+  name?: string
+  count: number
+  owned: number
+  instance: number
+  relates: number
+}
 
 type Commit = {
   id: CommitId
   parent_id?: CommitId
   timestamp: string
   message?: string
-  process_id?: ProcessId   // which run caused this commit; absent for machine-context commits
+  // which run caused this commit; absent for machine-context commits
+  process_id?: ProcessId
   branch: string
   chunks_modified: ChunkId[]
   placements_modified: [ChunkId, ChunkId][]
-  links_modified: ChunkId[]  // chunks whose inbound links changed this commit
+  // chunks whose inbound links changed this commit
+  links_modified: ChunkId[]
 }
 
 // — process control —
 
 type RunArgs = {
-  program?: ChunkId          // with `argument`: a direct start
-  argument?: Selection       // the offered set — elements tagged $loc | $ref
-  draft?: ProcessId          // the other form: consume an existing draft process
+  program?: ChunkId      // with `argument`: a direct start
+  argument?: Selection   // the offered set — elements tagged $loc | $ref
+  draft?: ProcessId      // the other form: consume an existing draft process
   mode?: 'child' | 'launch'
-  read?: Selection           // explicit additions — one of the five boundary sources
+  // explicit additions — one of the five boundary sources
+  read?: Selection
   write?: Selection
-  run?: Selection            // additions to the run wall — the toolset
+  run?: Selection        // additions to the run wall — the toolset
   timeout_ms?: number
 }
 
@@ -314,7 +335,7 @@ type TaggedRead =
   // context); absent = the connection's own context
 
 type BatchResult = {
-  head: CommitId             // the one snapshot every sub-query resolved at
+  head: CommitId   // the one snapshot every sub-query resolved at
   results: Record<string, ReadResult | ChunkItem | null | EngineError>
 }
 
@@ -340,26 +361,26 @@ Specced with the view family ([`view.md`](view.md) §6, §8); stated here only a
 ## Code architecture
 
 ```
-engine/sdk/                                   — the protocol client
+engine/sdk/   — the protocol client
   src/
-    index.ts              — public re-exports of the substrate surface
-    globals.d.ts          — the one ambient global: the installed transport object
-    types.ts              — TS mirror of the wire types
-    values.ts             — boundary translation: native values ⇄ tagged encoding;
-                            selection terms, which stay tagged; Ref class
-    protocol.ts           — Request | Response | Event shapes; id counter;
-                            shape-based demultiplexing
-    surface.ts            — read, resolve, get, readBatch, commit, run, awaitRun,
-                            cancel
-    purity.ts             — isPure over a program chunk: the definition-time legs
-    subscriptions.ts      — subscribe, registry, event router
-    transport.ts          — the one transport object's interface; fails loudly
-                            when the environment installed none
+    index.ts          — public re-exports of the substrate surface
+    globals.d.ts      — the one ambient global: the installed transport object
+    types.ts          — TS mirror of the wire types
+    values.ts         — boundary translation: native values ⇄ tagged encoding;
+                        selection terms, which stay tagged; Ref class
+    protocol.ts       — Request | Response | Event shapes; id counter;
+                        shape-based demultiplexing
+    surface.ts        — read, resolve, get, readBatch, commit, run, awaitRun,
+                        cancel
+    purity.ts         — isPure over a program chunk: the definition-time legs
+    subscriptions.ts  — subscribe, registry, event router
+    transport.ts      — the one transport object's interface; fails loudly
+                        when the environment installed none
   test/
-    values.test.ts        — the tagged encoding round-trips, selections included
-    surface.test.ts       — surface against a mock transport
+    values.test.ts    — the tagged encoding round-trips, selections included
+    surface.test.ts   — surface against a mock transport
 
-view/sdk/                                     — the glue + adapters (view.md §8)
+view/sdk/   — the glue + adapters (view.md §8)
   src/  glue/ (boot, resolve, subscribe, dispatch, input, ephemera) · adapters/
         (solid.ts, custom-element.ts) · faces wiring
 ```

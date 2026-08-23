@@ -15,8 +15,15 @@ The base family: leaf components (text, badge, status, button, the field editors
 `reader` — `[ ref(reading) ]`; places `reading.current.mounts` via `ctx.mount`; a drop → a new collation (its own act); its defaults table is the ruled reader-owned preferences.
 
 ```ol
-chunk reading   { instance: { current: ref(collation) } }
-chunk collation { instance: { mounts: list<ref(view/mount)>, settings: { orientation: enum(rows, columns), … }, predecessor?: ref(collation) } }
+chunk reading { instance: { current: ref(collation) } }
+
+chunk collation {
+  instance: {
+    mounts:       list<ref(view/mount)>
+    settings:     { orientation: enum(rows, columns), … }
+    predecessor?: ref(collation)
+  }
+}
 ```
 
 Carried: the reader's indirection and its immutable value — a collation is one value, an ordered list of mounts plus settings and a predecessor citation; editing from anywhere branches, nothing is deleted, identity captures version. A viewer never mutates what it views — but a new collation is a chunk, and chunk birth is never placementless: the reader's commit names its owner (the reading is the natural home — a mount has no frame to default into), and `current` moves within the component's stated write reach. Any collation restores its exact view; opening anyone's collation is a fresh reading pointing at it — nothing copied, the first edit branches.

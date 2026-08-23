@@ -7,8 +7,11 @@ A **chassis** is a platform binding and a client of the engine. It hosts a surfa
 **What you run is the engine, and a chassis.** Two commands, one directory:
 
 ```
-ol engine  --home <store>     the engine: opens the store, attaches, serves (engine.md)
-ol desktop --home <store>     the chassis: connects, reads the entry, hosts the surface
+ol engine  --home <store>
+    the engine: opens the store, attaches, serves (engine.md)
+
+ol desktop --home <store>
+    the chassis: connects, reads the entry, hosts the surface
 ```
 
 Flags: `--home` · `--engine` · `--entry` · `--at <commit>` (pinned recovery) · `--mount` (the shorthand, below).
@@ -20,10 +23,12 @@ Flags: `--home` · `--engine` · `--entry` · `--at <commit>` (pinned recovery) 
 **The home is a standard store directory** [R — the feedback fold; `field.ol` was the deviation]: recognized as every store is, `.ol/` inside, db and `project.toml` within (established naming kept [R — 2026-08-20]; the *contents* are superseded — `[[attach]]` replaces `[[mounts]]`, `[chassis]` is new):
 
 ```
-~/.config/ol/              the home — a standard store directory; the personal
-  .ol/                     store by default, not by kind
-    db                     the personal store: dynamically attached stores, your own edits
-    project.toml           [[attach]] entries (path, branch, at?, write) · [chassis] entry = <chunk>
+~/.config/ol/          the home — a standard store directory; the personal
+  .ol/                 store by default, not by kind
+    db                 the personal store: dynamically attached stores,
+                       your own edits
+    project.toml       [[attach]] entries (path, branch, at?, write) ·
+                       [chassis] entry = <chunk>
 ```
 
 Because the home is nothing special, **`--home` may point at any store directory — a project included**: the field you boot into is that store, and a session sits in the store it was opened for — the project-agent line ([`agent.md`](agent.md)) cashed with zero mechanism.
@@ -39,9 +44,15 @@ Because the home is nothing special, **`--home` may point at any store directory
 **The chassis's contract is the archetypes of its configuration, which it declares** — as a program declares its payloads — and a configuration is *instances* of them, shipped in a module (the pilot's desktop module ships one — [`desktop.md`](desktop.md)):
 
 ```ol
-chunk chassis/entry { instance: { layers: list<ref(view/mount)>,                        -- required: root mounts, in order
-                                  reservations?: list<{ input: chord | gesture, place: ref }>,  -- [O encoding]
-                                  surface?: ref(view/surface-config) } }              -- absent → inherit the home's default entry
+chunk chassis/entry {
+  instance: {
+    layers: list<ref(view/mount)>   -- required: root mounts, in order
+    -- [O encoding]
+    reservations?: list<{ input: chord | gesture, place: ref }>
+    -- absent → inherit the home's default entry
+    surface?: ref(view/surface-config)
+  }
+}
 ```
 
 `layers` is the only required key; the rest inherits from the home's default entry — which is what makes the **shorthand** lawful: `ol desktop --mount "reader [reading/x]"` synthesizes an entry with that one layer. **Repairing a broken configuration is the same shorthand over the entry chunk itself** (`--mount "chunk-table [my-entry]"`); no safe mode exists. Root-from-config recovery pins with `--at <commit>` [R].
@@ -138,9 +149,9 @@ Shutdown reverses; nothing the chassis holds is durable, so there is nothing to 
 
 ```
 chassis-desktop/
-  src/               — Rust: window/tao/wry, the served document and layer nodes,
-                       transport-object install, identity injection, the input
-                       floor, entry reading, ol:// relay to the engine
+  src/               — Rust: window/tao/wry, the served document and layer
+                       nodes, transport-object install, identity injection,
+                       the input floor, entry reading, ol:// relay to the engine
   .ol/db, .ol/project.toml
 ```
 

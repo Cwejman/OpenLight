@@ -10,7 +10,8 @@ A chunk is a unit of meaning with identity.
 chunk
   id        globally unique, system-generated
   name?     human-readable label, unique within its owner
-  instance  the contract this chunk's instances must fit — empty unless it is an archetype
+  instance  the contract this chunk's instances must fit — empty unless
+            it is an archetype
   seq?      legal only on an archetype — see *Ordered places*
   body      everything else — one JSON object
 ```
@@ -49,7 +50,8 @@ placement
   chunk_id   the chunk being placed
   on         the chunk it is placed on
   kind       'owned' | 'instance' | 'relates'
-  seq?       position, where what it is placed on is ordered — see *Ordered places*
+  seq?       position, where what it is placed on is ordered
+             — see *Ordered places*
 ```
 
 - **owned** — *where it lives, and what it is called.* Ownership carries **naming and containment, and nothing else** — and it is the *implicit* residence: where a chunk lands at birth, carrying name and lifetime. **Deliberate structure is authored as typed fields** (the grain rule: structure that changes while the thing remains itself is state, and state is a body key — the tile tree was the precedent; the session's `root` carries it on — [`desktop.md`](desktop.md)). Every chunk has at most one owner; names are unique within their owner, so `/` paths address chunks. An `owned` placement is ordinary one-hop membership like every other kind — naming into a namespace *is* placing into a room: same act, same governance, visible to the room's holders, one hop, no deeper. Ownership never crosses stores. A chunk with no owner is a root — bootstrap only; the pilot's convention is one root per store, named after it.
@@ -166,9 +168,9 @@ A JSON body is **compressed field structure**: the grain choice is never fatal, 
 ```ol
 chunk workplace { instance: { name: string unique, city?: string } }
 
-chunk status { instance: {} }        — the vocabulary archetype; draft, running,
-                                       done and failed exist as chunks placed
-                                       instance on it, found by reading
+— the vocabulary archetype; draft, running, done and failed exist as
+— chunks placed instance on it, found by reading
+chunk status { instance: {} }
 
 chunk person {
   instance: {

@@ -47,23 +47,31 @@ Engine as its own artefact + attach-era db (the attach record, `attach`/`detach`
 ## The monorepo
 
 ```
-db/                       the store
-engine/                   coordination — its own installed artefact; engine/sdk = the protocol client   < db
-view/                     the contract archetypes; view/sdk = the web-dom glue + adapters               < engine/sdk
-runtime-vm/               the VM runtime provider (rust; not in the first pilot)                        < engine
-secrets/                  stand-ins + read-secret (a module, not an integration)                        < engine
-agent/                    facets: headless < engine · viewing < component/process, component/reader
+db/                 the store
+engine/             coordination — its own installed artefact;
+                    engine/sdk = the protocol client        < db
+view/               the contract archetypes;
+                    view/sdk = the web-dom glue + adapters  < engine/sdk
+runtime-vm/         the VM runtime provider
+                    (rust; not in the first pilot)          < engine
+secrets/            stand-ins + read-secret
+                    (a module, not an integration)          < engine
+agent/              facets: headless < engine · viewing < component/process,
+                    component/reader
 
-component/base/           the base family: leaf components, layout primitives, faces, FrameBox
-component/reader/         reader + reading, collation                      < base
-component/table/          chunk-table, the list/table family              < base
-component/process/        process-view + the draft face                   < base
-component/prose/          (after the first pilot)                         < base
-component/command/        the command menu and palette                    < (base | overlay)
-component/overlay/        the anchored-presentation layer                 < base
+component/base/     the base family: leaf components, layout primitives,
+                    faces, FrameBox
+component/reader/   reader + reading, collation             < base
+component/table/    chunk-table, the list/table family      < base
+component/process/  process-view + the draft face           < base
+component/prose/    (after the first pilot)                 < base
+component/command/  the command menu and palette            < (base | overlay)
+component/overlay/  the anchored-presentation layer         < base
 
-desktop/                  the pilot's desktop module: the chassis entry, the shell template, sidebar, projects   < (base | …)
-chassis-desktop/          rust binary: platform machinery; hosts web-dom; a client of engine; declares the entry contract
+desktop/            the pilot's desktop module: the chassis entry,
+                    the shell template, sidebar, projects   < (base | …)
+chassis-desktop/    rust binary: platform machinery; hosts web-dom;
+                    a client of engine; declares the entry contract
 ```
 
 Each `component/*` package ships its component declarations, their payload archetypes, and their default implementations; a second package may implement the same declarations differently. **The dependency law [R]: declarations depend on declarations; implementations depend on declarations plus a surface kind; nothing ever depends on an implementation.** **A module is a store** — each line above is a store directory by the settled recognition (`.ol/` inside, db and toml within), the module's files beside it; dependency is attach ([`engine.md`](engine.md)).

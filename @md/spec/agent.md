@@ -13,20 +13,20 @@ A family: each provider model is its own program, placed `instance` on the **`mo
 ```ol
 program claude {
   runtime: vm
-  accepts: [ selection ]                  — the offered window; the offer is the grant
+  accepts: [ selection ]         — the offered window; the offer is the grant
   result:  ref(model/output)
-  read: {}  write: {}  run: {}            — sealed: reads its offer, starts nothing
+  read: {}  write: {}  run: {}   — sealed: reads its offer, starts nothing
   capabilities: { net:api.anthropic.com, secret:ANTHROPIC_API_KEY }
 }
 
 chunk model/output {
   instance: {
-    content?:     markdown                — the reply
-    thinking?:    markdown                — the reasoning stream (L1 reads here)
-    residue?:     map                     — replay material the provider requires
-                                            (e.g. thinking signatures); opaque
-    calls:        list<ref>               — ordered refs to the draft processes
-                                            composed during the run; [] = none
+    content?:     markdown   — the reply
+    thinking?:    markdown   — the reasoning stream (L1 reads here)
+    — replay material the provider requires (e.g. thinking signatures); opaque
+    residue?:     map
+    — ordered refs to the draft processes composed during the run; [] = none
+    calls:        list<ref>
     stop_reason?: string
     usage:        map
   }
@@ -87,14 +87,15 @@ Recorded twice, deliberately, both on structure that already exists:
 One turn, whole, in the field:
 
 ```
-P  (the turn)              argument: { doctrine, [project,tasks], prompt, params }
- ├─ M1 (claude run)        argument: the offer + [shell], [filesystem]
- │   ├─ O1: model/output   content · thinking · calls: [→D1] · usage
- │   ├─ D1: shell draft    argument: {→p1} — started by the agent; runs; owns result Ra
- │   └─ p1: payload        { command: "cargo test" }
- ├─ M2 (claude run)        argument: the offer + O1 + D1 + Ra
- │   └─ O2: model/output   content · calls: []
- └─ answer                 P's result; streamed, finalized
+P  (the turn)            argument: { doctrine, [project,tasks], prompt, params }
+ ├─ M1 (claude run)      argument: the offer + [shell], [filesystem]
+ │   ├─ O1: model/output content · thinking · calls: [→D1] · usage
+ │   ├─ D1: shell draft  argument: {→p1} — started by the agent; runs,
+ │                       owns result Ra
+ │   └─ p1: payload      { command: "cargo test" }
+ ├─ M2 (claude run)      argument: the offer + O1 + D1 + Ra
+ │   └─ O2: model/output content · calls: []
+ └─ answer               P's result; streamed, finalized
 ```
 
 Nothing is copied — every cycle's argument is refs and locs into chunks that exist once; the provider's replay is manufactured at the wire, inside `claude`, from these. A turn with no tool calls is one model run whose argument is exactly the window.

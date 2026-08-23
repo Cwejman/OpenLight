@@ -75,6 +75,8 @@ Even with bootstrap context, verify a subagent's conclusions against the core fi
 
 Bulleted and numbered lists carry a blank line between items — readable as raw markdown, where long single-line items otherwise congeal.
 
+Code blocks indent normally: inline `{ … }` bodies expand over lines at two spaces, every line stays inside 80 characters, and a trailing comment that no longer fits moves to its own line above the field it annotates. A few more lines cost nothing; a column pushed far right wraps in every reader.
+
 ## Commit messages
 
 Subject lines under 72 characters. Use the body for details.

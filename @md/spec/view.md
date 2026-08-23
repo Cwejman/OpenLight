@@ -11,11 +11,17 @@ This file mixes settled contracts with open exploration and marks the difference
 ## 1. view/surface — the drawing target
 
 ```ol
-chunk view/surface { instance: {} }            -- a kind: identity only, shipped by view/ — web-dom (the pilot's), gl, …
+-- a kind: identity only, shipped by view/ — web-dom (the pilot's), gl, …
+chunk view/surface { instance: {} }
 
-chunk view/surface-config { instance: { surface: ref(view/surface),
-                                        faces: { collapsed: ref(view/component), fault: ref(view/component) },
-                                        hosts: map<ref(view/component)> } }   -- keyed by surface-kind name: the hosting component for each nested kind
+chunk view/surface-config {
+  instance: {
+    surface: ref(view/surface)
+    faces:   { collapsed: ref(view/component), fault: ref(view/component) }
+    -- keyed by surface-kind name: the hosting component for each nested kind
+    hosts:   map<ref(view/component)>
+  }
+}
 ```
 
 A **surface** is a *kind* of place components are drawn on (the graphics word — wgpu, Wayland, Cairo). The kind is an identity chunk `view/` ships — what implementations reference and contracts are written against; no person edits it. It is met by two halves: a **host** — the native half: a realm, the transport object, `ol://` serving, identity, an input floor; the chassis at the root ([`chassis.md`](chassis.md)), a **hosting component** when nested — and the **glue** — the realm half, in `view/sdk` (§8), one per kind. (The engine's *runtime provider* is a different thing and keeps its word.) What is *yours* is the **surface config** — per installation, referenced from the chassis entry: which components serve as its **faces** (§7), which hosting components give it nested kinds. The root `draw` / `offer` need no home of their own — they are keys on the **root mounts** the entry's layers name. The glue decides nothing the config doesn't state.
@@ -23,12 +29,25 @@ A **surface** is a *kind* of place components are drawn on (the graphics word �
 ## 2. view/component — the declaration
 
 ```ol
-chunk view/component { instance: { accepts: list<type>,                    -- typed entries, optional marked; like a program's
-                                   serves?: { wmin?, wmax?, hmin?, hmax? },
-                                   read?: selection, write?: selection, run?: selection } }   -- ceilings over entry names / payload paths
+chunk view/component {
+  instance: {
+    -- typed entries, optional marked; like a program's
+    accepts: list<type>
+    serves?: { wmin?, wmax?, hmin?, hmax? }
+    -- ceilings over entry names / payload paths
+    read?:   selection
+    write?:  selection
+    run?:    selection
+  }
+}
 
--- a component is an instance of it and owns its payload archetypes, as a program does:
-chunk task-card : view/component { accepts: [ ref(task), task-card/settings? ], write: { task.status }, serves: { wmin: 240 } }
+-- a component is an instance of it and owns its payload archetypes,
+-- as a program does:
+chunk task-card : view/component {
+  accepts: [ ref(task), task-card/settings? ]
+  write:   { task.status }
+  serves:  { wmin: 240 }
+}
 chunk task-card/settings { instance: { density?: enum(tight, loose) } }
 ```
 
@@ -39,9 +58,17 @@ A **component** is a declaration: what it takes (**`accepts`**, the same shape a
 ## 3. view/mount — the call
 
 ```ol
-chunk view/mount { instance: { component: ref(view/component), argument: selection,
-                               read?/write?/run?: selection,          -- the mount's own grant: additions, as a run's are (beyond the parent's → consent)
-                               draw?: selection, offer?: selection } }
+chunk view/mount {
+  instance: {
+    component: ref(view/component)
+    argument:  selection
+    -- the mount's own grant: additions, as a run's are
+    -- (beyond the parent's → consent)
+    read?/write?/run?: selection
+    draw?:  selection
+    offer?: selection
+  }
+}
 
 chunk m1 : view/mount { component: task-card, argument: [ task/42 ] }
 ```
@@ -61,9 +88,20 @@ Per-mount marks that are not argument ride as placements: `relates` onto **`view
 ## 4. Realization — implementation and template
 
 ```ol
-chunk view/implementation { instance: { component: ref(view/component), surface: ref(view/surface), source: string } }   -- a path in the store, served via ol://
+chunk view/implementation {
+  instance: {
+    component: ref(view/component)
+    surface:   ref(view/surface)
+    source:    string               -- a path in the store, served via ol://
+  }
+}
 
-chunk view/template       { instance: { component: ref(view/component), template: ref(view/mount) } }   -- inline or stored
+chunk view/template {
+  instance: {
+    component: ref(view/component)
+    template:  ref(view/mount)      -- inline or stored
+  }
+}
 ```
 
 A component is drawable through a separate chunk referencing it — **realization** is only the word for "an implementation or a template". An **implementation** is code for one surface kind. A **template** is surface-agnostic data: a mount tree whose argument values may be **expressions over the mounting mount's own argument** (`$task`, `$task.name` — the same expressions-in-fields; `$` is the argument). Mounting a template-realized component: the glue evaluates the template with `$` bound → a derived mount tree → mounts it in place (derived, not stored; editing the template updates every mount). No realization → **abstract**: a contract others realize.
@@ -90,10 +128,12 @@ Each is a body key on any mount, readable at every node, a body edit at any clos
 
 ```
 mount(el, arg, ctx) → { update(arg), unmount() }
-  arg:  the mount's argument (the declaration says `accepts`, the mount says `argument` — as program and process do),
-        bound elements keyed by entry type name (owner-qualified where short names collide: arg.settings · arg['list/settings']);
-        slot entries arrive as mount handles
-  ctx:  reach facts per element · commit(…) · launch(…) · mount(el, mount) · faces
+  arg:  the mount's argument (the declaration says `accepts`, the mount says
+        `argument` — as program and process do), bound elements keyed by entry
+        type name (owner-qualified where short names collide: arg.settings ·
+        arg['list/settings']); slot entries arrive as mount handles
+  ctx:  reach facts per element · commit(…) · launch(…) · mount(el, mount) ·
+        faces
 ```
 
 Never hand-written: **adapters** in `view/sdk` — `solid()` (first-party) and `customElement()` (every framework that emits a custom element). A mounted component keeps its DOM and store; *pure* means output is a function of argument and field. Updates arrive at argument grain at the seam; inside, the component patches as it likes (Solid binds, doesn't diff). `unmount` = the framework's dispose.
@@ -108,8 +148,11 @@ export default solid((arg, ctx) => (
   <Row density={arg.settings?.density ?? 'loose'}>
     <Text role="title">{arg.task.name}</Text>
     <Badge status={arg.task.status} />
-    <Button disabled={!ctx.may.write(arg.task, 'status')}
-            onClick={() => ctx.commit(arg.task, { status: 'done' })}>Done</Button>
+    <Button
+      disabled={!ctx.may.write(arg.task, 'status')}
+      onClick={() => ctx.commit(arg.task, { status: 'done' })}>
+      Done
+    </Button>
   </Row>))
 
 // list — accepts: [ list/settings?, list<ref(view/mount)> ]
@@ -121,12 +164,26 @@ export default solid((arg, ctx) => (
 
 ```ol
 -- the same task-card as a template (illustrative)
-chunk task-card/tpl : view/template { component: task-card,
-  template: list { argument: [ list/settings { direction: row, density: $settings.density },
-                               [ text { argument: [ text/settings { role: title }, $task.name ] },
-                                 badge { argument: [ $task.status ] },
-                                 button { argument: [ button/settings { label: "Done" }, button/act { commit: { $task: { status: done } } } ] } ] ] } }
--- acts in templates are data: a payload the component dispatches through ctx (button/act); its encoding joins the expressions-in-fields open [O]
+chunk task-card/tpl : view/template {
+  component: task-card
+  template: list {
+    argument: [
+      list/settings { direction: row, density: $settings.density },
+      [
+        text  { argument: [ text/settings { role: title }, $task.name ] },
+        badge { argument: [ $task.status ] },
+        button {
+          argument: [
+            button/settings { label: "Done" },
+            button/act { commit: { $task: { status: done } } }
+          ]
+        }
+      ]
+    ]
+  }
+}
+-- acts in templates are data: a payload the component dispatches through ctx
+-- (button/act); its encoding joins the expressions-in-fields open [O]
 ```
 
 **Typed ergonomics — direction.** An integration renders TypeScript declarations from the field's contracts into a git-ignored location at build, so `arg.task.name` is typed from `task`'s contract. The pilot-era bridge; the horizon is first-class editing of code interconnected with the substrate, where type inference is an aspect of the field and the LSP shape is superseded.
@@ -166,8 +223,18 @@ Plumbing, not extension points:
 **Input is data [P].**
 
 ```ol
-chunk view/input-record { instance: { input: chord | gesture,
-                                      at: { mount: ref(view/mount), location: selection, rect: [x, y, w, h], point: [x, y] } } }   -- [O encoding]
+-- [O encoding]
+chunk view/input-record {
+  instance: {
+    input: chord | gesture
+    at: {
+      mount:    ref(view/mount)
+      location: selection
+      rect:     [x, y, w, h]
+      point:    [x, y]
+    }
+  }
+}
 ```
 
 The chassis's floor composes and lands the record ([`chassis.md`](chassis.md), *The input floor*); overlays, menus and consent are components whose content **derives by expression over that place** ([`components.md`](components.md) — overlay, command); dismiss = the record leaving. No handlers.
