@@ -138,6 +138,10 @@ The author ruled the category: **a computing medium** — knowledge is one thing
 - **Amne / Ämne** — Swedish: both *subject* (skolämne) and *raw material* (råämne) — topic and matter in one word; the umlaut is the price.
 - **Moss** · **Felt** · **Culture** · **Starter** — softer seconds: the spreading cover, the fiber-compounded cloth (felt = experienced; the Felt mapping startup collides), the living culture (unownable word), the sourdough starter passed hand to hand, fed by each keeper. Named for the vein even where the word fails.
 
+## Round four — the medium field (2026-08-23)
+
+The computing-medium ruling run through the full machinery the hand-round skipped: five generators (preserving media · living media · sound and synthesis · Nordic medium-words · spaces as media), 251 new unique names after dedup against every prior round, triaged: [`naming-round4.md`](naming-round4.md). Awaiting the author's walk, beside round three's.
+
 ## Open
 
 - Whether the name should carry the *field* (the noun everything else is said against) or the *act* (compounding, composing, standing-on).

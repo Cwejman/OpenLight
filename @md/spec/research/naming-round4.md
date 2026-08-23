@@ -1,0 +1,273 @@
+# Round four — the medium field
+
+*Five generators under the ruled category — the name names a medium: entered, lived-in, preserving, compounding. Deduped against rounds one to three and the medium hand-round. × marks convergence; triage marks as before.*
+
+
+## Media that preserve & carry (43)
+
+- **Bite** — the etcher's word for the acid eating the exposed line into the plate; homophone of byte — the smallest recorded unit in both crafts. [byte puns are everywhere]
+- **Burr** — the ridge drypoint throws up beside the cut line, which holds the richest ink and wears away with each printing: the mark that is generous and mortal. [burr = rough speech, clinging seed]
+- **Lathe** — the machine that cuts the master disc: recording as turning; every groove that ever carried sound began on one. [machine-shop commonplace]
+- **Splice** ×2 — the join of rope, film, tape, and genes: two records become one continuous carrier, and a good splice is stronger than the strands. [Array.splice; gene-editing startups]  ⚠ *Video/audio editing platform exists*
+- **Mortise** — the cut that receives the tenon: composition as carpentry — nothing glued that can be joined. [lock hardware]
+- **Sort** — a single piece of type in the case; run out mid-job and you are literally out of sorts; also the first operation computing learned. [sort() ubiquity]  ⚠ *Generic term, widely used in tech contexts*
+- **Slug** — a full line of type cast as one piece; a story's working label in the newsroom; the URL slug — printing's word already naturalized on the web. [the animal; web jargon]
+- **Punch** — the hand-cut steel original from which every matrix is struck and every letter descends: the single ancestor of all copies; also the card computing was born on. [punch = hit; juice brands]
+- **Agate** — the tiny type size of tabular fact (box scores, stock pages); the banded stone; the burnisher that polishes gold leaf — three crafts in one hard word, Geode-kin. [common stone name]  ⚠ *Various tech uses, some products named this*
+- **Deckle** — the frame that gives handmade paper its edge; a deckle edge is proof the sheet was made whole, not cut down from something larger. [barbecue cut of brisket, minor]
+- **Pell** — a parchment roll of record; the Pells were the Exchequer's permanent memory, roll after roll for six centuries. [Pell grants]
+- **Stemma** — the drawn family tree of manuscript copies, which descends from which: versioning as philology invented it. [rare; classics jargon]
+- **Näver** — Swedish birch bark: roofs, boxes, shoes, and letters — Novgorod's entire everyday correspondence survived on it; the writing medium of the North that cost nothing. [Naver, the Korean portal, is one vowel away]
+- **Karv** — Norse cut/notch, as in the karvstock, the Scandinavian tally stick: accounting by knife, records you can run a thumb over. [essentially collision-free]
+- **Kavle** — the Swedish budkavle, the message baton passed farm to farm to summon the district: the medium whose entire nature is to be carried onward. [rolling pin in modern Swedish]
+- **Ogham** — the Irish edge-alphabet cut along the corners of standing stones, its letters named after trees. [pronunciation wobbles: OH-am / OG-am]
+- **Quipu** — the Andean knot-record: position, color, ply, and knot as typed structure in cord — data without writing, readable centuries on. [khipu spelling varies; cultural weight]
+- **Bulla** — the clay envelope whose outer surface repeated the tokens sealed inside: content described on its own container — metadata's first appearance on earth. [papal bull; medical bulla]
+- **Incuse** — a design struck into the metal rather than raised from it: the record as recess, the mark that cannot be shaved off. [numismatics jargon; near collision-free]
+- **Halide** ×2 — the silver salts that hold the latent image: the substance a century of photography trusted its memory to. [chemistry-class word]  ⚠ *iOS camera app with dedicated developer*
+- **Still** ×2 — the photograph, the distiller's vessel, and the quiet: three kinds of holding — an instant, an essence, a silence — in one soft syllable. [very common word]
+- **Pinhole** — the single point through which the whole scene enters and writes itself: an image made by aperture alone — completion from a point, literally. [compound; camera hobbyists]
+- **Spool** — what film and tape wind onto between uses; the print spooler carried the word into computing intact. [common; thread]
+- **Platter** — the disc of the hard drive, the turntable, and the served table: three generations of the same carrying shape. [serving dish]
+- **Dub** ×2 — the copy that became its own art: dubplates cut one-off for the sound system, dubbing, dub — duplication as creation, dark and one syllable. [music genre; film dubbing]  ⚠ *Audio/music production use cases exist*
+- **Lacquer** ×2 — the disc the master is cut into before any pressing exists; and the finish that preserves wood for centuries without hiding it. [common finish word]
+- **Copal** — resin on its way to becoming amber: the amber family's living member, still soft enough to work — incense, varnish, preservation in progress rather than finished. [minor jewelry trade use]
+- **Lac** — the resin behind lacquer and shellac, secreted by living insects: the preservative that is itself a product of life. [lakh homophone; French lac = lake]
+- **Dammar** — the picture varnish chosen because it can always be lifted off again: protection that stays reversible — the conservator's first law made substance. [rare]
+- **Rosin** ×2 — what makes the bow grip the string and the solder wet the joint: no sound and no connection without it. [violin-case familiar]
+- **Balsam** — Canada balsam, the optical cement with glass's own refractive index: the join that disappears — two lenses, one path of light. [balm/balsamic associations]
+- **Glair** — beaten egg white, the illuminator's binder and the gilder's size: the humble fixative under every gold initial in every manuscript. [near collision-free]
+- **Natron** — the salt that kept Egypt's dead whole for forty centuries: drying as devotion, preservation as ritual. [minor software fork]
+- **Tar** — pitch that preserves rope, roof, and hull; and Unix's own word for an archive: the preservative computing already chose for keeping everything. [cigarette tar; tar.gz jargon]  ⚠ *Unix compression format, widely recognized*
+- **Char** — the burnt surface that protects the wood beneath it (shou sugi ban: preservation by controlled fire); and the character type — text's atom in C. [char jargon; charred = destroyed reading]
+- **Peat** ×2 — layered ages of moss compressed into ground that is an archive: cored and read for pollen, climate, and time — fuel you can also study. [fuel/whisky associations]
+- **Smalt** — cobalt glass ground into a deep night-blue pigment: color preserved inside glass itself, the painter's darkest blue before synthetic ones. [rare; near collision-free]
+- **Came** — the lead strip that joins pieces of stained glass into a window: the medium of light has a join, and this is its name. [reads as past tense of come]
+- **Kettle** — the kettle stitch, the loop that links each sewn gathering to the next: the book exists as one thing because of this join. [the pot dominates]
+- **Glassine** — the translucent archival sheet interleaved between prints: protection you can see through — preservation without concealment. [philately/photo jargon; clean]
+- **Fond** — the archival fonds, a body of records kept in the order their maker left them (respect des fonds: provenance as law); and the cook's fond, the browned residue that enriches everything made after it. [reads as the adjective]
+- **Solera** ×2 — the sherry system in which every draught contains a fraction of every year that ever entered the casks: perpetual, fractional compounding — nothing is ever finished and nothing is ever lost. [three syllables, open ending; wine trade]
+
+## Living media (43)
+
+- **Wort** ×2 — the sugar-rich liquid before fermentation; everything the yeast will become is dissolved in it, waiting. Yeast enters, lives, and turns potential into beer. Triple depth: wort the brew, wort the herb (St John's wort), and *Wort* is German for "word" — a medium of words hiding inside a brewing term; [homophone drift toward "wart"]
+- **Barm** — the living froth skimmed off fermenting ale and carried to the next loaf; the oldest bridge between brewing and baking. A medium that is itself passed on and re-seeded; [British slang "barmy" = mad]
+- **Kveik** — Norwegian farmhouse yeast, dried on wooden rings and rehydrated for generations; the verb *kveikja* means to kindle, to quicken. A dormant medium that wakes when things are pitched into it — plain Norse, one syllable spoken; [growing craft-beer usage, no brand lock]
+- **Must** ×2 — pressed juice before it becomes wine; the whole vineyard's year suspended in one liquid, entered by yeast, compounded into vintage. Doubles as the modal "must" — necessity; [very common word]
+- **Lees** ×2 — the spent-yeast sediment wine is deliberately aged on (*sur lie*); what looks like dregs is what deepens the flavor. The past of the process feeding its future; [archaic "dregs" reading can skew negative]
+- **Malt** ×2 — grain tricked into germinating so its own enzymes unlock its sugars; the medium prepares itself to be consumed. Closed, dark, one syllable; [whisky/candy genericity]
+- **Koji** — rice or barley colonized by *Aspergillus*; the engine of miso, sake, soy — a grain turned into a living enzyme bed that other ferments then enter. Soft, two syllables; [common Japanese given name]
+- **Desem** — Flemish whole-grain culture kept buried in flour, cool and slow; a starter's quieter, stranger cousin. Obscure enough to be nearly collision-free; [pronunciation not obvious: DAY-zum]
+- **Crock** — the stoneware vessel of kraut and pickles, seasoned by decades of ferments; heirloom crocks carry their history in their walls. Dark vowel, closed; [idiom "a crock of —" = nonsense]
+- **Onggi** — Korean breathing earthenware; the pot's micro-porous walls let the ferment respire, so the vessel is a participant, not a container. Lovely mechanism, soft sound; [obscure to Western ears]
+- **Jang** — the Korean family of fermented bean pastes aged for years in onggi rows; one syllable, closed, and names a whole tradition of slow compounding; [common Korean surname]
+- **Garum** — Rome's fermented fish essence; whole fish enter brine and time, and what emerges is the concentrated prize. Ancient, dark; [Latin-adjacent; smell associations]
+- **Nuka** — the Japanese rice-bran pickling bed, stirred by hand daily, inherited across generations; vegetables enter each morning and come out changed each night — the truest daily-practice medium in the set; [Nuka-Cola, Fallout]
+- **Bran** — the substrate of the nuka bed itself; the discarded outer layer of grain turned into the liveliest medium in the kitchen; [breakfast-cereal genericity]
+- **Cask** — wood that seasons what it holds and is seasoned in return; whisky takes the cask's mark, the cask takes the whisky's, and used casks are prized *because* of what lived in them before. The mark-taking clause of the brief, literally; [cask-ale genericity, mild]
+- **Cellar** — the space where things are laid down to compound: wine, cheese, roots; cool, dark, patient, night-compatible by definition; [two syllables, common word]
+- **Curd** — milk crossed over into solid; the medium the entire craft of cheese then works in. One dark closed syllable; [minor food genericity]
+- **Whey** — the clear living remainder, itself a growth medium (ricotta is "recooked" whey); homophone of "way" — a path hiding in a byproduct; [open ending]
+- **Rind** — the living skin of an aging cheese: a managed ecosystem of molds and bacteria that records the cave it grew in. The surface where the medium meets the world and takes its mark; [modest]
+- **Skyr** ×2 — Icelandic cultured milk kept alive by back-slopping for a thousand years; each batch enters the next. Norse, one syllable; [Icelandic dairy brands on shelves]
+- **Broth** ×2 — nutrient broth: the liquid cells are grown in, and the "primordial broth" life itself began in. Warm, dark vowel, kitchen-humble and lab-precise at once; [soup genericity]
+- **Slant** — a culture kept alive on an angled surface for the long term — the archival form of a living thing; doubles as "slant" = an angle of view. Storage-of-the-living plus perspective in one closed syllable; [common word]
+- **Lawn** — a bacterial lawn: growth so confluent it covers the plate; also the tended green outside the window. Things seeded sparsely compound into full cover; [domestic genericity]
+- **Silt** — what the flood leaves behind; the Nile's whole civilization ran on silt deposited season over season. Enter, settle, enrich, repeat — one closed syllable; [modest]
+- **Warp** — the old word for that same flood-laid silt ("warping" fields to feed them) *and* the loom's foundation threads everything else is woven through. Fertile ground and underlying structure in one dark closed syllable; [Warp Records; "warp speed"; "warped" = twisted]
+- **Mor** — mull's slower sibling, the raw humus of pine forests — and *mor* is "mother" in the Scandinavian languages. Mother-ground in one Norse syllable; [very short; "more" homophone]
+- **Teig** — Norwegian for both "dough" *and* "a strip of tilled land" — one Norse syllable that is literally bread-medium and field-medium at once; the brief's pun made flesh; [pronunciation ambiguity: "tie-g"]
+- **Coppice** — the wood that regrows *because* it is cut: harvesting the stool extends its life by centuries. A medium renewed by use — the more it's worked, the longer it lives; [two syllables, soft ending]
+- **Brine** ×2 — the preserving sea in a jar: things enter it raw and perishable and come out transformed and keepable; also the sea itself ("the briny"). Salt as the oldest curator; [Brine lacrosse gear, minor]
+- **Bittern** — the potent liquor left when salt is drawn from brine — the concentrate that sets tofu (nigari); also the marsh bird with the night-boom call. Residue-as-essence, plus a wetland double; [obscure]
+- **Fen** — the fertile peat-fed wetland, black soil under still water; England's richest farmland was fen. One syllable, soft, dark; [common in fantasy naming]
+- **Brim** — Old Norse for the surf, the sea's edge — and "to the brim" is fullness itself. The line where the medium meets the land, filled; [common word]
+- **Cultch** — the bed of old shell that oyster larvae must settle on to become oysters; the reef grows literally on the shells of its ancestors. Compounding-on-the-past with total precision; [awkward mouthfeel: "clutch/cult"]
+- **Kelp** — the underwater forest: canopy, current-buffer, nursery; a medium other lives live inside; [modest]
+- **Comb** ×2 — the flagship: hexagonal cells built collectively, holding brood on one frame and honey on the next — the same structure stores the future and the surplus. Wax is reused, cells re-filled, the comb darkens with generations — it takes the mark of everything done in it. And "to comb through" is careful search. Storage, nursery, collective construction, and search in one dark closed syllable; [honeycomb genericity, no brand lock]
+- **Brood** — the comb's living half; and "to brood" is to sit with a thought until it hatches. Incubation of young and of ideas in one dark syllable; [the moody adjective reading]
+- **Perga** — bee bread: pollen packed into cells and lactic-fermented into the colony's keeping food — a ferment inside the comb, storage that improves; [ancient city of Perga, minor]
+- **Mead** — honey fermented; *mead* is also the archaic meadow, and the mead-hall was where the community gathered and stories were told. Drink, ground, and hall in one closed syllable; [Mead notebooks — a real stationery-brand collision]
+- **Pith** — the plant's soft central store; and "pithy" is substance with nothing wasted. Core-medium plus concision; [modest]
+- **Gall** — the oak's grown chamber around a wasp's egg — tissue compounded around a visitor — and oak galls made iron-gall ink, the medium most of the written past survives in. A growth that became writing; [gall = bitterness/audacity, real negative drift]
+- **Yolk** — the packed provision an embryo lives on until it can live in the world; the starter capital of a life. Dark, closed; [breakfast genericity]
+- **Caul** ×2 — the membrane some are born inside; sailors kept cauls against drowning. A quiet, uncanny birth-medium; [obscure; slight morbid tinge]
+- **Midden** — the heap where everything discarded landed and was kept; shell middens are archaeology's best archive. The record made by accumulation alone; [trash-heap reading]
+
+## Sound & synthesis (68)
+
+- **Stem** — a submix that stands alone yet recombines with its siblings into the whole; the system's artifacts are exactly this — self-contained parts that stay mixable. Plant double meaning for free (a stem is what growth travels through). One syllable, closed, plain; [STEM education; Stem the music-royalties startup]  ⚠ *STEM education field, music app exists*
+- **Take** — one pass through the material, preserved whole; the medium keeps every attempt, and the best is chosen later. Maps to versioned work honestly; ["hot take" discourse scent; very common word]  ⚠ *extremely common word, many products*
+- **Comp** — the composite take: the best moments of many passes assembled into one seamless whole; also jazz comping — quiet accompaniment that makes the soloist sound better. Double music meaning, both true to a supporting medium; [comp = complimentary/comp-sci abbreviation]  ⚠ *common abbreviation, widespread tech use*
+- **Bounce** — consolidating many tracks into one new piece of medium; the work compounds by being rendered down and built on again. Mechanism maps to snapshot/compaction truly; [common word; bounce = failed email/check]  ⚠ *email services, SendGrid competitor space*
+- **Room** — the archetypal sound medium: everything recorded in a room takes the room's mark, and "room tone" is the sound of the space itself, kept on purpose. Also simply space-to-live-in; [maximally common word]  ⚠ *numerous meeting/video software products exist*
+- **Booth** — the small treated space where the voice is captured clean; a quiet enclosure for one thing at a time; [phone booth, photo booth — mild]  ⚠ *event booth software, various products*
+- **Spill** — mic bleed: one source living faintly in another's channel, presence traveling through shared air; and Norwegian *spille* = to play (music, games). A true cross-language double for a Scandinavian ear — the leak and the playing in one word. One syllable, closed; [spill = accident/leak connotation]
+- **Bleed** — same phenomenon, darker word: sound refusing containment, everything present in everything; [blood connotation; "bleed" in print is a nice second craft meaning]
+- **Floor** — the noise floor: the medium's own quiet voice, the murmur beneath which nothing can be kept; also the ground a room stands on. Honest about limits — a rare humble mapping; [very common word]  ⚠ *widely used in financial/product names*
+- **Snake** — the multicore that carries every channel from stage to desk in one body; many signals, one carrier; [animal/deceit connotation likely fatal]
+- **Print** — to print the mix: commit sound to the medium irreversibly; shared with photography and press. Takes-the-mark, literally; [print industry genericity]  ⚠ *ubiquitous in software, many products*
+- **Reel** — the wound body of recorded time; also reel = a dance tune (real double music meaning) and "reel it in"; [film-reel genericity; Instagram Reels — major]
+- **Shellac** — the medium of the 78 era and a wood finish laid on in thin compounding coats — a substance that preserves by accretion; [Shellac, Steve Albini's band — known in exactly this world; CSS tool]
+- **Bias** — the inaudible signal added so tape records linearly: the hidden carrier that makes faithful memory possible. Mechanism is beautiful; [the cognitive-bias meaning dominates and likely kills it]  ⚠ *common tech/ML term, widely used*
+- **Sleeve** — the jack's sleeve (ground — the contact that makes every connection quiet) and the record sleeve the medium lives in; two honest music meanings plus the garment; [common word]
+- **Skiff** — the shallow eurorack case, and a small open boat: the vessel that carries a working system, light enough to take along. One syllable, closed, concrete, quiet — real double meaning inside and outside the territory; [minor — skiff boats]
+- **Norm** — the normalled connection: signal flows along the default path until something is deliberately patched over it — convention as wiring, override as patching. The mechanism maps perfectly to defaults-with-override; the word itself is a bit sociological; [norm = social norm; Norm the name]
+- **Mult** — one signal split to many destinations without loss; broadcast as a passive piece of metal; [reads as abbreviation, weak as a name]
+- **Slew** — the slew limiter turns a jump into a glide: change is admitted, but shaped in time. Also "a slew of" (abundance) and the dark past tense of slay. One syllable, dark vowel; [slay/slew grimness — arguably a feature here]
+- **Hold** ×2 — sample-and-hold: the medium seizes a moment of a moving signal and keeps it steady until asked again; memory as a verb; [maximally common word]  ⚠ *common in music/voice/comms products*
+- **Latch** — the held state that persists after the trigger is gone; a door-fitting and a memory circuit; [Latch the smart-lock startup — defunct but known]
+- **Taper** — the pot's taper: the law mapping a hand's travel to the effect — the shape of control itself; also a taper is a slim candle, quietly night-compatible; [taper = to diminish]
+- **Trim** — the trim pot: quiet, set-once attenuation; also trim = neat, and a ship's trim (balance in the water). The only attenuate-family word that works as a quiet name; [Trim the fintech; common word]  ⚠ *common in audio/design/text products*
+- **Ground** — the shared reference every signal is measured against and returns to; without it nothing means anything. Also the earth itself — the deepest medium-word in electronics; [maximally common; grounds for coffee, grounded]  ⚠ *fundamental term, widely used in products*
+- **Bridge** — where string meets body: the one point through which all the string's energy passes into the resonant medium. The coupling itself; [maximally generic — bridges everywhere]  ⚠ *networking term, many products use*
+- **Saddle** — the bridge's actual contact point on a guitar: the small bone the whole tone crosses; concrete, two syllables, and a second life in riding; [common word, mild]
+- **Belly** — the luthier's word for a violin's top plate: the breathing surface that turns string-work into sound. Soft, bodily, plain; [bodily connotation cuts both ways]
+- **Soundpost** — the hidden pillar coupling belly to back; French calls it *l'âme* — the soul. As **Post** alone it gains "to post" but loses the soul; [post = mail/publish genericity]
+- **Brace** — the bracing under a soundboard: hidden structure that decides how the top is allowed to vibrate; also the brace that joins staves of music, also to brace = to steady; [common word]
+- **Tonewood** — wood chosen and dried for years because it carries sound well; a medium selected by listening; [compound reads slightly catalog-like]
+- **Timber** — building wood, felled and cured — and the exact homophone of *timbre*, the color of a sound. The pun is real and both halves are media; [common word; "timber!" falling-tree shout]  ⚠ *forestry software exists, some products*
+- **Bore** — the shaped emptiness inside a wind instrument: the sound's character is the shape of the hollow it travels through. Medium-as-absence, genuinely deep; ["boring" adjacency is probably fatal]
+- **Chanter** — the melody pipe of the bagpipe, over the drones; the voice above the held ground; [reads as agent-noun, "one who chants"]
+- **Swell** ×2 — the organ's swell box: an enclosure whose shutters let the sound breathe louder and softer — dynamics made of architecture; also the sea's swell; one syllable, closed; [swell = "great!" dated slang]  ⚠ *used in music, audio software products*
+- **Plenum** — the organ's wind-chest: pressurized stillness, the reservoir every pipe speaks from; also the full assembly, also the air-space in a building; [Latin; plenum in HVAC/politics]
+- **Rank** — one voice of the organ: a full row of pipes, one timbre across all pitches, drawn by a stop; a whole palette as a unit; [rank = smelly / hierarchy — likely fatal]  ⚠ *music/audio term, many products use*
+- **Tine** — the tuned metal tooth of a Rhodes: struck, it sings; the smallest resonant unit; also fork tine; [thin meaning outside the two]
+- **Frog** — the part of the bow the hand holds, where control enters the sounding system; [the animal dominates; whimsical]
+- **Horn** — the flared body that couples a small sound to a large air; brass horn, speaker horn, drinking horn, animal horn — all one shape, all Norse-plain; [common word; horny adjacency juvenile risk]
+- **Cone** — the speaker cone: the last membrane between signal and air; [geometry/ice-cream genericity]
+- **Capsule** — the mic capsule: the few square millimeters where air becomes signal — the transducing heart; [space capsule, capsule wardrobe; Latin]  ⚠ *Capsule CRM is a product, not dominant*
+- **Ribbon** — the ribbon mic's element, the ribbon cable joining modules, the ribbon controller played by touch: three real electro-music meanings; [gift-ribbon genericity]  ⚠ *Microsoft Office UI, used in products*
+- **Klang** — German and Scandinavian for ring, chime, sound-quality itself; Klangfarbe is tone-color. One dark closed syllable that *is* its meaning; [Klang Valley, Malaysia; onomatopoeic comic-book "clang"]
+- **Ljom** — Norwegian: the resounding echo of a mountain or hall — space answering sound. One syllable, dark vowel, Norse, nearly collision-free; the phenomenon is media-like: the landscape keeps sounding after you stop; [obscure to non-Norwegians; pronunciation barrier]
+- **Taraf** — the sympathetic strings of the sitar and sarangi: strings never touched, sounding because another sounded. The purest image in the territory — resonance as answered kinship; [Taraf de Haïdouks, the band; unfamiliar]
+- **Aliquot** — Blüthner's sympathetic piano strings, same phenomenon in the Western instrument; also aliquot = an exact fractional part; [polysyllabic Latin — fails the taste law, recorded for the mechanism]
+- **Wolf** — the wolf tone: the note a resonant body fights, where the medium's own voice interferes with the played one. Dark, Norse, one syllable — but it names a flaw; [the animal; Wolf appliances]
+- **Formant** — the resonant peaks by which a vocal tract stamps identity on any sound passing through it: the medium's fingerprint on the signal. Mechanism maps perfectly; the word is technical Latin; [speech-science jargon feel]
+- **Shelf** — the shelving filter: raise or lower everything past a point, a flat place to rest; also the shelf things are kept on — storage and spectrum in one plain syllable; [common word]  ⚠ *used in many products, not dominant*
+- **Hum** — the mains hum: the medium's involuntary voice — and humming, the most private form of music; [Hum by Verizon; common]
+- **Tail** — the reverb tail: what the space keeps saying after the sound has stopped — memory as decay; [common word; "tail risk" finance scent]
+- **Plate** — plate reverb: a hung steel sheet sound is sent into, its shimmer returned — a literal medium with its own voice, the room replaced by a substance; [license plates; tectonic plates; near-kin of banned Slate]  ⚠ *audio/music term, some products use*
+- **Tank** — the spring-reverb tank: the sealed box where sound goes to gather a past; dark, one syllable; [military tank; "to tank" = to fail]  ⚠ *common term, storage/containers, many use*
+- **Chiff** — the breathy speech-onset of an organ pipe: the consonant before the vowel of the tone, the sound of the medium starting to speak; [obscure; slight comic lightness]
+- **Neume** — the earliest written mark for melody: the first time sound was kept in a medium at all. One soft syllable, nearly collision-free, genuinely about preservation; [obscure; homophone risk "new me"]
+- **Clef** — the key that tells the lines what they mean: pure interpretation-context, one syllable; [French for key — several defunct startups used it]
+- **Gamut** — originally the full musical scale (gamma-ut), later the full range of anything: a music word that became a general word for the whole space of possibility. Two syllables, closed, quiet; ["run the gamut" idiom; color-gamut in displays]
+- **Quaver** — the eighth note, and the tremble in a voice; [Quaver music-education brand; "quavering" = weak]  ⚠ *musical term, but also note-taking app*
+- **Moll** — German/Scandinavian for the minor key: the dark mode, literally night-compatible tonality in one soft syllable; [English "gun moll"; German slang]
+- **Lyd** — Norwegian for sound, plainly; one closed syllable; kin to Old Norse *hljóð*, which meant both sound *and* listening-silence — the double meaning is a thousand years old; [opaque to non-Scandinavians]
+- **Ljod** — Old Norse *ljóð*: song, poem, spell — the sung thing itself, cousin of the German Lied; [spelling/pronunciation barrier; Lied itself is fatal in English]
+- **Stev** — the Norwegian folk verse form, traded stanza by stanza between singers: composition as exchange; one Norse syllable; [opaque; minor]
+- **Galdr** — Old Norse: the chanted spell — song that does work in the world; dark and closed; [neopagan/black-metal scent]
+
+## Nordic medium-words (64)
+
+- **Torv** — peat; the bog's compressed body, which preserves whatever falls into it for millennia and burns slow when cut; a medium that is both archive and fuel; [minor]
+- **Fonn** — perennial snowdrift (Norw. *fonn*, ON *fǫnn*); the patch that never melts, where glacial archaeologists find 6000-year-old arrows perfectly kept; a cold store that gives things back; [minor]
+- **Terva** — Finnish for wood tar; the substance that preserved every boat and stave church in the North; things coated in it outlast centuries; [minor]
+- **Kada** — resin (Sw. *kåda*); the tree's own wound-sealing medium, which hardens around what it touches and keeps it (amber's living ancestor, without the banned word); romanization loses the å; [minor]
+- **Savu** — Finnish for smoke; the preserving atmosphere of the *savusauna* and the smokehouse — things hung in it are changed and kept; soft, dark, two syllables; [minor]
+- **Rok** — smoke (Sw. *rök*); same mechanism, plus the Rök runestone — the longest runic inscription in the world, a literal medium that took the mark of what was done on it; romanization loses the ö; [roc, rock homophones]
+- **Aska** — ash (Sw./Icel. *aska*); what fire leaves; buries and preserves (Pompeii), sweetens soil, scours clean; echoes Ask, the first man carved from a tree; [minor]
+- **Lut** — lye (Sw. *lut*, as in lutfisk); the caustic bath that preserves by transformation; computing bonus: LUT = lookup table; [lute homophone; LUT is jargon]
+- **Malm** — ore (Sw. *malm*); rock that carries metal latent inside it — a medium pregnant with what smelting releases; also the -malm of Stockholm's districts; [IKEA MALM series — large]
+- **Garn** — yarn, and in Swedish also a fishing net (*lägga ut garnen*); the strand things are made from and the mesh things are caught in; borders the banned web-family, flagged as such; [minor]
+- **Drev** — caulking oakum (Sw. *drev*): the fiber driven into a hull's seams so the vessel holds; also a gear train, also a hunt's driving line; one dark closed syllable, triple meaning; [minor]
+- **Glod** — embers (Sw. *glöd*); the banked fire kept alive overnight under ash — *hålla glöden vid liv* is idiomatic for keeping a passion alive; the night-tended energy store; romanization badly loses the ö; [minor]
+- **Glanta** — forest clearing (Sw. *glänta*); the opening in the woods where light pools; the verb *glänta* means to open a door a crack — clearing + ajar in one soft word; native resonance is strong and warm; [minor]
+- **Glant** — from *på glänt*, "standing ajar"; the state of a door open just enough for light and listening; the interval itself, one closed syllable; [minor]
+- **Glipa** — a gap that lets light through (Sw. *glipa*: a coat that gapes, a door that doesn't quite close); the unintended, generous crack; [minor]
+- **Glugg** — a small aperture, peephole, hatch (Sw. *glugg*; also *lucka i schemat* sense — a gap in a schedule is idiomatically a *glugg*); the deliberate small opening in a wall; playful, closed; [minor]
+- **Vra** — nook (Sw. *vrå*); the corner where things collect and live half-forgotten — *i en undanskymd vrå*; romanization loses the å and most of the word; [minor]
+- **Farstu** — the entry room (Sw. *farstu*); the unheated in-between chamber between outdoors and the warm house — where boots, snow, and visitors pause; the threshold made into a room; [minor]
+- **Skreva** — rock crevice (Sw. *bergsskreva*); the split in stone where soil gathers and rowans grow — life in the interval; [minor]
+- **Vik** ×2 — bay/inlet (Sw. *vik*); sheltered water where boats live; bonus: imperative of *vika*, to fold — a survivor's cousin hiding in a place-word; [Vík, common toponym]
+- **Fjara** — Icelandic *fjara*, the foreshore; the strip that is sea twice a day and land twice a day — the between-tides zone where gathering happens; [minor]
+- **Fog** — mortar joint/seam (Sw. *fog*, *foga* = to join); the binding line between stones; accidental perfect double: English fog is itself a medium; [fog computing is an existing term — large in-domain]
+- **Vak** — the opening in lake ice (Sw. *vak*) where black water stays liquid all winter; kin to *vaka*, to keep vigil through the night — the ice-window plus the nightwatch in one dark syllable; [minor]
+- **Naust** ×2 — Old Norse/Norwegian boathouse; the shelter where the vessel itself overwinters — a house for the thing that carries you; [minor]
+- **Harbre** — the raised timber storehouse (Sw. *härbre*), food kept safe on stilts above rot and mice; romanization loses the ä; [minor]
+- **Aitta** — Finnish granary/storehouse, the courtyard's freestanding keep; also where young women slept in summer — a store that is literally slept in; [minor]
+- **Holk** — a hollowed-out log vessel; today *fågelholk*, the nesting box — a container whose whole purpose is to be lived in; [near-homophone of Hulk]
+- **Kupa** — the beehive (Sw. *bikupa*); the vessel that is simultaneously dwelling, workshop, and store, and that compounds sweetness over seasons; the truest lived-in container in the list; [minor]
+- **Krus** — crock/jug (Sw. *krus*); the stoneware vessel ferments live in; *krusa* also means to ripple water and to flatter; [Kruse surname]
+- **Sump** — the live-well (Sw. *fisksump*): a submerged crate where caught fish are kept alive until needed — storage that keeps its contents living; English collision is unfortunate but the mechanism is exactly right; [sump = oil pan/drain — negative]
+- **Tina** — bentwood food box (Sw. *svepask/tina*); also the verb to thaw (*tina upp*) — vessel plus the return of warmth; [common given name]
+- **Stuka** — the root clamp (Sw. *potatisstuka*): potatoes overwintered under earth and straw in the field itself — storage by burial, retrieval by digging; [Ju-87 Stuka — fatal]
+- **Lya** — den/lair (Sw. *lya*: a fox's *rävlya*, and colloquially one's own small flat — *min lya*); the burrow as beloved home; soft, two syllables, warmly idiomatic; [minor]
+- **Gryt** — a fox or badger earth (Sw. *gryt*); kin to *gryta*, the cauldron — den and cooking pot from one root; dark and closed; [minor]
+- **Bo** — nest, dwelling, and the verb to live (Sw. *bo*); the most loaded two letters in Swedish — where you live is your *bo*; probably too short and name-like; [Bo as given name]
+- **Deg** — dough (Sw. *deg*); the living worked mass that rises on its own schedule; also Swedish slang for money; one closed syllable; [minor]
+- **Juuri** — Finnish for root — and the word for a sourdough starter (*leipäjuuri*, "bread-root"); the starter as the root of every future loaf; also means "exactly/just now"; [minor]
+- **Brygd** — a brew, a concoction (Sw. *en hemlig brygd*); the deliberate mixture left to become itself; closed, dark, slightly occult in the right way; [minor]
+- **Brygga** — to brew, and the noun for a wooden jetty — the brew plus the pier, a made thing reaching from land into water; two media traditions in one word; [minor]
+- **Vort** — wort (Sw. *vört*); the sweet liquid that yeast lives and works in — the literal growth medium of beer, and of *vörtbröd* at Christmas; romanization loses the ö; [Da. *vort* = "our"]
+- **Sahti** — Finnish farmhouse ale, brewed through juniper branches, still alive as a tradition; names the whole living practice; [minor]
+- **Fil** — Swedish fermented milk (*filmjölk*), kept alive by re-seeding; quadruple native load: *fil* = culture + traffic lane + the tool file + the computer file; [file genericity in computing]
+- **Lake** — brine (Sw. *sill i lake*): the salt liquid herring is preserved and lives in; English *lake* is a still dark water — both readings are media; [common English noun]
+- **Sylt** — jam/preserve (Sw. *sylt*); fruit carried across the year in sugar; also *syltburk* idioms (caught with fingers in the jar); [Sylt, the German island]
+- **Grav** — the *grav* of gravlax: curing by burial in earth; preservation by interment, dark to the point of literal; [Grav CMS; grave]
+- **Dagg** — dew (Sw. *dagg*); the water the night itself deposits, gone by mid-morning; condensation as the dark hours' quiet work; [minor]
+- **Dimma** — fog (Sw. *dimma*); the medium that softens edges and carries sound strangely; two soft syllables; [DIMM, the memory module]
+- **Sumu** — Finnish for fog; darker vowel than dimma, rounder mouthfeel; [near "sumo"]
+- **Usva** — Finnish for mist, the thinner morning kind that hangs over water; unusual and soft; [minor]
+- **Dis** — light haze (Sw. *dis*); also ON *dís*, a guardian spirit — haze plus the watchful dead; [Eng. "dis" = disrespect]
+- **Skare** — the crust on old snow (Sw. *skarsnö*) hard enough to walk on; a surface the season builds, that bears weight at dawn and fails by noon; [minor]
+- **Fore** — Sw. *före*: the untranslatable word for the day's travel-condition of snow or road (*bra före idag*); the medium's quality as a thing in itself — huge idiomatic weight, badly wounded by romanization; [golf "fore!"]
+- **Routa** — Finnish for ground frost: the frozen layer in the soil that heaves stones and roads all winter and lets go in spring; the season working inside the ground; [near "router"]
+- **Yr** — whirling snow (Sw. *snöyra*), and the adjective for dizzy/giddy; the air made opaque and the head made light; [yr.no, the Norwegian weather service — famous in the Nordics]
+- **Fors** — rapids (Sw. *fors*); the stretch of river that works — every mill in the North sat on one; water as power medium; [minor]
+- **Hamn** — harbor (Sw. *hamn*): the sheltered water vessels live in; older Swedish *hamn* also means a taken shape or guise (*hamnskiftare*, shapeshifter) — the shelter plus the form; [minor]
+- **Damm** — Swedish for both millpond and dust — two media from one word, the held water and the settled fine matter; [homophone of "damn" — fatal]
+- **Hraun** — Icelandic lava field: rock that was recently liquid and remembers it, moss's first home; [hard for non-Nordic mouths]
+- **Vind** — Swedish for both wind and attic — the moving air and the still room under the roof where things are kept for decades; [reads as English "wind", generic]
+- **Hult** — small dense wood (Sw. *hult*, common in place names); the pocket forest; closed and dark; [Hult International Business School]
+- **Salo** — Finnish for deep forest wilderness, the roadless interior; [Salo, Finnish city; Pasolini's Salò — dark]
+- **Korpi** — Finnish for the deep spruce backwoods, mossy and dim; the forest at its most inward; [Korpiklaani, folk-metal band]
+- **Marka** — Norwegian: the forest commons around a city (Oslomarka) — everyone's roaming ground, owned by no one, used by all; [minor]
+- **Vaki** — Finnish *väki*: the impersonal force understood to dwell *in* a substance — the väki of water, of iron, of the forest; the old Finnish theory of media, in one word; romanization loses the ä; [minor]
+
+## Spaces as media (33)
+
+- **Gloam** — the dusk itself, shorn of its -ing; the hour when light stops being what you see by and becomes what you stand inside; one dark closed syllable that carries the system's whole night register; [minor — small games and indie projects, no major brand]
+- **Dimmet** — West Country dialect for dusk; a homely, unliterary twilight word — the gloaming for people who milk cows in it; soft i, hard closed t; [none known]
+- **Glim** — old cant for a small light, a candle in the dark; the minimum light a thing needs to be worked by; one closed syllable, humble to the point of secrecy; [minor]
+- **Blae** — Scots for blue-grey, the exact color of the blue hour without naming it; the shade of blaeberries and dusk sky; one soft syllable; [none known; risk is opacity, not collision]
+- **Roke** — Yorkshire dialect for the mist that rises off fields at evening; a local, working word for air turning visible; one closed syllable; [Roke Manor Research, UK engineering — niche]
+- **Brume** — winter mist; a hush of a word, dark vowel, closed; Latin root but worn smooth to one syllable; [minor perfume/candle uses]
+- **Murk** — dimness as a volume to navigate rather than a failure of light; blunt Norse-toned, one syllable, honest about the dark; [none major; risk is the negative shading]
+- **Umber** — the pigment of shadow; a color that is simultaneously a place (Umbria) and a darkness (umbra); two syllables, closed, warm-dark; [minor game/audio uses]
+- **Airglow** — the atmosphere's own faint light, visible only in true darkness; the medium literally luminous when everything else is off; compound but concrete; [minor]
+- **Loft** — Old Norse *lopt*: the air, the sky — before it ever meant a room; a workroom made of the upper air, plus the verb (to loft something upward); [Loft clothing, Salesloft — moderate]
+- **Welkin** — the vault of the sky as an enclosing dome; plain Germanic despite its poetic reputation; two syllables, closed; [none major; risk is archaism]
+- **Lee** — shelter as a condition of air: the calm side of anything, "in the lee of"; a medium defined by what it protects you from; one syllable; [Lee jeans; common surname]
+- **Voe** — Shetland for a narrow sea-inlet; Norse-rooted, one soft syllable; a small private piece of ocean; [minor]
+- **Gyre** — the ocean's slow circulation, the current that carries and returns; one syllable, and things placed in it come back enriched; [Yeats echo; minor brands]
+- **Cove** — sheltered water, small enough to know completely; one dark syllable; [many small brands, none dominant]
+- **Study** — the quiet room, the act, and the painter's preparatory work ("a study in blue"): the room, the practice, and the artifact share one word; two syllables; [generic; heavy edtech usage of the word]
+- **Oast** — the oast house, where hops are dried slow and low; a building shaped entirely by its medium; one closed syllable, pleasingly odd; [minor]
+- **Garner** — the granary, and the verb: to garner is to gather into keeping; the store and the act of storing; two syllables, closed; [common surname]
+- **Hide** — the birdwatcher's hide: the quiet enclosure you observe living things from without disturbing them; plus to hide, plus a hide of land (an old measure); a working triple; [generic verb]
+- **Bothy** — the open mountain shelter, kept stocked by strangers for strangers; enclosure as commons; two soft syllables; [minor outdoor brands]
+- **Shiel** — the summer hut of the high pasture (shieling); a seasonal room that exists only while the living work does; one syllable; [minor]
+- **Cloister** — the covered walk around the garth: enclosure that produces contemplation rather than confinement; two syllables, closed; [Cloister Black typeface — trivial]
+- **Snug** — the small private room in a pub, and the adjective it earned its name from; warmth as architecture; one dark closed syllable; [small proptech uses — minor]
+- **Roost** — where living things settle for the night, safe and off the ground; the night-enclosure verb-and-noun; one closed syllable; [minor insurance/stand brands]
+- **Clamp** — the earthen mound of straw and soil that keeps root vegetables alive through winter: burial that preserves rather than ends; one closed syllable; [the tool — a meaning collision, not a brand]
+- **Hull** — the ship's hull and the seed's hull: two enclosures, both keeping a living cargo through passage; one dark closed syllable; [Hull the city; minor]
+- **Cote** — dovecote, sheepcote: the small purpose-built shelter for living creatures; one syllable, gentle; [Côte restaurants UK — regional]
+- **Ark** — the enclosure that carries aliveness through catastrophe: Noah's, the seed vaults', the covenant's; one dark closed syllable; [Ark Invest; ARK: Survival Evolved — significant]
+- **Solvent** — the medium things dissolve into and recombine within; plus the second meaning: solvent, able to meet one's obligations — a system that keeps you solvent in both senses; two syllables, closed; [generic chemistry; minor fintechs]
+- **Steep** — the medium verb itself: to immerse something until the qualities transfer both ways; tea, dye, seed grain; one closed syllable; also the adjective; [generic]
+- **Argon** — the inert gas archives and wine are sealed under: an atmosphere whose whole function is to preserve by doing nothing; Greek for "idle"; two syllables, closed, dark; [Argon2 password hashing — dev-familiar]
+- **Brane** — the membrane worlds float on in string theory, homophone of *brain*; a physics medium word with an accidental cognition double; one closed syllable; [minor; risk is cuteness]
+- **Proof** — dough proofing (the dark warm rest where the living rise happens), alcohol proof, and proof-as-evidence; a working triple; one closed syllable; [several startups named Proof — moderate]
+
+## Removed as SEO-dead — named, not silently dropped
+
+- **Oxide** — Oxide Computer Company founded 2021
+- **Rack** — Rack web server spec, Ruby ecosystem
+- **Rail** — Ruby on Rails framework, ubiquitous
+- **Ring** — Amazon Ring is world-famous brand
+- **Send** — SendGrid, SendSimple, similar services dominate
+- **Spline** — 3D design software platform, founded startup
