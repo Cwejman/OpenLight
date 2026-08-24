@@ -50,7 +50,7 @@ The system lives in dualities; a good name will sit inside one of them.
 
 ## Name directions
 
-Moved to their own file: [`naming.md`](naming.md). The test stays here because it is a framing test: put a candidate in the sentence rung — "*X* is a compute environment where …" — and see whether the name pulls its weight or rides along.
+Moved to their own file: [`naming/naming.md`](naming/naming.md). The test stays here because it is a framing test: put a candidate in the sentence rung — "*X* is a compute environment where …" — and see whether the name pulls its weight or rides along.
 
 ## The GitHub description
 
