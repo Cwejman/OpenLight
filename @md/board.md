@@ -16,7 +16,7 @@ Numbered for reference, not strict order.
 
 1. **Finish the ratification read** — view.md's component sections, components.md, desktop.md, then the rest of the tree.
 
-2. **The knowledge-angle turnovers** — siblings, no order among them: **conventions.md** (grown steward-driven; gets the README treatment, possibly a new name — its status line marks it) · **this board** (this rewrite is the first pass; keep it pure state) · **the register pass** over the spec tree (author direction, 2026-08-22: each file re-shaped why-first — laws and motivation before engineering; not this cycle's work). The arc's opening record and its aim — the grail — live in [`spec/research/knowledge/opening.md`](spec/research/knowledge/opening.md).
+2. **The knowledge-angle turnovers** — siblings, no order among them: **the code's ratification read** — the arc's candidate result stands written at [`spec/research/knowledge/code.md`](spec/research/knowledge/code.md) (2026-08-24; proposed, awaiting the author's word) · **conventions.md** (grown steward-driven; its knowledge section is what the code supersedes on ratification; the rest still owed the README treatment) · **this board** (keep it pure state) · **the register pass** over the spec tree (author direction, 2026-08-22: each file re-shaped why-first; the code, once ratified, is its instrument — not this cycle's work). The arc's record lives in [`spec/research/knowledge/opening.md`](spec/research/knowledge/opening.md).
 
 3. **The reconcile remainder** — cheap, for a subagent: the fixture files rewritten from the new law (`db/fixtures/*.json`, `engine/fixtures/boundary.json` — the latter encodes the dead boundary model verbatim); the `conclusions.md` audit-and-close; the agent.md deep-claims sweep.
 
