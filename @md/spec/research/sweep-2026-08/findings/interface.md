@@ -1,0 +1,41 @@
+# The interface claim against the shipped world
+
+Night claims components declare what they take, mounting is a call, and which component can draw a thing is a read of the field. The sweep tested this against the product view layers, server-driven UI at five companies' scale, the component-contract standards, the generative-UI protocol race, and the research lineage. The finding: **the vacancy is real — nobody ships a general renderer-bid — the pattern is proven piecemeal at scale, and the expensive lessons are all about versioning and escape hatches, not about whether the model works.**
+
+## The vacancy, verified structurally
+
+All four product view layers (Notion, Airtable, Tana, Anytype) share one shape, verified against their APIs and protobufs: an extensible *instance* schema under a **closed set of view kinds** — 10, 6–7, 7, and 6+28 respectively — and closure one level deeper than it looks: **no user-defined property types either**; the type vocabularies are enums in the protocol, not records in the store. View configuration is everywhere a union discriminated by the view-kind tag — which is precisely the shape a declaration-and-call model replaces. The near-misses (Airtable's block view, Notion's HTML blocks) are user-placed sandboxes, not type-matched mounts — the exact distinction night's model turns on.
+
+The bid pattern itself is proven, but always welded to one editor: WordPress Gutenberg's block registry answers "which block types can this content transform into?" as a runtime query over ranked predicates, at WordPress scale; JSON Forms resolves renderers by `maxBy` over ranked testers (and its maintainer wrote down in 2026 that the declarative layer leaks — logic accumulates in mappers, cross-renderer customization means overriding every renderer); Builder.io expresses containment contracts as queries. No framework-neutral instance exists, and the trend ran the wrong way at exactly the wrong moment: **React deleted its only runtime prop contract in v19, and the one portable component-contract format (Custom Elements Manifest) has been frozen since 2024, read only by doc viewers** — the mainstream moved away from runtime introspectability precisely when agents started needing it.
+
+## What server-driven UI learned the expensive way
+
+Five teams (Airbnb, Plaid, DoorDash, Lyft, Shopify) hit the same wall and independently invented the same fix — **capability negotiation**: the client declares which component types it can render, the server refuses to send anything else. Nobody solved shipping a new component kind to an old client; Plaid's spec says it flatly — a new pane kind is a major version requiring an SDK upgrade. The transferable lessons:
+
+- **The escape hatch is an architectural tier, and it erodes.** Lyft's semantic components exist "as an escape hatch from server-driven land"; DoorDash's untyped `custom` field caused exactly the type-safety failures you'd predict — and shrank when they matched styling to a typed design-language vocabulary. Typing the vocabulary shrinks the hatch: an endorsement of night's direction, arrived at by attrition.
+
+- **Fallbacks work for variations, not novelty.** DoorDash found generic fallbacks "not useful at all"; Shopify's per-section default layouts worked. Reconciled: when the new thing is genuinely new, degradation is worse than omission — capability negotiation dominates.
+
+- **Recursive component trees and field-selection query languages are structurally opposed** (DoorDash found GraphQL over recursive facets "close to impossible"; Airbnb kept sections flat and pointed at them by id). If night's templates are trees of mounts, design against this early.
+
+- **Uber's Screenflow is the closest anyone came to night's exact model** — typed definitions with defaults, restricted expressions, and CI that recompiled every screen against every previously shipped runtime version. That is "a mount is a call validated by matching," extended over time; it is the correct answer, it costs a compiler and a build matrix, and it died with its org, at 16 flows in production.
+
+## The protocol race and the market verdict
+
+The generative-UI race consolidated inside MCP: MCP Apps is the standard, and the winning unit is an **opaque sandboxed iframe with no props schema**. Typed component trees lost at the protocol layer and are thriving one layer up (OpenUI Lang: a typed element tree validated against a schema generated from your component library). The split is stable — iframes buy cross-host portability without design agreement; typed trees buy fidelity but need a shared vocabulary. The posture for a project whose interface is already typed data: **ship the typed layer; emit MCP Apps as one adapter.** The commoditised asset is the hand-written widget; the durable asset is the typed model plus a small renderer per target.
+
+The market said the same thing in money. Retool abandoned its proprietary visual abstraction for React/TypeScript because the abstraction "prevented LLMs from working fluently" — read precisely, a verdict against **closed, non-inspectable** derivation, not against derivation: every survivor's remaining moat is typed contracts (data access, permissions, schema), and every AI-native winner's admitted weakness is maintenance. Deriving UI from typed contracts is a winning 2026 bet *provided the derivation emits inspectable, standard-language artefacts* — betting on a closed declarative runtime is betting on the thing Retool just spent a platform rewrite escaping. ([`field.md`](field.md) carries the surrounding market data.)
+
+## The research lineage
+
+Patchwork ships night's interface model in miniature (datatype/tool declarations, `supportedDatatypes` matching, a render contract with mandatory cleanup) — read `patchwork-skills` before finalising the component contract; it encodes hard-won constraints. Varv (CHI '22) has the sharpest concept model of UI-as-declarative-data and has been build-bot-only since 2024. Block Protocol — typed blocks as an open standard — is paused: **don't standardise the contract before it has users** (Patchwork instead ships a house style). Mavo is the unexplained two-year-dormant cautionary case. And the structured-editor ventures that bet on proprietary editing surfaces converged on the same funding answer within a year — consulting funds the tool (Unison, feenk), or insolvency (Dark, whose founder's post-mortem names the structured editor as the thing LLMs invalidated).
+
+Two boundary rules from the tools-for-thought side, both paid for in market share: **don't take files away** (Logseq did, four years late, into a market that had just re-valued files because agents read them; Obsidian's answer — typed views *over* files — won), and formalisation cost is paid at capture while benefit arrives at retrieval, so **typing must be deferrable and incremental** or users won't type (Shipman & Marshall, unrefuted since 1999 — [`rationale.md`](rationale.md) carries its mechanism).
+
+## Not established
+
+Whether Airbnb's Ghost Platform still exists in its 2021 form, or its Figma/WYSIWYG roadmap ever shipped; why Spotify and Nubank abandoned their SDUI frameworks (deletion documented, motive not); whether any Patchwork tool has a user outside the lab; adoption of Notion's Views API; "Airtable Omni" has no primary source — the verified product names are Cobuilder and Superagent.
+
+---
+
+*Sources: [`a2252e73e0215b641`](../raw/a2252e73e0215b641.md) (the four view layers, protobuf-verified) · [`a57740ddd62e39ab6`](../raw/a57740ddd62e39ab6.md) (SDUI at scale, the five-team convergence, the low-code reckoning) · [`a458ace67969949f3`](../raw/a458ace67969949f3.md) (schema-driven UI, the bid precedents, runtime introspectability) · [`a6064cc62dbf12499`](../raw/a6064cc62dbf12499.md) (the MCP Apps consolidation) · [`a3f6ddd86cf882a6d`](../raw/a3f6ddd86cf882a6d.md) and [`a5105d288fc90070c`](../raw/a5105d288fc90070c.md) (Patchwork, Varv, the lineage's expensive lessons) · [`a4bdd8ce92076fef2`](../raw/a4bdd8ce92076fef2.md) (the structured-editor economics).*
