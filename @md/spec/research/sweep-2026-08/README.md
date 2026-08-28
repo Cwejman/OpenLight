@@ -1,6 +1,6 @@
 # The sweep, raw — 2026-08-26
 
-*Research register. The unedited final reports from the agent sweep, kept so the compression into [`../landscape.md`](../landscape.md) and [`../knowledge/evidence.md`](../knowledge/evidence.md) is checkable rather than trusted. Those two files are a selection; this is what they selected from.*
+*Research register. The unedited final reports from the agent sweep, kept so any compression of them is checkable rather than trusted. [`../landscape.md`](../landscape.md) is one such selection — the ecosystem map; a second, `evidence.md`, scored the findings against the code's earlier rule set and was retired to git (2026-08-28) when that set was superseded. The next reading works from this raw, through [`../knowledge/code.md`](../knowledge/code.md).*
 
 Each file in `raw/` is one agent's final report, named by its run id. Reports were written to a fixed skeleton — headline, map, load-bearing findings with URL and date, what moved, what could not be established, leads — so the sections most often dropped in compression (the leads, the negative findings, the precise N values) are here in full.
 

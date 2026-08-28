@@ -58,3 +58,7 @@ Named plainly, so the arc knows its own finish line:
 - How orders branch by audience and outcome — one line, or a common core with branches, and where each branch ends.
 - What of the hjulverkstan ladder and chart survives contact with night's practice, and vice versa — the two studies deliberately cross-pollinate; neither is the other's authority.
 - Where the search's own records live as it proceeds (this directory), and what graduates where: rulings to the successor file, tree-shape work to the register pass.
+
+## The essence rebuild — 2026-08-28
+
+The code was rebuilt whole in a fresh session with the author, and [`code.md`](code.md) now reads: why → one limit → the fold and the link → two laws → open. Several opens above moved with it — read `code.md` before leaning on this record's framing. The sweep's rule-scored distillation (`evidence.md`) retired to git with the rules that framed it; the re-derivation of the research under the new code, and the first-proof companion piece, are queued on the board. This entry is a pointer: the full narrative lives in the log.
