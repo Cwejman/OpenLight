@@ -42,25 +42,9 @@ The inverse holds for local changes — a rename, one correction. There a wholes
 
 The specs are state; everything else is an event. A ratification record, a feedback note, a review's findings — each amends the state, is folded, and then retires from the tree; git keeps it. One source of truth, no standing record beside the law it produced. (Practiced: `ratification.md` and `feedback.md`, both retired 2026-08-20 after their live rows folded in.)
 
-## Knowledge structure — *open, being refined*
+## Knowledge structure
 
-The principle for how a knowledge base is best structured is still being sought; until it lands, work by the established practices — this file's rewriting rules included. The search runs in two projects: the wider distillation — a fifteen-rung ladder of principles, an open study and a first chart of the surrounding practices — lives in hjulverkstan (`~/git/hjulverkstan/wiki/drafts/`); this section keeps what is night's own ground. This section records the search, not a rule.
-
-**As much as we know (2026-08-23, from dialogue; stated, not proven).** The same code appears wherever things compound — Unix, the internet, this project's substrate: small self-standing units, one medium, one way to join. For knowledge the unit is the fold and the join is the reference, and the code reads:
-
-- **Why before how, at every scale.** A fold is readable on its own because it opens with what it is for; then what must hold; then how; then practice. Values, principles, mechanisms, methods — stability rises upward, volume downward, and what compounds is what holds still, so the core is written first and is the smallest part.
-
-- **Reading order is goal order; definition order is dependency order.** They conflict. Goal order governs the entry and each fold's opening; dependency order governs the body; the reference absorbs the forward dependency. *This is where the tree fails today — the specs define before they motivate; the why sits at the bottom of the files, where comprehension arrives last.* Not yet tested; the README is the first file written by it.
-
-- **Folds compose only by reference** — one home, many paths. **Status is part of the writing.** **Shallow** — two levels, three at most.
-
-*Open, honestly:* whether every fold really carries every ring, or only the entry; what the proven instruction set is — this is the shape, not yet the method. One method finding stands (2026-08-23, the blind-variant experiment): prose regenerated from a proposition inventory converges on the inventory's own wording — a tightly compressed proposition *is* prose, so the brief's compression level sets the writer's freedom; loosen the inventory and vary the entry angle to buy real variance. Earlier ground, still standing (refined 2026-08-22 from the transcript round):
-
-- **Folds are closures.** What is established inside doesn't exist outside; a reference is a thread to pull, not a failure. The code-side anchor for why comprehension can grow bite-wise at all — and why a context, which cannot be refactored, needs folds in the first place.
-- **The entry has two forces.** From the top, something inviting — a reader must *want* in; from the bottom, everything properly in place. How they meet is not yet known. And the window's start is not ours to write — the harness occupies it; first words seem to weigh more, though not always, since they compress too.
-- **Two acceptance tests.** A senior reader finishes with *no questions* — disagreement is permitted residue; an unanswerable question is the failure. And a fresh session bootstraps against everything and can be trusted.
-- **Registers weight epistemic status.** Spec is law, research is structured-but-uncommitted, sketches are held-open ideas — kept apart so a reader, agent or person, knows what is meaningful before reading it.
-- **Hierarchy is the accepted compromise**, not the nature of knowledge — a knowledge structure has no top, just a field of relations; the entry point is the price paid, and worth paying. It is what this project's own substrate exists to supersede.
+Superseded (2026-08-30). The principle this section sought is found and ratified: [`spec/research/knowledge/code.md`](spec/research/knowledge/code.md). The search continues beside it in [`spec/research/knowledge/study.md`](spec/research/knowledge/study.md) — the claims under test, their evidence, the method. This section's prior content is retired to git.
 
 ## Code
 
