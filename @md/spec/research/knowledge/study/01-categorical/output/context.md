@@ -50,4 +50,4 @@ Whether typed context beats prose for frontier readers (see [`structure.md`](str
 
 ---
 
-*Sources: [`aafbf4f4a32e619af`](../raw/aafbf4f4a32e619af.md) (the monolith fact-check, context science, the typed-compaction table) · [`a187277ed3a006fbc`](../raw/a187277ed3a006fbc.md) (memory commoditisation, the four capability tests, poisoning) · [`a7bfd40b8a7c7a61c`](../raw/a7bfd40b8a7c7a61c.md) (the GraphRAG evaluations and their folklore).*
+*Sources: [`aafbf4f4a32e619af`](../../../../sweep-2026-08/raw/aafbf4f4a32e619af.md) (the monolith fact-check, context science, the typed-compaction table) · [`a187277ed3a006fbc`](../../../../sweep-2026-08/raw/a187277ed3a006fbc.md) (memory commoditisation, the four capability tests, poisoning) · [`a7bfd40b8a7c7a61c`](../../../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md) (the GraphRAG evaluations and their folklore).*

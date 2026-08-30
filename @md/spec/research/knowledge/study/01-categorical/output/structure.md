@@ -56,4 +56,4 @@ The crux experiment does not exist: no head-to-head of LLM-assisted, human-*decl
 
 ---
 
-*Sources: [`aa5f5baaa66cc8bf1`](../raw/aa5f5baaa66cc8bf1.md) (the stress-test: verdict, decision rule, folklore audit on both sides) · [`ab601f5a0087e7fc8`](../raw/ab601f5a0087e7fc8.md) and [`af750ce80e754223b`](../raw/af750ce80e754223b.md) (the docs-for-agents nulls, the localisation mechanism, the noise floor) · [`a5e1231b95c4c9ac5`](../raw/a5e1231b95c4c9ac5.md) (the schemas-matter/prose-doesn't through-line).*
+*Sources: [`aa5f5baaa66cc8bf1`](../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) (the stress-test: verdict, decision rule, folklore audit on both sides) · [`ab601f5a0087e7fc8`](../../../../sweep-2026-08/raw/ab601f5a0087e7fc8.md) and [`af750ce80e754223b`](../../../../sweep-2026-08/raw/af750ce80e754223b.md) (the docs-for-agents nulls, the localisation mechanism, the noise floor) · [`a5e1231b95c4c9ac5`](../../../../sweep-2026-08/raw/a5e1231b95c4c9ac5.md) (the schemas-matter/prose-doesn't through-line).*

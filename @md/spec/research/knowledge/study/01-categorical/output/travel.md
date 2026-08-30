@@ -36,4 +36,4 @@ Any true replication of the stickiness study; the mirroring hypothesis beyond fi
 
 ---
 
-*Sources: [`abdf5bfa14a7ddd82`](../raw/abdf5bfa14a7ddd82.md) (the whole lane: stickiness, absorptive capacity, Carlile, Conway, the ceiling, and the restatement) · [`abeeefde341d33a2d`](../raw/abeeefde341d33a2d.md) (the DORA construct year by year, primary-sourced) · [`a5e1231b95c4c9ac5`](../raw/a5e1231b95c4c9ac5.md) (the documentation-effectiveness through-line).*
+*Sources: [`abdf5bfa14a7ddd82`](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md) (the whole lane: stickiness, absorptive capacity, Carlile, Conway, the ceiling, and the restatement) · [`abeeefde341d33a2d`](../../../../sweep-2026-08/raw/abeeefde341d33a2d.md) (the DORA construct year by year, primary-sourced) · [`a5e1231b95c4c9ac5`](../../../../sweep-2026-08/raw/a5e1231b95c4c9ac5.md) (the documentation-effectiveness through-line).*

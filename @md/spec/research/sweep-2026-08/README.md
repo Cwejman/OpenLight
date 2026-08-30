@@ -1,10 +1,10 @@
 # The sweep, raw — 2026-08-26
 
-*Research register. The unedited final reports from the agent sweep, kept so any compression of them is checkable rather than trusted. [`../landscape.md`](../landscape.md) is one such selection — the ecosystem map; a second, `evidence.md`, scored the findings against the code's earlier rule set and was retired to git (2026-08-28) when that set was superseded. Two readings under [`../knowledge/code.md`](../knowledge/code.md) now exist: [`findings/`](findings/README.md) — the findings folded by subject, for decisions (2026-08-28) — and [`encounters.md`](encounters.md) — the same corpus as a walk among the people and works, for engagement (2026-08-29); both proof-of-concept structures built under the code, awaiting the author's read. How all of this came about — the sweep's commission and briefs, both readings' derivations, prompts verbatim — is [`method.md`](method.md).*
+*Research register. The unedited final reports from the agent sweep, kept so any compression of them is checkable rather than trusted. [`../landscape.md`](../landscape.md) is one such selection — the ecosystem map; a second, `evidence.md`, scored the findings against the code's earlier rule set and was retired to git (2026-08-28) when that set was superseded. Two readings under [`../knowledge/code.md`](../knowledge/code.md) exist as labs of [the study](../knowledge/study/README.md): [`01-categorical/`](../knowledge/study/01-categorical/output/README.md) — the findings folded by subject, for decisions (2026-08-28) — and [`02-encounters/`](../knowledge/study/02-encounters/output.md) — the same corpus as a walk among the people and works, for engagement (2026-08-29); each lab carries its own method record beside its output. How the sweep itself came about — commission, briefs, harvest, verbatim — is [`method.md`](method.md).*
 
 Each file in `raw/` is one agent's final report, named by its run id. Reports were written to a fixed skeleton — headline, map, load-bearing findings with URL and date, what moved, what could not be established, leads — so the sections most often dropped in compression (the leads, the negative findings, the precise N values) are here in full.
 
-**The named runs.** The rest of `raw/` is sub-agents these spawned; their topics are not recorded.
+**The named runs.** `raw/` holds 45 files: the 18 named below and 27 sub-agents these spawned, whose topics are not recorded. (Audited 2026-08-30: one run this table once named, `a26e3386afa704453` — information architecture, first run — has no file in `raw/`; it did not survive the harvest's size filter, and its lane's surviving report is the corrective sweep named below.)
 
 | id | subject |
 |---|---|
@@ -21,7 +21,7 @@ Each file in `raw/` is one agent's final report, named by its run id. Reports we
 | `aa5f5baaa66cc8bf1` | adversarial stress-test of the structure thesis |
 | `a3f4c332843acf946` | citation verification — the folklore audit |
 | `a26ae7e524c53262a` | documentation systems; Diátaxis and its critics |
-| `a26e3386afa704453` | the same, first run — information architecture |
+| `ae8fc467393dd0407` | information architecture — the corrective card-sorting sweep |
 | `af3e6b7e48703f0a0` | how professionals actually read technical documents |
 | `a57740ddd62e39ab6` | server-driven UI at scale; the low-code market |
 | `a458ace67969949f3` | schema-driven UI; component contracts as data |

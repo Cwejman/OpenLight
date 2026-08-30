@@ -44,7 +44,7 @@ The specs are state; everything else is an event. A ratification record, a feedb
 
 ## Knowledge structure
 
-Superseded (2026-08-30). The principle this section sought is found and ratified: [`spec/research/knowledge/code.md`](spec/research/knowledge/code.md). The search continues beside it in [`spec/research/knowledge/study.md`](spec/research/knowledge/study.md) — the claims under test, their evidence, the method. This section's prior content is retired to git.
+Superseded (2026-08-30). The principle this section sought is found and ratified: [`spec/research/knowledge/code.md`](spec/research/knowledge/code.md). The search continues beside it in [`spec/research/knowledge/study/README.md`](spec/research/knowledge/study/README.md) — the claims under test, their evidence, the method. This section's prior content is retired to git.
 
 ## Code
 

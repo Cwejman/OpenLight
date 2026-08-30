@@ -1,6 +1,6 @@
 # Method: how this directory came about
 
-*Research register. The chain of custody for everything in `sweep-2026-08/` — what was asked, verbatim, at each stage, so the method can be judged, repeated, and improved rather than re-invented. Three stages: the sweep that produced [`raw/`](raw/) (2026-08-26→27), the categorical reading that produced [`findings/`](findings/README.md) (2026-08-28), and the narrative reading that produced [`encounters.md`](encounters.md) (2026-08-29). Stage 1 was recovered forensically from the session transcript on 2026-08-29 (session `7c9850eb-615c-4ccb-9977-a87825ae42e1`, in the local Claude Code project directory; line numbers below refer to it); one recovered brief was verified byte-for-byte against the transcript. Stages 2 and 3 are recorded by the session that performed them, prompts verbatim from its own context.*
+*Research register. The chain of custody for the sweep that produced [`raw/`](raw/) (2026-08-26→27), recovered forensically from the session transcript on 2026-08-29 (session `7c9850eb-615c-4ccb-9977-a87825ae42e1`, in the local Claude Code project directory; line numbers below refer to it); one recovered brief was verified byte-for-byte against the transcript. The corpus's two readings are labs in the study, and each carries its own record beside its output (moved there 2026-08-30): [`01-categorical/`](../knowledge/study/01-categorical/method.md) (2026-08-28) and [`02-encounters/`](../knowledge/study/02-encounters/prompt.md) (2026-08-29).*
 
 ---
 
@@ -68,78 +68,6 @@ All sweep agents: the `Agent` tool, `subagent_type: "general-purpose"`, `model: 
 
 ---
 
-## Stage 2 — the categorical reading (2026-08-28): how `findings/` came about
-
-Performed in a single session, in-context — the deliberate opposite of the sweep's fan-out. The author's ruling, on the proposal to compress via subagents: subagents would be blank, compression needs an explicit strategy, and the cross-report connective tissue is exactly what compression loses — "perhaps what we want is to load all of this into the current context." So:
-
-1. The session bootstrapped per the README chain, measured the corpus (45 files, ~678 KB, ~150k tokens), and read **all 45 raw reports whole**, in batches, keeping a terse written inventory per report (subject, load-bearing findings, negatives, cross-links) as the anchor against single-pass reasoning.
-
-2. Fold boundaries were then cut by *subject* (the dive), not by run — the same finding often lived in three reports and got one home. An outline (entry + 12 folds, with per-fact home assignments) was written before any prose, per the conventions' outline-before-prose rule.
-
-3. The folds were written under [`code.md`](../knowledge/code.md): each opens with what it settles, ends with a "Not established" section, carries confidence in the sentences rather than a tag system (a deliberate experiment), and closes with a sources line into `raw/` whose link text says what following gives. Result: ~92 KB, ~12.9k words, ≈20k tokens — a 7:1 compression.
-
-The author's verdict on the result, same day: a real improvement, essentially the code's law at work — *"but it's been folded categorically; there isn't meaning."* The purification served the deciding reader and not the author's stated goal — engagement, connection outward, meaning that compounds. That verdict is what commissioned stage 3, and it made the code's open question "how orders branch by audience and outcome" concrete: same corpus, two outcomes, and the cut that serves one flattens the other.
-
----
-
-## Stage 3 — the narrative reading (2026-08-29): how `encounters.md` came about
-
-Design decisions, made in dialogue with the author before launch: a **fresh session with no project context** (the purity rule — the verdict framing of `findings/` must not contaminate the voice, and the session deliberately does not read the project tree at all, so the piece cannot become a reflection on night); **write from the raw alone, fetch nothing** (staged depth — the author's ruling that a link to an unknown still allows folds: the piece ships complete with unopened doors, and later sessions open them one at a time); and the author's request carried near-verbatim. The author also noted the known limitation going in: the session has little understanding of its one reader — which makes it a test of whether the code's mechanics produce engagement structurally, not a test spoiled.
-
-The complete prompt given to the fresh session (a `general-purpose` background agent), verbatim:
-
-```
-You are a fresh session with no prior context, deliberately. Bootstrap from named files
-only; do not read anything else in the repository — no README at the repo root, no spec
-tree, nothing beyond what is named here.
-
-Read, in order:
-
-1. `/Users/jcwejman/git/@x/night/@md/spec/research/knowledge/code.md` — the working law
-   your writing follows (folds, links, the two laws).
-2. `/Users/jcwejman/git/@x/night/@md/spec/research/sweep-2026-08/README.md` — what the
-   raw material is; its named-runs table orients you.
-3. All 45 files in `/Users/jcwejman/git/@x/night/@md/spec/research/sweep-2026-08/raw/` —
-   unedited research-agent reports from a web sweep, 2026-08-26. Read them whole.
-
-Then write, honoring this request from the author of the project these files belong to:
-
-"Bring me into contact with the existing research and other people's work in a way that
-engages me — meaning that compounds as I read. Not a scorecard of my project's claims;
-the project is only the shore I depart from. Write encounters: the people, their work,
-its arc and fate, in their own words where the raw carries them. Narrative is wanted —
-the raw itself records that story beats exposition by the widest margin in the
-literature."
-
-Constraints:
-
-- Write from the raw alone; fetch nothing from the web.
-- Where a work deserves to be read in its own voice and hasn't been, leave a link
-  standing in place (a real URL from the raw where one exists), with the sentence around
-  it saying what opening that door would give. The piece ships complete with unopened
-  doors; later sessions open them one at a time. A link is an offer, never a missing
-  piece — the text must read whole without it.
-- Every claim carries its confidence in the sentence, per the law in code.md; the raw
-  reports' own verification notes travel with any figure you repeat.
-- One piece, a single markdown file. Research register: structured, uncommitted. Choose
-  its name by what it turns out to be, and save it directly in
-  `/Users/jcwejman/git/@x/night/@md/spec/research/sweep-2026-08/` (not in raw/, not in
-  findings/ — do not read findings/ at all; it exists and would contaminate your cut).
-- Markdown convention: blank lines between list items.
-- Do not commit anything to git.
-
-The reader is one person: the project's author, who already holds their own project
-fully and wants to be connected outward — to the people and works of the wider world, in
-a way where each encounter gives the next one more meaning. They are the only test.
-
-When done, report back: the file's path and name, a one-paragraph account of the shape
-you chose and why, and what you deliberately left as unopened doors.
-```
-
-The session chose the walk-in-ten-movements form itself, citing the narrative finding in the raw as its license; ~6,700 words (≈9k tokens, a 16:1 compression), 23 outward links, doors left standing in place and in a closing section.
-
----
-
 ## What the chain teaches (held lightly, for the method to compound)
 
 - **Cleanroom briefs work.** Translating the project's claims into neutral terms and forbidding repo reads produced reports that test the thesis instead of echoing it — including reports that refute named claims outright, which is the point.
@@ -148,6 +76,6 @@ The session chose the walk-in-ten-movements form itself, citing the narrative fi
 
 - **The purification is not the meaning.** The same corpus yielded a 7:1 categorical reading and a 16:1 narrative one, serving different outcomes for different readers — the concrete instance of the code's open question on audience and outcome. Neither reading replaces the other or the raw.
 
-- **A link to an unknown is load-bearing.** The staged-doors rule let stage 3 ship whole without charting everything — coverage became a growth path instead of a precondition.
+- **A link to an unknown is load-bearing.** The staged-doors rule let the narrative reading ship whole without charting everything — coverage became a growth path instead of a precondition.
 
-- **Provenance decays fast.** Stage 1's method was recoverable only because the transcript still existed, two days later, and recovering it took a forensic pass. Recording the method at the moment of the work — as this file now does for stages 2 and 3 — is the cheap version of what stage 1 made expensive.
+- **Provenance decays fast.** Stage 1's method was recoverable only because the transcript still existed, two days later, and recovering it took a forensic pass. Recording the method at the moment of the work — as the study's lab records now do — is the cheap version of what stage 1 made expensive.

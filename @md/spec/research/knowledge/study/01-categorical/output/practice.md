@@ -28,4 +28,4 @@ Any study varying human-facing information architecture (page kinds, heading dep
 
 ---
 
-*Sources: [`a26ae7e524c53262a`](../raw/a26ae7e524c53262a.md) (Diátaxis at full strength, the Pigweed failure, the title-chain verification) · [`a5e68a671a08e519a`](../raw/a5e68a671a08e519a.md) (DITA's bus factor, minimalism's replication line) · [`a86776519f614dd3a`](../raw/a86776519f614dd3a.md) (the institutional state: STC, iiRDS, the folklore ROI family) · [`a1c816c1f7cbcfdf9`](../raw/a1c816c1f7cbcfdf9.md) (the AI turn: llms.txt, traffic, retrieval results, Intercom).*
+*Sources: [`a26ae7e524c53262a`](../../../../sweep-2026-08/raw/a26ae7e524c53262a.md) (Diátaxis at full strength, the Pigweed failure, the title-chain verification) · [`a5e68a671a08e519a`](../../../../sweep-2026-08/raw/a5e68a671a08e519a.md) (DITA's bus factor, minimalism's replication line) · [`a86776519f614dd3a`](../../../../sweep-2026-08/raw/a86776519f614dd3a.md) (the institutional state: STC, iiRDS, the folklore ROI family) · [`a1c816c1f7cbcfdf9`](../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md) (the AI turn: llms.txt, traffic, retrieval results, Intercom).*

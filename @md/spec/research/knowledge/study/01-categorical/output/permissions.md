@@ -38,4 +38,4 @@ No published argument *for* shallow/non-transitive permission exists — the evi
 
 ---
 
-*Sources: [`aea19b144c46bfc26`](../raw/aea19b144c46bfc26.md) (Zanzibar verbatim, the clone landscape, the oversharing record — the deepest permission report) · [`abffcf492c6f3d77d`](../raw/abffcf492c6f3d77d.md) (Fluree, Willow/Meadowcap, RLS, Cedar, and the four-claim test) · [`adc9dab44aefdde97`](../raw/adc9dab44aefdde97.md) (the transitivity-rots evidence across knowledge bases).*
+*Sources: [`aea19b144c46bfc26`](../../../../sweep-2026-08/raw/aea19b144c46bfc26.md) (Zanzibar verbatim, the clone landscape, the oversharing record — the deepest permission report) · [`abffcf492c6f3d77d`](../../../../sweep-2026-08/raw/abffcf492c6f3d77d.md) (Fluree, Willow/Meadowcap, RLS, Cedar, and the four-claim test) · [`adc9dab44aefdde97`](../../../../sweep-2026-08/raw/adc9dab44aefdde97.md) (the transitivity-rots evidence across knowledge bases).*

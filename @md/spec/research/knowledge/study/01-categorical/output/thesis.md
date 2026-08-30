@@ -48,4 +48,4 @@ VC theses, academic venues (PLDI/UIST/Onward!/Hypertext 2025–26), arXiv positi
 
 ---
 
-*Sources: [`a09867b88abcb610b`](../raw/a09867b88abcb610b.md) (the neighbour census, claim-by-claim, and opposition — the leads list there is unusually good) · [`aa5f5baaa66cc8bf1`](../raw/aa5f5baaa66cc8bf1.md) (the adversarial stress-test behind the restatement) · [`aafbf4f4a32e619af`](../raw/aafbf4f4a32e619af.md) (the monolith-claim fact-check).*
+*Sources: [`a09867b88abcb610b`](../../../../sweep-2026-08/raw/a09867b88abcb610b.md) (the neighbour census, claim-by-claim, and opposition — the leads list there is unusually good) · [`aa5f5baaa66cc8bf1`](../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) (the adversarial stress-test behind the restatement) · [`aafbf4f4a32e619af`](../../../../sweep-2026-08/raw/aafbf4f4a32e619af.md) (the monolith-claim fact-check).*

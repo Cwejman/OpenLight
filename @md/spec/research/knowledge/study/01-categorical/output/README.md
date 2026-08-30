@@ -1,10 +1,10 @@
 # The sweep's findings
 
-*Research register: structured, uncommitted. Derived 2026-08-28 from all 45 raw reports, read whole in one session, written under [the code](../../knowledge/code.md) — and the first structure built under it, so its shape is itself an experiment the code's *Open* section is waiting on.*
+*Research register: structured, uncommitted. Derived 2026-08-28 from all 45 raw reports, read whole in one session, written under [the code](../../../code.md) — and the first structure built under it, so its shape is itself an experiment the code's *Open* section is waiting on.*
 
 The sweep of 2026-08-26 sent agents across every territory night's claims touch. What came back is ~150k tokens of raw reports — checkable, but not readable as ground. This directory is that reading: the findings folded by subject, so that a decision in the specs or in the code can stand on what the world actually established, at the confidence it actually established it.
 
-Each file is a fold: it opens with what it settles, reads complete on its own, and ends with what could not be established. Confidence is carried in the sentences — "one study, N=17" and "vendor-claimed" mean exactly that — and every fold closes with a sources line into [`../raw/`](../raw/), where the unedited reports keep the leads, the negative findings, and the precise numbers.
+Each file is a fold: it opens with what it settles, reads complete on its own, and ends with what could not be established. Confidence is carried in the sentences — "one study, N=17" and "vendor-claimed" mean exactly that — and every fold closes with a sources line into [`../raw/`](../../../../sweep-2026-08/raw/), where the unedited reports keep the leads, the negative findings, and the precise numbers.
 
 ## The map
 
@@ -46,6 +46,6 @@ Most agents exhausted their web-search budgets and fell back to direct fetches, 
 
 ## Coverage
 
-All 45 files in `raw/` are folded. One discrepancy: the sweep README's named-runs table lists `a26e3386afa704453` ("information architecture, first run") and no such file exists in `raw/` — either lost or a mistyped id; its subject is covered by the revised run ([`ae8fc467393dd0407`](../raw/ae8fc467393dd0407.md)), so the loss is likely small, but the coverage claim is qualified by it.
+All 45 files in `raw/` are folded. One discrepancy: the sweep README's named-runs table lists `a26e3386afa704453` ("information architecture, first run") and no such file exists in `raw/` — either lost or a mistyped id; its subject is covered by the revised run ([`ae8fc467393dd0407`](../../../../sweep-2026-08/raw/ae8fc467393dd0407.md)), so the loss is likely small, but the coverage claim is qualified by it.
 
-Not folded, deliberately: the per-report leads lists (they live in raw, and are leads, not findings); run-level method notes beyond the two cautions above; market financial detail beyond what grounds a decision (raw keeps it); and the sister-study coverage map ([`a583337921a4f7975`](../raw/a583337921a4f7975.md)), which describes the pre-rebuild code and the hjulverkstan chart — superseded as framing by the current [`code.md`](../../knowledge/code.md), consult it only for the chart's open-question list.
+Not folded, deliberately: the per-report leads lists (they live in raw, and are leads, not findings); run-level method notes beyond the two cautions above; market financial detail beyond what grounds a decision (raw keeps it); and the sister-study coverage map ([`a583337921a4f7975`](../../../../sweep-2026-08/raw/a583337921a4f7975.md)), which describes the pre-rebuild code and the hjulverkstan chart — superseded as framing by the current [`code.md`](../../../code.md), consult it only for the chart's open-question list.

@@ -1,6 +1,6 @@
 # The code
 
-*Ratified (author, 2026-08-30). The search around the code — the claims under test, their evidence, the method — lives in [`study.md`](study.md).*
+*Ratified (author, 2026-08-30). The search around the code — the claims under test, their evidence, the labs — lives in [`study/`](study/README.md).*
 
 The code is a set of working rules for how knowledge is written and arranged so that it reaches whoever needs it next. This document states its core — why it exists, one limit, two primitives, two laws — and names what is still open.
 
