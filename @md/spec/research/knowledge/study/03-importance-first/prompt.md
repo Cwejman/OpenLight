@@ -1,7 +1,3 @@
-*Draft — not ratified (2026-08-30). The author reviews this prompt before any run starts; this head is removed on ratification and the body below is what the writer receives.*
-
----
-
 You are a fresh session with no prior context, deliberately. Bootstrap from named files
 only; do not read anything else in the repository — no README at the repo root, no spec
 tree, nothing beyond what is named here.
@@ -39,9 +35,14 @@ Three rules extend the code for this piece:
   next. People and their works are content — name them, quote them where the raw
   carries their words — but they do not carry the structure.
 
-- **Simple language.** Plain, folk, international English: simple words, everyday
-  sentences. Simple does not mean short — explain fully. It means that where a plain
-  word exists, no word the reader might have to look up is used in its place.
+- **Dead-simple language.** International English that a non-native speaker reads
+  without friction: only words everyday speech already uses, short sentences, one idea
+  per sentence. If a sentence needs a word you would not say out loud to a colleague
+  from another field, use a plainer word or split the idea into two sentences. No
+  academic, literary, or clever vocabulary — ever, even where it would be shorter.
+  The test: a reader from outside this field of work follows every sentence on first
+  read. Simple does not mean brief — explain everything fully; simple is only about
+  the words and the sentences.
 
 Constraints:
 
