@@ -78,6 +78,12 @@ The discriminating test — the first lab, [`03-importance-first/`](03-importanc
 
 Matures when: a candidate survives a discriminating test and holds across repeated reading experience.
 
+## Observations toward the first proof
+
+What the labs' free choices show about the shape in practice. These harvest into the first proof; none is a rule yet.
+
+- **Flat is the default topology** (lab 03, 2026-08-31, observed by the author before reading the prose): seven sections, no subheading anywhere — each section one fold, details in-line rather than nested. The code says a fold can be a section inside a file, but nowhere is it legible that *nesting is folding*: the surface of a fold holds only what the fold needs, and detail drops a level down — subheadings, or separate files when the content is large — where the link is proximity and skippability rather than a reference. "Detail folds toward the edges" gets read as later sections, not deeper levels. Ridden in [`04-importance-first-nested/`](04-importance-first-nested/prompt.md) (cut 2026-08-31): the same prompt as lab 03 plus a fourth rule — folds have two media, subheadings folding detail downward where the hierarchy fits.
+
 ## Standing method findings
 
 Settled by repetition; they feed the first proof's stewarding rules:
