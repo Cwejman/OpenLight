@@ -22,7 +22,9 @@ The word must work in live speech — a workshop, an agent session — the way f
 
 - **Ground** has the richest idiom family: *cover ground* (work through it), *break new ground* (open a new unit), *go over that ground again* (re-read), *common ground* (shared understanding), *ground that claim* (give it its why), *on solid ground* (trusted). Weaker at the making act — "ground it" stretches.
 
-- **Passage** carries navigation but not making: *pass over* (skip), *pass through* (read), *pass on* (hand to the next). No verb for compressing work into one.
+- **Passage** speaks the navigation of live work, which is the register a session actually uses while it moves (author's catch): *enter a new passage*, *go back to the previous passage*, *we're in this passage now* — plus *pass over* (skip), *pass through* (read), *pass on* (hand to the next). Still no verb for the making — compressing work into one.
+
+- So the three split by register: **passage** speaks the moving, **ground** the standing, **brief** the handing.
 
 - Noted for whichever word wins: the open-up act already has a universal dialog verb — *unpack* ("let's unpack that") — and capsule's verb *encapsulate* is the one live folk-technical verb for the compress act, even with the noun set aside.
 
