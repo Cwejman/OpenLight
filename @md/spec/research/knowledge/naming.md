@@ -14,6 +14,18 @@ Less than it once seemed. Two rulings narrowed the search: the whole-that-is-par
 
 - **Brief.** Latin *brevis* (short) → *breve*, an official short writing that stands for a larger matter: the papal brief, the legal brief — a whole case compressed for someone who must act on it. The living verb is the point: *to brief someone* is to hand them, quickly, the understanding they need to act — compressed hand-over in one word. Its flaw: shortness implies things were left out, and the unit keeps everything within.
 
+## The dialog test (author, 2026-09-01)
+
+The word must work in live speech — a workshop, an agent session — the way fold was brutally used: fold that down, fold it in, fold it up. A name that only works on paper fails; the mechanics get navigated out loud, so the name needs a working verb family. The candidates, tested:
+
+- **Brief** has the strongest verb family, and it is exact: *brief me* is handing the essence (reading the surface, in one act of speech), *debrief* is harvesting a finished stretch into the unit — the fold-down act already has a folk verb — and *briefed* names the state of holding it. "Debrief this session into a brief" is a complete instruction today.
+
+- **Ground** has the richest idiom family: *cover ground* (work through it), *break new ground* (open a new unit), *go over that ground again* (re-read), *common ground* (shared understanding), *ground that claim* (give it its why), *on solid ground* (trusted). Weaker at the making act — "ground it" stretches.
+
+- **Passage** carries navigation but not making: *pass over* (skip), *pass through* (read), *pass on* (hand to the next). No verb for compressing work into one.
+
+- Noted for whichever word wins: the open-up act already has a universal dialog verb — *unpack* ("let's unpack that") — and capsule's verb *encapsulate* is the one live folk-technical verb for the compress act, even with the noun set aside.
+
 ## Weighed and set aside
 
 - **Lemma** — the last surviving word that holds the full structure in one piece: statement at the surface, proof kept within, taken (the Greek root: *the thing taken*) so the next person builds on it without re-reading, nesting at every scale. Set aside because it is non-folk and, worse, means different things in different fields (math's proven result, linguistics' headword). Modern English split its meaning into *takeaway* (the taking), *a given* (the taken-for-granted), and *result / finding / fact* (the settledness) — and none of the fragments kept surface-with-depth.
