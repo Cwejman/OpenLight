@@ -114,6 +114,8 @@ Settled by repetition; they feed the first proof's stewarding rules:
 
 ## Notes
 
+- The unit's name is under search — [`naming.md`](../naming.md) holds the live candidates (passage, ground, brief) and the sweeps behind them; "fold" stays in use until the ruling.
+
 - The sibling study ground is hjulverkstan (`~/git/hjulverkstan/wiki/drafts/` — the ladder, the study, the chart). The two searches cross-pollinate; neither is the other's authority.
 
 - The sweep's three artifacts ([`findings/`](01-categorical/output/README.md), [`encounters.md`](02-encounters/output.md), [`method.md`](../../sweep-2026-08/method.md)) await the author's read; [`landscape.md`](../../landscape.md) is kept as ore, to be re-read critically rather than trusted.
