@@ -1,6 +1,6 @@
 # The study
 
-The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`07-refinements/code.md`](07-refinements/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
+The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`07-breakdown/code.md`](07-breakdown/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
 
 ## 1. The finish line
 
@@ -14,7 +14,7 @@ The search ends when the proof is lived, not argued. Three marks:
 
 ## 2. Where the search stands
 
-Six labs run, a seventh open, and the reading queue is the bottleneck: the author's cold reads of labs 03–06 are owed, and most open claims wait on them.
+Six labs run, a seventh cut and awaiting launch, and the reading queue is the bottleneck: the author's cold reads of labs 03–06 are owed, and most open claims wait on them.
 
 - **Labs 01–02 are the baseline pair.** The same corpus cut categorically ([`findings/`](01-categorical/output/README.md)) and as a narrative walk ([`encounters.md`](02-encounters/output.md)). The first informed but did not engage; the second engaged. Every later reading is judged against these two.
 
@@ -22,7 +22,7 @@ Six labs run, a seventh open, and the reading queue is the bottleneck: the autho
 
 - **Lab 06 changed the delivery.** The prompt went bare, and a full edition of the code — grown with principles, the unit renamed brief — became the writer's primary instruction. The output, [`The ground others hold`](06-principles/output.md) (~5,200 words), is the leanest reading yet.
 
-- **Lab 07 is open and accumulating.** [Its edition](07-refinements/code.md) takes what the 06 read yields. The first refinement is in: the brief as the unit of change, with [first evidence](07-refinements/evidence.md) from the 06 writer's own edit log.
+- **Lab 07 is the breakdown test**, cut 2026-09-02 and awaiting launch. The team's read of 06 found one shape recurring: a slim surface followed by bold-led bullets, the only place bullets appear at all, at every heading level. That shape is a brief whose nested briefs never got their headings, so every win arrives at one depth in one serving. The lab reworks the 06 output one level deeper — wins lifted into the surface as prose, the remainder dropped into nested briefs — with the content held fixed so the structure is the only variable. The instruction lives in [its prompt](07-breakdown/prompt.md), not in the code: whether it becomes a rule is what the lab is for. [Its edition](07-breakdown/code.md) also carries the first refinement the 06 read yielded — the brief as the unit of change, with [first evidence](07-breakdown/evidence.md) from the 06 writer's own edit log — and the rework exercises exactly that rule.
 
 After the labs, in order: **the markdown practice** — how the code works in files and folders, deliberately unwritten until the labs' recurring choices can be harvested — and **the grounds** — the studies behind each rule and the refinements still owed. Both stand as empty links in the code's closing section, and then comes mark 2: the spec tree itself.
 
@@ -30,7 +30,7 @@ After the labs, in order: **the markdown practice** — how the code works in fi
 
 A lab is one directory beside this file, `<nn>-<name>/`, and since lab 06 it ships three things:
 
-- **Its code edition** (`code.md`) — the full law the writer follows, extended as if the lab's claims were always its own. The code carries everything; the prompt carries nothing but mechanics.
+- **Its code edition** (`code.md`) — the full law the writer follows, extended as if the lab's claims were always its own. The code carries everything; the prompt carries nothing but mechanics. The exception is a lab that *tests* a candidate rule rather than adopting one: there the candidate stays in the prompt, so a rule the lab may reject never enters the law (lab 07).
 
 - **Its prompt** (`prompt.md`) — bootstrap, the author's request, constraints. Both files are written before the run, so together they are the method record by construction.
 
@@ -48,7 +48,7 @@ Three rules keep a lab honest:
 
 What the search believes lives in the latest edition, nowhere else. What it waits on lives here:
 
-- **The cold reads of 03–06** — the deciding evidence for the editions' engagement and language principles. Each verdict lands as a refinement in the next edition, with its evidence recorded beside it, as [07's first](07-refinements/evidence.md) was.
+- **The cold reads of 03–06** — the deciding evidence for the editions' engagement and language principles. Each verdict lands as a refinement in the next edition, with its evidence recorded beside it, as [07's first](07-breakdown/evidence.md) was.
 
 - **Labs to cut**: the research-allowed A/B — does lifting the raw-alone wall restore the depth the 04 verdict found missing ([issue #1](https://github.com/Cwejman/OpenLight/issues/1)); the relaxation of the order law's recursion, a later study; and, should structure alone fall flat in the reads, the combined arm — structure plus narrative.
 
