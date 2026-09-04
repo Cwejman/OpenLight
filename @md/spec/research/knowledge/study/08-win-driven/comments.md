@@ -1,32 +1,34 @@
 # Comments: what lab 08's edition still owes
 
-*Working record, purified 2026-09-04, after §4 was recut around six kinds. Only what is still open. Strength: **reasoned** throughout; these are the steward's reads, not a cold reader's. The author's session ratifies the edition with the context it holds.*
+*Working record, rewritten 2026-09-05 after the lab took one shape: the edition ([`code.md`](code.md)) with the author's §1 to §3 and a §4 that points at the ontology; the ontology ([`ontology.md`](ontology.md)), the one home for what the words mean and the current arc; its evidence ([`evidence-series.md`](evidence-series.md)); and this file. Session history is the git log, so no prompt record is kept. Only what is still open. Strength: **reasoned** throughout; these are the steward's reads, not a cold reader's.*
 
-## 1. What §4 now carries, and what it retires
+## 1. Owed to the edition
 
-**The ontology has its own home now.** [`ontology.md`](ontology.md) carries the five fundamentals and what derives from them, written on the author's instruction after §4 was cut into the edition by mistake. Two homes for one ontology breaks law 2, so at ratification §4 should shrink to a pointer at the file, or the file should absorb whatever §4 says better. The steward's read: the file is purer, since it separates fundamentals from derived kinds and names what is left out; §4 is the graded reading of the same set for someone who will not open the file.
+**Elevation.** §4 is a pointer. When the author decides, the edition takes from the ontology what a reader who will not open it needs, graded, and the rest stays pointed at. Until then the edition is §1 to §3 and the pointer, and that is a complete document.
 
-§4 is the ontology as one graded list: the holon, two relations, the knower, the win, amplification, the trail. Each stands on the one before. The 07 edition's compounds fold into it without remainder: law 1 is §4.4 read in the knower's time, law 2 is §4.5's cost, principle 6 is §4.2's last paragraph, principles 1 and 3 are §4.4's shape. So the edition needs no separate laws or principles sections; what §4 does not carry belongs to the markdown practice. This is the steward's read of the author's instruction to discompound, and the first thing the ratifying read should confirm or refuse.
+**§1's forward sentence.** *This is broken down further as the document progresses.* Could now name the ontology. Left as written because §1 is the author's prose.
 
-## 2. Author's calls on §4
+**Knowledge against information.** Now the second relation of comprehension in the ontology. Reasoned, not observed; a cut candidate if a cold reader finds it a detour.
 
-**The word knower.** New. Chosen as the general word for person-or-model where 07 said reader and the README says citizen. It is folk and it names the role by what it does. Alternatives, if it grates: reader, holder, citizen.
+## 2. Owed to the ontology
 
-**Where the trail sits.** Commits, comments and spaces are hosted as the sixth kind, on the reading that all three are writes by a knower kept in time, and a comment is a holon standing on another. It is the smallest win of the six and comes last. If the author sees the space as its own kind rather than the trail's container, §4.6 splits in two.
+**The cold read.** Nothing in it has been read cold. Every relation is marked reasoned, and the two that are marked observed are the backlink and the fresh-head finding.
 
-**Knowledge against information (§4.3).** Kept from the first cut, now inside the knower. Reasoned, not observed.
+**Words that entered before their names.** Knower, trail, prism, space, and the two relation names within and upon, each saying so in its last relation. Each waits for a cycle that either settles the word or replaces it; the notions stand.
 
-**The citation form.** *[Quine 1948]*, *[Koestler 1967]* appear in §4 as the code's own principle at work: a link to the holon nobody wrote. Plain text, so addressable but not followable until the brief exists.
-
-**§1's forward sentence.** *This is broken down further as the document progresses.* Could now name §4. Left as written because §1 is the author's prose.
+**Field.** Decided as the typed successor's name, the README's word, against the steward's draft, which used field for the sum of all holons. If the author reads field the draft's way, the medium entry's last relation changes and nothing else.
 
 ## 3. For the markdown practice
 
 **The surface is declared by position, not by markup.** A brief's why needs no italics, bold or blockquote. The heading carries the depth and the first paragraph after it carries the role, so a renderer can style both without the author annotating anything, and marking it would put one fact in two homes. Markdown's three emphasis tools do not help here in any case: italic and blockquote point down in importance, and bold is the only up-signal and fails at scale.
 
-*The rule this buys, and its price:* if position declares the surface, position must be reliable. **A brief may never open with a list, a table or a quote.** The first thing after a heading is always the prose that carries the why. §4 keeps to it: no list anywhere in the section.
+*The rule this buys, and its price:* if position declares the surface, position must be reliable. **A brief may never open with a list, a table or a quote.** The first thing after a heading is always the prose that carries the why. The ontology keeps to it: no list anywhere in it.
 
-**The everyday word leads, the exact term follows in parentheses.** *What knowledge is (its ontology), and what shape it takes (its topology).* Serves the reader who needs plain language and the one who wants the precise name, in one sentence.
+**The everyday word leads, the exact term follows in parentheses.** *What knowledge is (its ontology), and what shape it takes (its topology).* Serves the reader who needs plain language and the one who wants the precise name, in one sentence. Since the language rule moved (the ontology's entry Word), the exact term may stand alone where its meaning is exact and can be looked up.
+
+**A relation's title reads whole from the other end.** Found in the taxonomy study ([`evidence-series.md`](evidence-series.md), *What the other side shows*). When a brief's heading names what it stands on, as a prose title with the ground word linked, the heading above it is the subject and the title is the predicate: "Amplify: feeds on ground". That is exactly what a frontend shows for a reverse link, the parent heading, the title and the first paragraph, so the markdown holds one direction only and a backlink is derived, never written. The price is the rule: a title that links must read as a sentence from the linked word's side, and a title that does not link is a property, which is right, since it never appears in anyone's trail. Hand-written backlink lists were tried and cut; they hand no win and copy what the titles already hold. Reasoned, checked against sixty-five titles, no cold read.
+
+**A title names what the brief is for, one level above what it says.** The rule above was first titled "the title and first paragraph must backlink", and the author struck it: it names the content, not the purpose. Retitled *Can be found from the ground it names*, which says what the rule achieves and leaves the mechanism to the paragraph. This is law 1 at the heading: purpose before machinery, so the reader decides from the title alone and the paragraph is free to change. The author's grounding for it is the standard for naming functions: a name that restates the implementation is clear, searchable and wrong, because it should say what the implementation is for; keep the name one level of abstraction above the code (a short video on naming standards, the author's words are in git at d54a11d, `prompt.md`, 2026-09-04). Observed in one title; the ontology's other titles were written before the rule and not yet read against it.
 
 **Holarchy, not holonarchy.** Koestler's own word for the nesting is *holarchy* [Koestler 1967]. The 07 edition has the longer form and should give it up when it is next touched.
 
@@ -34,8 +36,4 @@
 
 **Bracket citations as links.** *[Author year]* in running text is the practice's citation form. When the brief exists, the bracket becomes a markdown link to it; until then it stays text.
 
-**Section references in running text.** §4 refers upward with a section sign and a heading anchor on every use, so no paragraph depends on an earlier one for its pointer. Whether every use or only the first should carry the link is a team open ([issue #1](https://github.com/Cwejman/OpenLight/issues/1)).
-
-## 4. Sketch seeded here, not yet a sketch
-
-**The holon-list frontend.** The first holator, read-only: parse the markdown tree into a flat list of holons with address, surface, depth, parent, children and links out; compute the inverse of every link; show each holon with within, upon and stood-upon; show each commit and its changes browsed by the same relations; show comments as holons standing on what they comment, walkable by knower or by space. Centrality becomes measurable as the count of what stands on a holon, and the parked expand-and-collapse open unblocks since the page is ours. The existing `.wiki/` pandoc build knows files and folders only; the smallest step is a pass that emits the holon list as one JSON file. Belongs in [`sketches.md`](../../../../../sketches.md) when the author says so.
+**Section references in running text.** The ontology refers by anchor on every use, so no paragraph depends on an earlier one for its pointer. Whether every use or only the first should carry the link is a team open ([issue #1](https://github.com/Cwejman/OpenLight/issues/1)).
