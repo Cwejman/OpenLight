@@ -2,15 +2,15 @@
 
 *Rule of this document: every change is committed, and the commit is the ratification. A change is not proposed in conversation and folded later; whoever makes it commits it, standing on what it changes, and the other side ratifies by committing on it in turn. A session commits its ideas, the author ratifies, the session ratifies back. What was changed, by whom, on what ground, is then in the trail, and nothing here is settled by talk alone.*
 
-*Parallel study to lab 08, opened 2026-09-04 under the author's prompt ([`prompt.md`](prompt.md)). One file, and the file is a holarchy: the words are its parts, ordered by centrality, the win each gives, and each word breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. Every relation has one home, the side that depends, and nothing is said twice: what stands on a word follows it in the order, and who links to what is a trail for a frontend to show, not for the markdown to carry. The reading order, where each word is given before use, is [`series.md`](series.md); the two orders differ in three places, recorded there. Ratified 2026-09-05 against the steward's ontology of the code ([`../ontology.md`](../ontology.md)), which cuts the knowledge half of this list to five fundamentals, the holon, within, upon, the knower and the act, and derives the rest. That file is the purer home for the knowledge words, and this one keeps the arc's, interface down, standing on it. Three rulings the two files await together: knower against reader and citizen; trail as a kind, as the edition's §4.6 has it, or as an everyday word, as this file has it; and prism. A fourth the steward's file held open, one name for the whole, this file decides: the words are three because the things are three. The medium is prose in briefs and links, untyped, what the code runs on today. The field is its typed successor, the README's word, what the arc builds. A space is a region of either with a rule on who reads and who writes. Trail is used below as the everyday word for what the interface shows back, not as a word of the ontology; it was tried as one and withdrawn, and whether it earns a place is open. Strength: **reasoned**, steward-written, no cold read yet. The lab's edition ([`../code.md`](../code.md)) stays the law's home for the words it defines; from Interface down, the entries are the author's direction of 2026-09-04 and not yet the spec tree's, which still holds substrate and engine as tenets of their own.*
+*Parallel study to lab 08, opened 2026-09-04 under the author's prompt ([`prompt.md`](prompt.md)). One file, and the file is a holarchy: the words are its parts, ordered by centrality, the win each gives, and each word breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. Every relation has one home, the side that depends, and nothing is said twice: what stands on a word follows it in the order, and who links to what is a trail for a frontend to show, not for the markdown to carry. The reading order, where each word is given before use, is [`series.md`](series.md); the two orders differ in three places, recorded there. Ratified 2026-09-05 against the steward's ontology of the code ([`../ontology.md`](../ontology.md)), which cuts the knowledge half of this list to five fundamentals, the holon, within, upon, the knower and the act, and derives the rest. That file is the purer home for the knowledge words, and this one keeps the arc's, interface down, standing on it. Three words the two files awaited a ruling on, knower, trail and prism, entered on 2026-09-05 under a rule the author gave: a notion may enter with its name unsettled, and each such word says so in its last relation, with the reason, so a reader knows whether to rest on it. The same day the language principle moved: a word outside everyday English is allowed where its meaning is exact, because a word is the smallest holon and can be looked up; the entry Word carries it. One name the steward's file held open, one name for the whole, this file decides: the words are three because the things are three. The medium is prose in briefs and links, untyped, what the code runs on today. The field is its typed successor, the README's word, what the arc builds. A space is a region of either with a rule on who reads and who writes. Strength: **reasoned**, steward-written, no cold read yet. The lab's edition ([`../code.md`](../code.md)) stays the law's home for the words it defines; from Interface down, the entries are the author's direction of 2026-09-04 and not yet the spec tree's, which still holds substrate and engine as tenets of their own.*
 
 ## Comprehension
 
 Understanding a thing well enough to act on it. The one value the code measures everything by.
 
-### Lives in one bounded place
+### Lives in a [knower](#knower), and nowhere else
 
-A head, or a model's context, and neither holds everything. Knowledge is comprehension written down so it can form again in a place other than the one it first formed in.
+A head, or a model's context, and neither holds everything. Knowledge is comprehension written down so it can form again in a knower other than the one it first formed in.
 
 ### Is not information
 
@@ -19,6 +19,26 @@ Information is what is on the page; comprehension is what the page lets form. A 
 ### Compounds by joining
 
 An insight is worth more once it meets what the reader already holds, and two people's understandings are worth more again once they meet each other. The friction of that meeting, across roles, backgrounds and processes, is the whole reason for the code.
+
+## Knower
+
+Whoever comes to the knowledge and is changed by it: a person, or a model in a session. Bounded, and both reader and writer.
+
+### Is where [comprehension](#comprehension) lives
+
+Comprehension is the knower's state, holding a thing well enough to act on it, and it exists nowhere but in a knower. Knowledge is what lets it form again in another one.
+
+### Is bounded, which the whole code follows from
+
+A person forgets; a model's context fills and gets worse as it fills. So a knower holds what matters and reaches for the rest, and everything the code asks is written for a knower that cannot hold the whole.
+
+### Writes as well as reads
+
+Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first, and the one who knows a thing stops being the only way to it once it is written.
+
+### Is named for now, not settled
+
+The word is a day old, from the steward's edition. The code says reader, which fails for the writer; the README says citizen, which includes programs, and a program cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word, which a later cycle may replace.
 
 ## Win
 
@@ -70,7 +90,7 @@ When a stretch of work ends it is debriefed: the ground covered gives up its con
 
 ### Can be found from the [ground](#ground) it names
 
-The ground says nothing back. The [interface](#interface) shows, under the ground, every brief that names it, by title and first paragraph. So a title that links must read whole from the ground's side, as a sentence about the brief it belongs to.
+The ground says nothing back. The [trail](#trail) shows, under the ground, every brief that names it, by title and first paragraph. So a title that links must read whole from the ground's side, as a sentence about the brief it belongs to.
 
 ### Means what everyday speech means
 
@@ -112,13 +132,33 @@ The first thing a link does: it points at the ground a brief stands on, so a rea
 
 The second thing: for the reader who wants more than the brief says, the link is where more is.
 
-### Is read backward by the [interface](#interface), never written twice
-
-A link is written once, at the brief that stands on the ground, and the ground says nothing back. The interface reads the same links from the ground's side and shows, under a brief, everything that names it, so who stands on a brief is visible there and nowhere in the text. Writing that down would be a copy, and copies rot.
-
 ### Needs no target yet
 
 A pointer to a source unread or a question unanswered is the brief you did not write. The text reads whole, and the door stands for the day someone opens it.
+
+## Trail
+
+What leads to a brief: every brief that names it, and every change it has had. Never written, always derived.
+
+### Runs the [links](#link) backward
+
+A link is written once, at the brief that stands on the ground, and the ground says nothing back. The trail is the same links read from the ground's side: under a brief, everything that names it, each by its title and first paragraph.
+
+### Is shown by the [interface](#interface), never written in the [medium](#medium)
+
+The medium holds one direction, and the file's order supplies the other for the reader who reads down. Every other way back is the interface's to show, from the links and the commits it can already see. Writing it down would be a copy, and copies rot.
+
+### Shows a [ground](#ground) its second life
+
+A brief is handed once and stood on many times, and who stands on it is visible only here.
+
+### Carries history as well as reach
+
+What a brief was before, who changed it and why, is the same trail run through time. The [kernel](#kernel)'s commits hold it; in the markdown practice, git does.
+
+### Is named for now, not settled
+
+The word was tried, withdrawn for caution, and restored under a rule the author then gave: a notion may enter with its name open, because a contribution that had to be perfect could not be made. Rest on the notion; the name is one word a later commit may change.
 
 ## Gradient
 
@@ -156,6 +196,22 @@ Each nested brief is whole on its own and part of the one above, which is why a 
 
 Greek *holos*, whole, with the particle *-on*, part: the one word made for exactly this two-faced thing.
 
+## Word
+
+The smallest holon the medium is built on. A word can be looked up, so a precise one is a link to its meaning.
+
+### Is the smallest [holon](#holon)
+
+Whole in itself, since it means something alone, and part of every brief that uses it. Below it nothing carries meaning.
+
+### Is a [link](#link) when it is precise
+
+A word outside everyday English is reading spent, and the code once asked for the plainest word for that reason. But a word whose meaning is exact is an offer, never a missing piece: the sentence reads, and the meaning is one lookup away. So the code now asks for the word whose meaning is exact, and the plainest such word.
+
+### Deepens the [medium](#medium)
+
+Once every word is a holon that can be opened, the medium reaches below the brief, and a reader who meets a word they do not hold is one step from holding it. That is the code's shape at the smallest scale there is.
+
 ## Medium
 
 Briefs joined by links, held in one shared space. What the code turns written knowledge into.
@@ -192,9 +248,33 @@ A monolith composes only inside its own frame; its seams are for translation, so
 
 People, models and programs are amplified alike, each given more than it could gather alone.
 
+### Is a [knower](#knower), or a program that cannot comprehend
+
+A person and a model are citizens that know; a classical program is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
+
 ### Holds citizenship as a condition, not a right
 
 The medium sets the terms; no tool grants them.
+
+## Prism
+
+What a knower holds at one moment: for a model its context, for a person what they have read and still hold.
+
+### Is what a [knower](#knower) holds at one moment
+
+A selection, never the whole, and recomputed as the work moves. Holding is the knower's state and the prism is its content.
+
+### Is cut from the [medium](#medium) and loses none of it
+
+A glass prism lays light out by colour without losing any. This one lays the medium out by kind, and the knower takes the band the work at hand needs; the rest stays at its address.
+
+### Is taken under a [contract](#contract) by a model, by choice by a person
+
+A model's prism is agreed in advance, what the session takes in and gives back. A person's follows the offers the links make. This is the one place the two knowers differ.
+
+### Is named for now, not settled
+
+The name is from the steward's edition and one cycle old; whether it is the best possible word needs more cycles. The code's own word for the model's case is context. Rest on the notion, a bounded selection recomputed as the field moves.
 
 ## Interface
 
@@ -203,10 +283,6 @@ Where comprehension happens: the surface at which a citizen meets the medium. Wh
 ### Rests on the [medium](#medium)'s law alone, on no tenet beneath
 
 Not on the engine, the substrate or any specific of OpenLight. Briefs and links under a [gradient](#gradient) are enough, which is why it can be built before the layers under it are settled.
-
-### Shows what the [medium](#medium) does not write
-
-The medium holds one direction, and the file's order supplies the other for the reader who reads down. Every other way back is the interface's to show from what it can already see: from the links, who stands on a brief; from the commits, what it was before, who changed it and why. That is the trail, and it is never written.
 
 ### [Amplifies](#amplify) first
 
@@ -276,7 +352,7 @@ What it takes and what it gives, as structure in the medium.
 
 A call is matched, never parsed. Attach a peer's kernel and its programs compound with yours at once.
 
-### Leaves a trail in the [kernel](#kernel)
+### Leaves a [trail](#trail) in the [kernel](#kernel)
 
 Boundaries before a run, inspection during, history after; every write walks back to the program that made it and the person who ran it.
 
@@ -336,7 +412,7 @@ What a tool builds around a model to bound it. Retired.
 
 A linear transcript, a closed function, a context assembled for the occasion that belongs to one tool.
 
-### Leaves no trail
+### Leaves no [trail](#trail)
 
 Nobody can say an answer came from exactly this state, and nobody can re-derive it.
 

@@ -95,3 +95,11 @@
 *Thirteenth, 2026-09-05, after the steward's other session committed its recut of §4 and staged an ontology of its own:*
 
 > Ok, the other ession has contributed, you go now
+
+*Fourteenth, 2026-09-05, ruling on the three words and on language:*
+
+> If you follow epistemology, then you may add it but state the reason for its unsettledness if it should be rested on and become a large "stone" or not.
+>
+> Same goes with trail, if we needed perfection for contribution it wouldnt be possible...
+>
+> The pricniple of dead simple language has also evolved, we may use words internatinoal english may notinclude, but if we do so it is for its meaning is so precise, and our otnological approach to things mean the smalles holon our substrate is built on, words can now be looked up. The substrate just got profoundly deeper with that. So Is prism the best possible word? More cycles would be needed, but the other side of the epistemological angle is being able to do work in progress, so even trail can be added, for it is a notion, its name jsut doesnt ahve to be settled, and its content hold its honesty as well

@@ -2,13 +2,29 @@
 
 *The web of [`ontology.md`](ontology.md) cut as a line, 2026-09-04. The words stand in dependence order: each is given before any later word uses it, and among the words whose ground is already given, the bigger win comes first. Every relation is stated once, on the side that depends, as a link back to the word it stands on; the earlier word carries no forward door. What a word says of itself without reaching another word stays where it was. Whether one side is enough, and what the cut costs, is recorded at the end. Strength: **reasoned**, one steward's pass, no cold read.*
 
+## Knower
+
+Whoever comes to the knowledge and is changed by it: a person, or a model in a session. Bounded, and both reader and writer.
+
+### Is bounded, which the whole code follows from
+
+A person forgets; a model's context fills and gets worse as it fills. So a knower holds what matters and reaches for the rest, and everything the code asks is written for a knower that cannot hold the whole.
+
+### Writes as well as reads
+
+Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first, and the one who knows a thing stops being the only way to it once it is written.
+
+### Is named for now, not settled
+
+The word is a day old, from the steward's edition. The code says reader, which fails for the writer; the README says citizen, which includes programs, and a program cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word, which a later cycle may replace.
+
 ## Comprehension
 
 Understanding a thing well enough to act on it. The one value the code measures everything by.
 
-### Lives in one bounded place
+### Lives in a [knower](#knower), and nowhere else
 
-A head, or a model's context, and neither holds everything. Knowledge is comprehension written down so it can form again in a place other than the one it first formed in.
+A head, or a model's context, and neither holds everything. Comprehension is the knower's state, and knowledge is comprehension written down so it can form again in a knower other than the one it first formed in.
 
 ### Is not information
 
@@ -170,6 +186,22 @@ Nobody holds the whole. A reader holds the briefs that matter and lets the rest 
 
 Where Unix had text and the pipe, and the web the page and the link, the medium has the brief and the link. Its typed successor, where programs and interfaces stand in it as prose does, is what the technical arc builds.
 
+## Word
+
+The smallest holon the medium is built on. A word can be looked up, so a precise one is a link to its meaning.
+
+### Is the smallest [holon](#holon)
+
+Whole in itself, since it means something alone, and part of every brief that uses it. Below it nothing carries meaning.
+
+### Is a [link](#link) when it is precise
+
+A word outside everyday English is reading spent, and the code once asked for the plainest word for that reason. But a word whose meaning is exact is an offer, never a missing piece: the sentence reads, and the meaning is one lookup away. So the code now asks for the word whose meaning is exact, and the plainest such word.
+
+### Deepens the [medium](#medium)
+
+Once every word is a holon that can be opened, the medium reaches below the brief, and a reader who meets a word they do not hold is one step from holding it. That is the code's shape at the smallest scale there is.
+
 ## Citizen
 
 Anything that reads the medium and writes back into it on the same terms as everything else: a person, a model, a program, or what draws a screen.
@@ -181,6 +213,10 @@ A monolith composes only inside its own frame; its seams are for translation, so
 ### Is [amplified](#amplify)
 
 People, models and programs are amplified alike, each given more than it could gather alone.
+
+### Is a [knower](#knower), or a program that cannot comprehend
+
+A person and a model are citizens that know; a classical program is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
 
 ### Holds citizenship as a condition, not a right
 
@@ -194,17 +230,37 @@ Where comprehension happens: the surface at which a citizen meets the medium. Wh
 
 Not on the engine, the substrate or any specific of OpenLight. Briefs and links under a [gradient](#gradient) are enough, which is why it can be built before the layers under it are settled.
 
-### Shows what the [medium](#medium) does not write
-
-The medium holds one direction, and the file's order supplies the other for the reader who reads down. Every other way back is the interface's to show from what it can already see: from the links, who stands on a brief; from the commits, what it was before, who changed it and why. That is the trail, and it is never written.
-
-### Reads every [link](#link) backward, so a [brief](#brief) can be found from the ground it names
-
-The ground says nothing back, and the interface shows under it every brief that names it, by title and first paragraph. So a title that links must read whole from the ground's side, as a sentence about the brief it belongs to.
-
 ### [Amplifies](#amplify) first
 
 Building it is where the arc goes next. Nobody has had the experience yet; it has to be built to be felt.
+
+## Trail
+
+What leads to a brief: every brief that names it, and every change it has had. Never written, always derived.
+
+### Runs the [links](#link) backward
+
+A link is written once, at the brief that stands on the ground, and the ground says nothing back. The trail is the same links read from the ground's side: under a brief, everything that names it, each by its title and first paragraph.
+
+### Is shown by the [interface](#interface), never written in the [medium](#medium)
+
+The medium holds one direction, and the file's order supplies the other for the reader who reads down. Every other way back is the interface's to show, from the links and the commits it can already see. Writing it down would be a copy, and copies rot.
+
+### Shows a [ground](#ground) its second life
+
+A brief is handed once and stood on many times, and who stands on it is visible only here.
+
+### Makes a [brief](#brief) findable from the ground it names
+
+The ground says nothing back, and the trail shows under it every brief that names it, by title and first paragraph. So a title that links must read whole from the ground's side, as a sentence about the brief it belongs to.
+
+### Carries history as well as reach
+
+What a brief was before, who changed it and why, is the same trail run through time.
+
+### Is named for now, not settled
+
+The word was tried, withdrawn for caution, and restored under a rule the author then gave: a notion may enter with its name open, because a contribution that had to be perfect could not be made. Rest on the notion; the name is one word a later commit may change.
 
 ## Contract
 
@@ -221,6 +277,26 @@ So whatever holds contracts holds its own law as data.
 ### Is typed for the one [citizen](#citizen) that cannot read a sentence
 
 For the classical program, the contract is types. For people and models, it is prose.
+
+## Prism
+
+What a knower holds at one moment: for a model its context, for a person what they have read and still hold.
+
+### Is what a [knower](#knower) holds at one moment
+
+A selection, never the whole, and recomputed as the work moves. Holding is the knower's state and the prism is its content.
+
+### Is cut from the [medium](#medium) and loses none of it
+
+A glass prism lays light out by colour without losing any. This one lays the medium out by kind, and the knower takes the band the work at hand needs; the rest stays at its address.
+
+### Is taken under a [contract](#contract) by a model, by choice by a person
+
+A model's prism is agreed in advance, what the session takes in and gives back. A person's follows the offers the links make. This is the one place the two knowers differ.
+
+### Is named for now, not settled
+
+The name is from the steward's edition and one cycle old; whether it is the best possible word needs more cycles. The code's own word for the model's case is context. Rest on the notion, a bounded selection recomputed as the field moves.
 
 ## Kernel
 
@@ -270,7 +346,7 @@ What it takes and what it gives, as structure in the medium.
 
 A call is matched, never parsed. Attach a peer's kernel and its programs compound with yours at once.
 
-### Leaves a trail in the [kernel](#kernel)
+### Leaves a [trail](#trail) in the [kernel](#kernel)
 
 Boundaries before a run, inspection during, history after; every write walks back to the program that made it and the person who ran it.
 
@@ -330,7 +406,7 @@ What a tool builds around a model to bound it. Retired.
 
 A linear transcript, a closed function, a context assembled for the occasion that belongs to one tool.
 
-### Leaves no trail
+### Leaves no [trail](#trail)
 
 Nobody can say an answer came from exactly this state, and nobody can re-derive it.
 
@@ -370,7 +446,7 @@ Mostly, and where it was not, the doubt was the finding. The rule chose a side w
 
 ### What the cut changed in the order
 
-The web's order and the series' order differ in three places, and all three are the resistances above. Amplify moved from third to fifth, because it stands on ground, which stands on brief. Holon moved before gradient. Contract moved before kernel. Everywhere else, the bigger win was also the earlier ground, so the author's guess holds for sixteen of nineteen words: centrality is a good first proposal for dependence order, and where it fails, the failure marks a word that is used by something bigger than itself. One rule found after the cut moved home between the forms. That a brief can be found from the ground it names lives under brief in the web, by subject, and under interface here, because it stands on link and interface and both come after brief. The web files a rule by what it is about; the line files it by what it stands on. A word for the reverse of link, trail, was tried for a day and withdrawn, the author taking new words cautiously; what it carried went to interface, and trail stays an everyday word.
+The web's order and the series' order differ in three places, and all three are the resistances above. Amplify moved from third to fifth, because it stands on ground, which stands on brief. Holon moved before gradient. Contract moved before kernel. Everywhere else, the bigger win was also the earlier ground, so the author's guess holds for sixteen of nineteen words: centrality is a good first proposal for dependence order, and where it fails, the failure marks a word that is used by something bigger than itself. One rule found after the cut moved home between the forms. That a brief can be found from the ground it names lives under brief in the web, by subject, and under interface here, because it stands on link and interface and both come after brief. The web files a rule by what it is about; the line files it by what it stands on. A word for the reverse of link, trail, was tried for a day, withdrawn for caution, and restored the next day under the author's rule that a notion may enter with its name unsettled, saying so. Three more words entered under the same rule, knower, word and prism, and knower is the fifth divergence and the sharpest: second by win, since it is where comprehension lives, and first by dependence, since comprehension stands on it. The line opens with who knows; the web opens with what knowing is worth.
 
 ### What the other side shows
 
