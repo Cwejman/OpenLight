@@ -1,6 +1,6 @@
 # The study
 
-The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`07-breakdown/code.md`](07-breakdown/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
+The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`08-win-driven/code.md`](08-win-driven/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
 
 ## 1. The finish line
 
@@ -36,7 +36,7 @@ Provenance recovered late survives only by luck, and the loss is invisible: the 
 
 ## 3. Where the search stands
 
-Seven labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
+Eight labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
 
 - **Labs 01–02 are the baseline pair.** The same corpus cut categorically ([`findings/`](01-categorical/output/README.md)) and as a narrative walk ([`encounters.md`](02-encounters/output.md)). The first informed but did not engage; the second engaged. Every later reading is judged against these two.
 
@@ -45,6 +45,8 @@ Seven labs run, and the reading queue is the bottleneck: the author's cold reads
 - **Lab 06 changed the delivery.** The prompt went bare, and a full edition of the code — grown with principles, the unit renamed brief — became the writer's primary instruction. The output, [`The ground others hold`](06-principles/output.md) (~5,200 words), is the leanest reading yet.
 
 - **Lab 07 tested the breakdown**, and the structure paid. The team's read of 06 found one shape recurring: a slim surface followed by bold-led bullets, the only place bullets appear at all, at every heading level. That shape is a brief whose nested briefs never got their headings, so every win arrives at one depth in one serving. The lab reworked the 06 output one level deeper with the content held fixed, and [the result](07-breakdown/output.md) reads 46% shorter at the level a reader stops while holding more — the full measurement, and the four things it does not reach, are in [`evidence-breakdown.md`](07-breakdown/evidence-breakdown.md). The instruction lived in [its prompt](07-breakdown/prompt.md), not in the edition, because a rule a lab may reject must not enter the law first. Awaiting the author's cold read; whether it becomes a principle is the open question.
+
+- **Lab 08 is written with the author, not run.** Its edition ([`08-win-driven/code.md`](08-win-driven/code.md)) opens with the why, then what the code changes, then how far it goes, then what knowledge is made of; the author writes the surface and the steward the depth, and [`comments.md`](08-win-driven/comments.md) holds what the edition still owes. Beside it stands the taxonomy study ([`08-01-taxonomy/`](08-win-driven/08-01-taxonomy/)): the code's words and the technical arc's as one web ordered by centrality ([`ontology.md`](08-win-driven/08-01-taxonomy/ontology.md)), the same web cut as a line in dependence order ([`series.md`](08-win-driven/08-01-taxonomy/series.md)), and what the cut showed: one side of a relation is enough when its title reads whole from the other end, the backlink is the interface's to derive, and centrality is a good first guess at dependence order. That study runs under a rule of its own, written at its top: every change is committed, and the commit is the ratification; a session commits, the author ratifies, the session ratifies back. Two sessions have cycled under it, and the rule caught its first loss the same night: notes left uncommitted were dropped by another session's purification.
 
 After the labs come the two unwritten artifacts of [§2](#2-what-the-study-ships) — the markdown practice first, since the labs' recurring choices are what it harvests, then the grounds — and then mark 2: the spec tree itself.
 
