@@ -14,9 +14,9 @@
 
 **The cold read.** Nothing in it has been read cold. Every relation is marked reasoned, and the two that are marked observed are the backlink and the fresh-head finding.
 
-**Words that entered before their names.** Knower, trail, prism, space, and the two relation names within and upon, each saying so in its last relation. Each waits for a cycle that either settles the word or replaces it; the notions stand.
+**Words that entered before their names.** Knower, trail, prism, and the two relation names within and upon, each saying so in its last relation. Each waits for a cycle that either settles the word or replaces it; the notions stand.
 
-**Field.** Decided as the typed successor's name, the README's word, against the steward's draft, which used field for the sum of all holons. If the author reads field the draft's way, the medium entry's last relation changes and nothing else.
+**Consolidation's pairing.** The author gave the word with a pairing, consolidated deterministic inference and amplified resonance in the medium. The ontology reads it as the two sides of amplification, the field's and the knower's, and marks the reading reasoned. Whether resonance earns a word of its own is not asked yet; it stands as a relation of amplify.
 
 ## 3. For the markdown practice
 
