@@ -74,6 +74,8 @@ Wins are not equal. A few carry everything else, and most details matter only to
 
 The knower's order follows the same grade. Nothing arrives before its ground: every meaning is given before it is used, purpose before machinery, and every point where a knower may stop leaves them whole. Where a subject forces the other order, the debt is declared in a line. Borrowing is allowed. Silent borrowing is not.
 
+Language is the cost side of the win, and the rule for it has moved. Every hard word is reading spent, which is why the code asked for the plainest word. But a word is the smallest holon the medium is built on, and a word can be looked up: used where its meaning is exact, it is a link to that meaning, an offer rather than a missing piece. So the code asks for the word whose meaning is exact, and the plainest such word. The medium reaches below the brief with this, to the smallest thing that carries meaning.
+
 ### 4.5 Amplification
 
 A knower standing in a field of holons leaves with more than it came with. That is what the medium does, and it is the reason to build one. Two knowers standing in the same field compound on each other the moment either writes, because what was written has an address and the other's prism picks it up. This is the change [§2](#2-what-it-changes) describes, seen from inside.
