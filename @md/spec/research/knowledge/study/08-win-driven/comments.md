@@ -4,6 +4,8 @@
 
 ## 1. What §4 now carries, and what it retires
 
+**The ontology has its own home now.** [`ontology.md`](ontology.md) carries the five fundamentals and what derives from them, written on the author's instruction after §4 was cut into the edition by mistake. Two homes for one ontology breaks law 2, so at ratification §4 should shrink to a pointer at the file, or the file should absorb whatever §4 says better. The steward's read: the file is purer, since it separates fundamentals from derived kinds and names what is left out; §4 is the graded reading of the same set for someone who will not open the file.
+
 §4 is the ontology as one graded list: the holon, two relations, the knower, the win, amplification, the trail. Each stands on the one before. The 07 edition's compounds fold into it without remainder: law 1 is §4.4 read in the knower's time, law 2 is §4.5's cost, principle 6 is §4.2's last paragraph, principles 1 and 3 are §4.4's shape. So the edition needs no separate laws or principles sections; what §4 does not carry belongs to the markdown practice. This is the steward's read of the author's instruction to discompound, and the first thing the ratifying read should confirm or refuse.
 
 ## 2. Author's calls on §4
