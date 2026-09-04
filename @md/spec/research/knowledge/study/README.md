@@ -88,6 +88,8 @@ Settled by repetition; they feed the markdown practice and the grounds:
 
 - **A bootstrapped session becomes what it reads.** What its ground does not carry does not reach the work.
 
+- **A matrix of amnesias finds what one fresh head cannot.** Several fresh sessions reading one file, each with a different ground and nothing else, disagree in what they find and agree in what they measure; eight grounds on the ontology found four hundred faults in one evening and two independent measures of its order agreed against it ([`08-win-driven/evidence-clean-room.md`](08-win-driven/evidence-clean-room.md)). The technique is the fresh head, multiplied and pointed.
+
 - **Record the method at the moment of the work.** Three times now the evidence for a rule existed only in a session that was about to end. This is the finding that [§2.2](#22-the-duty-is-per-session) makes a standing duty.
 
 ## 7. Notes

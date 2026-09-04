@@ -1,0 +1,36 @@
+# Evidence: the clean-room matrix
+
+*What a matrix of deliberate amnesias found in the ontology, round one, 2026-09-05. The technique: several fresh sessions read the same file, each given a different ground and nothing else, and report against a fixed form; the writer then verifies each finding against the file before folding it. The raw reports are the receipts, kept in [`passes/round-1/`](passes/round-1/) until folded, then retired to git. Strength: **observed** for what the readers found, **measured** where a count is given.*
+
+## The grounds
+
+Eight passes, one file under test, each with its own amnesia:
+
+- **Amnesia**: the ontology alone. A senior engineer who has never heard of the project.
+- **README**: the project's entry, then the ontology. Consistency with the author's own claims.
+- **Laws**: the ratified code and the edition, then the ontology. Audit against the two laws and the file's own form rules.
+- **Tree**: the pilot, substrate, engine and view specs, then the ontology. Where the arc's words contradict or rename the tree.
+- **Reverse**: the ontology alone, asked what question it answers, what prompt would produce it, and what a skeptic asks.
+- **Blind**: the headings alone, asked to write the paragraphs; then a ninth pass compared the reconstruction to the original ([`evidence-blind.md`](evidence-blind.md)).
+- **Authors**: the ontology, then the web, to find and verify the author who named each notion ([`evidence-authors.md`](evidence-authors.md)).
+- **Naming**: the ontology, the naming record and the series evidence, asked for the minimal set and for candidates for the unsettled names. Failed on a rate limit; runs in round two.
+
+## What the readers found
+
+Counts are the readers' own, verified by the writer where folded:
+
+- Amnesia: 62 words or notions used before given, 34 sentences not understood, 22 questions left open, 26 relation titles that named content or provenance rather than purpose. The most-used noun, the code, was never defined. Provenance words, author, steward, edition, recut, purification, the pilot, read as private language throughout.
+- README: 13 contradictions, the deepest on types, where the README's typed medium is the ontology's field and the ontology's medium entry named markdown while claiming to name no technology. Attach's object inconsistent, store against kernel. The README's trail includes reads; the ontology's held only writes. Branch absent.
+- Laws: 40 fact groups stated in more than one place, the worst being one home per fact stated in five homes; 2 outright contradictions, link as one join and as one of two, resonance on the medium's side and on the knower's; 6 relations stated at both ends; 28 claims presented as settled without a mark; 20 relations with no win beyond their title.
+- Tree: 15 places where the tree is more precise than the ontology's sentence, among them that stores attach and kernels never join, that publishing is placement into a dimension, that a boundary has three walls and is a standing licence with live membership, that contracts are one reified value read three ways, and that the tree's engine is a judge and a runner fused, so the sweep is a split, not a rename.
+- Reverse: the weakest link is the word measures, a ratio with no unit, on which the file's order, the gradient's slope and the test of knowledge rest; five load-bearing words without an entry, act, address, fact, session, nesting.
+- Blind: 91.5 percent of headings carried their paragraph; the eleven that did not are titles read from their own side only.
+- Authors: 24 of 29 words have a verified author; brief, substrate and harness have none.
+
+## What moved
+
+All of it folded into one rewrite, committed as round one. The head lost its provenance and gained the confidence scale. Code entered as a word and lists the two laws. The order became the measured reach with a reader's win as tie-break, and the file says so. Every copy the laws pass found has one home. Every citation the authors pass verified stands in brackets. The tree's fifteen precisions are in the arc's words. Trail took the README's meaning back.
+
+## What this does not reach
+
+The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break, so round two reads the folded file cold again.

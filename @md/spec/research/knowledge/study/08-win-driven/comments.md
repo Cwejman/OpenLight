@@ -12,13 +12,13 @@
 
 ## 2. Owed to the ontology
 
-**The cold read.** Nothing in it has been read cold. Every relation is marked reasoned, and the two that are marked observed are the backlink and the fresh-head finding.
+**The cold read.** Read cold eight times by fresh sessions on 2026-09-05 ([`evidence-clean-room.md`](evidence-clean-room.md)) and rewritten whole on what they found; not yet read cold by a person, and not by the author since the rewrite.
 
-**Words that entered before their names.** Knower, trail, prism, and the two relation names within and upon, each saying so in its last relation. Each waits for a cycle that either settles the word or replaces it; the notions stand.
+**Words that entered before their names.** Knower, trail and prism, each saying so in its last relation. The relation names within and upon left in round one; nesting has one home under holon and no short name. Each waits for a cycle that either settles the word or replaces it; the notions stand.
 
 **Consolidation's pairing.** The author gave the word with a pairing, consolidated deterministic inference and amplified resonance in the medium. The ontology reads it as the two sides of amplification, the field's and the knower's, and marks the reading reasoned. Whether resonance earns a word of its own is not asked yet; it stands as a relation of amplify.
 
-**The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The spec tree still says engine for the platform and holds the substrate beside it. That is a sweep across the tree, not a frontier task; it is recorded here for the arc's conclusions and not done.
+**The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The tree audit ([`passes/round-1/tree.md`](passes/round-1/tree.md), *Rename map*) found the tree's engine is a judge and a runner fused, so the sweep is a split: the judge becomes the kernel, the runner the program engine, one citizen. It also found the tree's connection kind named `field` collides with the word and wants renaming first. A sweep across the tree, not a frontier task; recorded for the arc's conclusions and not done.
 
 ## 3. For the markdown practice
 
