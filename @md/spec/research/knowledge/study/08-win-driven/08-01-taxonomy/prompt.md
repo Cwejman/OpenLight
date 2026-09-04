@@ -91,3 +91,7 @@
 > Also add a rule at the top of this doc, change are commited, for changes are to be rattified, or rather changes ought to be rattifications them selves and should leave trail, if i'm to use that word.
 >
 > ◊nother session for instance has some ideas, and this share dmedium could work, it commits its ideas, you can rattify and it can rattify back
+
+*Thirteenth, 2026-09-05, after the steward's other session committed its recut of §4 and staged an ontology of its own:*
+
+> Ok, the other ession has contributed, you go now

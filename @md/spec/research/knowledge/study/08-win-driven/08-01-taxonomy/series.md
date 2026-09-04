@@ -86,6 +86,10 @@ Contraction is what makes it. A brief contracts the reading, never the reader, a
 
 An amplifier needs a source. The more true ground a reader gains per reading, the greater the gain, so ground that stays true is the amplifier's supply.
 
+### Amplifies error as fast as truth, which is why [ground](#ground) must stay true
+
+A wrong brief stood on by many spreads as fast as a right one. So the ground's duty, one home per fact and every claim with its confidence, is not a rule laid on top. It is what amplification costs.
+
 ## Link
 
 The one way briefs join. An offer, never a missing piece.
@@ -134,7 +138,7 @@ Every connection runs from a bigger win to the smaller wins inside it, never the
 
 Knowledge is a web, not a chain: a brief has many grounds, and only one can be the brief above it. A document is a line, and the line can show only the downward relation. Every other relation is a link.
 
-### Is a holonarchy of [wins](#win), so [holons](#holon) are its parts
+### Is a holarchy of [wins](#win), so [holons](#holon) are its parts
 
 Each level is whole in itself and part of the one above. Holon names the part; gradient names the order.
 
@@ -362,7 +366,7 @@ For the reader who reads the line, yes, and cleanly. Nothing that comprehension 
 
 ### Is it clear which side carries it
 
-Mostly, and where it was not, the doubt was the finding. The rule chose a side without effort for seventy-odd relations: the later word depends, so the later word links. Three pairs resisted, and each resisted for a reason worth keeping. Holon and gradient, where the ontology had put gradient first by win and the series needed holon first by dependence, because a holonarchy is made of holons. Contract and kernel, the same: the kernel is federated by contract, so contract must be given first, though it is the smaller win. And interface and kernel, where the dependence ran the way the author claimed and the series proved it: interface does not stand on kernel, so it comes first, and kernel carries "sits below the interface". The series makes the interface's independence a fact of order, where the web could only assert it.
+Mostly, and where it was not, the doubt was the finding. The rule chose a side without effort for seventy-odd relations: the later word depends, so the later word links. Three pairs resisted, and each resisted for a reason worth keeping. Holon and gradient, where the ontology had put gradient first by win and the series needed holon first by dependence, because a holarchy is made of holons. Contract and kernel, the same: the kernel is federated by contract, so contract must be given first, though it is the smaller win. And interface and kernel, where the dependence ran the way the author claimed and the series proved it: interface does not stand on kernel, so it comes first, and kernel carries "sits below the interface". The series makes the interface's independence a fact of order, where the web could only assert it.
 
 ### What the cut changed in the order
 
@@ -371,6 +375,10 @@ The web's order and the series' order differ in three places, and all three are 
 ### What the other side shows
 
 The doors were cut because a frontend can derive them, and what it derives is the heading above the relation, the relation's title, and its first paragraph. In this form that is a sentence: the parent word is the subject, the title the predicate, the linked word the object. From ground, a reverse listing reads "Amplify: feeds on ground", "Link: names ground so it is never restated", "Harness: withheld the ground a model becomes", and it is the relation's own home speaking rather than a paraphrase of it. So one side is enough on one condition, which is a rule for the writing rather than the tool: a relation's title must read whole from the other end. Checked against the sixty-five titles of the ontology after the fact, sixty-four passed and one was corrected, "is superseded by amplify", which used the verb as a noun. Three relations carry their link in the first paragraph rather than the title, interface and specification on gradient, specification on brief; the paragraph carries them, which the rule allows and a stricter cut would not. The markdown holds one direction and the file's order supplies the other for the linear reader; the reverse trail, the history, who stands on what, are derived from links and commits by whatever reads the shape.
+
+### What a second head found
+
+The steward's own session, working the same evening without this study in view, recut the edition's §4 and drafted an ontology of the code ([`../ontology.md`](../ontology.md)) with two relations only, within and upon, and stated that the backlink is upon read from the other end, which text cannot hold and the field can. That is this section's finding reached from the other side, so it is now observed twice, in two heads, and no longer only reasoned. The same session also grounded the second law as the cost of amplification, that error spreads as fast as truth, which this study's amplify brief lacked and now carries.
 
 ### What this does not reach
 

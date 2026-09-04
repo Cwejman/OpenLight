@@ -2,7 +2,7 @@
 
 *Rule of this document: every change is committed, and the commit is the ratification. A change is not proposed in conversation and folded later; whoever makes it commits it, standing on what it changes, and the other side ratifies by committing on it in turn. A session commits its ideas, the author ratifies, the session ratifies back. What was changed, by whom, on what ground, is then in the trail, and nothing here is settled by talk alone.*
 
-*Parallel study to lab 08, opened 2026-09-04 under the author's prompt ([`prompt.md`](prompt.md)). One file, and the file is a holarchy: the words are its parts, ordered by centrality, the win each gives, and each word breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. Every relation has one home, the side that depends, and nothing is said twice: what stands on a word follows it in the order, and who links to what is a trail for a frontend to show, not for the markdown to carry. The reading order, where each word is given before use, is [`series.md`](series.md); the two orders differ in three places, recorded there. Trail is used below as the everyday word for what the interface shows back, not as a word of the ontology; it was tried as one and withdrawn, and whether it earns a place is open. Strength: **reasoned**, steward-written, no cold read yet. The lab's edition ([`../code.md`](../code.md)) stays the law's home for the words it defines; from Interface down, the entries are the author's direction of 2026-09-04 and not yet the spec tree's, which still holds substrate and engine as tenets of their own.*
+*Parallel study to lab 08, opened 2026-09-04 under the author's prompt ([`prompt.md`](prompt.md)). One file, and the file is a holarchy: the words are its parts, ordered by centrality, the win each gives, and each word breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. Every relation has one home, the side that depends, and nothing is said twice: what stands on a word follows it in the order, and who links to what is a trail for a frontend to show, not for the markdown to carry. The reading order, where each word is given before use, is [`series.md`](series.md); the two orders differ in three places, recorded there. Ratified 2026-09-05 against the steward's ontology of the code ([`../ontology.md`](../ontology.md)), which cuts the knowledge half of this list to five fundamentals, the holon, within, upon, the knower and the act, and derives the rest. That file is the purer home for the knowledge words, and this one keeps the arc's, interface down, standing on it. Four rulings the two files await together: knower against reader and citizen; trail as a kind, as the edition's §4.6 has it, or as an everyday word, as this file has it; prism; and field, medium or space for the whole. Trail is used below as the everyday word for what the interface shows back, not as a word of the ontology; it was tried as one and withdrawn, and whether it earns a place is open. Strength: **reasoned**, steward-written, no cold read yet. The lab's edition ([`../code.md`](../code.md)) stays the law's home for the words it defines; from Interface down, the entries are the author's direction of 2026-09-04 and not yet the spec tree's, which still holds substrate and engine as tenets of their own.*
 
 ## Comprehension
 
@@ -51,6 +51,10 @@ Contraction is what makes it. A brief contracts the reading, never the reader, a
 ### Feeds on [ground](#ground)
 
 An amplifier needs a source. The more true ground a reader gains per reading, the greater the gain, so ground that stays true is the amplifier's supply.
+
+### Amplifies error as fast as truth, which is why [ground](#ground) must stay true
+
+A wrong brief stood on by many spreads as fast as a right one. So the ground's duty, one home per fact and every claim with its confidence, is not a rule laid on top. It is what amplification costs.
 
 ## Brief
 
@@ -132,7 +136,7 @@ Every connection runs from a bigger win to the smaller wins inside it, never the
 
 Knowledge is a web, not a chain: a brief has many grounds, and only one can be the brief above it. A document is a line, and the line can show only the downward relation. Every other relation is a link.
 
-### Is a holonarchy of [wins](#win), so [holons](#holon) are its parts
+### Is a holarchy of [wins](#win), so [holons](#holon) are its parts
 
 Each level is whole in itself and part of the one above. Holon names the part; gradient names the order.
 
