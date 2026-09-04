@@ -22,6 +22,26 @@ A reading surface with two coupled parts:
 - Does the pacing layer belong to the reader program or to a separate annotating program whose output any reader consumes?
 - Honest ceiling: ~400 wpm with intact comprehension. Is the value speed at all, or navigation — and does the pitch change accordingly?
 
+## Comments on holons
+
+**Open — sketch** (author, 2026-09-04, from the taxonomy study; stewarded in parallel with the frontend arc).
+
+Every holon is authored at a boundary: the file, when the practice runs on markdown in directories, or the holon itself, when it runs on the substrate. Publishing a holon is the act of authoring, and a published thing may be commented on. Comments are free: they attach to the holon without entering it, so the author's text stays the author's and the reader's response stays the reader's, and the two are visible together. That is the boundary between custodian and stakeholder, a development team and its client for instance, and it is the thing social media got right.
+
+**Grounding.** The taxonomy study settled that the markdown holds one direction and a frontend derives the rest, the reverse trail from the links and the history from the commits ([`spec/research/knowledge/study/08-win-driven/08-01-taxonomy/series.md`](spec/research/knowledge/study/08-win-driven/08-01-taxonomy/series.md), *What the other side shows*). A comment is the same kind of thing: a connection to a holon that the holon does not carry, shown by whatever reads the shape. Prior art is every publishing surface with a comment thread beneath the post, and the project's own convention that records are events: a comment that changes the holon is folded and retires, and git keeps it.
+
+**Why here.** Over the substrate a comment is a chunk connected to the holon it answers, with its author and its commit, and the boundary that admits it is the same attach and write mode that admits any citizen. No new mechanism, only a new relation drawn. In the markdown practice the holon is a file and the comment has nowhere to live inside it, which is the open question below.
+
+**Open questions.**
+
+- Where does a comment live when the holon is a file? Beside it, in an issue, in a commit message, or in a sidecar the frontend joins; each keeps the file pure at a different cost.
+
+- Is a comment a brief? It hands over one thing to one reader, but it is not written to be stood on, and the laws may not apply to it.
+
+- Who may comment on an attached, read-only holon, and where does the comment land: in the commenter's store, connected across the attach.
+
+- Does a comment ever fold in? If a comment amends the holon and retires, the trail must still show it was said, and by whom.
+
 ## Type-mirror integration
 
 **Open — sketch** (author margin note, 2026-08-05: an integration running the *other* way — syncing the field out to the external world).
