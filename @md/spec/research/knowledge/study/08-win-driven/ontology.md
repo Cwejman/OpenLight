@@ -2,7 +2,7 @@
 
 *Rule of this document: every change is committed, and the commit is the ratification. A change is not proposed in conversation and folded later; whoever makes it commits it, standing on what it changes, and the other side ratifies by committing on it in turn. A session commits its ideas, the author ratifies, the session ratifies back. What was changed, by whom, on what ground, is then in the trail, and nothing here is settled by talk alone.*
 
-*This file is the current arc of the code's evolution: the words the code and the technical arc are built from, each a brief. Each word opens with its essence and breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked; every relation has one home, the side that depends, and nothing is said twice, since what stands on a word follows it in the order and the rest is the interface's to show. The order is centrality, the win each word gives; the same web cut as a line, and what the cut showed, is [`evidence-series.md`](evidence-series.md). Merged 2026-09-05 from three sources the trail holds whole: the author's §4 of the edition, the steward's recut of it around six kinds, and the steward's draft of five fundamentals. The edition's §4 now points here, and the edition is elevated from this file when the author decides. A word that entered before its name was settled says so in its last relation, with the reason, under the author's rule that a notion may enter before its name. The knowledge words, comprehension down to prism, name no technology; the arc's words, interface down, are the author's direction and not yet the spec tree's, which still holds substrate and engine as tenets of their own. Space, field and boundary were ruled 2026-09-05 by the author, space being addresses across dimensions and the field of a different nature; consolidation entered the same day as the author's word. Left out on purpose: the containers, file, folder, heading and bullet, which belong to the markdown practice; and types and schemas, which are for the one citizen that cannot read a sentence. Strength: **reasoned**; observed where a relation says so; no cold read.*
+*This file is the current arc of the code's evolution: the words the code and the technical arc are built from, each a brief. Each word opens with its essence and breaks down into the relations it stands on, one per heading, the heading a prose title with the word it reaches linked; every relation has one home, the side that depends, and nothing is said twice, since what stands on a word follows it in the order and the rest is the interface's to show. The order is centrality, the win each word gives; the same web cut as a line, and what the cut showed, is [`evidence-series.md`](evidence-series.md). Merged 2026-09-05 from three sources the trail holds whole: the author's §4 of the edition, the steward's recut of it around six kinds, and the steward's draft of five fundamentals. The edition's §4 now points here, and the edition is elevated from this file when the author decides. A word that entered before its name was settled says so in its last relation, with the reason, under the author's rule that a notion may enter before its name. The knowledge words, comprehension down to prism, name no technology; the arc's words, interface down, are the author's direction and not yet the spec tree's, which still holds the substrate as a tenet beside the engine and the engine as the platform's one runtime; the ontology puts the substrate below the kernel and makes the engine a citizen, plural. Space, field and boundary were ruled 2026-09-05 by the author, space being addresses across dimensions and the field of a different nature; consolidation entered the same day as the author's word. Left out on purpose: the containers, file, folder, heading and bullet, which belong to the markdown practice; and types and schemas, which are for the one citizen that cannot read a sentence. Strength: **reasoned**; observed where a relation says so; no cold read.*
 
 ## Comprehension
 
@@ -372,9 +372,9 @@ A monolith composes only inside its own frame; its seams are for translation, so
 
 People, models and programs are amplified alike, each given more than it could gather alone.
 
-### Is a [knower](#knower), or a program that cannot comprehend
+### Is a [knower](#knower), or a program or an engine that cannot comprehend
 
-A person and a model are citizens that know; a classical program is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
+A person and a model are citizens that know; a classical program, or an engine with its own mechanics, is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
 
 ### Holds citizenship as a condition, not a right
 
@@ -414,15 +414,19 @@ Building it is where the arc goes next. Nobody has had the experience yet; it ha
 
 ## Kernel
 
-The deepest layer of ours, the one that governs itself. Both program and storage.
+The deepest layer that runs: what hosts the field while it is open, and the one thing every act on it goes through. Both program and memory.
 
-### Governs itself, because its law is data within it
+### Governs itself, because its law is data it rests on
 
-It needs no governance, shepherding or upholding from anything above. Its contracts are held in what it stores.
+It needs no governance, shepherding or upholding from anything above. Its own contract is held in the substrate it rests in, so a kernel can be replaced and the field stays.
 
-### Holds the [field](#field) and runs what runs against it
+### Hosts the [field](#field) while running, and rests in the [substrate](#substrate)
 
-The ontology of low-level compute borrowed whole: an operating system's kernel owns the machine and hosts everything else.
+An operating system's kernel is in memory, rebooted without loss, and the one thing that touches the disk. So here: what the kernel holds is the field open, not the field kept. What it holds open at one moment is to engines what a [prism](#prism) is to a knower, a selection of the field, and the same shape one layer down.
+
+### Is the one thing every act goes through
+
+Knowers, programs and engines reach the field only through it, and it judges every act under the [boundaries](#boundary) it keeps. Nothing touches the substrate directly.
 
 ### Is federated by [contract](#contract)
 
@@ -430,15 +434,35 @@ Kernels join by contract, one attaching another's store on declared terms, so a 
 
 ### Sits below the [interface](#interface)
 
-Above it, where comprehension happens. Below it, only the circuitry.
+Above it, where comprehension happens. Below it, only circuitry: what keeps and what computes.
+
+## Substrate
+
+What the field rests in and what outlives every kernel: the law of laying it down, chunks, connections, types and boundaries, typed against itself, every change a commit on a branch.
+
+### Holds the [field](#field) at rest
+
+The disk and its format, not the program that touches them. A store is a directory; a kernel opens it, another kernel can open the same one, and stopping a kernel loses nothing.
+
+### Keeps every [contract](#contract), which is how anything interoperates
+
+The contracts that govern the field are chunks in the same field, so the law is data. An engine's contract lives here too, and that is what makes an engine, whatever it runs, usable from the field.
+
+### Holds the chunk, which may become the [holon](#holon)
+
+Whole in itself, placed in others, with no epistemic duty. Renaming chunk to holon is an open ruling; the word is reserved for it.
+
+### Is circuitry that keeps, beside the [processor](#processor) that computes
+
+Both sit below the kernel, and neither is it. The spec tree still holds the substrate as a tenet beside the engine; the ontology places it below the kernel, the author's ruling of 2026-09-05.
 
 ## Processor
 
 The exact circuitry that computes. Central because everything above it is computed by it and nothing below it computes.
 
-### Fixes the bottom under the [kernel](#kernel)
+### Fixes the bottom under the [kernel](#kernel), with the [substrate](#substrate) beside it
 
-The one layer with no ground beneath. The kernel governs itself; the processor merely runs it.
+Two kinds of circuitry with no ground beneath: one keeps, one computes. The kernel governs itself; the processor merely runs it.
 
 ### Holds no [comprehension](#comprehension)
 
@@ -480,37 +504,25 @@ A call is matched, never parsed. Attach a peer's kernel and its programs compoun
 
 Boundaries before a run, inspection during, history after; every write walks back to the program that made it and the person who ran it.
 
-## Substrate
-
-The kernel seen as storage: the field held as chunks and connections, typed against itself, every change a commit on a branch.
-
-### Is one aspect of the [kernel](#kernel)
-
-In the pilot it is a tenet of its own, the field's law, and the spec tree still holds it so. This ontology folds it in, because a self-governing thing cannot have its storage and its program as two authorities.
-
-### Keeps the [contracts](#contract) that govern it
-
-They are chunks in the same field, so the law is data.
-
-### Holds the chunk, which may become the [holon](#holon)
-
-Whole in itself, placed in others, with no epistemic duty. Renaming chunk to holon is an open ruling; the word is reserved for it.
-
 ## Engine
 
-The kernel seen as program: what runs programs against the substrate, sets boundaries, records every process, and speaks one wire to every client.
+A contracted whole of something larger, with its own execution and mechanics, made interoperable through the substrate. A citizen, not a tenet.
 
-### Is the other aspect of the [kernel](#kernel)
+### Is a [citizen](#citizen), and there are many
 
-In the pilot it is its own installed artefact and a tenet of its own. This ontology folds it in.
+The pilot's engine, which runs programs, is one. A DSP engine for music, with its own clock and its own arithmetic, is another. Each runs what it runs the way it runs it, and none is the platform.
 
-### Is hosted in the [substrate](#substrate) by its interoperability
+### Is made interoperable by its [contract](#contract) in the [substrate](#substrate)
 
-The wire and the attach it offers are themselves field data, and a program whose contract is stored in what it governs is no longer a layer above it. That hosting is what makes the kernel one.
+What an engine takes and gives is a chunk in the field, so the field can call it and stand on what it returns, whatever happens inside. Interoperability is the substrate's gift, not a runtime the engine carries.
 
-### Runs every [program](#program)
+### Reaches the field only through the [kernel](#kernel)
 
-Nothing runs without going through it, and that duty is now the kernel's.
+An engine executes; it does not touch the substrate. Every read and write it makes is an act the kernel judges.
+
+### Runs a [program](#program) when that is its kind
+
+The pilot's engine is the one whose contracted whole is programs and processes. The spec tree still names it the engine, as if it were the only one; the ontology makes it one citizen among engines, the author's ruling of 2026-09-05, and the tree's rename waits on the arc.
 
 ## Specification
 

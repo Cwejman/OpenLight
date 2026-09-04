@@ -18,6 +18,8 @@
 
 **Consolidation's pairing.** The author gave the word with a pairing, consolidated deterministic inference and amplified resonance in the medium. The ontology reads it as the two sides of amplification, the field's and the knower's, and marks the reading reasoned. Whether resonance earns a word of its own is not asked yet; it stands as a relation of amplify.
 
+**The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The spec tree still says engine for the platform and holds the substrate beside it. That is a sweep across the tree, not a frontier task; it is recorded here for the arc's conclusions and not done.
+
 ## 3. For the markdown practice
 
 **The surface is declared by position, not by markup.** A brief's why needs no italics, bold or blockquote. The heading carries the depth and the first paragraph after it carries the role, so a renderer can style both without the author annotating anything, and marking it would put one fact in two homes. Markdown's three emphasis tools do not help here in any case: italic and blockquote point down in importance, and bold is the only up-signal and fails at scale.
