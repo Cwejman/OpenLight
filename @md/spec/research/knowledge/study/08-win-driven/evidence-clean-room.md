@@ -47,6 +47,10 @@ The author corrected the order rule between rounds: a win gradient descends from
 
 The file rests here. What a further round would find is of three kinds and none is the writer's: forward reference, which is the web's form and the head says so; the platform words' depth, which is the specification's and not the ontology's; and the rulings the entries mark as the author's. The trail holds every round as a commit.
 
+## Round five, and the turn
+
+The author's steer, the same evening: the ontology's goal is the code's and every word is graded toward it; names iterate and nothing waits on them; the platform's words are to derive from the goal, not from the engineering tree, so that the next specification emanates from the ontology and not the reverse; and kernel is suspect, since the engine may be a primal thing of the medium rather than a monolith. One fresh reader read the round-five file: not understood 20, never given 17, contradictions 7, copies 20, failed titles 15, and thirty sentences of engineering detail, nearly all in the platform half. Its one change, to give the platform half its own head, was taken inside the one file: a word, Platform, is the entry of the second half and states its why from the goal, as Code does for the first. The platform half was rewritten whole from that why, the thirty sentences went, and kernel was retired on the exploration's finding ([`evidence-kernel.md`](evidence-kernel.md)).
+
 ## What this does not reach
 
 The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break. A third round would need the two stopped passes and a person; the counts that remain are the form's and the author's, not the writer's.

@@ -1,6 +1,6 @@
 # Ontology
 
-*The words the code and the platform built for it are made of, and the dynamics between them: what is, the parts of meaning that make it, the right words in their right relations, and nothing more detailed than that. Its goal is the code's, that knowledge reaches whoever needs it next, person or model, and every word is graded toward it. Each word is a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward that goal: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use; the nearest such line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so, and rests on its notion; a better word comes when it comes, and nothing waits on it. Who changed what is in the git log.*
+*The words the code and the platform built for it are made of, and the dynamics between them: what is, the parts of meaning that make it, the right words in their right relations, and nothing more detailed than that. Its goal is the code's, that knowledge reaches whoever needs it next, person or model, and every word is graded toward it. Each word is a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward that goal: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use, so this file borrows forward and declares it here, which the first law allows; the nearest line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so, and rests on its notion; a better word comes when it comes, and nothing waits on it. Who changed what is in the git log.*
 
 ## Code
 
@@ -16,11 +16,11 @@ The first: nothing arrives before its ground; the reader's order is the writer's
 
 ### Runs on prose in files today, and on the [field](#field) when it is built
 
-Nothing in the code needs new technology: markdown in directories, tracked in git, holds it. Of the words below, brief, link, medium and commit are in use today, and the trail as far as git shows it; the harness, retired here, is still what today's sessions run under; field, substrate, boundary, prism, engines and the interface over the field are specified, not built, and the kernel is the pilot's word for what it builds first. The platform is what makes the same rules hold for programs.
+Nothing in the code needs new technology: markdown in directories, tracked in git, holds it, and the code's words are in use today. The [platform](#platform)'s words are what the same goal requires once programs are readers too; they are specified, not built.
 
 ### Stands in a study, under the project's entry
 
-This file is one lab's arc in a study of how knowledge is best structured ([`../README.md`](../README.md)); the project's entry is its README ([`../../../../../README.md`](../../../../../../README.md)), whose three claims the words here carry; the platform is specified in a tree of files under [`../../../`](../../../), which this file diverges from where it says so; and what is only an idea waits in [`sketches.md`](../../../../../sketches.md). The pilot is that platform's first cut.
+This file is one lab's arc in a study of how knowledge is best structured ([`../README.md`](../README.md)); the project's entry is its README ([`README.md`](../../../../../../README.md)), whose three claims the words here carry; what is only an idea waits in [`sketches.md`](../../../../../sketches.md). The platform was first specified bottom-up, from engineering; its next specification emanates from this file, and the old tree is not this file's ground.
 
 ## Comprehension
 
@@ -112,7 +112,7 @@ For the reader who wants more than the brief says, the link is where more is.
 
 ### Needs no target yet, in prose
 
-A pointer to a source unread or a question unanswered is the brief nobody wrote; the text reads whole and the door stands. Written as a name and a year in brackets it is a citation, and the same thing. In the field a link is a connection the substrate keeps, its target checked when it is written, so the unwritten brief there is a mention, not a reference.
+A pointer to a source unread or a question unanswered is the brief nobody wrote; the text reads whole and the door stands. Written as a name and a year in brackets it is a citation, and the same thing.
 
 ## Holon
 
@@ -128,7 +128,7 @@ The surface is what it says itself, apart from its parts; the depth is its parts
 
 ### Has an address, which is what a [link](#link) points at
 
-One thing carries one name, and its place in the nesting supplies the everyday form of it, a path. Identity is the name and the path is its spelling, so a holon that moves keeps its identity while its path changes. In prose the address is a heading or a file; in the field, an id.
+One thing carries one name, and its place in the nesting supplies the everyday form of it, a path. Identity is the name and the path is its spelling, so a holon that moves keeps its identity while its path changes.
 
 ### Is Koestler's word
 
@@ -172,7 +172,7 @@ A person forgets; a model's context fills and gets worse as it fills. So a knowe
 
 ### Acts in two ways, reading and writing, and is bounded in both
 
-A read changes the knower; a write changes the field. Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first. Within the code, time is only the order acts stand in; the field also keeps time as a value, a date in a body, which is data and not this.
+A read changes the knower; a write changes the field. Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first. Time enters only as the order acts stand in.
 
 ### Is a session, when it is a model
 
@@ -184,7 +184,7 @@ The code says reader, which fails for the writer. Rest on the notion, one bounde
 
 ## Trail
 
-What leads to a brief and what it led to: every brief that names it, every change it had, and every read that went through the kernel. Never written as a trail; derived from what is recorded. Bush's memex tied items into trails that did not fade [Bush 1945]; his trail was stored, this one is derived, and that is the departure.
+What leads to a brief and what it led to: every brief that names it, every change it had, and every read made through the field. Never written as a trail; derived from what is recorded. Bush's memex tied items into trails that did not fade [Bush 1945]; his trail was stored, this one is derived, and that is the departure.
 
 ### Runs the [links](#link) backward
 
@@ -196,7 +196,7 @@ The medium holds one direction, and a file's order supplies the other for the re
 
 ### Records a run: what was read, in what order, against which state
 
-A read leaves nothing in the medium, but a read that goes through the [kernel](#kernel) is recorded with the run it belonged to, so an answer can be walked back to what it stood on. This is the trail the transcript could not keep.
+A read leaves nothing in the medium, but a read made through the field is recorded with the run it belonged to, so an answer can be walked back to what it stood on. This is the trail the transcript could not keep.
 
 ### Is walked by [knower](#knower) or by address in the [space](#space)
 
@@ -260,7 +260,7 @@ The more true ground a reader gains per reading, the greater the gain. A wrong b
 
 ### Is multiplied by every knower reading at one write's address
 
-A write with one home and an address is picked up by every [prism](#prism) tuned to it, so one write is amplified as many times as there are knowers standing there. Resonance is that, seen from the medium's side, and the word is Grossberg's for a pattern that settles only when input and expectation agree [Grossberg 1976]. Reasoned.
+A write with one home and an address is picked up by every [prism](#prism) tuned to it, so one write is amplified as many times as there are knowers standing there. Resonance is that, seen from the knowers' side, and the word is Grossberg's for a pattern that settles only when input and expectation agree [Grossberg 1976]. Reasoned.
 
 ### Replaces the [harness](#harness), which bounded what this expands
 
@@ -292,11 +292,11 @@ Its surface is what changed and why; its changes are read as two states of the f
 
 ### Is on a branch
 
-A branch is what the transcript lacked: somewhere to step back to, a fork to take. Every change is a commit on a branch, and a branch of a shared store is where work stands before it is merged.
+A branch is what the transcript lacked: somewhere to step back to, a fork to take. Work stands on a branch before it is merged.
 
 ### Is the ratification, which is this document's rule
 
-Whoever makes a change commits it, standing on what it changes, and the other side ratifies by committing on it in turn; a session commits, the author ratifies, the session ratifies back. Talk settles nothing; the trail does. A change left uncommitted is outside the trail and can be lost. Observed once.
+Whoever makes a change commits it, standing on what it changes, and the other side ratifies by committing on it in turn. Talk settles nothing; the trail does. A change left uncommitted is outside the trail and can be lost. Observed once.
 
 ### Changes one [brief](#brief) whole, or one [word](#word) in place
 
@@ -304,7 +304,7 @@ A small fix, a word or a name, is made in place. A change to what a brief says r
 
 ### Publishes by placement, not by a second act
 
-Publishing is not a second kind of act. To place a holon into a dimension is to publish it to whoever's [boundary](#boundary) reaches that dimension.
+To place a holon where others' [boundaries](#boundary) reach is to publish it; there is no second act.
 
 ## Comment
 
@@ -316,67 +316,11 @@ The author's text stays the author's and the reader's response stays the reader'
 
 ### Is free from the reader's own place, and placed onto the brief by leave
 
-Said from the reader's own place, a comment needs only read over the brief and reaches the brief's readers through the trail. Placed onto the brief itself, it needs write there, within the [boundary](#boundary). A published brief may be commented on, and that is the boundary between custodian and stakeholder, a team and its client.
+From the reader's own place a comment is free to anyone who may read the brief, and reaches the brief's readers through the trail; placed onto the brief itself it needs the author's leave, within the [boundary](#boundary). A published brief may be commented on, and that is the line between custodian and stakeholder, a team and its client.
 
 ### Has no home yet when the brief is a file
 
 A file cannot hold a comment without ceasing to be the author's alone; where it lives instead is held open in the sketches.
-
-## Space
-
-The addresses, across dimensions, at which holons are placed. Where a thing is, never what it is.
-
-### Gives every [holon](#holon) an address
-
-An address is a point in a space, and a space is made of dimensions. A dimension is a holon that other holons are placed in, so every holon is placed in some and is itself one. Ruled by the author.
-
-### Is where, never what
-
-As different as coordinates and what stands at them. Medium, space and field are three words because they are three things.
-
-## Field
-
-What is at every address of a space: the whole of what is written, read from a point. The medium given addresses and types. Maxwell's word, for a state assigned to every point of a space [Maxwell 1865].
-
-### Stands over a [space](#space)
-
-To every address the field assigns what is there: a holon, what is placed on it, what points at it, or nothing yet.
-
-### Is the [medium](#medium) with addresses and contracts, and keeps everything
-
-Where Unix had text joined by the pipe, and the web the page joined by the link, the medium has the brief joined by the link; and where that lineage ends, because text is not data, the field begins: every holon with an address and a contract, so that programs and what draws stand in it as prose does. Nothing in it is pruned.
-
-### Is read from a point, which is what makes completion repeatable
-
-A knower reads from where it stands. A model's completion from a point in a field, not from a pasted transcript, is the project's first claim: the point makes the ground addressable.
-
-## Boundary
-
-A rule on acts over a region of the space: who may read there, who may write, what may run.
-
-### Draws a region of [space](#space) by permission
-
-The field is one; a boundary is what a knower or a run may reach in it. Reads reach what it admits, writes land where it allows, runs start what it names.
-
-### Is set before a run and stays live during it
-
-What a boundary names is a selection of the field, and the field keeps moving, so the licence stands while its members change. Trust is native, because the rule is the field's and not the writer's.
-
-### Is what a private region is, seen from outside
-
-A knower may work on a branch, or in a frame of its own, before anyone sees; what keeps others out is that their boundaries do not reach it. Nothing is private by a wall of its own.
-
-## Citizen
-
-Anything that reads the field and writes back into it on the same terms as everything else. Aristotle's citizen shares in decision, not only in residence [Aristotle c. 350 BC], and the ontology admits programs, which is the departure.
-
-### Compounds directly, where a monolith compounds only its glue
-
-A monolith composes only inside its own frame; its seams are for translation, so what compounds is the glue and never the parts. A citizen's output is ground the next citizen stands on. The project's entry says the monolith becomes a citizen; widening the word to programs and engines is this file's.
-
-### Is a [knower](#knower), or a program or an engine, which cannot comprehend
-
-A person and a model are citizens that know; a classical program, or an engine with its own mechanics, is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
 
 ## Prism
 
@@ -398,17 +342,73 @@ Three things that look different are one form: a selection of the field, read as
 
 The code's own word for the model's case is context. Rest on the notion, a bounded selection recomputed as the field moves.
 
+## Platform
+
+What the medium must become for a program to be a knower's peer: the same briefs and links, given addresses, contracts and a law that is data, so that programs read and write what people and models read and write. The entry of the second half, and its why is the code's, met for citizens that cannot read a sentence.
+
+### Exists so that programs compound as knowers do
+
+The goal is knowledge reaching whoever needs it next, and whoever includes programs. A program cannot read prose, so for it the medium must be data; once it is, a program's output is ground the next reader stands on, person, model or program alike, and the walls between them fall.
+
+### Is derived from that goal, not from what was built
+
+The words below are what the goal requires and nothing else. Where a built thing has no word here, it is a mechanism, and mechanisms belong to the specification, which is written from these words downward. Reasoned.
+
+### Names no technology, because a dynamic is not a mechanism
+
+Each word says what must be true, not how. Files, git and processes are how, and they change; the dynamics do not.
+
+## Field
+
+What the medium becomes when every holon has an address and a contract: what is at every address, read from a point. Maxwell's word, for a state assigned to every point of a space [Maxwell 1865].
+
+### Is the [medium](#medium) made readable by a program
+
+A program cannot read prose; it can read data at an address under a contract. So the field is the same briefs and links, each holon addressed and its shape declared, and nothing in it is pruned. Where Unix had text joined by the pipe and the web the page joined by the link, the field has the holon joined by the link, and text is not data.
+
+### Keeps its own law as data
+
+The contracts that govern the field are in the field, read where the data is, by the same readers. That is why programs meet by matching, why the interface is a read of the field, and why no separate harness exists; the [substrate](#substrate) holds the fact, the field lives by it.
+
+### Is read from a point, which makes a model's completion repeatable
+
+A knower reads from where it stands. A model's completion from a point in a field, not from a pasted transcript, is the project's first claim: the point makes the ground addressable.
+
+## Space
+
+The addresses, across dimensions, at which holons are placed. Where a thing is, never what it is.
+
+### Gives every [holon](#holon) an address
+
+An address is a point in a space, and a space is made of dimensions. A dimension is a holon that other holons are placed in, so every holon is placed in some and is itself one. Ruled by the author.
+
+### Is where, never what
+
+As different as coordinates and what stands at them; the [field](#field) is the what. Medium, space and field are three words because they are three things.
+
+## Citizen
+
+Anything that reads the field and writes back into it on the same terms as everything else. Aristotle's citizen shares in decision, not only in residence [Aristotle c. 350 BC], and the ontology admits programs, which is the departure.
+
+### Compounds directly, where a monolith compounds only its glue
+
+A monolith composes only inside its own frame; its seams are for translation, so what compounds is the glue and never the parts. A citizen's output is ground the next citizen stands on. The project's entry says the monolith becomes a citizen; widening the word to programs and engines is this file's.
+
+### Is a [knower](#knower), or a program or an engine, which cannot comprehend
+
+A person and a model are citizens that know; a classical program, or an engine with its own mechanics, is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
+
 ## Contract
 
-A statement, in the field, of what a thing takes and what it gives, so things meet by matching rather than by custom glue. Meyer's word: precondition the client's duty, postcondition the supplier's [Meyer 1992].
+A statement in the field of what a thing takes and what it gives, so things meet by matching rather than by custom glue. Meyer's word: precondition the client's duty, postcondition the supplier's [Meyer 1992].
 
 ### Is a [brief](#brief) of a kind
 
 The essence a caller needs at the surface, the implementation within.
 
-### Is one value, read by a validator, a form and a model alike
+### Is one value that every reader reads
 
-Types are data in the field, so one contract is read by validation, drawn as a form, and handed to a model as its tool schema; a model reads the same contract a person composes with. Types are the plainest exact words for the one [citizen](#citizen) that cannot read a sentence.
+Types are data, so a model reads the same contract a person composes with and a program checks it. Types are the plainest exact words for the one [citizen](#citizen) that cannot read a sentence.
 
 ### Lives in the [field](#field) it governs
 
@@ -416,71 +416,63 @@ So whatever holds contracts holds its own law as data.
 
 ### Is what draws, when it is a component's
 
-What draws a screen is a component: a declaration of what it takes, as a program declares what it takes. Which components can draw a thing is a read of the field.
+What draws a screen declares what it takes, as a program declares what it takes, so a component is a contract that draws.
 
-## Interface
+## Engine
 
-Where a knower meets the field: what it reads and writes through, and what shows the trail. Simon's meeting point between an artifact's inner and outer environment [Simon 1969].
+A primal thing of the medium that executes: it reads the field's law and runs under it, with mechanics of its own, one of many. Babbage's engine had a store and a mill of its own [Babbage 1837].
 
-### Rests on the [medium](#medium)'s law for the knowledge half, and is a client of the [kernel](#kernel) for the built one
+### Executes under the law, which it reads as data
 
-The interface the code needs today rests on briefs and links under a gradient and on nothing beneath, which is why it can be built before the platform is settled. The interface over the field is a client of the kernel. Ruled by the author; scoped here.
+Engines execute; the law judges; the substrate records. An engine reads the law from the field as any citizen does and commits through the store's judging, so nothing it does is outside the trail, and no engine needs to know another exists.
 
-### Is built next, since it has to be built to be felt
+### Is one of many, so the core is unbound
 
-Nobody has had the experience yet. Ruled by the author, against the pilot's order of mechanism first.
+The engine that runs programs is one. A DSP engine for music, with its own clock and its own arithmetic, is another. None is the platform: the medium has a law and many engines, as the web has a law and many servers, and more people bring their own engines, goals and ideas to one medium. Ruled by the author; the reach of it underexplored.
 
-## Kernel
+### Is reached by its [contract](#contract), whatever happens inside
 
-What the pilot builds as one process: it hosts the field while open, judges every act on it, and rests in the substrate. Whether the medium needs one is open.
+What an engine takes and gives is in the field, so the field can call it and stand on what it returns. Interoperability is the field's gift, not a runtime the engine carries.
 
-### Hosts the [field](#field) open, and rests in the [substrate](#substrate)
+### Hosts its own runs
 
-An operating system's kernel is in memory, rebooted without loss, and the one thing that touches the disk. So here: what the kernel holds is the field open, not the field kept, and a kernel can be replaced. Brinch Hansen's nucleus, the one part that can be extended with new systems in an orderly manner [Brinch Hansen 1970].
+Its live state is its own: what it runs it also watches and stops, and what another engine asks of it arrives as a commit it honours.
 
-### Judges every act under a [boundary](#boundary)
+## Boundary
 
-Knowers, programs and engines reach the field only through it, and it speaks to every client over one protocol.
+A rule on acts over a region of the space: who may read there, who may write, what may run.
 
-### Attaches stores on declared terms
+### Draws a region of [space](#space) by permission
 
-A kernel brings a peer's store into the running field, read-only or on a branch; two kernels on one store are not joined. Federation is stores attached, never kernels joined.
+The field is one; a boundary is what a knower or a run may reach in it. Reads reach what it admits, writes land where it allows, runs start what it names.
 
-### May not need to exist, since the law is data
+### Is set before a run and stays live during it
 
-The web has no kernel: a law, and many engines that read it. If the field's law is data in the field, every [engine](#engine) that reads the law can judge its own acts by it, and what the pilot builds as one judging process is one engine among the many, not the centre. The author is skeptical of the word and the thing; the operating-system picture may have misled, and what stays is the dynamic, that the law governs and the engines execute under it. Open, underexplored.
+What a boundary names is a selection of the field, and the field keeps moving, so the licence stands while its members change. Trust is native, because the rule is the law's and not the writer's, and the law is judged at the store before a commit stands.
+
+### Is what a private region is, seen from outside
+
+A knower may work on a branch of its own before anyone sees; what keeps others out is that their boundaries do not reach it. Nothing is private by a wall of its own.
 
 ## Substrate
 
-What the field rests in and what outlives every kernel: the law of laying it down, chunks and their connections, types, boundaries, every change a commit on a branch.
+What the field rests in and what outlives every engine: the law of laying it down, and the record of every commit.
 
-### Holds the [field](#field) at rest, as stores
+### Holds the [field](#field) at rest
 
-A store is a directory in the substrate's format. A kernel opens it, and another kernel can open the same one. The commits are kept here; the kernel only serves them.
+A store is the substrate's unit. Any engine that keeps the format can open it, and closing one loses nothing; the commits are kept here.
 
-### Keeps the law as data, all but the format
+### Gives each store one order, and judges each [commit](#commit) before it stands
 
-The law is data, because [contracts](#contract) live here with what they govern. The one law that is not data is the format that reads the data.
+For many engines to share one field safely, commits at a store must stand in one order, each judged under a boundary before it stands. That judging is the law's role at the store, not a thing of its own: the pilot plays it in one process fused with its program engine, and any process that keeps the format and the law may play it instead. One per store, and none above the stores. The word kernel named this role and was retired for it, as harness was; the role stays, the thing does not. Reasoned, from an exploration on 2026-09-05.
 
 ### Holds the chunk, which may become the [holon](#holon)
 
 A holon with no duty to be true. Renaming chunk to holon is held open.
 
-### Is the lever the project stands on
+### Is the lever, typed against itself
 
-The project's entry calls the substrate's one fact, typed against itself, the lever that moves everything else. This file keeps the fact and adds only that the kernel rests in it. Ruled by the author, 2026-09-05.
-
-## Processor
-
-The exact circuitry that computes. Nothing below it computes. Von Neumann's central arithmetic and central control, apart from the memory [von Neumann 1945].
-
-### Fixes the bottom under the [kernel](#kernel), beside the [substrate](#substrate)
-
-Two kinds of circuitry with no ground beneath: one keeps, one computes. What judges runs on the processor; the processor merely runs it.
-
-### Holds no [comprehension](#comprehension)
-
-It executes. The win begins one layer up.
+The substrate's one fact, that its law is data in it, is what the project's entry calls the lever that moves everything else. Ruled by the author.
 
 ## Program
 
@@ -494,25 +486,21 @@ Its context a selection of the field, its output landing back as structure.
 
 A call is matched against the contract in the body, which is what [amplifies](#amplify) programs: attach a peer's store and its programs compound with yours at once.
 
-### Runs as a process, and leaves a [trail](#trail) in the [kernel](#kernel)
+### Runs under a [boundary](#boundary) and leaves a [trail](#trail)
 
-A run is a process, with a [boundary](#boundary) before it and a trail after, so every write walks back to the program that made it and the person who ran it.
+A boundary before it, a trail after, so every write walks back to the program that made it and the person who ran it.
 
-## Engine
+## Interface
 
-A primal thing of the medium that executes: reads the field's law and runs under it, with its own mechanics, one of many. A citizen, not a tenet. Babbage's engine had a store and a mill of its own [Babbage 1837].
+Where a knower meets the field: what it reads and writes through, and what shows the trail. Simon's meeting point between an artifact's inner and outer environment [Simon 1969].
 
-### Is a [citizen](#citizen), and there are many
+### Rests on the [medium](#medium)'s law, and reads the [field](#field) for the rest
 
-The program engine, which runs programs, is one. A DSP engine for music, with its own clock and its own arithmetic, is another. Each runs what it runs the way it runs it, and none is the platform: the core is unbound, so that more people can bring their own engines, goals and ideas to the same medium. Ruled by the author, 2026-09-05; the reach of it underexplored.
+The interface the code needs today rests on briefs and links under a gradient and on nothing beneath, which is why it can be built before the platform is settled. Over the field, the interface is itself a read of the field: which components can draw a thing is asked of the field, not configured beside it. Ruled by the author.
 
-### Is reached by its [contract](#contract) in the [substrate](#substrate)
+### Is built next, since it has to be built to be felt
 
-What an engine takes and gives is a chunk in the field, so the field can call it and stand on what it returns, whatever happens inside. Interoperability is the substrate's gift, not a runtime the engine carries.
-
-### Judges its own acts by the law it reads, if there is no kernel
-
-The law being data, an engine that reads it can keep it; then trust rests on the substrate's record, every act a commit, and not on one process standing between engines and the field. Open, with the kernel's question.
+Nobody has had the experience yet. Ruled by the author.
 
 ## Specification
 
@@ -520,11 +508,23 @@ A brief for what is to be built: the shortest text from which the built thing co
 
 ### Is a [holon](#holon) whole only in its goals, background and taste
 
-A specification has preceding matter, other wholes to be whole in, and the platform is written from that [ground](#ground): the code's holons are briefs, the platform's are specifications, and both stand under one gradient.
+A specification has preceding matter, other wholes to be whole in, and the platform's is written from that [ground](#ground): the code's holons are briefs, the platform's are specifications, and both stand under one gradient.
 
-### Is what the platform's law becomes when rewritten under the code
+### Emanates from this file
 
-Comprehensible, engaging, and still law-grade: the second mark the study set itself.
+The platform's next specification is written from these words downward. Each word's dynamic becomes a requirement, and the mechanism is chosen last; where the old tree and this file disagree, this file is the ground.
+
+## Processor
+
+The circuitry that computes: the floor. Von Neumann's central arithmetic and central control, apart from the memory [von Neumann 1945].
+
+### Runs everything above it and nothing below
+
+The one layer with no ground beneath, beside the [substrate](#substrate) that keeps.
+
+### Holds no [comprehension](#comprehension)
+
+It executes. The win begins one layer up.
 
 ## Harness
 
@@ -540,4 +540,4 @@ That the law is data in the field makes the field a first-class harness to every
 
 ### Still names today's sessions in the code
 
-Where the code says harness it means the sessions that exist and can be bootstrapped against files, which is what every session that wrote this file ran under. Read it as the tool to be superseded, not as the law.
+Where the code says harness it means the sessions that exist and can be bootstrapped against files. Read it as the tool to be superseded, not as the law.
