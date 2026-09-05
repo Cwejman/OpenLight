@@ -31,6 +31,16 @@ Counts are the readers' own, verified by the writer where folded:
 
 All of it folded into one rewrite, committed as round one. The head lost its provenance and gained the confidence scale. Code entered as a word and lists the two laws. The order became the measured reach with a reader's win as tie-break, and the file says so. Every copy the laws pass found has one home. Every citation the authors pass verified stands in brackets. The tree's fifteen precisions are in the arc's words. Trail took the README's meaning back.
 
+## Round two
+
+The rewritten file was read again from three of the grounds, the file alone, the README, and the headings alone; the laws and naming passes were stopped by a spend limit. The counts, round one against round two, from readers who had not seen each other's work:
+
+- Used before given: 62, then 74. Not understood: 34, then 36. Open questions: 22, then 28. Failed titles: 26, then 18. Copies: about 40 groups, then 23. README contradictions beyond the three declared divergences: 13, then 8. Blind reconstruction: 17 words confident, then 16; 5 titles flagged underdetermined, then 12, most because a title named something outside the file.
+
+Three of the five counts did not fall. Two reasons, and both are recorded rather than argued away. The file grew by a word and by twenty-four citations, and a stricter reader counted more. And a web ordered by reach cannot give every word before use; the forward references the amnesia reader counts are the form, not a fault, which the head now says. What did fall is what the writer can fix: copies, failed titles, contradictions with the README, and both-ends relations, which the script now finds at zero.
+
+Round two's own folding: the head defines what it uses and settles the order's confidence, measured for reach and observed for the tie-break; code says which words are built today and which are specified; the twelve titles that named the README, the tree or the arc name the thing itself; the twenty-three copies have one home each; the eight relations stated at both ends have one; the private language of the kernel entry is gone.
+
 ## What this does not reach
 
-The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break, so round two reads the folded file cold again.
+The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break. A third round would need the two stopped passes and a person; the counts that remain are the form's and the author's, not the writer's.

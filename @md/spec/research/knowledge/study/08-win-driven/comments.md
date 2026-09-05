@@ -12,7 +12,9 @@
 
 ## 2. Owed to the ontology
 
-**The cold read.** Read cold eight times by fresh sessions on 2026-09-05 ([`evidence-clean-room.md`](evidence-clean-room.md)) and rewritten whole on what they found; not yet read cold by a person, and not by the author since the rewrite.
+**The cold read.** Read cold by fresh sessions in two rounds on 2026-09-05 ([`evidence-clean-room.md`](evidence-clean-room.md)), rewritten whole after the first and cut after the second; not yet read cold by a person, and not by the author since the rewrite. The counts that did not fall between rounds are the form's, a web gives nothing before use, and the author's: which words are built and which imagined is now said under code, and whether that is the right line is the author's.
+
+**The unit of a win.** The file says a win is comprehension gained against reading spent and that the ratio has no unit. The order's tie-break is a reader's judgment, marked observed. Three ways to compare two wins without a unit were to be proposed by the naming pass, which the spend limit stopped; owed.
 
 **Words that entered before their names.** Knower, trail and prism, each saying so in its last relation. The relation names within and upon left in round one; nesting has one home under holon and no short name. Each waits for a cycle that either settles the word or replaces it; the notions stand.
 

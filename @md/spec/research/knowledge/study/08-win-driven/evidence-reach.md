@@ -26,6 +26,10 @@ From round one the file is ordered by measured reach, ties broken by a reader's 
 
 Counted on the rewritten file: brief 8, field 8, holon 6, kernel 6, ground 5, comprehension 5, trail 5, win 4, link 4, medium 4, boundary 3, contract 3, space 3, citizen 3, substrate 3, knower 2, prism 2, interface 2, gradient 1, commit 1, word 1, amplify 1, harness 1, processor 1, code 0, comment 0, program 0, engine 0, consolidation 0, specification 0. Field rose from five to eight because the arc's words now stand on it rather than on the medium; amplify fell from four to one because its relations were folded into win and ground.
 
+## Reach after round two
+
+Brief 8, field 7, holon 6, ground 5, comprehension 5, win 4, link 4, medium 4, trail 4, contract 4, boundary 4, kernel 4, space 3, citizen 3, substrate 3, knower 2, gradient 1, commit 1, word 1, prism 1, interface 1, amplify 1, harness 1, comment 0, program 0, engine 0, specification 0, processor 0, consolidation 0. Mutual dependence: none. Eight pairs that stood on each other after round one were cut to one home each, which is what the count is for.
+
 ## What this does not reach
 
 Reach counts links in headings only; a link in a paragraph is not counted, and the writer chose which relations to title. A count of what stands on a word is a count of this file's writing, not of the notion's importance in the world. The unit of a win is still unmeasured; the tie-break is a reader's judgment and is marked observed.

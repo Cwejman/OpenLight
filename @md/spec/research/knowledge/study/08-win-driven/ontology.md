@@ -1,6 +1,6 @@
 # Ontology
 
-*The words the code and the platform built for it are made of, each a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written under it, because the trail shows it. Words are ordered by reach, how many stand on each, ties broken by a reader's win; the reading order, where each word is given before use, is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so in its last relation, and rests on its notion. Who changed what is in the log. Nothing here is settled by talk.*
+*The words the code and the platform built for it are made of, each a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written under it, because the trail shows it. Words are ordered by reach, how many other words stand on each, which is measured; ties are broken by a reader's judgment of the win, which is observed. A web has no order in which every word is given before use; the nearest such line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so in its last relation, and rests on its notion. Who changed what is in the git log, and nothing here is settled by talk.*
 
 ## Code
 
@@ -8,7 +8,7 @@ The working rules for how knowledge is written and arranged so that it reaches w
 
 ### Has one value, [comprehension](#comprehension), and one unit of it, the [win](#win)
 
-Everything the code asks is measured by comprehension gained against reading spent. A rule that does not raise that ratio is not the code's.
+Everything the code asks is measured in wins. A rule that does not raise comprehension per reading is not the code's.
 
 ### Has two laws, and everything else follows from them
 
@@ -16,7 +16,7 @@ The first: nothing arrives before its ground; the reader's order is the writer's
 
 ### Runs on prose in files today, and on the [field](#field) when it is built
 
-Nothing in the code needs new technology: markdown in directories, tracked in git, holds it. The platform below the interface is what makes the same rules hold for programs.
+Nothing in the code needs new technology: markdown in directories, tracked in git, holds it. Of the words below, brief, link, medium, commit and the harness are in use today, and the trail as far as git shows it; kernel, field, substrate, boundary, prism and the interface over the field are specified, not built. The platform is what makes the same rules hold for programs.
 
 ## Brief
 
@@ -72,7 +72,7 @@ One gain in comprehension: what you understand after reading that you did not be
 
 ### Is measured as [comprehension](#comprehension) gained against reading spent
 
-A long page that gives little is a small win; a line that changes what you can do is a large one. The ratio has no unit yet: two wins are compared by a reader, not by a count, and this file's ties were broken that way. Observed, not measured.
+A long page that gives little is a small win; a line that changes what you can do is a large one. The ratio has no unit yet: two wins are compared by a reader, not by a count, and this file's ties were broken that way. Observed.
 
 ### Is unequal, which is what makes an order possible
 
@@ -98,18 +98,6 @@ A team's knowledge compounds only as far as its briefs are safe to stand on. So 
 
 A brief that describes the world is true or false, and carries its confidence in the writing, never as a feeling the reader is left to sense. One that directs the world, a goal, a plan, a decision, is in force, fulfilled or superseded, and carries that status instead. The split is the direction of fit [Searle 1979]: word to world for the first, world to word for the second. Reasoned.
 
-## Comprehension
-
-Understanding a thing well enough to act on it. The one value the code measures everything by.
-
-### Is not information
-
-Information is what is on the page; comprehension is what the page lets form, built from the text together with what the reader already holds and settled into one whole [Kintsch 1988]. A page rich in the first and poor in the second holds little knowledge.
-
-### Compounds by joining
-
-An insight is worth more once it meets what the reader already holds, and two people's understandings are worth more again once they meet. The friction of that meeting, across roles, backgrounds and processes, is the wall the code exists to take down.
-
 ## Link
 
 The one way briefs join. An offer, never a missing piece. Nelson's word for the join of hypertext [Nelson 1965].
@@ -128,7 +116,39 @@ For the reader who wants more than the brief says, the link is where more is.
 
 ### Needs no target yet, in prose
 
-A pointer to a source unread or a question unanswered is the brief nobody wrote; the text reads whole and the door stands. Written as a name and a year in brackets it is a citation, and the same thing. In the field a link's target is checked when it is written, so the unwritten brief there is a mention, not a reference.
+A pointer to a source unread or a question unanswered is the brief nobody wrote; the text reads whole and the door stands. Written as a name and a year in brackets it is a citation, and the same thing. In the field a link is a connection the substrate keeps, its target checked when it is written, so the unwritten brief there is a mention, not a reference.
+
+## Comprehension
+
+Understanding a thing well enough to act on it. The one value the code measures everything by.
+
+### Is not information
+
+Information is what is on the page; comprehension is what the page lets form, built from the text together with what the reader already holds and settled into one whole [Kintsch 1988]. A page rich in the first and poor in the second holds little knowledge.
+
+### Compounds by joining
+
+An insight is worth more once it meets what the reader already holds, and two people's understandings are worth more again once they meet. The friction of that meeting, across roles, backgrounds and processes, is the wall the code exists to take down.
+
+## Medium
+
+Briefs joined by links, held in common. What the code turns written knowledge into; untyped, because it is prose. A medium shapes what passes through it more than any message does [McLuhan 1964].
+
+### Is made of [briefs](#brief) and [links](#link), and nothing else
+
+Both its readers, person and model, read prose, so no schema is needed for the medium to hold. Types arrive with the field.
+
+### Is where [comprehension](#comprehension) meets, across knowers
+
+Each piece lands as ground for the next, and two knowers in one medium compound the moment either writes, because the write has an address.
+
+### Holds everything that gives work its direction
+
+The goals and plans, the decisions and their whys, the record each session leaves. All of it is knowledge, all of it the same briefs and links.
+
+### Makes forgetting safe
+
+Nobody holds the whole. A reader holds the briefs that matter and lets the rest go, because the brief above holds the point and the link leads back. Dropping context is not new; dropping it and staying whole is, and it is the medium that provides it, not the tool.
 
 ## Trail
 
@@ -154,45 +174,25 @@ Everything one knower wrote, or everything said at one address.
 
 The word was tried, withdrawn for caution, and restored under the rule that a notion may enter before its name. Rest on the notion.
 
-## Medium
+## Contract
 
-Briefs joined by links, held in common. What the code turns written knowledge into; untyped, because it is prose. A medium shapes what passes through it more than any message does [McLuhan 1964].
+A statement, in the field, of what a thing takes and what it gives, so things meet by matching rather than by custom glue. Meyer's word: precondition the client's duty, postcondition the supplier's [Meyer 1992].
 
-### Is made of [briefs](#brief) and [links](#link), and nothing else
+### Is a [brief](#brief) of a kind
 
-Both its readers, person and model, read prose, so no schema is needed for the medium to hold. Types arrive with the field, which is the medium given addresses and contracts.
+The essence a caller needs at the surface, the implementation within.
 
-### Is where [comprehension](#comprehension) compounds
+### Is one value, read by a validator, a form and a model alike
 
-Each piece lands as ground for the next, and two knowers in one medium compound the moment either writes, because the write has an address and the other's prism picks it up.
+Types are data in the field, so one contract is read by validation, drawn as a form, and handed to a model as its tool schema; a model reads the same contract a person composes with. Types are the plainest exact words for the one [citizen](#citizen) that cannot read a sentence.
 
-### Holds everything that gives work its direction
+### Lives in the [field](#field) it governs
 
-The goals and plans, the decisions and their whys, the record each session leaves. All of it is knowledge, all of it the same briefs and links.
+So whatever holds contracts holds its own law as data.
 
-### Makes forgetting safe
+### Is what draws, when it is a component's
 
-Nobody holds the whole. A reader holds the briefs that matter and lets the rest go, because the brief above holds the point and the link leads back. Dropping context is not new; dropping it and staying whole is, and it is the medium that provides it, not the tool.
-
-## Kernel
-
-What hosts the field while it is open, judges every act on it, and rests in the substrate. Both program and memory. Brinch Hansen's nucleus, the one part that can be extended with new systems in an orderly manner [Brinch Hansen 1970].
-
-### Hosts the [field](#field) open, and rests in the [substrate](#substrate)
-
-An operating system's kernel is in memory, rebooted without loss, and the one thing that touches the disk. So here: what the kernel holds is the field open, not the field kept; a kernel can be replaced and the field stays.
-
-### Judges every act under a [boundary](#boundary)
-
-Knowers, programs and engines reach the field only through it. Its own archetypes are field data, and its contract to its clients is one wire.
-
-### Attaches stores on declared terms
-
-A kernel brings a peer's store into the running field, read-only or on a branch; two kernels on one store are not joined. Federation is stores attached, never kernels joined.
-
-### Sits below the [interface](#interface), above the circuitry
-
-Above it, where comprehension happens. Below it, the substrate that keeps and the [processor](#processor) that computes. Beside it, what the tree calls the chassis, a client and a host. What the spec tree calls the engine is this word's judge half; the rename waits on the arc.
+What draws a screen is a component: a declaration of what it takes, as a program declares what it takes. Which components can draw a thing is a read of the field.
 
 ## Field
 
@@ -204,27 +204,11 @@ To every address the field assigns what is there: a holon, what is placed on it,
 
 ### Is the [medium](#medium) with addresses and contracts, and keeps everything
 
-Where Unix had text and the pipe, and the web the page and the link, the medium has the brief and the link. The field is that medium once every holon has an address and a contract, so that programs and what draws stand in it as prose does. Nothing in it is pruned; it is the typed, versioned medium the README names.
+Where Unix had text joined by the pipe, and the web the page joined by the link, the medium has the brief joined by the link; and where that lineage ends, because text is not data, the field begins: every holon with an address and a contract, so that programs and what draws stand in it as prose does. Nothing in it is pruned.
 
 ### Is read from a point, which is what makes completion repeatable
 
-A knower reads from where it stands. Completion from a point in a field, not from a pasted transcript, is the project's first claim: the point makes the ground addressable, and a [prism](#prism) is cut at it.
-
-## Boundary
-
-A rule on acts over a region of the space: who may read there, who may write, what may be started.
-
-### Draws a region of [space](#space) by permission, on the viewer's side
-
-The field is one; a boundary is what a knower or a run may reach in it. Reads reach what the boundary admits, writes land where it allows, and a run may start only what its boundary names.
-
-### Is set before a run and stays live during it
-
-The boundary's expression freezes when a run starts; what it names keeps moving as the field moves, so the licence stands while its members change. Inspection during, history after: trust is native, because every act is judged under one rule the [kernel](#kernel) keeps.
-
-### Is what a private region is, seen from outside
-
-A knower may work on a branch, or in a frame of its own, before anyone sees; what keeps others out is that their boundaries do not reach it. Nothing is private by a wall of its own.
+A knower reads from where it stands. Completion from a point in a field, not from a pasted transcript, is the project's first claim: the point makes the ground addressable.
 
 ## Gradient
 
@@ -236,7 +220,7 @@ Comprehension descends as reading deepens, and a reader stops holding the bigges
 
 ### Runs one way, which is the first law
 
-Every connection runs from a bigger win to the smaller wins inside it, never the reverse: nothing arrives before its ground, every meaning given before it is used, purpose before machinery. Where a subject forces the other order, the debt is declared in a line. Borrowing is allowed; silent borrowing is not.
+Every connection runs from a bigger win to the smaller wins inside it, never the reverse: nothing arrives before its ground, purpose before machinery, and every meaning given before it is used. Where a subject forces the other order, the debt is declared in a line. Borrowing is allowed; silent borrowing is not.
 
 ### Places by reach, which the [trail](#trail) can count
 
@@ -246,93 +230,21 @@ A [brief](#brief) that many stand on sits near the centre and carries the compre
 
 Because the slope is in the shape, each addition lands where its win belongs and the top stays short as the whole grows, so keeping knowledge in order stops being a job of its own.
 
-## Contract
+## Boundary
 
-A statement, in the field, of what a thing takes and what it gives, so things meet by matching rather than by custom glue. Meyer's word: precondition the client's duty, postcondition the supplier's [Meyer 1992].
+A rule on acts over a region of the space: who may read there, who may write, what may be started.
 
-### Is a [brief](#brief) of a kind
+### Draws a region of [space](#space) by permission, on the viewer's side
 
-The essence a caller needs at the surface, the implementation within.
+The field is one; a boundary is what a knower or a run may reach in it. Reads reach what the boundary admits, writes land where it allows, and a run may start only what its boundary names.
 
-### Is one value, read three ways
+### Is set before a run and stays live during it
 
-Types are data in the field: one contract is read by validation, by a form, and by a model's tool schema, so a model reads the same contract a person composes with. Types are the plainest exact words for the one [citizen](#citizen) that cannot read a sentence.
+The boundary's expression freezes when a run starts; what it names keeps moving as the field moves, so the licence stands while its members change. Inspection during, history after: trust is native, because the rule is the kernel's and not the writer's.
 
-### Lives in the [field](#field) it governs
+### Is what a private region is, seen from outside
 
-So whatever holds contracts holds its own law as data.
-
-### Draws, when it is a component's
-
-What draws a screen is a component: a declaration of what it takes, as a program declares what it takes. Which components can draw a thing is a read of the field.
-
-## Space
-
-The addresses, across dimensions, at which holons are placed. Where a thing is, never what it is.
-
-### Gives every [holon](#holon) an address
-
-An address is a point in a space, and a space is made of dimensions: every holon is placed in some, and is itself a dimension others are placed in. Ruled by the author.
-
-### Is where, while the [field](#field) is what
-
-As different as coordinates and what stands at them. Medium, space and field are three words because they are three things.
-
-## Citizen
-
-Anything that reads the field and writes back into it on the same terms as everything else. Aristotle's citizen shares in decision, not only in residence [Aristotle c. 350 BC], and the ontology admits programs, which is the departure.
-
-### Compounds directly, where a monolith compounds only its glue
-
-A monolith composes only inside its own frame; its seams are for translation, so what compounds is the glue and never the parts. A citizen's output is ground the next citizen stands on. The README says the monolith becomes a citizen; widening the word to programs and engines is this file's.
-
-### Is a [knower](#knower), or a program or an engine, which cannot comprehend
-
-A person and a model are citizens that know; a classical program, or an engine with its own mechanics, is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
-
-## Knower
-
-Whoever comes to the knowledge and is changed by it: a person, or a model in a session. Bounded, and both reader and writer. The knower's part in every act of knowing is not a flaw but a component of it [Polanyi 1958].
-
-### Is where [comprehension](#comprehension) lives, and nowhere else
-
-A head, or a model's context, and neither holds everything. Knowledge is comprehension written down so that it can form again in a knower other than the one it first formed in.
-
-### Is bounded, which the whole code follows from
-
-A person forgets; a model's context fills and gets worse as it fills. So a knower holds what matters and reaches for the rest, and every rule of the code is written for a knower that cannot hold the whole.
-
-### Acts in two ways, reading and writing, and is bounded in both
-
-A read changes the knower; a write changes the field. Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first. Within the code, time is only the order acts stand in; the field also keeps time as a value, a date in a body, which is data and not this.
-
-### Is a session, when it is a model
-
-A session is one model-knower's lifetime: it opens holding nothing, becomes what it reads, and ends. What it does not write is lost with it, so a session debriefs before it ends.
-
-### Is named for now, not settled
-
-The word is new. The code says reader, which fails for the writer; the README says the monolith becomes a citizen, and citizen was widened here to programs, which cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word.
-
-## Substrate
-
-What the field rests in and what outlives every kernel: the law of laying it down, chunks and their connections, types, boundaries, every change a commit on a branch.
-
-### Holds the [field](#field) at rest, as stores
-
-A store is a directory in the substrate's format. A kernel opens it, another kernel can open the same one, and stopping a kernel loses nothing. The commits are kept here; the kernel only serves them.
-
-### Keeps every [contract](#contract), which is how anything interoperates
-
-The contracts that govern the field are chunks in the same field, so the law is data. An engine's contract lives here too, and that is what makes an engine usable from the field whatever it runs. The one law that is not data is the format that reads the data.
-
-### Holds the chunk, which may become the [holon](#holon)
-
-Whole in itself, placed in others, with no duty to be true. Renaming chunk to holon is held open.
-
-### Is the README's lever, placed below the [kernel](#kernel)
-
-The README calls the substrate's one fact, typed against itself, the lever. This file keeps the fact and moves the word below the kernel, beside the processor: circuitry that keeps. Ruled by the author, 2026-09-05; the tree still holds it as a tenet beside the engine.
+A knower may work on a branch, or in a frame of its own, before anyone sees; what keeps others out is that their boundaries do not reach it. Nothing is private by a wall of its own.
 
 ## Commit
 
@@ -354,9 +266,97 @@ Whoever makes a change commits it, standing on what it changes, and the other si
 
 A small fix, a word or a name, is made in place. A change to what a brief says rewrites it whole, because a whole is checkable only when one bounded knower holds it at one moment. One pass is never enough, for the same reason.
 
-### Publishes by placing into a dimension whose holders can see
+### Publishes by placement, not by a second act
 
 Publishing is not a second kind of act. To place a holon into a dimension is to publish it to whoever's [boundary](#boundary) reaches that dimension.
+
+## Kernel
+
+What hosts the field while it is open, judges every act on it, and rests in the substrate. Both program and memory. Brinch Hansen's nucleus, the one part that can be extended with new systems in an orderly manner [Brinch Hansen 1970].
+
+### Hosts the [field](#field) open, and rests in the [substrate](#substrate)
+
+An operating system's kernel is in memory, rebooted without loss, and the one thing that touches the disk. So here: what the kernel holds is the field open, not the field kept, and a kernel can be replaced.
+
+### Judges every act under a [boundary](#boundary)
+
+Knowers, programs and engines reach the field only through it. What it is made of is itself in the field, and it speaks to every client over one protocol.
+
+### Attaches stores on declared terms
+
+A kernel brings a peer's store into the running field, read-only or on a branch; two kernels on one store are not joined. Federation is stores attached, never kernels joined.
+
+### Sits below where comprehension happens, above the circuitry
+
+Above it, the interface. Below it, the substrate that keeps and the processor that computes. Beside it, the platform binding that hosts it on a machine. The spec tree's engine is this word together with the program engine, and the split waits on the tree.
+
+## Knower
+
+Whoever comes to the knowledge and is changed by it: a person, or a model in a session. Bounded, and both reader and writer. The knower's part in every act of knowing is not a flaw but a component of it [Polanyi 1958].
+
+### Is where [comprehension](#comprehension) lives, and nowhere else
+
+A head, or a model's context, and neither holds everything. Knowledge is comprehension written down so that it can form again in a knower other than the one it first formed in.
+
+### Is bounded, which both laws answer to
+
+A person forgets; a model's context fills and gets worse as it fills. So a knower holds what matters and reaches for the rest, and every rule of the code is written for a knower that cannot hold the whole.
+
+### Acts in two ways, reading and writing, and is bounded in both
+
+A read changes the knower; a write changes the field. Whoever makes a brief is bounded the same way as whoever reads it, so every limit on the reader binds the writer first. Within the code, time is only the order acts stand in; the field also keeps time as a value, a date in a body, which is data and not this.
+
+### Is a session, when it is a model
+
+A session is one model-knower's lifetime, opened holding nothing and closed when its context is spent. What it does not write is lost with it, so a session debriefs before it ends.
+
+### Is named for now, not settled
+
+The word is new. The code says reader, which fails for the writer; citizen is widened here to programs, which cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word.
+
+## Space
+
+The addresses, across dimensions, at which holons are placed. Where a thing is, never what it is.
+
+### Gives every [holon](#holon) an address
+
+An address is a point in a space, and a space is made of dimensions: every holon is placed in some, and is itself a dimension others are placed in. Ruled by the author.
+
+### Is where, never what
+
+As different as coordinates and what stands at them. Medium, space and field are three words because they are three things.
+
+## Citizen
+
+Anything that reads the field and writes back into it on the same terms as everything else. Aristotle's citizen shares in decision, not only in residence [Aristotle c. 350 BC], and the ontology admits programs, which is the departure.
+
+### Compounds directly, where a monolith compounds only its glue
+
+A monolith composes only inside its own frame; its seams are for translation, so what compounds is the glue and never the parts. A citizen's output is ground the next citizen stands on. The project's entry says the monolith becomes a citizen; widening the word to programs and engines is this file's.
+
+### Is a [knower](#knower), or a program or an engine, which cannot comprehend
+
+A person and a model are citizens that know; a classical program, or an engine with its own mechanics, is a citizen that only matches. Citizenship is the terms; knowing is not required for it.
+
+## Substrate
+
+What the field rests in and what outlives every kernel: the law of laying it down, chunks and their connections, types, boundaries, every change a commit on a branch.
+
+### Holds the [field](#field) at rest, as stores
+
+A store is a directory in the substrate's format. A kernel opens it, and another kernel can open the same one. The commits are kept here; the kernel only serves them.
+
+### Keeps the law as data, all but the format
+
+The law is data, because a [contract](#contract) lives in the field it governs, and this is where the field is kept. The one law that is not data is the format that reads the data.
+
+### Holds the chunk, which may become the [holon](#holon)
+
+Whole in itself, placed in others, with no duty to be true. Renaming chunk to holon is held open.
+
+### Is the lever the project stands on, and what the kernel rests in
+
+The project's entry calls the substrate's one fact, typed against itself, the lever that moves everything else. This file keeps the fact and adds only that the kernel rests in it. Ruled by the author, 2026-09-05.
 
 ## Word
 
@@ -366,7 +366,7 @@ The smallest holon the medium is built on: the minimum free form, what can be ut
 
 Whole in itself, since it means something alone, and part of every brief that uses it. Below it nothing stands alone.
 
-### Is a [link](#link) when it is precise, which moved the code's language rule
+### Is a [link](#link) when it is precise, so the exact word is allowed
 
 A word outside everyday English is reading spent, and the code once asked for the plainest word for that reason. But a word whose meaning is exact is an offer, never a missing piece: the sentence reads, and the meaning is one lookup away. So the code asks for the word whose meaning is exact, and the plainest such word. Ruled by the author.
 
@@ -386,13 +386,29 @@ A glass prism lays light out by colour without losing any. This one lays the fie
 
 A model's prism is agreed in advance, what the session takes in and gives back. A person's follows the offers the links make. This is the one place the two knowers differ.
 
-### Is one selection among three
+### Is a selection, as a boundary and a call's argument are
 
-The prism, the boundary and a call's argument are all selections of the field, one form read three ways. Reasoned.
+Three things that look different are one form: a selection of the field, read as what a knower holds, what a run may reach, and what a call is given. Reasoned.
 
 ### Is named for now, not settled
 
 The word is a metaphor one cycle old, and the code's own word for the model's case is context. Rest on the notion, a bounded selection recomputed as the field moves.
+
+## Comment
+
+A write that stands on a brief without changing it.
+
+### Stands on a [brief](#brief) and leaves it whole
+
+The author's text stays the author's and the reader's response stays the reader's, and the two are visible together. A comment that amends the brief is folded in and retires; the trail still shows it was said.
+
+### Is free from the reader's own room, and placed onto the brief by leave
+
+Said from the reader's own place, a comment needs only read over the brief and reaches the brief's readers through the trail. Placed onto the brief itself, it needs write there, within the [boundary](#boundary). A published brief may be commented on, and that is the boundary between custodian and stakeholder, a team and its client.
+
+### Has no home yet when the brief is a file
+
+A file cannot hold a comment without ceasing to be the author's alone; where it lives instead is held open in the sketches.
 
 ## Interface
 
@@ -400,15 +416,11 @@ Where comprehension happens: what a knower reads and writes the field through, a
 
 ### Rests on the [medium](#medium)'s law for the knowledge half, and is a client of the [kernel](#kernel) for the built one
 
-The interface the code needs today rests on briefs and links under a gradient and on nothing beneath, which is why it can be built before the platform is settled. The interface over the field is a client of the kernel: every act it makes is judged there. Ruled by the author; scoped here.
+The interface the code needs today rests on briefs and links under a gradient and on nothing beneath, which is why it can be built before the platform is settled. The interface over the field is a client of the kernel. Ruled by the author; scoped here.
 
-### Shows what the medium does not write
+### Is built next, since it has to be built to be felt
 
-From the links, who stands on a brief; from the commits, what it was before, who changed it and why: the [trail](#trail).
-
-### Is what the arc builds next, since it has to be built to be felt
-
-Nobody has had the experience yet.
+Nobody has had the experience yet. Ruled by the author, against the pilot's order of mechanism first.
 
 ## Amplify
 
@@ -430,41 +442,9 @@ The more true ground a reader gains per reading, the greater the gain. A wrong b
 
 A write with one home and an address is picked up by every [prism](#prism) tuned to it, so one write is amplified as many times as there are knowers standing there. Resonance is that, seen from the medium's side, and the word is Grossberg's for a pattern that settles only when input and expectation agree [Grossberg 1976]. Reasoned.
 
-### Supersedes the [harness](#harness)
+### Replaces the [harness](#harness), which bounded what this expands
 
-A harness bounds a model to a transcript, a closed function run once. The medium gives a model more ground per reading than any transcript could, and its output becomes ground for the next. We do not bound; we expand.
-
-## Comment
-
-A write that stands on a brief without changing it.
-
-### Stands on a [brief](#brief) and leaves it whole
-
-The author's text stays the author's and the reader's response stays the reader's, and the two are visible together. A comment that amends the brief is folded in and retires; the trail still shows it was said.
-
-### Is free from the reader's own room, and placed onto the brief by leave
-
-Said from the reader's own place, a comment needs only read over the brief and reaches the brief's readers through the trail. Placed onto the brief itself, it needs write there, within the [boundary](#boundary). A published brief may be commented on, and that is the boundary between custodian and stakeholder, a team and its client.
-
-### Is held open for the file
-
-Where a comment lives when the brief is a file is open, in the sketches.
-
-## Harness
-
-What a tool builds around a model to bound it: a transcript, a closed function, a context made for the occasion. Retired.
-
-### Leaves no [trail](#trail)
-
-Nobody can say an answer came from exactly this state, and nobody can re-derive it.
-
-### Is dissolved by the [field](#field)'s one fact
-
-Contracts are chunks in the field they govern, so the field is a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression and hand-over go with it.
-
-### Still names today's sessions in the code
-
-Where the code says harness it means the sessions that exist and can be bootstrapped against files, which is what every session that wrote this file ran under. Read it as the tool to be superseded, not as the law.
+A harness bounds a model to a transcript, a closed function run once. The medium gives a model more ground per reading than any transcript could, and its output becomes ground for the next. We do not bound; we expand and [contract](#contract).
 
 ## Program
 
@@ -474,13 +454,13 @@ The unit of execution in the field, headless, carrying its contract in its body.
 
 Its context a selection of the field, its output landing back as structure.
 
-### Is bound by the match, never by keyword
+### Is called by matching its contract, never by name
 
 A call is matched against the contract in the body, which is the [amplifier](#amplify) in the technical arc: attach a peer's store and its programs compound with yours at once.
 
 ### Runs as a process, and leaves a [trail](#trail) in the [kernel](#kernel)
 
-A run is a process: a boundary before it, inspection during, history after, so every write walks back to the program that made it and the person who ran it.
+A run is a process, with a [boundary](#boundary) before it and a trail after, so every write walks back to the program that made it and the person who ran it.
 
 ## Engine
 
@@ -492,7 +472,35 @@ The program engine, which runs programs, is one. A DSP engine for music, with it
 
 ### Is reached by its [contract](#contract) in the [substrate](#substrate)
 
-What an engine takes and gives is a chunk in the field, so the field can call it and stand on what it returns, whatever happens inside. Interoperability is the substrate's gift, not a runtime the engine carries; the tree's runtime providers are the program engine's private mechanism.
+What an engine takes and gives is a chunk in the field, so the field can call it and stand on what it returns, whatever happens inside. Interoperability is the substrate's gift, not a runtime the engine carries.
+
+## Harness
+
+What a tool builds around a model to bound it: a transcript, a closed function, a context made for the occasion. Retired.
+
+### Leaves no [trail](#trail)
+
+Nobody can say an answer came from exactly this state, and nobody can re-derive it.
+
+### Is dissolved by the [field](#field), which harnesses everything
+
+The substrate's one fact, that the law is data in the field it governs, makes the field a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression by inference over the text goes with it.
+
+### Still names today's sessions in the code
+
+Where the code says harness it means the sessions that exist and can be bootstrapped against files, which is what every session that wrote this file ran under. Read it as the tool to be superseded, not as the law.
+
+## Specification
+
+A brief for what is to be built: the shortest text from which the built thing could be deleted and rebuilt in one pass, and no further than that. Parnas's rule, precise and complete enough that others can build against it and no more [Parnas 1972].
+
+### Is a [holon](#holon) whole only in its goals, background and taste
+
+A specification has preceding matter, other wholes to be whole in, and the engineering arc writes from that [ground](#ground), where the knowledge arc's holons are briefs and the engineering arc's are specifications.
+
+### Is what the spec tree becomes when rewritten under the code
+
+Comprehensible, engaging, and still law-grade.
 
 ## Processor
 
@@ -512,24 +520,12 @@ Bringing what is scattered into one whole that stands: many sessions, many heads
 
 ### Does for the medium what a [brief](#brief) does for one stretch of work
 
-A brief consolidates one dive into one surface. The medium consolidates every brief into one home per fact, so what many knowers found separately stands once, and stands for all of them.
+A brief consolidates one dive into one surface. The medium consolidates every brief, so what many knowers found separately stands once, and stands for all of them.
 
 ### Lets an answer be re-derived from the same state of the [field](#field)
 
-An inference made from consolidated ground stands on one addressable state, a [commit](#commit), and can be made again from that state. What is repeatable is the ground; a sampled model's answer is its own. What the transcript could not say, which state an answer came from, the address says. Reasoned.
+An inference made from consolidated ground stands on one addressable state, a [commit](#commit), and can be made again from that state. What is repeatable is the ground; a sampled model's answer is its own. Reasoned.
 
-### Is the field's side of what resonance is the knower's
+### Is amplification seen from the field, as resonance is from the knower
 
 Consolidated inference and amplified resonance are one dynamic seen from two sides: the field settles, and the knowers standing on it gain at once. This reading of the pairing is reasoned; the word is ruled by the author.
-
-## Specification
-
-A brief for what is to be built: the shortest text from which the built thing could be deleted and rebuilt in one pass, and no further than that. Parnas's rule, precise and complete enough that others can build against it and no more [Parnas 1972].
-
-### Is a [holon](#holon) whole only in its goals, background and taste
-
-A specification has preceding matter, other wholes to be whole in, and the engineering arc writes from that [ground](#ground), where the knowledge arc's holons are briefs and the engineering arc's are specifications.
-
-### Is what the spec tree becomes when rewritten under the code
-
-Comprehensible, engaging, and still law-grade.
