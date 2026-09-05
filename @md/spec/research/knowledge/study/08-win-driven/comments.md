@@ -20,6 +20,8 @@
 
 **Consolidation's pairing.** The author gave the word with a pairing, consolidated deterministic inference and amplified resonance in the medium. The ontology reads it as the two sides of amplification, the field's and the knower's, and marks the reading reasoned. Whether resonance earns a word of its own is not asked yet; it stands as a relation of amplify.
 
+**Law is a word, 2026-09-05.** A fresh reader found law carrying four senses; it is now the platform half's word for what governs acts in the field, kept as data, judged at the store, and the code's two laws are named as the code's. The judging role that kernel had named lives under law.
+
 **Kernel retired, 2026-09-05.** The word named the law's judging at a store and the operating-system picture made a process of it; the exploration ([`evidence-kernel.md`](evidence-kernel.md)) found one judge per store and none above, and the role moved under substrate. The arc's conclusions, section K, recorded the earlier ruling that the tree's engine splits into kernel and program engine; that split is now judge and program engine, and the section says so.
 
 **The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The tree audit (in git at 8ddd4b7, `passes/round-1/tree.md`, *Rename map*) found the tree's engine is a judge and a runner fused, so the sweep is a split: the judge becomes the kernel, the runner the program engine, one citizen. It also found the tree's connection kind named `field` collides with the word and wants renaming first. A sweep across the tree, not a frontier task; recorded for the arc's conclusions and not done.

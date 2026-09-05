@@ -1,6 +1,6 @@
 # Ontology
 
-*The words the code and the platform built for it are made of, and the dynamics between them: what is, the parts of meaning that make it, the right words in their right relations, and nothing more detailed than that. Its goal is the code's, that knowledge reaches whoever needs it next, person or model, and every word is graded toward it. Each word is a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward that goal: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use, so this file borrows forward and declares it here, which the first law allows; the nearest line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so, and rests on its notion; a better word comes when it comes, and nothing waits on it. Who changed what is in the git log.*
+*The words the code and the platform built for it are made of, and the dynamics between them: what is, the parts of meaning that make it, the right words in their right relations, and nothing more detailed than that. Its goal is the code's, that knowledge reaches whoever needs it next, person or model, and every word is graded toward it. Each word is a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward that goal: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use, so this file borrows forward and declares it here, which the code's first law allows; the nearest line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so, and rests on its notion; a better word comes when it comes, and nothing waits on it. Who changed what is in the git log.*
 
 ## Code
 
@@ -10,7 +10,7 @@ The working rules for how knowledge is written and arranged so that it reaches w
 
 Everything the code asks is measured in wins. A rule that does not raise comprehension per reading is not the code's.
 
-### Has two laws, and everything else follows from them
+### Has two laws of writing, and everything else follows from them
 
 The first: nothing arrives before its ground; the reader's order is the writer's order. The second: the ground stays true; whatever is stood on holds for whoever stands on it next. Each has its home under the word it binds, the [gradient](#gradient) and the [ground](#ground).
 
@@ -256,7 +256,7 @@ A brief contracts the reading, never the reader, and what is contracted at the s
 
 ### Feeds on true [ground](#ground), and amplifies error as fast as truth
 
-The more true ground a reader gains per reading, the greater the gain. A wrong brief stood on by many spreads as fast as a right one, which is why the second law is not a rule laid on top: it is what amplification costs.
+The more true ground a reader gains per reading, the greater the gain. A wrong brief stood on by many spreads as fast as a right one, which is why the code's second law is not a rule laid on top: it is what amplification costs.
 
 ### Is multiplied by every knower reading at one write's address
 
@@ -324,7 +324,7 @@ A file cannot hold a comment without ceasing to be the author's alone; where it 
 
 ## Platform
 
-What the medium must become for a program to be a knower's peer: the same briefs and links, given addresses, contracts and a law that is data, so that programs read and write what people and models read and write. The entry of the second half, and its why is the code's, met for citizens that cannot read a sentence.
+What the medium must become for a program to be a knower's peer: the same briefs and links, given addresses, contracts and a [law](#law) that is data, so that programs read and write what people and models read and write. The entry of the second half, and its why is the code's, met for citizens that cannot read a sentence.
 
 ### Exists so that programs compound as knowers do
 
@@ -349,6 +349,22 @@ A program cannot read prose; it can read data at an address under a contract. So
 ### Is read from a point, which makes a completion's ground repeatable
 
 A knower reads from where it stands. A model's completion from a point in a field, not from a pasted transcript, is the project's first claim: the point makes the ground addressable, and the answer is the model's own.
+
+## Law
+
+What governs acts in the field, kept as data in it: the contracts on what may be written, and the boundaries on who may act where. Not the code's two laws, which govern writing; this law governs the field.
+
+### Is kept as data in the [field](#field), which is the lever
+
+The contracts that govern the field are in the field, read where the data is, by the same readers. That one fact is what the project's entry calls the lever: it is why programs meet by matching, why the interface is a read of the field, and why no separate harness exists. Ruled by the author.
+
+### Is judged at the store, before a commit stands
+
+For many engines to share one field safely, commits at a store must stand in one order, each judged under the law before it stands. That judging is the law's role at the store, not a thing of its own: today one process plays it, fused with the engine that runs programs, and any process that reads the substrate and the law may play it instead. One judge per store, and none above the stores. The word kernel named this role and was retired for it, as harness was. Reasoned, from an exploration on 2026-09-05.
+
+### Is read by every [citizen](#citizen) alike
+
+A person composes with it, a model reads it as its tool schema, a program checks it, an engine runs under it. One law, four readers, no translation.
 
 ## Citizen
 
@@ -400,29 +416,25 @@ What draws a screen declares what it takes, as a program declares what it takes;
 
 ## Substrate
 
-What the field rests in and what outlives every engine: the law of laying it down, and the record of every commit.
+What the field rests in and what outlives every engine: the shape of laying it down, and the record of every commit.
 
 ### Holds the [field](#field) at rest
 
 A store is the substrate's unit, one field at rest. Any engine that reads the substrate can open it, and closing one loses nothing; the commits are kept here.
 
-### Gives each store one order, and judges each [commit](#commit) before it stands
+### Gives each store one order of [commits](#commit)
 
-For many engines to share one field safely, commits at a store must stand in one order, each judged under a boundary before it stands. That judging is the law's role at the store, not a thing of its own: today one process plays it, fused with the engine that runs programs, and any process that reads the substrate and the law may play it instead. One per store, and none above the stores. The word kernel named this role and was retired for it, as harness was; the role stays, the thing does not. Reasoned, from an exploration on 2026-09-05.
+A store is where commits stand in one order, and the [law](#law) is judged there; the substrate keeps the order and the record, and the judging is the law's.
 
 ### Holds the [holon](#holon) as a chunk
 
 A chunk is the substrate's holon, with no duty to be true; whether the specification takes the word holon is held open.
 
-### Keeps the law as data, which is the lever
-
-The contracts that govern the field are in the field, read where the data is, by the same readers. That one fact is what the project's entry calls the lever: it is why programs meet by matching, why the interface is a read of the field, and why no separate harness exists. Ruled by the author.
-
 ## Engine
 
 A primal thing of the medium that executes: it reads the field's law and runs under it, with mechanics of its own, one of many. Babbage's engine had a store and a mill of its own [Babbage 1837].
 
-### Executes under the law, which it reads as data
+### Executes under the [law](#law), which it reads as data
 
 Engines execute; the law judges; the substrate records. An engine reads the law from the field as any citizen does and commits through the store's judging, so nothing it does is outside the trail, and no engine needs to know another exists.
 
@@ -448,7 +460,7 @@ The field is one; a boundary is what a knower or a run may reach in it. Reads re
 
 ### Is set before a run and stays live during it
 
-What a boundary names is a selection of the field, and the field keeps moving, so the licence stands while its members change. Trust is native, because the rule is the law's and not the writer's.
+What a boundary names is a selection of the field, and the field keeps moving, so the licence stands while its members change. Trust is native, because the rule is the [law](#law)'s and not the writer's.
 
 ### Is what a private region is, seen from outside
 
@@ -532,7 +544,7 @@ Nobody can say an answer came from exactly this state, and nobody can re-derive 
 
 ### Is dissolved by the [field](#field), which harnesses everything
 
-The [substrate](#substrate)'s one fact makes the field a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression by inference over the text goes with it.
+That the [law](#law) is data in the field makes the field a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression by inference over the text goes with it.
 
 ### Still names today's sessions in the code
 

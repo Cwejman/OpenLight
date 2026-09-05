@@ -55,6 +55,12 @@ The author's steer, the same evening: the ontology's goal is the code's and ever
 
 After the platform half was rewritten from the goal, one fresh reader and one blind reconstruction. The reader, round five against round seven: not understood 20, then 21; never given 17, then 13; contradictions 7, then 7, none the same as before; copies 20, then 15; failed titles 15, then 12; engineering detail 30, then 25. The blind writer reconstructed twenty-four of thirty words with confidence and marked four titles underdetermined, against twelve in round two and five in round one, with no hard conflict. The reader's one change was the second half's own law applied to itself: named things that are not words become words or go, and the law-is-data fact gets one home; folded, with both halves re-ordered by their entry's why.
 
+## Round eight, and rest
+
+One more fresh reader after round seven: not understood 24, never given 15, contradictions 10, copies 15, failed titles 16, engineering detail 28. Against round seven's 21, 13, 7, 15, 12 and 25, that is one reader's variance and not movement; three readers over rounds five to eight sit in one band, and what each finds is largely different from what the last found, which is the signature of a file at rest under this technique. The reader's one change was real and was taken: the word law carried four senses, the code's two laws, the field's contracts, the store's judging and permission; law is now a word of the platform half with one meaning, what governs acts in the field kept as data in it, and the code's two laws are named as the code's wherever they could be read otherwise.
+
+The file rests at thirty-one words. Further rounds under this technique would trade one reader's findings for another's. What would move it now is a person's cold read, the author's, or the specification being written from it, which is the test the file was made for.
+
 ## What this does not reach
 
 The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break. A third round would need the two stopped passes and a person; the counts that remain are the form's and the author's, not the writer's.
