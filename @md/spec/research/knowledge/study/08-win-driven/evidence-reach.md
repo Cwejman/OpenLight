@@ -18,9 +18,9 @@ Five pairs of words each stood on the other: comprehension and knower, brief and
 
 A topological order of the words by their links, ties broken by the file's order, moved sixteen words by three places or more against the centrality order. The largest moves: trail from ninth to sixteenth, since it stands on interface; contract from twenty-fifth to fourteenth and specification from twenty-eighth to fifteenth, since little stands under them. The finding of the series holds at this size: centrality is a good first guess at dependence, and the misses mark words used by something bigger than themselves.
 
-## The rule adopted
+## The rule adopted, and corrected
 
-From round one the file is ordered by measured reach, ties broken by a reader's win, and the head says so. Code, added in round one as the word for the working rules, is placed first by the author's own rule that the why comes before the how, not by count.
+From round one the file was ordered by measured reach, ties broken by a reader's win. The author corrected it the same day: a win gradient depends on the entry's why, and reach counts dependence, not gain. So the file is ordered by win toward its own why, stated under code, and reach stands beside it as the check. Where the two agree, brief and holon high, specification and harness low, value and dependence coincide. Where they part, field high by reach and lower by win, amplify low by reach and higher by win, a word is depended on more than it gives, or gives more than is depended on, and both are worth knowing.
 
 ## Reach after round one
 
