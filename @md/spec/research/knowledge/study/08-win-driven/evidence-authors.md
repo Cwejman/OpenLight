@@ -1,6 +1,6 @@
 # Evidence: the address space of authors
 
-*Each word of the ontology grounded in the author who named or first sharpened its notion, verified against a real source on the web, 2026-09-05. Technique: a fresh session read the ontology and searched the literature for each of the twenty-nine words, confirming title, year and claim before reporting. The full table with quotations and the departures is in [`passes/round-1/authors.md`](passes/round-1/authors.md). Strength: **observed**, each row verified once; the departures are reasoned.*
+*Each word of the ontology grounded in the author who named or first sharpened its notion, verified against a real source on the web, 2026-09-05. Technique: a fresh session read the ontology and searched the literature for each of the twenty-nine words, confirming title, year and claim before reporting. The full table with quotations and the departures is in git at 8ddd4b7, `passes/round-1/authors.md`. Strength: **observed**, each row verified once; the departures are reasoned.*
 
 ## Verified
 

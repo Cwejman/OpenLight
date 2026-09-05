@@ -1,6 +1,6 @@
 # Evidence: the clean-room matrix
 
-*What a matrix of deliberate amnesias found in the ontology, round one, 2026-09-05. The technique: several fresh sessions read the same file, each given a different ground and nothing else, and report against a fixed form; the writer then verifies each finding against the file before folding it. The raw reports are the receipts, kept in [`passes/round-1/`](passes/round-1/) until folded, then retired to git. Strength: **observed** for what the readers found, **measured** where a count is given.*
+*What a matrix of deliberate amnesias found in the ontology, round one, 2026-09-05. The technique: several fresh sessions read the same file, each given a different ground and nothing else, and report against a fixed form; the writer then verifies each finding against the file before folding it. The raw reports are the receipts, folded and retired to git at 8ddd4b7 and the commit after it, `passes/`. Strength: **observed** for what the readers found, **measured** where a count is given.*
 
 ## The grounds
 

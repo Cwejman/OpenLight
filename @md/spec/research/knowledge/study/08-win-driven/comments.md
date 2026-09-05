@@ -20,7 +20,7 @@
 
 **Consolidation's pairing.** The author gave the word with a pairing, consolidated deterministic inference and amplified resonance in the medium. The ontology reads it as the two sides of amplification, the field's and the knower's, and marks the reading reasoned. Whether resonance earns a word of its own is not asked yet; it stands as a relation of amplify.
 
-**The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The tree audit ([`passes/round-1/tree.md`](passes/round-1/tree.md), *Rename map*) found the tree's engine is a judge and a runner fused, so the sweep is a split: the judge becomes the kernel, the runner the program engine, one citizen. It also found the tree's connection kind named `field` collides with the word and wants renaming first. A sweep across the tree, not a frontier task; recorded for the arc's conclusions and not done.
+**The tree's rename.** Under the ontology the pilot's engine is the kernel, what hosts the field and judges every act, and engine is a citizen with its own mechanics, contracted through the substrate. The tree audit (in git at 8ddd4b7, `passes/round-1/tree.md`, *Rename map*) found the tree's engine is a judge and a runner fused, so the sweep is a split: the judge becomes the kernel, the runner the program engine, one citizen. It also found the tree's connection kind named `field` collides with the word and wants renaming first. A sweep across the tree, not a frontier task; recorded for the arc's conclusions and not done.
 
 ## 3. For the markdown practice
 
