@@ -24,6 +24,10 @@ Facts derivable from no heading, that live only in paragraphs: ground's duty, on
 
 The rule that a relation's title must read whole from the other end, recorded in the practice notes, holds at 91.5 percent and fails exactly where a title reads from its own side only. Round one retitled the divergent eleven by purpose and moved the hidden facts into titles or into the entries the facts belong to.
 
+## Round seven
+
+On the file with the platform half rewritten from the goal: twenty-four of thirty words reconstructed with confidence from headings alone, four titles marked underdetermined, no hard conflict. Round one had seventeen confident and five underdetermined of twenty-nine; round two had sixteen and twelve. The titles that still underdetermine name a source or a rule rather than the relation: the study relation under code, the pairing under consolidation, the component under contract, the lever under substrate.
+
 ## What this does not reach
 
 One blind writer and one grader, both models. Partial covers a wide band, from a missing example to a missing reason. The measure is of this file's titles, not of the rule in general; a second file written under the rule from the start is the next test.
