@@ -1,6 +1,6 @@
 # Ontology
 
-*The words the code and the platform built for it are made of, each a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written under it, because the trail shows it. Words are ordered by win toward this file's why, which the first word states: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use; the nearest such line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so in its last relation, and rests on its notion. Who changed what is in the git log, and nothing here is settled by talk.*
+*The words the code and the platform built for it are made of, each a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward this file's why, which the first word states: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use; the nearest such line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so in its last relation, and rests on its notion. Who changed what is in the git log.*
 
 ## Code
 
@@ -16,7 +16,11 @@ The first: nothing arrives before its ground; the reader's order is the writer's
 
 ### Runs on prose in files today, and on the [field](#field) when it is built
 
-Nothing in the code needs new technology: markdown in directories, tracked in git, holds it. Of the words below, brief, link, medium, commit and the harness are in use today, and the trail as far as git shows it; kernel, field, substrate, boundary, prism and the interface over the field are specified, not built. The platform is what makes the same rules hold for programs.
+Nothing in the code needs new technology: markdown in directories, tracked in git, holds it. Of the words below, brief, link, medium and commit are in use today, and the trail as far as git shows it; the harness, retired here, is still what today's sessions run under; kernel, field, substrate, boundary, prism and the interface over the field are specified, not built. The platform is what makes the same rules hold for programs.
+
+### Stands in a study, under the project's entry
+
+This file is one lab's arc in a study of how knowledge is best structured ([`../README.md`](../README.md)); the project's entry is its README ([`../../../../../README.md`](../../../../../../README.md)), whose three claims the words here carry; the platform is specified in a tree of files under [`../../../`](../../../), which this file diverges from where it says so; and what is only an idea waits in [`sketches.md`](../../../../../sketches.md). The pilot is that platform's first cut.
 
 ## Comprehension
 
@@ -92,7 +96,7 @@ A brief that describes the world is true or false, and carries its confidence in
 
 ## Link
 
-The one way briefs join. An offer, never a missing piece. Nelson's word for the join of hypertext [Nelson 1965].
+The one way briefs join beyond nesting. An offer, never a missing piece. Nelson's word for the join of hypertext [Nelson 1965].
 
 ### Joins [briefs](#brief) without breaking them
 
@@ -140,7 +144,7 @@ Comprehension descends as reading deepens, and a reader who stops holds the bigg
 
 ### Runs one way, which is the first law
 
-Every connection runs from a bigger win to the smaller wins inside it, never the reverse: nothing arrives before its ground, purpose before machinery, and every meaning given before it is used. Where a subject forces the other order, the debt is declared in a line. Borrowing is allowed; silent borrowing is not.
+Every connection runs from a bigger win to the smaller wins inside it, never the reverse unless it says so: nothing arrives before its ground, purpose before machinery, and every meaning given before it is used. Where a subject forces the other order, the debt is declared in a line. Borrowing is allowed; silent borrowing is not.
 
 ### Descends from its entry's why, so one web holds many gradients
 
@@ -176,11 +180,11 @@ A session is one model-knower's lifetime, opened holding nothing and closed when
 
 ### Is named for now, not settled
 
-The word is new. The code says reader, which fails for the writer; citizen is widened here to programs, which cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word.
+The word is new. The code says reader, which fails for the writer; citizen includes programs, which cannot comprehend. Rest on the notion, one bounded thing that reads and writes, and not on the word.
 
 ## Trail
 
-What leads to a brief and what it led to: every brief that names it, every change it had, and every read that went through the kernel. Never written as such, always derived. Bush's memex tied items into trails that did not fade [Bush 1945]; his trail was stored, this one is derived, and that is the departure.
+What leads to a brief and what it led to: every brief that names it, every change it had, and every read that went through the kernel. Never written as a trail; derived from what is recorded. Bush's memex tied items into trails that did not fade [Bush 1945]; his trail was stored, this one is derived, and that is the departure.
 
 ### Runs the [links](#link) backward
 
@@ -206,7 +210,7 @@ The word was tried, withdrawn for caution, and restored under the rule that a no
 
 Briefs joined by links, held in common. What the code turns written knowledge into; untyped, because it is prose. A medium shapes what passes through it more than any message does [McLuhan 1964].
 
-### Is made of [briefs](#brief) and [links](#link), and nothing else
+### Is made of [briefs](#brief) and [links](#link), and briefs of words
 
 Both its readers, person and model, read prose, so no schema is needed for the medium to hold. Types arrive with the field.
 
@@ -232,7 +236,7 @@ Whole in itself, since it means something alone, and part of every brief that us
 
 ### Is a [link](#link) when it is precise, so the exact word is allowed
 
-A word outside everyday English is reading spent, and the code once asked for the plainest word for that reason. But a word whose meaning is exact is an offer, never a missing piece: the sentence reads, and the meaning is one lookup away. So the code asks for the word whose meaning is exact, and the plainest such word. Ruled by the author.
+A word outside everyday English is reading spent, and the code once asked for the plainest word for that reason. But a word whose meaning is exact is an offer of the same kind: the sentence reads, and the meaning is one lookup away. So the code asks for the word whose meaning is exact, and the plainest such word. Ruled by the author.
 
 ### Puts a lookup one step below every brief
 
@@ -308,7 +312,7 @@ A write that stands on a brief without changing it.
 
 ### Stands on a [brief](#brief) and leaves it whole
 
-The author's text stays the author's and the reader's response stays the reader's, and the two are visible together. A comment that amends the brief is folded in and retires; the trail still shows it was said.
+The author's text stays the author's and the reader's response stays the reader's, and the two are visible together. A comment that asks for a change is folded in by the author and retires; the trail still shows it was said.
 
 ### Is free from the reader's own place, and placed onto the brief by leave
 
@@ -324,7 +328,7 @@ The addresses, across dimensions, at which holons are placed. Where a thing is, 
 
 ### Gives every [holon](#holon) an address
 
-An address is a point in a space, and a space is made of dimensions: every holon is placed in some, and is itself a dimension others are placed in. Ruled by the author.
+An address is a point in a space, and a space is made of dimensions. A dimension is a holon that other holons are placed in, so every holon is placed in some and is itself one; nesting, a folder, an inbox and a tag are all dimensions. Ruled by the author.
 
 ### Is where, never what
 
@@ -336,7 +340,7 @@ What is at every address of a space: the whole of what is written, read from a p
 
 ### Stands over a [space](#space)
 
-To every address the field assigns what is there: a holon, what is placed on it, what points at it, or nothing yet.
+To every address the field assigns what is there: a holon, what is placed on it, what points at it, or nothing yet. A type is a contract on what a holon's body may hold, and it is itself a holon in the field.
 
 ### Is the [medium](#medium) with addresses and contracts, and keeps everything
 
@@ -356,7 +360,7 @@ The field is one; a boundary is what a knower or a run may reach in it. Reads re
 
 ### Is set before a run and stays live during it
 
-The boundary's expression freezes when a run starts; what it names keeps moving as the field moves, so the licence stands while its members change. Inspection during, history after: trust is native, because the rule is the kernel's and not the writer's.
+A boundary is written as a selection of the field, which places and which kinds; the selection freezes when a run starts, and what it names keeps moving as the field moves, so the licence stands while its members change. Inspection during, history after: trust is native, because the rule is the kernel's and not the writer's.
 
 ### Is what a private region is, seen from outside
 
@@ -384,7 +388,7 @@ A glass prism lays light out by colour without losing any. This one lays the fie
 
 ### Is taken under a [contract](#contract) by a model, by choice by a person
 
-A model's prism is agreed in advance, what the session takes in and gives back. A person's follows the offers the links make. This is the one place the two knowers differ.
+A model's prism is agreed in advance, what the session takes in and gives back. A person's follows the offers the links make. This is the one place the code treats the two knowers differently.
 
 ### Is a selection, as a boundary and a call's argument are
 
@@ -416,7 +420,7 @@ What draws a screen is a component: a declaration of what it takes, as a program
 
 ## Interface
 
-Where comprehension happens: what a knower reads and writes the field through, and what shows the trail. Simon's meeting point between an artifact's inner and outer environment [Simon 1969].
+Where a knower meets the field: what it reads and writes through, and what shows the trail. Simon's meeting point between an artifact's inner and outer environment [Simon 1969].
 
 ### Rests on the [medium](#medium)'s law for the knowledge half, and is a client of the [kernel](#kernel) for the built one
 
@@ -442,9 +446,9 @@ Knowers, programs and engines reach the field only through it. What it is made o
 
 A kernel brings a peer's store into the running field, read-only or on a branch; two kernels on one store are not joined. Federation is stores attached, never kernels joined.
 
-### Sits below where comprehension happens, above the circuitry
+### Sits below the interface, above the circuitry
 
-Above it, the interface. Below it, the substrate that keeps and the processor that computes. Beside it, the platform binding that hosts it on a machine.
+Above it, where a knower meets the field. Below it, the circuitry. Beside it, the platform binding that hosts it on a machine.
 
 ## Substrate
 
@@ -456,13 +460,13 @@ A store is a directory in the substrate's format. A kernel opens it, and another
 
 ### Keeps the law as data, all but the format
 
-The law is data, because a [contract](#contract) lives in the field it governs, and this is where the field is kept. The one law that is not data is the format that reads the data.
+The law is data, because [contracts](#contract) live here with what they govern. The one law that is not data is the format that reads the data.
 
 ### Holds the chunk, which may become the [holon](#holon)
 
-Whole in itself, placed in others, with no duty to be true. Renaming chunk to holon is held open.
+A holon with no duty to be true. Renaming chunk to holon is held open.
 
-### Is the lever the project stands on, and what the kernel rests in
+### Is the lever the project stands on
 
 The project's entry calls the substrate's one fact, typed against itself, the lever that moves everything else. This file keeps the fact and adds only that the kernel rests in it. Ruled by the author, 2026-09-05.
 
@@ -528,7 +532,7 @@ Nobody can say an answer came from exactly this state, and nobody can re-derive 
 
 ### Is dissolved by the [field](#field), which harnesses everything
 
-The substrate's one fact, that the law is data in the field it governs, makes the field a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression by inference over the text goes with it.
+That the law is data in the field makes the field a first-class harness to everything, every program a tool, every place a context, every run recorded. A harness as a separate technology no longer exists, and compression by inference over the text goes with it.
 
 ### Still names today's sessions in the code
 

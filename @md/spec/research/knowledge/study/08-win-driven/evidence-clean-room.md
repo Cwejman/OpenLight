@@ -41,6 +41,12 @@ Three of the five counts did not fall. Two reasons, and both are recorded rather
 
 Round two's own folding: the head defines what it uses and settles the order's confidence, measured for reach and observed for the tie-break; code says which words are built today and which are specified; the twelve titles that named the README, the tree or the arc name the thing itself; the twenty-three copies have one home each; the eight relations stated at both ends have one; the private language of the kernel entry is gone.
 
+## Round three, and rest
+
+The author corrected the order rule between rounds: a win gradient descends from its entry's why, and reach counts dependence. The file was re-ordered by win toward its own why, the gradient gained the relation, and the writer made a pass of their own under the code before one fresh reader read the result with counts. Round two against round three: not understood 36, then 20; copies 23, then 15; failed titles 18, then 13; open questions 28, then 14; never given 39, then 16. Every count fell. The reader's one proposed change, to give the platform words their ground in the file and to name the outside documents the file leans on, was folded: dimension, type and the boundary's expression are given where they are used, and code names the study, the entry, the tree and the sketches once.
+
+The file rests here. What a further round would find is of three kinds and none is the writer's: forward reference, which is the web's form and the head says so; the platform words' depth, which is the specification's and not the ontology's; and the rulings the entries mark as the author's. The trail holds every round as a commit.
+
 ## What this does not reach
 
 The readers were models in fresh sessions, not the author and not a person; a person's cold read is still owed. Each pass ran once; a second reader with the same ground might find differently. The findings were verified by the writer that folded them, which is the closure the fresh head exists to break. A third round would need the two stopped passes and a person; the counts that remain are the form's and the author's, not the writer's.
