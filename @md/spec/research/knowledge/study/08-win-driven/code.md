@@ -40,4 +40,4 @@ None of that exists today. You can assemble a context however you like, and bran
 
 ## 4. What knowledge is made of
 
-The ontology [§1](#1-why-there-is-a-code) promised, the kinds of thing knowledge is made of and the one who comes to it, lives in [`ontology.md`](ontology.md), which is the current arc of this code's evolution and the one home for what the words mean. This edition is elevated from it when the author decides. What stood here before, the author's five words and the steward's six kinds, is absorbed there, and the trail holds both.
+*Held open (author, 2026-09-07). The ontology that was to fill this section ran a step ahead and is set aside in [`08-01-ontology/`](08-01-ontology/README.md); the author writes from here.*
