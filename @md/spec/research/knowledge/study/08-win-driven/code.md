@@ -40,4 +40,26 @@ None of that exists today. A context is assembled for the occasion, belongs to o
 
 ## 4. What knowledge is made of
 
-*Held open (author, 2026-09-07). The ontology that was to fill this section ran a step ahead and is set aside in [`08-01-ontology/`](08-01-ontology/README.md); the author writes from here.*
+Knowledge is prose, broken into parts. Nobody reads everything, and a reader wants the most understanding for the least reading, so the parts are ordered by the gradient: the win everyone shares first, then by importance, each part breaking into smaller ones, into more and more paths and their details.
+
+### The brief
+
+A part is a brief, and it holds two wins that must not be confused. The first is its contract: the title and the first paragraph say what you will understand if you enter. That is a win on its own, small and cheap, and it is what lets a reader decide without reading. The second is the win itself, and it takes the whole brief to give it.
+
+Two forces pull on a brief, and the code is the balance between them. The first: the biggest win as early as possible. The second: a win is comprehension, and comprehension is built only on comprehension already held, so a brief cannot say its win in terms the reader does not have yet. The balance is to give the win in what the reader holds at that point, and no more. Understood there, the win is real but not yet practical: what it means in the work comes as the reader descends, and each descent is made knowing what it is for. The other order, details first and the why at the end, has the reader learn without knowing why. This is the code's thesis, why-first, and what the rest of it serves.
+
+So a brief gives its win as briefly as it can. What the win needs in order to be understood stays in the brief. What it does not need, the smaller wins beneath it, is broken out into briefs of their own, further down the gradient: gain what can be gained without the details, then enter the details wiser.
+
+### The holarchy
+
+Briefs sit within briefs. Each is whole, readable alone, and also a part: it belongs to the brief above it, whose win it breaks down. This is the gradient made concrete. The brief above is the bigger win, the briefs within are the smaller wins it did not need, and the contract of each tells the reader whether to go on or to skip.
+
+The nesting comes in three forms, and they differ. A folder with an entry file: the entry is the brief, the files and folders beside it are its parts, and this nests without limit. A document's headings: a heading with the paragraphs under it is the brief, its subheadings are its parts, and this nests a few levels before a document is better split into a folder. A paragraph with its bullets: the paragraph is the brief and each bullet a part, and this nests no further. It is the end of the arc, where a part is too small to be a brief of its own.
+
+### The link
+
+Nesting is one join; the link is the other. A holarchy is not a hierarchy: what a brief stands on may lie anywhere, not only above it or within it, and a link reaches it. A link points back, to ground given elsewhere, or forward, to something not yet given. Forward links are kept few, because a win should be understood without running ahead of the ground so far, and the holarchy's order, the bigger win before the smaller, is what keeps them few. Every link says what following it gives, so nobody enters blind.
+
+### The ground
+
+What a brief stands on must hold for whoever stands on it next. One fact, one home: it is said once and pointed to from everywhere else, because copies drift into different rules. Confidence is written: a claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense. And settled means settled for now, given what it stands on.
