@@ -34,11 +34,11 @@ Knowledge is prose, broken into parts. Nobody reads everything, and a reader wan
 
 Everything the code asks comes down to two laws, because compounding has two sides. Every part is first handed to a reader, and after that it is ground that others stand on. One law for the hand-over, one for the ground. Laws, not advice: where one fails, knowledge stops compounding.
 
-### The brief
+### 3.1 The brief
 
 The first law: a brief is understood in the reader's order, and leaves the reader whole wherever they stop.
 
-A part is a brief, and it holds two wins that must not be confused. The first is its contract: the title and the first paragraph say what you will understand if you enter. That is a win on its own, small and cheap, and it is what lets a reader decide without reading. The second is the win itself, and it takes the whole brief to give it.
+A part is a brief, and it holds two wins that must not be confused. The first is its contract: the title and the first paragraph say what you will understand if you enter. That is a win on its own, small and cheap, and it is what lets a reader decide without reading. So a brief is named by what it gives, never by what it contains, and its title sits one level above its text: what the brief is for, not what it says. The second is the win itself, and it takes the whole brief to give it.
 
 Two forces pull on a brief, and the code is the balance between them. The first: the biggest win as early as possible. The second: a win is comprehension, and comprehension is built only on comprehension already held, so a brief cannot say its win in terms the reader does not have yet. The balance is to give the win in what the reader holds at that point, and no more. Understood there, the win is real but not yet practical: what it means in the work comes as the reader descends, and each descent is made knowing what it is for. The other order, details first and the why at the end, has the reader learn without knowing why. This is the code's thesis, why-first, and what the rest of it serves.
 
@@ -50,17 +50,17 @@ The verbs are everyday. To brief someone is to hand them the understanding they 
 
 A brief that meets its limit does one of two things. Holding more than one win, it breaks down. Needing ground it cannot carry, it points out. The first is the holarchy, the second the link.
 
-#### The holarchy
+#### 3.1.1 The holarchy
 
 Briefs sit within briefs. Each is whole, readable alone, and also a part: it belongs to the brief above it, whose win it breaks down. This is the gradient made concrete. The brief above is the bigger win, the briefs within are the smaller wins it did not need, and the contract of each tells the reader whether to go on or to skip.
 
 The nesting comes in three forms, and they differ. A folder with an entry file: the entry is the brief, the files and folders beside it are its parts, and this nests without limit. A document's headings: a heading with the paragraphs under it is the brief, its subheadings are its parts, and this nests a few levels before a document is better split into a folder. A paragraph with its bullets: the paragraph is the brief and each bullet a part, and this nests no further. It is the end of the arc, where a part is too small to be a brief of its own.
 
-#### The link
+#### 3.1.2 The link
 
 Nesting is one join; the link is the other. A holarchy is not a hierarchy: what a brief stands on may lie anywhere, not only above it or within it, and a link reaches it. A link points back, to ground given elsewhere, or forward, to something not yet given. Forward links are kept few, because a win should be understood without running ahead of the ground so far, and the holarchy's order, the bigger win before the smaller, is what keeps them few. Every link says what following it gives, so nobody enters blind.
 
-### The ground
+### 3.2 The ground
 
 The second law: the ground stays true for whoever stands on it next.
 
@@ -68,11 +68,53 @@ A brief is read once and stood on for long after, and a team's knowledge compoun
 
 A fact has one home. It is said once and pointed to from everywhere else, so when it changes, its one home changes and every pointer stays true. Copies instead drift: three copies of a rule quietly become three rules.
 
-Confidence is written. A claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense, since an unmarked guess read a year later becomes law. And settled means settled for now, given what it stands on, because a new brief can arrive and change what the old ones meant.
+Confidence is written. A claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense, since an unmarked guess read a year later becomes law. A brief that directs rather than describes, a goal, a plan, a decision, carries status instead: in force, fulfilled or superseded. And settled means settled for now, given what it stands on, because a new brief can arrive and change what the old ones meant.
 
 ## 4. The principles
 
-*Held open (author, 2026-09-08). Written next, from what the labs settled.*
+The laws state the conditions, and a wide rule is easy to honour loosely. The principles are the laws made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the laws bind, and they are few, because each one is a place the laws were quietly broken. Each closes by saying how strongly it holds, measured, seen, reasoned or preferred; where it came from is kept in the grounds, linked at the end.
+
+### 4.1 Ordered at every level, skippable below it
+
+The holarchy is ordered, because prose is. A document lays its briefs one after another. A folder has no order of its own, but its entry file is prose, and that is where its order comes from: the entry briefs what the folder holds, and a file enters where the entry's prose reaches it, a brief at any depth of the entry briefing that file and linking there. A document can only nest so deep before a folder takes over, and how files are best used under an entry is open; what is settled is that the order is the entry's, never the listing's. So every level comes with its children in order, and the laws say nothing arrives before its ground; this is where that is quietly broken, because order is easy to write loosely and hard to see broken.
+
+At each level, the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after. A brief that holds two wins is split, and the detail moves a level down, never away; the nested brief is that detail, a win the level above did not need, so a reader may skip it and go on. That is safe on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. The rule recurses, so it holds at every depth.
+
+Where a brief must stand on something nested in a predecessor, it links there, because the reader was allowed to skip it. And when that happens often, or the dependence is plain, the win was misplaced: what a later brief needs at this level belonged at this level, in the predecessor's own brief, not nested under it.
+
+The last form of the holarchy hides all of this. A paragraph followed by bullets is a level too, and a writer who does not see it never judges it: the paragraph is seldom a win, it is the lead-in the bullets needed, and the bullets are the content, force-fed at one depth. The practice, when you meet one, is to read the paragraph and its bullets as one whole, ask what it actually conveys, and write that win as the brief. Then let what remains find its own shape, by what is being conveyed and never bullet by bullet: what is one thing takes one heading, even where it was two bullets, because a win needs an address and room for its detail; and what has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. Measured.
+
+### 4.2 The plainest exact word
+
+A word the reader does not hold is reading spent for nothing, which is the gradient at the scale of the sentence. So the rule is plain words, the ones everyday speech already uses. Parentheses then serve two different cases, and they flip. Where a word is needed because what follows builds on it, the exact word is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. Where a word is not being introduced but only carries, the plain word leads, and the exact term follows in parentheses for the reader who knows it and is grounded by it. And a word that much of what follows stands on is a win of its own: it gets its own brief, and where it is used, it links there instead.
+
+Sentences are short, one idea each. A paragraph holds one point and is taken in at a glance; most long paragraphs are two points. Simple is not terse: everything is explained fully, and the simplicity is in the words and the sentences, never in cutting the explanation. The test is a reader from outside the field following every sentence on first read. Preferred, and seen in every read since.
+
+### 4.3 A link may point beyond what is written
+
+The laws can sound as if they describe a finished thing. It never is: knowledge is built step by step on work in progress, and the code is made for that. So a link needs no finished target, and two kinds of target are always allowed.
+
+The first is a brief not yet written. A question set down before its answer exists, a piece owed but not yet made, links to where it will be, and the link is empty until then. The text reads whole without it, and the sentence around it says what will be there.
+
+The second is a source outside the knowledge, not yet digested: a web page, a paper, a book, a conversation. The link goes to the source itself, and the sentence says what it holds and that it has not been brought in. It is the brief nobody wrote yet, and a reader who wants it goes to the source directly.
+
+Both are offers like any other link, and both stay honest by saying what they are. What is not allowed is the third thing: saying much about a source inside a brief. That is a brief growing in the wrong place. Give the source its own brief, what is known so far with the pointer to it, until the day it is digested into briefs of its own. Seen.
+
+### 4.4 A story carries the causes
+
+A story, or narrative, is read faster and remembered longer than the same content as statements, and relating to it is only part of the reason. A story is a chain of causes, each event explaining the next, and understanding it is rebuilding that chain, which is the same work as understanding anything [Trabasso and van den Broek 1985]. Statements hand the reader facts; a story leaves the connections for the reader to infer, and what a reader infers, they keep [Willingham 2004]. And a story arrives in a shape the reader already holds, a setting, a goal, an attempt, an outcome, so the shape costs nothing to parse [Mandler and Johnson 1977]. That is what the archetypal story buys: the shape the reader knows, with nothing the win does not need, no particular person, no background. And it grounds: an abstract claim placed in a situation the reader has lived, the team that cannot join what its members carry, lands where the bare claim would not [Bransford and Johnson 1972]. That is narrative even before it is a story.
+
+A real story is welcome where the win is about that particular thing, the inventor and what happened. It engages, and it still obeys the rest of the code, plain words and a light paragraph. Two things bound it. Details that interest but do not serve the win cost the win, because readers remember them instead [Harp and Mayer 1998]. And a story lowers the reader's guard, so it never carries a claim's confidence; that is written beside it, as for any claim [Green and Brock 2000]. The test is the same as for any brief: if the essence reads shorter and clearer without the story, the story is wrong. Measured, by others: the sources are cited from the writer's memory, a model's, and are not yet verified or ratified. Here seen once and reasoned, with studies owed.
+
+### 4.5 Written whole, read cold, debriefed before the end
+
+No writer holds a whole brief and the whole code at once, a model included. So three duties stand between a draft and the ground.
+
+Written whole. A word or a name is fixed in place, but a change to what a brief says rewrites it whole, since a whole is checkable only in one head at one moment; the test is whether the opening would have to change. Where there is invention, the outline comes first, what each part establishes and what it depends on, since a mistake found there is never written.
+
+Read cold. One pass is never enough, and the writer's closure is invisible from inside. So the draft is checked against the code and rewritten until it breaks nowhere, and a fresh head reads it before it ships.
+
+Debriefed. A session that ends without writing what it found has lost it. So every session debriefs before it ends, its conclusion to the surface, and names what it left out, since a claim of coverage is judged by its omissions. A record that asked for a change is folded in and retires; the history keeps it. Seen three times.
 
 ## 5. How far this goes
 
