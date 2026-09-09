@@ -26,7 +26,7 @@ And keeping it in order stops being a job of its own. Each addition lands where 
 
 Taken together, this is a substantial change in how we work.
 
-None of this waits on new technology to propel its capability. Nothing here is typed. No schemas, no edge types, only prose in structured pieces under a defined law, which is why markdown in directories is enough. A [proof of concept]() runs this with git and the harnesses that exist today. It pays soonest in IT, where part of the group already works with them.
+None of this waits on new technology to propel its capability. Nothing here is typed. No schemas, no edge types, only prose in structured pieces under a defined law, which is why markdown in directories is enough. A [proof of concept](poc.md) runs this with git and the harnesses that exist today. It pays soonest in IT, where part of the group already works with them.
 
 ## 3. What knowledge is made of
 
@@ -128,4 +128,4 @@ None of that exists today. A context is assembled for the occasion, belongs to o
 
 ## 6. Open
 
-What the code does not yet know, it says. How briefs divide in practice, how deep they go, and what an entry looks like are to be observed, not prescribed; the observing is in [the markdown practice](), the code worked in files and folders, not yet written. And the code obeys its own second law: where each rule came from and how strongly it holds is kept in [the grounds](), not yet written.
+What the code does not yet know, it says. How briefs divide in practice, how deep they go, and what an entry looks like are to be observed, not prescribed; the observing is in [the proof of concept](poc.md), the code worked in markdown files and folders. And the code obeys its own second law: where each rule came from and how strongly it holds is kept in [the grounds](), not yet written.
