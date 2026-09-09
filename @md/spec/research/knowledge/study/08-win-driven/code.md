@@ -84,11 +84,19 @@ Where a brief must stand on something nested in a predecessor, it links there, b
 
 The last form of the holarchy hides all of this. A paragraph followed by bullets is a level too, and a writer who does not see it never judges it: the paragraph is seldom a win, it is the lead-in the bullets needed, and the bullets are the content, force-fed at one depth. The practice, when you meet one, is to read the paragraph and its bullets as one whole, ask what it actually conveys, and write that win as the brief. Then let what remains find its own shape, by what is being conveyed and never bullet by bullet: what is one thing takes one heading, even where it was two bullets, because a win needs an address and room for its detail; and what has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. Measured.
 
-### 4.2 The plainest exact word
+### 4.2 One point at a time, in plain words
 
-A word the reader does not hold is reading spent for nothing, which is the gradient at the scale of the sentence. So the rule is plain words, the ones everyday speech already uses. Parentheses then serve two different cases, and they flip. Where a word is needed because what follows builds on it, the exact word is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. Where a word is not being introduced but only carries, the plain word leads, and the exact term follows in parentheses for the reader who knows it and is grounded by it. And a word that much of what follows stands on is a win of its own: it gets its own brief, and where it is used, it links there instead.
+A word the reader does not hold is reading spent for nothing. So the code asks for plain words, the ones everyday speech already uses.
 
-Sentences are short, one idea each. A paragraph holds one point and is taken in at a glance; most long paragraphs are two points. Simple is not terse: everything is explained fully, and the simplicity is in the words and the sentences, never in cutting the explanation. The test is a reader from outside the field following every sentence on first read. Preferred, and seen in every read since.
+Parentheses serve two cases, and they flip. A word that what follows builds on is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. A word that only carries is not introduced: the plain word leads, and the exact term follows in parentheses for the reader it grounds.
+
+A word that much of what follows stands on is a win of its own. It gets its own brief, and where it is used, it links there.
+
+A paragraph makes one point. Prose is modular: a brief is points connected in order, and a reader takes them one at a time. A paragraph that makes two is two paragraphs, and a long paragraph is the sign.
+
+So the writing starts from what is to be said, not from the words. Find each point the brief has to make, say each once in a sentence or two, and stop. What is left out is what makes what stays stand.
+
+Sentences are short, one idea each. Simple is not terse: everything is explained, and the simplicity is in the words and the sentences, never in cutting the explanation. The test is a reader from outside the field following every sentence on first read. Preferred, and seen in every read since.
 
 ### 4.3 A link may point beyond what is written
 
@@ -106,17 +114,25 @@ A story, or narrative, is read faster and remembered longer than the same conten
 
 A real story is welcome where the win is about that particular thing, the inventor and what happened. It engages, and it still obeys the rest of the code, plain words and a light paragraph. Two things bound it. Details that interest but do not serve the win cost the win, because readers remember them instead [Harp and Mayer 1998]. And a story lowers the reader's guard, so it never carries a claim's confidence; that is written beside it, as for any claim [Green and Brock 2000]. The test is the same as for any brief: if the essence reads shorter and clearer without the story, the story is wrong. Measured, by others: the sources are cited from the writer's memory, a model's, and are not yet verified or ratified. Here seen once and reasoned, with studies owed.
 
-### 4.5 Written whole, read against the code, written again
+### 4.5 No first draft is the ground
 
-No writer holds a whole brief and the whole code at once, a model included, so no first draft is the ground. Writing under the code runs in cycles: write, read, write again, until a round changes nothing.
+A writer cannot see its own text whole. No head holds a whole piece and the whole code at once, a model's included, and what a writer left out, it does not know it left out.
 
-Write organically. A brief is written whole, in one head at one moment, from the material and the win it hands. Not from an outline: an outline runs ahead of the text, and the text holds the whole better than any sketch of it. A holarchy is written the same way, its entry and its briefs as one piece of prose, in order.
+So the first draft is not handed over. It is the material, and the piece is made from it in rounds of three steps, until a round changes only words.
 
-Read against the code. When the draft stands, read it from the top as its reader would, brief by brief, and ask of each what the laws and the principles ask: does it open with its win, does it stand only on what came before it, is it one win or two, is its confidence written, does every link say what it gives. Then hand it to a fresh head, a session that holds nothing but the code, the practice and the draft, and ask what it did not understand, what arrived before its ground, and what it would cut. That reading is the one the writer cannot do, because a writer's closure is invisible from inside.
+#### 4.5.1 Read, then let a blank head read
 
-Write again, at the grain of what broke. A word or a name is fixed in place. A brief that breaks is written again whole, since a whole is checkable only when one head holds it; the test is whether its opening would have to change. And where the break runs through the arc, the holarchy from that brief down is written again as one piece, because its briefs stand on each other in order, and a fix to one shifts the ground of the rest.
+The writer reads the draft from the top, brief by brief, asking of each what the laws and the principles ask. Then a session that holds only the code, the practice and the draft reads it, and hands back what it did not understand, what came before its ground, and what it would cut. It writes nothing; the writer holds the material, and a blank head reads the draft alone, never the material, so its reading stays cheap.
 
-Debriefed. A session that ends without writing what it found has lost it. So before it ends, the writer says which rounds ran and what each found, and names what it left out, since a claim of coverage is judged by its omissions. A record that asked for a change is folded in and retires; the history keeps it. Seen three times.
+#### 4.5.2 Write again at the grain of the holon
+
+A word is fixed in place. A brief that broke is written again whole, since a whole is checkable only in one head at one moment. A brief that held is kept, moved if its place moved, never retyped: what a writer generates is what the work costs, and a retyped brief costs as much as a new one and can drift.
+
+When the break is in the order or the entry, the holarchy's own text is written again and its parts placed anew. Every part the change reaches is written again too, because parts stand on each other.
+
+#### 4.5.3 Debrief before the end
+
+A session ends, and what it did not write is lost with it. So before it ends it debriefs: the piece it made stands as the brief, and beside it, in a few lines, what it left out, what it left open, and what it decided on its own. Written then or never, since how the work went exists only while the session does. Seen, three times.
 
 ## 5. How far this goes
 

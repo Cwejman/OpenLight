@@ -30,6 +30,10 @@ Prose alone does not show how things connect, and a page of it gives the eye no 
 
 The second use is the image in an artful sense, as a blog post uses one: breathing space, an art direction held across a body of writing, a painting placed where the text carries the meaning it shows, so the eye gets a visual aid and the page gets air. Not in the code, which is a manifesto and stays unlittered, but in the knowledge written under it, as projects take it up. Preferred.
 
-## 7. Open
+## 7. The tool
+
+The cycle wants a tool that is not built. It reads a document by depth: the title and the first paragraphs, then one level down, then the next, so a session holds the gradient without reading the files whole. It traces links as structure, not as text to open. And it moves a brief by its address or replaces one whole, so a rewrite touches only the brief named. Until it exists, headings do the reading and scripts do the moving. Open, and needed soon.
+
+## 8. Open
 
 What this practice has not settled, to be found by observation: how files hang under an entry; whether an intro carries a short guide to how the text is read; and whether the character counts the earlier editions used as red flags, five hundred for a paragraph and three hundred for a bullet, earn a place here.
