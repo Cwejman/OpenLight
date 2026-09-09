@@ -1,87 +1,41 @@
 # Feedback on the run
 
-*The writer's own report on lab 08's run, 2026-09-09, as the fresh session gave it after writing [`output.md`](output.md). Recorded verbatim in substance; the verdicts are the writer's, not a cold reader's, and not yet the author's. A record, not law: what is folded from it retires with it.*
+*The steward's reading of the run and of the piece, 2026-09-09, with the author. The piece is [`output/`](output/README.md), the writer's record of its rounds is [`debrief.md`](debrief.md), and the account in minutes and tokens sits there too. Round one's outputs are in git. What is here is what the run teaches for the next one, and a record: what is folded from it retires with it. Reasoned, from one run, unless marked.*
 
-## 1. The why it chose, and for whom
+## The piece is flat, and the reader is force-fed
 
-Written for whoever is about to commit to the code, to write a team's knowledge under it or to build the medium its fifth part describes. The why of the whole is that such a person should know what the code stands on before they stand on it: which of its claims the world's evidence holds up, which it corrects, and what nobody has shown, so that what they write or build rests on ground rather than habit. That framing let the whole corpus land in one gradient: the biggest shared win first (the shape holds, the numbers fall, the artifact alone is not the lever), then what the writing rests on (comprehension science), what an artifact can do (organisational and documentation evidence), what a model reads (context engineering and the coding-agent nulls), and only then, for the engineer, what the medium of the code's fifth part would meet (substrate, schema evolution, interface-as-data, low-code). The code's own structure, writer first, engineer last, "the rest does not depend on it", gave the order. One deliberate move: the piece treats the code's central bet, that a fresh session reading the debrief is the downstream consumer that keeps it load-bearing, as a hypothesis the sweep bounds but does not test, and says so in three places rather than letting the reader infer it.
+The author read the entry and then `reading.md`, and felt force-fed. The shape confirms it. The entry has eight sections and no depth; `reading.md` has seven sections, no subsections at all, and each section is four or five paragraphs of up to 830 characters. The whole piece is two levels deep, the entry's sections and the files' sections, and inside a file every section is a flat block of five points. That is lab 06's failure without the bullets: nested wins that never got their headings. Seen.
 
-## 2. Where narrative was used
+The writer's own report says why. It chose a folder because a single document "would have needed a fifth heading level, past the practice's lean of three," read depth as something to avoid, moved the depth into files, and then kept the files flat. Two places in the text pointed it that way. 4.1 says a document can only nest so deep before a folder takes over, which read cold is a warning against nesting. And 4.1's hidden-level paragraph names one costume only, the paragraph with bullets; a section of five heavy paragraphs is the same hidden level in another costume, and the code never says so. Nothing in the code says the plain thing: nesting is how the gradient is made, and a section whose paragraphs each carry a win is a holarchy that has not been given its headings.
 
-- §1, archetypal: the team that writes everything down and a year later the new colleague still walks over to ask. Setting, goal, attempt, outcome, no particular person; it grounds the three organisational findings (absorptive capacity, no repair loop, descriptive decay) before the reader has the terms.
+The fix proposed, for the author's read since it is the code: 4.1's hidden-level paragraph names both costumes, the paragraph with its bullets and the section of many paragraphs each carrying a win, and the practice paragraph that follows already says what to do; and the practice states the depth lean as being about h5 and h6, with a sentence that h3 and h4 are where the breakdown lives, so a file with flat sections is the failure and not the lean. Lab 07 measured this move: one level deeper read 46 percent shorter at the depth a reader stops, holding more. This run shows a writer will not take the step unless the code names it.
 
-- §2.5, real: Pigweed adopting Diátaxis as a literal blueprint and retreating to sections within a page. Marked seen, one organisation, no metrics.
+## What else the run teaches
 
-- §3.2, real: the surgical-checklist chain, Haynes' eight hospitals, Ontario's 101-hospital null, Haugen's randomised trial, told as a chain of causes because the point is precisely causal: implementation carries the effect, not the artifact. Marked measured.
+**A word for borrowed confidence.** Three writers in a row hit the same gap: their claims' confidence is a source's, read but not checked, and the four marks cannot say so. The ground's confidence paragraph wants one sentence: a claim carried from a source carries the source's grade, and that it was not checked. A code change, for the author's read.
 
-- §5.1, real: Dark Inc's post-mortem in the founder's words, with Unison and feenk's turn to consulting beside it.
+**Sources without an author and a year.** The bracket form fails for a paper known only by a number or a system known by its name. The practice already sends an outside source to its address; one sentence makes that the rule for such sources.
 
-- §5.2, real: Logseq shipping its database rewrite four years late into a market that had just re-valued files. Marked seen.
+**The blank head's isolation is mechanics.** The writer had to tell its blank heads to ignore the repository's own bootstrap instruction. The prompt should say it: a blank head reads the code, the practice and the draft, and nothing the repository or the harness offers.
 
-- §5.5, real: Cambria's write-side pivot, told as what happened rather than as a lens algebra.
+**The cost is the context, and the context is the judgment.** The writer's context grew from 113k to 446k tokens as it wrote, re-read and rewrote, and the rounds were run at that size. Running the rounds in a session without the raw would cut a third of the cost, and was considered and withdrawn: in round 3 the writer went back to the raw before its last rewrite, and a session that does not hold the material rewrites a copy of a copy. The August ruling stands, blank contexts lose the connective tissue, and the growth is the price of the judgment.
 
-- §5.6, real: Uber Screenflow, the design, the compile-against-every-runtime answer, sixteen flows, the shutdown.
+**What can be cut without losing judgment.** The cache: the writer's was the five-minute kind and one silence cost a sixth of the run; a harness setting. The move tool: round 2 rewrote five of six files because without tooling a file is regenerated to move a section; the practice's tool is what makes "moved, never retyped" real. Re-reading: the writer re-read files it had written a minute before and still held; the fresh read is the blank head's job. Thinking was 66k of 151k output; a lower effort would cut it and might cost the judgment it pays for.
 
-- §5.7, real, short: Retool's reversal.
+**The corpus as a holarchy.** The larger answer to cost is the code's own thesis turned on its input. The raw is a pile; debriefed once under the code, with detail kept within and one home per fact, it becomes a holarchy a session reads by depth, opening a report's detail only where a fix needs it. The first lab did the compression once, 150k tokens to 20k, and the author's verdict on it is the caution: a writer standing on a bad debrief cannot see it. So the compressed corpus has to be trusted as any ground is, confidence written and the source one link away. Not for this study's runs, which compare against the baseline pair on the same raw; for the practice, and for lab 09.
 
-- §6, real, one sentence: the agent that caught a summariser inventing "N=22, 10 companies".
+**Leave alone.** One home across a folder costing forward links, and the folklore audit reading as the bullets case, are the code working as written; the blank heads flagging a list is an observation to keep.
 
-Considered and left out: Szulanski's study itself as a story (the numbers were the win, the narrative would have been decoration); Bossavit's chase of the IBM Systems Sciences Institute (reduced to one clause in the folklore list, because the reader needs the verdict, not the hunt); the Wikidata query-service split and Neo4j's consolidation (interesting, not serving any win the piece makes); Letta's pivot (kept as one clause of fact); Bezos's six-pager. In every case the test was the code's: the essence read shorter without the story.
+## From round one, still unfolded
 
-## 3. Doors deliberately left unopened
+*The two round-one writers' reports (2026-09-09, before the cycle principle existed) are in git at 906b363, `feedback.md`. What they found that no edition has yet answered:*
 
-- The folklore list (§3.4) gives one line per number and points at the reports; no chase reproduced.
+- The anchor rule, a section reference carrying its anchor on every use, made clunky link text where headings are long sentences; whether first use alone should carry it is the practice's open.
 
-- §5.5 gives the spine of the schema-evolution report and tells the engineer to read it whole; the option space for federation, the four recommendation groups, and the Noria measurements are summarised in a sentence each, not unpacked.
+- A bullet capped at one or two sentences pushed one-idea items into semicolon chains where three short sentences read better; the count is in the practice's open.
 
-- §5.3 and §5.4 name each precedent in one bullet; the standards-track status of RDF, SPARQL and SHACL, the Zanzibar clone landscape, Datomic's accretion limits, and the faceted-navigation lineage stay behind links.
+- Saying what a link gives costs a clause per repeated citation of one report; a footnote would carry it more lightly.
 
-- §7 lists, with a link each, everything the piece does not carry: company-by-company low-code and PKM states, the sync-engine consolidation, DITA, iiRDS and STC, the proposal-process numbers, the design-rationale lineage, IA card sorting, the substrate-research strands, the generative-UI protocol race, the product view layers, the typed data-layer landscape, and the reading-order studies.
+- "Only prose" made the raw's tables impossible to carry; in two sections a table would have been the honest form.
 
-- The mapping from the sweep's earlier six-principle edition of the code to the current two-law, five-principle one is stated where it matters (§2.1 on "abstract", §2.4 on the redundancy justification, §4.4 on the fifth part's "no branch") but not tabulated.
-
-- The grounds the code's §6 says are not yet written: the piece is raw material for them, and the writer did not try to write them.
-
-## 4. Where the code or the proof of concept fought the writer
-
-- The anchor rule (poc §4, a reference to another section carries its anchor on every use) produced clunky link text, "[the sizing brief](#22-…)", because the heading names are long sentences; the poc's own open question about whether first use alone should carry the anchor is the one the writer would settle first.
-
-- The "bullet is one or two sentences" rule (poc §3) pushed several one-idea items into long semicolon chains (§2.2 the menu studies, §5.3 permission) rather than a third sentence. A bullet of three short sentences would have read better than two long ones.
-
-- Every-link-says-what-it-gives (code 3.1.2) is right but costs a clause per citation when the same report is cited for a finding; the writer ended up appending "which has the counts" style tails that a footnote would carry more lightly.
-
-- Confidence marks (code 3.2) were easy to write at the end of each brief but hard inside sentences that mix a report's grade ("paper-only") with the writer's ("reasoned"); the writer kept the reports' words and put its own at the brief's close, which means a reader has to reach the end of a brief to know how much to trust its middle.
-
-- The code's "no schemas, only prose" is right for the writing and made the tables in the raw (delta tables, grade tables) impossible to carry; each was turned into a bullet or dropped, and the loss is visible in §4.4 and §5.4, where a table would have been the honest form.
-
-- Nothing in the code or poc fought the choice of reader or the order of wins; those came out of the material and the code's own structure without strain.
-
-# Feedback on the second run
-
-*The second writer's own report, 2026-09-09, after writing `output-2/` under [`prompt-2.md`](prompt-2.md), which restored the author's request as the angle. Verdicts the writer's.*
-
-## 1. Why a folder, and the centre
-
-The material runs three levels deep everywhere, lineage, sub-lineage, work, and in one document the works would have landed at h4 or h5. The entry holds a paragraph or two per lineage and links to a file; each file holds h2 per sub-lineage and h3 per work. The centre: the three bodies of work the project sits between, comprehension science, the builders of media meant to carry understanding in their structure, and the world where models read the same files, seldom read each other and each arrived separately at one finding: what helps a reader is reaching the right piece at the right level, and what fails is asking the writer to put meaning into the structure. It tells the author which law has science under it, the first, thinly and with a fault line, and which stands on the systems record, the second.
-
-## 2. Narrative
-
-One archetypal, in the entry: a group builds a typed medium, the writing slows, the newcomer asks a colleague. Six real: the surgical checklist chain, Logseq, Cambria, Darklang, Uber Screenflow, Retool. Left out: the story of the sweep itself, Bezos's six-pager, Luhmann's life beyond the archive's counts, Ink and Switch as biography.
-
-## 3. Where the code or the proof of concept fought the writer
-
-- Every confidence mark is a third party's that the writer read but did not check; the code has no word for that, and the writer made one.
-
-- Bullets of one or two sentences and a brief opening with prose: folklore wanted to be a list, three sections grew lead paragraphs, and items were joined by semicolons to obey.
-
-- "Say little about a source inside a brief": sources are the subject here, so each got its own brief, which pushed paragraphs long.
-
-- About 150 bracket citations link nowhere, because the practice says they stay text until a brief exists; the reports are linked at each file's end instead.
-
-- One factual conflict between reports, DITA 2.0's first beta, had no home under the code; both readings were written in the sentence.
-
-# What both runs did with the cycle
-
-*The steward's finding from the two transcripts, 2026-09-09. Seen.*
-
-Neither writer ran the cycle the fifth principle asked for. The first wrote once, made twenty in-place edits that each added a link tail, checked that links resolved, and reported. The second wrote once through the shell, ran scripts that measured paragraph lengths and split the long ones, checked links, and reported; it called the script its cold read. Neither re-read its own output from the top, neither asked of any brief whether it broke a law or a principle, and neither started a fresh session to read it. The principle as then written had no actor, no act, no list, no moment and no definition of a fresh head, and both duties fell due when the context was fullest. The principle was rewritten as the cycle before the second round: write, read against the code, write again at the grain of what broke.
+- One factual conflict between two reports had no home under the code; the writer wrote both readings in one sentence.
