@@ -22,7 +22,9 @@ Debrief that material under the code. What it is for, and for whom, is yours to 
 
 - Write from the raw alone: fetch nothing from the web, and read nothing beyond the files named in Bootstrap.
 
-- One piece, saved as `output.md` beside this prompt file. If the depth the code asks for runs past what one document's headings carry under the proof of concept, an `output/` folder with `README.md` as its entry is allowed instead; say in your report why the document was not enough.
+- One piece, saved as `output-<model>.md` beside this prompt file, where `<model>` is the short name of the model writing it, so `output-fable.md` for Fable, `output-copilot.md` for Copilot. If the depth the code asks for runs past what one document's headings carry under the proof of concept, an `output-<model>/` folder with `README.md` as its entry is allowed instead; say in your report why the document was not enough.
+
+- **Run in isolation.** Beside this prompt file there may be another prompt, a feedback file, and outputs of other runs, by this model or another. Read none of them: not `prompt-2.md`, not `feedback.md`, not any file or folder whose name begins with `output`. Your only inputs are the files named in Bootstrap.
 
 - Do not commit anything to git.
 
