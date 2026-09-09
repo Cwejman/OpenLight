@@ -28,7 +28,7 @@ Debrief that material under the code. What it is for, and for whom, is yours to 
 
 - Do not commit anything to git.
 
-- **A debrief beside the output.** Before you report, write `debrief-<model>.md` beside the output, named as the output is. It is the evidence of how the piece was made: each round in order, what the read against the code found and what the blank head found, what was changed at what grain, a brief written again whole, a brief moved, a holarchy's own text redone; what was left out, what was left open, and what you decided on your own; and what it cost, as far as you can see it, the number of rounds, the number of blank heads started, and for each round roughly how much text was generated against how much was kept as it was.
+- **A change log beside the output.** Before you report, write `debrief-<model>.md` beside the output, named as the output is. It is a plain record of the rounds the piece went through, one section per round: which briefs were written again whole, which were moved as they were, and which holarchies had their own text redone; what was left out of the piece and what was left open; and a rough count, per round, of text written against text kept. Numbers and file sections, not commentary.
 
 ---
 
