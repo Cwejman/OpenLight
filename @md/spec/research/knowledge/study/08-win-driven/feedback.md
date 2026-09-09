@@ -55,3 +55,33 @@ Considered and left out: Szulanski's study itself as a story (the numbers were t
 - The code's "no schemas, only prose" is right for the writing and made the tables in the raw (delta tables, grade tables) impossible to carry; each was turned into a bullet or dropped, and the loss is visible in §4.4 and §5.4, where a table would have been the honest form.
 
 - Nothing in the code or poc fought the choice of reader or the order of wins; those came out of the material and the code's own structure without strain.
+
+# Feedback on the second run
+
+*The second writer's own report, 2026-09-09, after writing `output-2/` under [`prompt-2.md`](prompt-2.md), which restored the author's request as the angle. Verdicts the writer's.*
+
+## 1. Why a folder, and the centre
+
+The material runs three levels deep everywhere, lineage, sub-lineage, work, and in one document the works would have landed at h4 or h5. The entry holds a paragraph or two per lineage and links to a file; each file holds h2 per sub-lineage and h3 per work. The centre: the three bodies of work the project sits between, comprehension science, the builders of media meant to carry understanding in their structure, and the world where models read the same files, seldom read each other and each arrived separately at one finding: what helps a reader is reaching the right piece at the right level, and what fails is asking the writer to put meaning into the structure. It tells the author which law has science under it, the first, thinly and with a fault line, and which stands on the systems record, the second.
+
+## 2. Narrative
+
+One archetypal, in the entry: a group builds a typed medium, the writing slows, the newcomer asks a colleague. Six real: the surgical checklist chain, Logseq, Cambria, Darklang, Uber Screenflow, Retool. Left out: the story of the sweep itself, Bezos's six-pager, Luhmann's life beyond the archive's counts, Ink and Switch as biography.
+
+## 3. Where the code or the proof of concept fought the writer
+
+- Every confidence mark is a third party's that the writer read but did not check; the code has no word for that, and the writer made one.
+
+- Bullets of one or two sentences and a brief opening with prose: folklore wanted to be a list, three sections grew lead paragraphs, and items were joined by semicolons to obey.
+
+- "Say little about a source inside a brief": sources are the subject here, so each got its own brief, which pushed paragraphs long.
+
+- About 150 bracket citations link nowhere, because the practice says they stay text until a brief exists; the reports are linked at each file's end instead.
+
+- One factual conflict between reports, DITA 2.0's first beta, had no home under the code; both readings were written in the sentence.
+
+# What both runs did with the cycle
+
+*The steward's finding from the two transcripts, 2026-09-09. Seen.*
+
+Neither writer ran the cycle the fifth principle asked for. The first wrote once, made twenty in-place edits that each added a link tail, checked that links resolved, and reported. The second wrote once through the shell, ran scripts that measured paragraph lengths and split the long ones, checked links, and reported; it called the script its cold read. Neither re-read its own output from the top, neither asked of any brief whether it broke a law or a principle, and neither started a fresh session to read it. The principle as then written had no actor, no act, no list, no moment and no definition of a fresh head, and both duties fell due when the context was fullest. The principle was rewritten as the cycle before the second round: write, read against the code, write again at the grain of what broke.

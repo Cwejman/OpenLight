@@ -106,15 +106,17 @@ A story, or narrative, is read faster and remembered longer than the same conten
 
 A real story is welcome where the win is about that particular thing, the inventor and what happened. It engages, and it still obeys the rest of the code, plain words and a light paragraph. Two things bound it. Details that interest but do not serve the win cost the win, because readers remember them instead [Harp and Mayer 1998]. And a story lowers the reader's guard, so it never carries a claim's confidence; that is written beside it, as for any claim [Green and Brock 2000]. The test is the same as for any brief: if the essence reads shorter and clearer without the story, the story is wrong. Measured, by others: the sources are cited from the writer's memory, a model's, and are not yet verified or ratified. Here seen once and reasoned, with studies owed.
 
-### 4.5 Written whole, read cold, debriefed before the end
+### 4.5 Written whole, read against the code, written again
 
-No writer holds a whole brief and the whole code at once, a model included. So three duties stand between a draft and the ground.
+No writer holds a whole brief and the whole code at once, a model included, so no first draft is the ground. Writing under the code runs in cycles: write, read, write again, until a round changes nothing.
 
-Written whole. A word or a name is fixed in place, but a change to what a brief says rewrites it whole, since a whole is checkable only in one head at one moment; the test is whether the opening would have to change. Where there is invention, the outline comes first, what each part establishes and what it depends on, since a mistake found there is never written.
+Write organically. A brief is written whole, in one head at one moment, from the material and the win it hands. Not from an outline: an outline runs ahead of the text, and the text holds the whole better than any sketch of it. A holarchy is written the same way, its entry and its briefs as one piece of prose, in order.
 
-Read cold. One pass is never enough, and the writer's closure is invisible from inside. So the draft is checked against the code and rewritten until it breaks nowhere, and a fresh head reads it before it ships.
+Read against the code. When the draft stands, read it from the top as its reader would, brief by brief, and ask of each what the laws and the principles ask: does it open with its win, does it stand only on what came before it, is it one win or two, is its confidence written, does every link say what it gives. Then hand it to a fresh head, a session that holds nothing but the code, the practice and the draft, and ask what it did not understand, what arrived before its ground, and what it would cut. That reading is the one the writer cannot do, because a writer's closure is invisible from inside.
 
-Debriefed. A session that ends without writing what it found has lost it. So every session debriefs before it ends, its conclusion to the surface, and names what it left out, since a claim of coverage is judged by its omissions. A record that asked for a change is folded in and retires; the history keeps it. Seen three times.
+Write again, at the grain of what broke. A word or a name is fixed in place. A brief that breaks is written again whole, since a whole is checkable only when one head holds it; the test is whether its opening would have to change. And where the break runs through the arc, the holarchy from that brief down is written again as one piece, because its briefs stand on each other in order, and a fix to one shifts the ground of the rest.
+
+Debriefed. A session that ends without writing what it found has lost it. So before it ends, the writer says which rounds ran and what each found, and names what it left out, since a claim of coverage is judged by its omissions. A record that asked for a change is folded in and retires; the history keeps it. Seen three times.
 
 ## 5. How far this goes
 
