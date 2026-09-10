@@ -68,7 +68,7 @@ A brief is read once and stood on for long after, and a team's knowledge compoun
 
 A fact has one home. It is said once and pointed to from everywhere else, so when it changes, its one home changes and every pointer stays true. Copies instead drift: three copies of a rule quietly become three rules.
 
-Confidence is written. A claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense, since an unmarked guess read a year later becomes law. A brief that directs rather than describes, a goal, a plan, a decision, carries status instead: in force, fulfilled or superseded. And settled means settled for now, given what it stands on, because a new brief can arrive and change what the old ones meant.
+Confidence is written. A claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense, since an unmarked guess read a year later becomes law. A claim carried from a source carries the source's grade and says that it was not checked, since a mark the reader takes for the writer's own is a borrowed certainty. A brief that directs rather than describes, a goal, a plan, a decision, carries status instead: in force, fulfilled or superseded. And settled means settled for now, given what it stands on, because a new brief can arrive and change what the old ones meant.
 
 ## 4. The principles
 
@@ -76,17 +76,15 @@ The laws state the conditions, and a wide rule is easy to honour loosely. The pr
 
 ### 4.1 The order of a holarchy
 
-The holarchy is ordered, because prose is. A document lays its briefs one after another, and at every level they are laid in the order the wins demand, each standing on the ones before it and never on the ones after. What is nested under a brief is the detail its level did not need, so a reader may skip it. The laws say nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
+The holarchy is ordered, because prose is. At every level the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after, and what is nested under a brief is what its level did not need. The laws say nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
 
-A folder has no order of its own, but its entry file is prose, and that is where its order comes from. The entry briefs what the folder holds, and a file enters where the entry's prose reaches it: a brief at any depth of the entry briefing that file and linking there. A document can only nest so deep before a folder takes over. How files are best used under an entry is open; what is settled is that the order is the entry's, never the listing's.
+Because the nested is what the level did not need, a reader may skip it, on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. Where a brief must stand on something nested in a predecessor, it links there, since the reader was allowed to skip it; and when that is frequent or plain, the win was misplaced and belonged at this level.
 
-A brief that holds two wins is split, and the detail moves a level down, never away. The nested brief is that detail, a win the level above did not need, so a reader may skip it and go on. Skipping is safe on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. The rule recurses, so it holds at every depth.
+A folder has no order of its own; its entry file is prose, and that is where its order comes from. A file enters where the entry's prose reaches it, briefed and linked there, and when a document's depth outgrows its headings a folder takes over and the nesting continues. How files are best used under an entry is open; the order is the entry's, never the listing's.
 
-Where a brief must stand on something nested in a predecessor, it links there, because the reader was allowed to skip it. When that happens often, or the dependence is plain, the win was misplaced: what a later brief needs at this level belonged at this level, in the predecessor's own brief.
+The failure is a level not broken down, and it wears two costumes. A paragraph with bullets, where the paragraph is the lead-in and the bullets are the content, force-fed at one depth. And a section that is not brief, which the reader takes in whole to find the win and cannot skip. Both break the balance the brief is made of: the biggest win first, and what it does not need moved down.
 
-The last form of the holarchy hides all of this. A paragraph followed by bullets is a level too, and a writer who does not see it never judges it. The paragraph is seldom a win; it is the lead-in the bullets needed, and the bullets are the content, force-fed at one depth.
-
-The practice, when you meet one, is to read the paragraph and its bullets as one whole, ask what it actually conveys, and write that win as the brief. Then let what remains find its own shape, by what is being conveyed and never bullet by bullet. What is one thing takes one heading, even where it was two bullets, because a win needs an address and room for its detail. What has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. Measured.
+So when you meet either, read the whole, ask what it conveys, and write that win as the brief; then let what remains find its own shape by what it conveys, never item by item. What is one thing takes one heading, and what has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. This holds at every grain and no size sets it: wherever a win can be lifted, lift it, and let the details it does not need descend. Measured.
 
 ### 4.2 The prose of a brief
 

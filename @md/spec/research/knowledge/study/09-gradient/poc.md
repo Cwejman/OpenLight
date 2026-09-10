@@ -4,7 +4,7 @@ The code run in the simplest medium there is: markdown files in folders, tracked
 
 ## 1. The medium
 
-A brief is a markdown file or a section in one. A folder is a holon whose brief is its entry file, `README.md`, and a folder without one is a pile. A document nests its headings below its title, and the lean is three levels, h2 to h4, with a folder taking over beyond. The two levels left, h5 and h6, come at a cost in a reader's sense of place, and may still earn their use where the briefs are very light and the structure is natural to the subject, an API reference, an outline of simple sources; this is a lean, not settled, and unmeasured. How files hang under an entry, named from a brief at any depth of it and linked there, is open and will be observed, and the order is always the entry's prose, never the listing. Git is the history: every change is a commit, and what a record retires into.
+A brief is a markdown file or a section in one. A folder is a holon whose brief is its entry file, `README.md`, and a folder without one is a pile. A document nests its headings below its title, and the lean is three levels, h2 to h4, with a folder taking over beyond. The two levels left, h5 and h6, come at a cost in a reader's sense of place, and may still earn their use where the briefs are very light and the structure is natural to the subject, an API reference, an outline of simple sources; this is a lean, not settled, and unmeasured. Take your own agency in terms of what is right for the content. The lean does not excuse a flat file; the breakdown is the code's, at every grain. Git is the history: every change is a commit, and what a record retires into.
 
 ## 2. Headings carry numbers
 
@@ -12,17 +12,17 @@ Headings are numbered, and the numbers nest with the headings: 1, then 1.1 and 1
 
 ## 3. The surface is declared by position
 
-The heading and the first paragraph after it are the contract, and nothing marks them: no italics, no bold, no blockquote. Position is the mark, so a renderer can style the surface without the author annotating it, and one fact is not written in two homes. The price is that position must be reliable: a brief never opens with a list, a table or a quote. The first thing after a heading is always the prose that carries the win, and a bullet list follows the paragraph that needs it. Reasoned; kept throughout the ontology.
+The heading and the first paragraph after it are the contract, and nothing marks them: no italics, no bold, no blockquote. Position is the mark, so a renderer can style the surface without the author annotating it, and one fact is not written in two homes. The price is that position must be reliable: a brief never opens with a list, a table or a quote. The first thing after a heading is always the prose that carries the win, and a bullet list follows the paragraph that needs it. Reasoned.
 
-A bullet is one sentence or two. Past that it is a brief and takes a heading, as the code's first principle says. Bulleted and numbered lists carry a blank line between items, so they read as raw markdown. Whether a long bullet may open in bold is open: bold is the only up-signal markdown has and it fails at scale, and it would put the surface in a second home beside position.
+Bulleted and numbered lists carry a blank line between items, so they read as raw markdown. Whether a long bullet may open in bold is open: bold is the only up-signal markdown has and it fails at scale, and it would put the surface in a second home beside position.
 
 ## 4. Links and citations
 
-Links are relative markdown links, and the sentence around each says what following it gives. A link to a brief not yet written is written empty, `[the name]()`, and stands until the brief exists. A link to an outside source goes to the source's address. A source cited in running text is written as a name and a year in brackets, *[Author year]*, and becomes a link when the source has a brief of its own; until then it stays text. A reference to another section is written by anchor on every use, so no paragraph depends on an earlier one for its pointer; whether the first use alone should carry it is open.
+Links are relative markdown links. A link to a brief not yet written is written empty, `[the name]()`, and stands until the brief exists. A link to an outside source goes to the source's address, and a source known only by a number or a system by its name is cited that way, as a link to its address. A source cited in running text is written as a name and a year in brackets, *[Author year]*, and becomes a link when the source has a brief of its own; until then it stays text. A reference to another section is written by anchor on every use, so no paragraph depends on an earlier one for its pointer; whether the first use alone should carry it is open.
 
 ## 5. Files
 
-A file has one root brief. When a brief is central to two regions it lives in one file and the other links to it, never split, because two halves quietly become two rules. The file is cut around the brief the most stands on in that region. Records are events: a ratification, a review's findings, a feedback note each amends the state, is folded, and retires from the tree; git keeps it.
+A file has one root brief. When a brief is central to two regions it lives in one file and the other links to it, never split, by the code's one home. The file is cut around the brief the most stands on in that region. Records are events: a ratification, a review's findings, a feedback note each amends the state, is folded, and retires from the tree; git keeps it.
 
 ## 6. Visuals
 

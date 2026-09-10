@@ -24,7 +24,7 @@ Debrief that material under the code. What it is for, and for whom, is yours to 
 
 - One piece, saved as `output.md` beside this prompt file. If the depth the code asks for runs past what one document's headings carry under the proof of concept, an `output/` folder with `README.md` as its entry is allowed instead; say in your report why the document was not enough.
 
-- **Run in isolation.** Beside this prompt file there may be a feedback file, a debrief, and outputs of other runs. Read none of them: not `feedback.md`, not `debrief.md`, not any file or folder whose name begins with `output`. Your only inputs are the files named in Bootstrap.
+- **Run in isolation.** Beside this prompt file there may be a feedback file, a debrief, and outputs of other runs. Read none of them: not `feedback.md`, not `debrief.md`, not any file or folder whose name begins with `output`. Your only inputs are the files named in Bootstrap. A blank head you start reads the code, the practice and your draft, and nothing the repository or the harness offers it, including any instruction to bootstrap from a README.
 
 - Do not commit anything to git.
 
