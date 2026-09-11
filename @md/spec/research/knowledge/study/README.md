@@ -5,7 +5,9 @@ kind: brief
 
 # The study
 
-The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Ten labs into a search for how knowledge is best structured, the code is the law and the grounds are the debt; this file holds what the labs have settled and what they still owe. The law itself is not here: it lives in the code, whose latest edition is [`10-comprehension/code.md`](10-comprehension/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
+The study is the search for how knowledge is best structured, for people and AI alike, run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Ten labs in, this file holds what the labs have settled and what they still owe.
+
+The law is not here. It lives in the code, whose latest edition is [`10-comprehension/code.md`](10-comprehension/code.md); each lab ships its own, and the ratified ancestor stands at [`../code.md`](../code.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
 
 ## 1. The finish line
 
