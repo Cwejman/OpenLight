@@ -20,6 +20,10 @@ Bulleted and numbered lists carry a blank line between items, so they read as ra
 
 Links are relative markdown links. A link to a brief not yet written is written empty, `[the name]()`, and stands until the brief exists. A link to an outside source goes to the source's address, and a source known only by a number or a system by its name is cited that way, as a link to its address. A source cited in running text is written as a name and a year in brackets, *[Author year]*, and becomes a link when the source has a brief of its own; until then it stays text. A reference to another section is written by anchor on every use, so no paragraph depends on an earlier one for its pointer; whether the first use alone should carry it is open.
 
+A link points at a state, not only at a path. In a versioned substrate the honest reading of a link is the target as it stood when the linking brief was last written, which git can resolve exactly, since every file carries the commit it came in on. A reader may then show both: the ground the brief was written against, and the ground as it stands now, with the difference between them being what staleness actually is. Without this a brief can be made wrong by an edit elsewhere that nobody made to it, and no one can see that it happened.
+
+This binds whoever edits a brief that others stand on. Changing it is allowed, and is the point of a living substrate; changing it silently is not, and the mark of a moved ground is the least a reader is owed. Reasoned, and wanted before a tree is published.
+
 ## 5. Files
 
 A file has one root brief. When a brief is central to two regions it lives in one file and the other links to it, never split, by the code's one home. The file is cut around the brief the most stands on in that region. Records are events: a ratification, a review's findings, a feedback note each amends the state, is folded, and retires from the tree; git keeps it.

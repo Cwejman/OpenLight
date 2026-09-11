@@ -62,13 +62,21 @@ What was asked and is not there:
 
 - **The records should become organic** as the work goes on: kept as the work happens rather than recovered at the end. This file and [the making](making.md) were both written after the fact, which is the failure the study keeps naming, met again by the people who named it.
 
-## 6. The medium beyond the page
+## 6. Links that hold their state
+
+A link points at a state, not only at a path, and the reader resolves it as a path. So a brief written against a file yesterday now points at whatever that file became, and nothing shows the reader which one the writer meant.
+
+This stopped being theoretical during the sitting that built all of this. The lab's corpus and its piece were written against an edition of the code, and that edition was changed twice after they were finished, once for a rule about what comes next. Their links now point past what they were written against, and only the staleness mark says so, without being able to show what moved.
+
+What is owed: resolve a link to the target as of the commit the linking brief last came in on, show the two states side by side where they differ, and make the mark a difference a reader can open rather than a warning they must trust. Git holds everything needed. The practice carries the rule; this program does not carry it yet.
+
+## 7. The medium beyond the page
 
 What stands: nothing yet. The program runs a small server because a page cannot read a folder on its own.
 
 What was asked: the parsing belongs in the page, so one program reads a granted directory locally and a manifest when published, web-native and substrate-native at once, with the two moments differing only in time. Then [a repository is published as itself](publication.md) by its own pipeline, digesting only the files whose frontmatter stamps them as written under the code. That milestone is gated on the judgments in room 1 and on whether this interface is feasible at all, and nothing should be built toward it until those are answered.
 
-## 7. What this stretch taught the study
+## 8. What this stretch taught the study
 
 Two things that belong to the code and not to the program, both already folded into [the study](../README.md).
 

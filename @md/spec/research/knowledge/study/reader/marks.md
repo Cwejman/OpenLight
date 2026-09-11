@@ -26,6 +26,8 @@ Every brief carries its own paragraphs as a texture, in the maps and beside ever
 
 A brief stands on what it links to, and git knows when each file last changed. Where something a brief points at was committed after the brief itself, the brief is marked: its ground moved and it was not written again. The mark is a word beside the name in the spreads, the tree and the rail, and the hover card says how many of the things it stands on changed after it did.
 
+What the mark really measures is the distance between two states: the target as it stood when the brief was last written, which is what the brief was actually written against, and the target as it stands now. Resolving a link to its anchored state is not built; git holds everything needed for it, and until it is, the mark says that the distance exists without being able to show it.
+
 It is a suspicion and not a verdict. A pointer can survive its target changing, and often does. But it is the cheapest honest signal a reader or a harness has for staleness, and it costs nothing but a read of the log. Seen, on this room: four briefs carry the mark at the close of the sitting that wrote them, which is what a sitting that revises its own ground should expect.
 
 ## 6. The stamp a file carries
