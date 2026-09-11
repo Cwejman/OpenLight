@@ -30,7 +30,11 @@ The direction, held 2026-09-11 and not yet built. The page takes its tree from w
 
 What survives of the server is at most a few lines that emit the manifest at publish time, and that is the whole of the gain being weighed: taking on a build step is worth it only because it removes a service, not because it adds a pipeline. Anything more would be running ahead of what is known.
 
-## 5. Open
+## 5. What is owed next
+
+The raw, in the page. A brief should be openable as the markdown it actually is, expanding in place and staying in step with the reading, so a reader can see the text as written without leaving where they stand. It is divided from the prose around it by rhythm alone, like everything else here, and takes a surface of its own only where the pointer asks for one.
+
+## 6. Open
 
 It runs a small server because a page cannot read a folder on its own. What it should do instead is read the substrate from the browser: the file system through the client's own access where that is granted, or the git repository directly, so the same page serves a live local substrate and a published read-only one with no service in the middle. That is what would make it web-native and substrate-native at once, and it is the direction, not the state.
 

@@ -12,6 +12,9 @@
   :root { color-scheme: light dark;
     --bg:#f2ede3; --ink:#1e1b17; --soft:#463f37; --mute:#857d71; --line:#ded4c2;
     --seq:#3d6fb0; --warm:#b8542a;
+    /* six hues, one per region of the whole, assigned in fixed order and never cycled;
+       validated for this ground, for colour blindness and for contrast */
+    --h1:#3d6fb0; --h2:#b8542a; --h3:#2f8f62; --h4:#7a5aa8; --h5:#a07a18; --h6:#a8476b;
     /* rhythm: one magnitude at depth 0, stepping down per level, with a floor */
     --r0: clamp(22px, 2.4vw, 40px); --r1: calc(var(--r0) * .62); --r2: calc(var(--r1) * .62);
     --r3: calc(var(--r2) * .66); --r4: 4px;
@@ -25,6 +28,7 @@
   @media (prefers-color-scheme: dark) { :root {
     --bg:#141317; --ink:#efeae0; --soft:#cdc6ba; --mute:#8f887d; --line:#312e38;
     --seq:#6a9be0; --warm:#e58a5a;
+    --h1:#5b8fd6; --h2:#d4703c; --h3:#2ba36b; --h4:#9a7ed0; --h5:#b08c22; --h6:#d05f84;
     --lift: color-mix(in oklab, var(--bg) 86%, #fff 14%); --sheen: rgba(255,255,255,.09);
     --diffuse-1: rgba(0,0,0,.34); --diffuse-2: rgba(0,0,0,.62); } }
   * { box-sizing:border-box; }
@@ -57,6 +61,8 @@
   .place .lvl + .lvl { padding-left:10px; }
   .place .lvl + .lvl + .lvl { padding-left:20px; }
   .place .lvl + .lvl + .lvl + .lvl { padding-left:30px; }
+  .dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:7px;
+    vertical-align:1px; flex:none; }
   .place .nm { font: var(--t5)/1.35 var(--serif); color:var(--mute); cursor:pointer;
     display:inline-block; max-width:78%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     vertical-align:bottom; }
@@ -181,6 +187,7 @@
     /* the estate a card takes follows what it holds, not the width available */
     .kid { grid-template-columns:minmax(0,1fr) 104px; max-width:62em; }
   }
+  .kn .dot { width:7px; height:7px; vertical-align:2px; margin-right:9px; }
   .kn { font: 600 var(--t2)/1.24 var(--serif); letter-spacing:-.012em; transition:color .12s; max-width:20em; }
   .kid:hover .kn { color:var(--seq); }
   .kf { color:var(--soft); font: var(--t4)/1.56 var(--serif); margin-top:var(--r4); max-width:34em; }
@@ -269,6 +276,16 @@ const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&g
 const tok = n => Math.round(n/4);
 const fmt = n => n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1)+'k' : String(n);
 const shade = d => `color-mix(in oklab, var(--seq) ${Math.max(16, 96 - d*20)}%, var(--bg))`;
+// hue says which region of the whole a brief belongs to; depth says how far in it sits
+const HUES = 6;
+function hueOf(uid) {
+  const first = uid === '' ? -1 : Number(String(uid).split(',')[0]);
+  return first < 0 ? 'var(--mute)' : `var(--h${(first % HUES) + 1})`;
+}
+function tint(uid, depth) {
+  return `color-mix(in oklab, ${hueOf(uid)} ${Math.max(14, 88 - depth * 19)}%, var(--bg))`;
+}
+function dot(uid) { return `<i class="dot" style="background:${hueOf(uid)}"></i>`; }
 let DATA = null, PATH = [];   // PATH = indices from the root to the focused node
 
 function at(path) { let n = DATA.tree; for (const i of path) n = n.kids[i]; return n; }
@@ -312,7 +329,8 @@ function placement() {
     const nm = here.name.replace(/^[\d.]+\s*/, '');
     const last = i === PATH.length;
     rows.push(`<div class="lvl ${last ? 'now' : ''}">
-      <a class="nm" data-jump="${PATH.slice(0, i).join(',')}" data-uid="${PATH.slice(0, i).join(',')}">${esc(nm)}</a>
+      <a class="nm" data-jump="${PATH.slice(0, i).join(',')}" data-uid="${PATH.slice(0, i).join(',')}">${
+        i ? dot(PATH.slice(0, i).join(',')) : ''}${esc(nm)}</a>
       <span class="w">${fmt(tok(here.own_n))}${here.kids.length ? ` + ${fmt(tok(here.total_n - here.own_n))}` : ''}</span>` +
       (last || !here.kids.length ? '' : (() => {
         const tot = here.kids.reduce((a,k)=>a+Math.max(k.total_n,1),0) || 1;
@@ -344,7 +362,7 @@ function sunburst(focus) {
     if (depth > 0) {
       const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - Math.min(2, RING/8);
       const own = n.total_n ? Math.max(0.08, n.own_n / n.total_n) : 1;
-      out += `<path d="${arc(r0, r1, a0, a1)}" fill="${shade(depth)}" stroke="var(--bg)" stroke-width="1.5"
+      out += `<path d="${arc(r0, r1, a0, a1)}" fill="${tint(PATH.concat(path).join(','), depth)}" stroke="var(--bg)" stroke-width="1.5"
         data-path="${path.join(',')}" data-uid="${PATH.concat(path).join(',')}"></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
       placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
@@ -634,7 +652,7 @@ function treemap(root, here) {
                          : `<i class="own" style="width:100%;height:${ownF*100}%"></i>`) : '';
     return `<div class="c ${trait(n)} ${on ? 'here' : ''} ${more ? 'more' : ''}" data-uid="${uid}"
       style="left:${x+inset*.1}%;top:${y+inset*.1}%;width:${Math.max(.3,w-inset*.2)}%;height:${Math.max(.3,h-inset*.2)}%;
-      background:${shade(depth)};z-index:${depth}">${own}${label}</div>`;
+      background:${tint(uid, depth)};z-index:${depth}">${own}${label}</div>`;
   }).join('');
 }
 function minimap(root, here, cap) {
@@ -779,7 +797,7 @@ function render() {
     const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
       `<span class="room ${g.kids.length ? 'deep' : ''}" data-uid="${PATH.concat(i, k.kids.indexOf(g)).join(',')}"><b>${esc(g.name)}</b>${spark(g, 7)}<i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
     return `<div class="kid" data-kid="${i}" data-uid="${PATH.concat(i).join(',')}">
-      <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face)}</div>${rooms}</div>
+      <div><div class="kn">${dot(PATH.concat(i).join(','))}${esc(k.name)}</div><div class="kf">${esc(k.face)}</div>${rooms}</div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
         ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
   };
