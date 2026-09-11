@@ -64,11 +64,17 @@ def slug(h):
     return re.sub(r"[^a-z0-9]+", "-", h.lower()).strip("-")
 
 
+def paragraphs(own):
+    """The lengths of a brief's own paragraphs: its texture, and how heavy it looks."""
+    return [len(re.sub(r"\s+", " ", p.strip())) for p in own.split("\n\n")
+            if p.strip() and not p.strip().startswith("#")]
+
+
 def node(name, path, anchor, kind, own, kids):
     own_n = len(own)
     return {
         "name": name, "path": path, "anchor": anchor, "kind": kind,
-        "own": own, "own_n": own_n, "face": face(own),
+        "own": own, "own_n": own_n, "face": face(own), "paras": paragraphs(own),
         "total_n": own_n + sum(k["total_n"] for k in kids), "kids": kids,
     }
 

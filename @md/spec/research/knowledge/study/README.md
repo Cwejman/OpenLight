@@ -64,11 +64,13 @@ A lab is one directory beside this file, `<nn>-<name>/`, and since lab 06 it shi
 
 - **The output** — the writer's piece.
 
+**From lab 11 the reset ends (2026-09-11).** Until now each lab began from nothing: a fresh writer, the raw, and a code edition, with the previous output left behind. That was right while the code was moving under us and a piece written against an old edition could not be trusted. It is no longer worth its cost. The code and the piece now evolve together: a lab takes the standing output and the standing edition, changes what the last read found wanting, and rewrites only the briefs the change reaches. What the reset bought, a writer uncontaminated by earlier verdicts, is bought more cheaply by the fresh head, which holds only the code and the draft. What it cost was everything already learned in the prose.
+
 Three rules keep a lab honest:
 
 - **Ratify before launch.** The author reads the edition and the prompt whole; the run starts on their word.
 
-- **The writer runs pure.** A fresh session reads the prompt and only what it names — never this notebook, which holds the verdicts a clean arm must not see.
+- **The writer runs pure.** A fresh session reads the prompt and only what it names — never this notebook, which holds the verdicts a clean arm must not see. Purity is about this file, not about the work: from lab 11 a writer inherits the standing output and edition, and still never reads the verdicts on them.
 
 - **The author reads cold**, against the baseline pair, and the verdict lands here.
 
@@ -85,6 +87,8 @@ What the search believes lives in the latest edition, nowhere else. What it wait
 ## 6. Method findings that hold
 
 Settled by repetition; they feed the markdown practice and the grounds:
+
+- **Heaviness is seen before it is read.** A reader judges a brief's difficulty from its shape, the size of its paragraphs and the density of the page, before spending any reading on it, and under the code that judgment is the verdict: a part that looks like too much is harder to understand, because comprehension follows confidence. So a piece can be failed at a glance, and it should be looked at blurred before it is read. Seen, on lab 10's output.
 
 - **A fresh head finds what the writer cannot.** The writer's closure is invisible from inside — three times evidenced. The cold read is part of shipping, not an aspiration.
 

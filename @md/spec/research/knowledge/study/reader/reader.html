@@ -72,6 +72,15 @@
   .prose a { color:var(--seq); text-decoration:none; border-bottom:1px solid color-mix(in oklab, var(--seq) 35%, transparent); }
   .prose a.empty { color:var(--mute); border-bottom:1px dotted var(--rule); }
 
+  /* the texture: how heavy a brief looks before it is read */
+  .tex { display:flex; gap:2px; align-items:flex-end; height:16px; margin:8px 0 0; }
+  .tex i { display:block; width:3px; border-radius:1px; background:var(--rule); }
+  .tex i.big { background:var(--warm); }
+  .kw .tex { justify-content:flex-end; height:13px; margin:7px 0 4px; }
+  .weigh { display:flex; align-items:center; gap:14px; margin:-8px 0 26px;
+    font: 11.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute);
+    letter-spacing:.06em; text-transform:uppercase; }
+  .weigh .tex { height:20px; margin:0; }
   /* what lies beneath */
   .kids { margin-top:64px; }
   .kids .lbl { border-top:2px solid var(--ink); padding-top:10px; margin-bottom:4px; }
@@ -100,6 +109,7 @@
     <div class="crumb" id="crumb"></div>
     <h2 class="title" id="title"></h2>
     <div class="meta" id="meta"></div>
+    <div class="weigh" id="weigh"></div>
     <div class="prose" id="prose"></div>
     <div class="kids" id="kids"></div>
   </main>
@@ -186,6 +196,13 @@ function gauge(focus) {
     <div class="note">tokens, counted as bytes over four</div>`;
 }
 
+function texture(paras, cap) {
+  if (!paras || !paras.length) return '';
+  const max = Math.max(600, ...paras), show = cap ? paras.slice(0, cap) : paras;
+  return `<div class="tex">` + show.map(n =>
+    `<i class="${n > 500 ? 'big' : ''}" style="height:${Math.max(2, Math.round(16*n/max))}px" title="${n} characters"></i>`
+  ).join('') + `</div>`;
+}
 function render() {
   const focus = at(PATH), root = DATA.tree;
   document.getElementById('rootname').textContent = root.name;
@@ -204,12 +221,16 @@ function render() {
     `${focus.kind} · ${fmt(tok(focus.own_n))} tokens here` +
     (focus.kids.length ? ` · ${focus.kids.length} beneath, ${fmt(tok(focus.total_n - focus.own_n))} in them` : ' · nothing beneath') +
     (focus.path && focus.path !== '.' ? ` · ${focus.path}` : '');
+  const heavy = (focus.paras||[]).filter(n=>n>500).length;
+  document.getElementById('weigh').innerHTML = focus.paras && focus.paras.length
+    ? texture(focus.paras) + `<span>${focus.paras.length} paragraph${focus.paras.length>1?'s':''}` +
+      (heavy ? ` · ${heavy} over five hundred characters` : ' · none heavy') + `</span>` : '';
   document.getElementById('prose').innerHTML = md(focus.own);
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
   document.getElementById('kids').innerHTML = (focus.kids.length ? `<span class="lbl">what lies beneath</span>` : '') + focus.kids.map((k,i) => `<div class="kid" data-kid="${i}">
       <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face.slice(0,190))}${k.face.length>190?'…':''}</div></div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
-        ${k.kids.length ? k.kids.length + ' beneath' : 'a leaf'}</div></div>`).join('');
+        ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' beneath' : 'a leaf'}</div></div>`).join('');
 }
 
 document.addEventListener('click', e => {
