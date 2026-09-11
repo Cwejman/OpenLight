@@ -26,6 +26,8 @@ Mutual driving is a third relation beside nesting and the link, and it costs two
 
 The meeting itself is a holon of its own. The friction of the bow belongs neither to the bow nor to the string; it is where their two characteristics cross, and it has to be somewhere. So a substrate that lets parts drive each other needs a place for junctions, and they are parts like any other.
 
+A junction can itself be amplified. Where the meeting between two holons needs judgment rather than a fixed curve, the junction is a program with a model in it, holding the cognition the two have in common while each keeps its own focus; the author names a live model used exactly this way as the case, unchecked here. That is coordination as a unit of its own, and it is the same position the friction of the bow holds, one step up in kind.
+
 Whether the code should carry this, or whether it belongs only where signals flow, is open. It is stated here and not lifted.
 
 *Reasoned, and grounded in methods that work in shipped instruments; the sources are named from the writer's memory, a model's, and none was checked in this session. [Their verification is owed to the grounds]().*

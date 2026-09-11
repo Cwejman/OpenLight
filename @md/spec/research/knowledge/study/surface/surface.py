@@ -288,29 +288,35 @@ def snapshot():
 SNAPS = os.path.join(LAB, ".snapshots")  # one copy of corpus/ and output/ per round the record names
 
 
-def snapshot_rounds(rounds):
-    """The trail: when the record gains a round, keep the tree as it stands under that round's name."""
+def take(name):
+    """Keep the tree as it stands, under one name."""
     import shutil
-    # on first sight of a record, only the newest round is a state the files can vouch for;
-    # earlier rounds are marked seen and never copied
+    dest = os.path.join(SNAPS, name)
+    if os.path.exists(dest):
+        return
+    os.makedirs(dest)
+    for sub in ("corpus", "output"):
+        src = os.path.join(LAB, sub)
+        if os.path.isdir(src):
+            shutil.copytree(src, os.path.join(dest, sub))
+
+
+def snapshot_rounds(rounds):
+    """The trail: a state kept when the watching starts, and one each time the record gains a round."""
     if not hasattr(snapshot_rounds, "seen"):
-        snapshot_rounds.seen = set(rounds[:-1]) if not os.path.isdir(SNAPS) else set(rounds)
+        # rounds already in the record are states nobody saw; the trail starts here
+        snapshot_rounds.seen = set(rounds)
+        if not os.path.isdir(SNAPS):
+            take("at-start")
+        return
     for r in rounds:
-        if "round" not in r.lower():  # renumbering makes new names for standing sections; only rounds are states
+        if "round" not in r.lower():  # renumbering renames standing sections; only rounds are states
             continue
         if r in snapshot_rounds.seen:
             continue
         snapshot_rounds.seen.add(r)
         # key on the round, not its number: the record renumbers as entries are inserted
-        name = re.sub(r"[^A-Za-z0-9]+", "-", re.sub(r"^[\d.]+\s*", "", r)).strip("-")[:60]
-        dest = os.path.join(SNAPS, name)
-        if os.path.exists(dest):
-            continue
-        os.makedirs(dest)
-        for sub in ("corpus", "output"):
-            src = os.path.join(LAB, sub)
-            if os.path.isdir(src):
-                shutil.copytree(src, os.path.join(dest, sub))
+        take(re.sub(r"[^A-Za-z0-9]+", "-", re.sub(r"^[\d.]+\s*", "", r)).strip("-")[:60])
 
 
 def loop():
