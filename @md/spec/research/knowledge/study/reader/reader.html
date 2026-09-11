@@ -107,6 +107,20 @@
   .unread { font: 11.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); margin:6px 0 0;
     letter-spacing:.05em; }
   .unread b { color:var(--warm); font-weight:500; }
+  /* one thing, lit wherever it appears */
+  .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:330px;
+    background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:10px 13px;
+    box-shadow:0 6px 22px rgba(0,0,0,.10); }
+  .tip .t { font: 600 16px/1.3 "Newsreader", serif; color:var(--ink); }
+  .tip .f { font: 14.5px/1.45 "Newsreader", serif; color:var(--mute); margin-top:4px; }
+  .tip .s { font: 11.5px/1.7 "Inter", system-ui, sans-serif; color:var(--mute); margin-top:7px;
+    letter-spacing:.05em; text-transform:uppercase; }
+  .tip .s b { color:var(--ink); font-weight:500; }
+  .tip .s em { font-style:normal; color:var(--warm); }
+  [data-uid] { cursor:pointer; }
+  svg path.lit { stroke:var(--warm) !important; stroke-width:2 !important; }
+  .mn.lit { background:color-mix(in oklab, var(--warm) 14%, transparent); border-left-color:var(--warm); }
+  .kid.lit { background:color-mix(in oklab, var(--warm) 5%, transparent); }
   /* the texture: how heavy a brief looks before it is read */
   .tex { display:flex; gap:2px; align-items:flex-end; height:16px; margin:8px 0 0; }
   .tex i { display:block; width:3px; border-radius:1px; background:var(--rule); }
@@ -138,6 +152,7 @@
 </style>
 </head>
 <body>
+<div class="tip" id="tip"></div>
 <div class="wrap">
   <aside class="map">
     <h1 class="root" id="rootname">reading…</h1>
@@ -220,7 +235,7 @@ function sunburst(focus) {
       const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - Math.min(2, RING/8);
       const own = n.total_n ? Math.max(0.08, n.own_n / n.total_n) : 1;
       out += `<path d="${arc(r0, r1, a0, a1)}" fill="${shade(depth)}" stroke="var(--paper)" stroke-width="1.5"
-        data-path="${path.join(',')}"><title>${esc(n.name)} — ${fmt(tok(n.own_n))} own, ${fmt(tok(n.total_n))} with everything beneath</title></path>`;
+        data-path="${path.join(',')}" data-uid="${PATH.concat(path).join(',')}"></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
       placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
     }
@@ -280,6 +295,40 @@ function unreadCount(root) {
   (function w(n) { const t = trait(n); if (t === '') unread++; else if (t === 'changed') changed++; n.kids.forEach(w); })(root);
   return {unread, changed};
 }
+function nodeAt(uid) {
+  try { return at(uid === '' ? [] : uid.split(',').map(Number)); } catch (e) { return null; }
+}
+function tipFor(n) {
+  const heavy = (n.paras||[]).filter(x=>x>500).length, t = trait(n);
+  const ins = pointedFrom(n).length, outs = (n.links||[]).length;
+  const bits = [];
+  bits.push(`<b>${fmt(tok(n.own_n))}</b> here`);
+  if (n.kids.length) bits.push(`<b>${fmt(tok(n.total_n - n.own_n))}</b> in ${n.kids.length} room${n.kids.length>1?'s':''}`);
+  if (n.paras && n.paras.length) bits.push(`${n.paras.length} paragraph${n.paras.length>1?'s':''}${heavy ? `, <em>${heavy} heavy</em>` : ''}`);
+  if (outs) bits.push(`points at ${outs}`);
+  if (ins) bits.push(`${ins} point here`);
+  bits.push(t === 'changed' ? '<em>changed since you read it</em>' : t === 'read' ? 'read' : 'not read yet');
+  return `<div class="t">${esc(n.name)}</div>${n.face ? `<div class="f">${esc(n.face.slice(0,150))}${n.face.length>150?'…':''}</div>` : ''}<div class="s">${bits.join(' · ')}</div>`;
+}
+let LIT = null;
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('tip');
+  const el = e.target.closest && e.target.closest('[data-uid]');
+  const uid = el ? el.dataset.uid : null;
+  if (uid !== LIT) {
+    document.querySelectorAll('.lit').forEach(x => x.classList.remove('lit'));
+    LIT = uid;
+    if (uid !== null) document.querySelectorAll(`[data-uid="${uid}"]`).forEach(x => x.classList.add('lit'));
+  }
+  if (!el) { tip.style.display = 'none'; return; }
+  const n = nodeAt(uid);
+  if (!n) { tip.style.display = 'none'; return; }
+  tip.innerHTML = tipFor(n);
+  tip.style.display = 'block';
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 12, e.clientX + 16) + 'px';
+  tip.style.top = Math.min(window.innerHeight - h - 12, e.clientY + 16) + 'px';
+}, {passive:true});
 function pathOf(target) {
   let found = null;
   (function w(n, p) { if (found) return; if (n === target) { found = p; return; } n.kids.forEach((k,i)=>w(k,p.concat(i))); })(DATA.tree, []);
@@ -329,7 +378,7 @@ function minimap(root, here, cap) {
     }).join('');
     const on = path.join(',') === here.join(',');
     const space = Math.max(0, (4 - Math.min(depth,4)) * 7);
-    return `<div class="mn ${on ? 'here' : ''} ${trait(n)}" data-path="${path.join(',')}" style="margin-left:${ind}px;margin-top:${space}px" title="${esc(n.name)} — ${fmt(tok(n.own_n))} tokens">
+    return `<div class="mn ${on ? 'here' : ''} ${trait(n)}" data-path="${path.join(',')}" data-uid="${path.join(',')}" style="margin-left:${ind}px;margin-top:${space}px">
       <div class="mh" style="width:${hw}px;background:${col}"></div>${paras}</div>`;
   }).join('');
 }
@@ -420,12 +469,12 @@ function render() {
   document.getElementById('backs').innerHTML = backs.length
     ? `<span class="lbl">pointed at from</span>` + backs.map(b => {
         const p = pathOf(b);
-        return `<a data-jump="${p.join(',')}">${esc(b.name)}</a>`; }).join('') : '';
+        return `<a data-jump="${p.join(',')}" data-uid="${p.join(',')}">${esc(b.name)}</a>`; }).join('') : '';
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
   const card = (k, i) => {
     const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
       `<span class="room ${g.kids.length ? 'deep' : ''}"><b>${esc(g.name)}</b><i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
-    return `<div class="kid" data-kid="${i}">
+    return `<div class="kid" data-kid="${i}" data-uid="${PATH.concat(i).join(',')}">
       <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face.slice(0,190))}${k.face.length>190?'…':''}</div>${rooms}</div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
         ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
