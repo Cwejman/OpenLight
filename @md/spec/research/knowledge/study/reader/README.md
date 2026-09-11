@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The reader
 
 A page that serves a substrate as what it is: prose in a holarchy, read by moving through it rather than by scrolling a file. Give it a path and it reads markdown files in folders as [the practice](../10-comprehension/poc.md) defines them, weighs every room by the text in it, and lets a reader descend without losing where they came from. Built 2026-09-11 in one sitting, and not yet good to use.

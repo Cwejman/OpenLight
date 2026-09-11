@@ -1,6 +1,11 @@
+---
+under: the code
+kind: brief
+---
+
 # How it marks
 
-One brief is one object, seen from several distances. Everything that names it carries the same identity, so a hover anywhere lights it everywhere at once and tells what it is.
+This is what joins [the reading](reads.md) to [the maps](maps.md): one brief is one object, seen from several distances. Everything that names it carries the same identity, so a hover anywhere lights it everywhere at once and tells what it is.
 
 ## 1. The hover, and the card
 

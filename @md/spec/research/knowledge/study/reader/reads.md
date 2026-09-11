@@ -1,4 +1,11 @@
+---
+under: the code
+kind: brief
+---
+
 # How it reads
+
+The spreads are how this program answers the code: a reader descends a holarchy without losing where they came from. What each spread draws of the whole is [how it maps](maps.md); how a room is lit and marked wherever it appears is [how it marks](marks.md); what this still owes is in [the path forward](forward.md).
 
 Depth runs to the right. Each level of a descent is a spread of its own, so entering a room does not replace the room you were in: it takes the column beside it, and the way you came stays legible as a row. Up to three spreads divide the width, and the rail above them carries the whole descent from the root, so going deeper than three drops a spread from view and never the knowledge of where it sits.
 

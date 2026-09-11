@@ -1,4 +1,11 @@
+---
+under: the code
+kind: brief
+---
+
 # How it maps
+
+These are the views of the whole that stand beside [the reading](reads.md), each the same substrate at a different distance. What they mark and how they answer the pointer is [how it marks](marks.md); the grades of figure still owed are in [the path forward](forward.md#3-the-figures).
 
 The column beside the spreads holds the views of the whole. Each is the same substrate at a different distance, and each is a section you can close, remembered between visits, so the estate is the reader's to spend.
 

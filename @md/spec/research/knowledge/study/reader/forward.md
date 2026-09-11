@@ -1,3 +1,9 @@
+---
+under: the code
+kind: plan
+status: in force
+---
+
 # The path forward
 
 What was asked of this program, set against what it actually does. Every direction here comes from [the asks](asked.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
