@@ -26,6 +26,8 @@ The debrief is opened when the work begins and appended after every round, never
 
 A session's thinking is not in the record; what it leaves is what it wrote. So beside the record it keeps `steps.md`, newest first, one line per step: the clock time, what it is about to do, and why, in the words it would say to someone watching. A line, not a paragraph; the paragraph is the round's entry in the debrief, and the piece is above that. The note is written before the step, not after, so a step that fails still has its intent on record, and whoever watches, a person or a monitor drawing the work, reads the making at the grain of a line. Reasoned, from the first runs under the monitor; the transcripts showed the words a session says are the only narrative it leaves.
 
+Every session that runs hooks into this level of record keeping, the contracted one: the note per step, the entry per round, the piece above. That is what joins the two outlooks, the harness's and a web reader's, on one record. Locally, while a run is live, the record and the transcripts give the introspection the harness does not show. When the work is committed, the raw packs, transcripts and snapshots, are tucked away under an ignored folder or in git's own objects, not lost and not in the reader's way, so the tree a reader opens on GitHub is prose and the record, and the raw is one step beneath for whoever counts.
+
 ## 7. Open
 
 Where the line falls between writing a brief again whole and amending one paragraph in place, when a change is smaller than the brief, is not drawn; the rounds so far wrote whole where the understanding changed and amended where it did not. Seen, in five rounds of one run.
