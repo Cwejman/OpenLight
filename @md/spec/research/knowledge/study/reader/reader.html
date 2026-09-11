@@ -114,7 +114,7 @@
   .place .row i:hover { background:var(--seq); }
   .place .cap { font: 11px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); letter-spacing:.05em; }
   /* one thing, lit wherever it appears */
-  .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:330px;
+  .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:340px;
     background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:10px 13px;
     box-shadow:0 6px 22px rgba(0,0,0,.10); }
   .tip .t { font: 600 16px/1.3 "Newsreader", serif; color:var(--ink); }
@@ -123,6 +123,15 @@
     letter-spacing:.05em; text-transform:uppercase; }
   .tip .s b { color:var(--ink); font-weight:500; }
   .tip .s em { font-style:normal; color:var(--warm); }
+  .tip.pinned { pointer-events:auto; border-color:var(--warm); box-shadow:0 10px 34px rgba(0,0,0,.16); }
+  .tip .act { margin-top:10px; padding-top:9px; border-top:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:4px 14px; }
+  .tip .act a { font: 14.5px/1.5 "Newsreader", serif; color:var(--soft); cursor:pointer;
+    border-bottom:1px solid var(--line); }
+  .tip .act a:hover { color:var(--seq); border-color:var(--seq); }
+  .tip .act a.open { color:var(--warm); border-color:var(--warm); font-weight:500; }
+  .tip .hint { font: 10.5px/1.5 "Inter", system-ui, sans-serif; color:var(--mute);
+    letter-spacing:.1em; text-transform:uppercase; margin-top:8px; }
   [data-uid] { cursor:pointer; }
   svg path.lit { stroke:var(--warm) !important; stroke-width:2 !important; }
   .mn.lit { background:color-mix(in oklab, var(--warm) 14%, transparent); border-left-color:var(--warm); }
@@ -144,11 +153,11 @@
   .kids { margin-top:64px; }
   .kids .lbl { border-top:2px solid var(--ink); padding-top:10px; margin-bottom:4px; }
   .kid { display:grid; grid-template-columns:minmax(0,1fr) 108px; gap:26px; align-items:baseline;
-    padding:22px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+    padding:30px 0; border-bottom:1px solid var(--line); cursor:pointer; }
   .kid > div { min-width:0; }
   .kid:hover .kn { color:var(--seq); }
-  .kn { font: 600 21px/1.25 "Newsreader", serif; letter-spacing:-.01em; transition:color .12s; }
-  .kf { color:var(--mute); font-size:16px; line-height:1.5; margin-top:5px; max-width:36em; }
+  .kn { font: 600 23px/1.24 "Newsreader", serif; letter-spacing:-.012em; transition:color .12s; max-width:20em; }
+  .kf { color:var(--soft); font: 17px/1.58 "Newsreader", serif; margin-top:7px; max-width:34em; }
   .kw { font: 11.5px/1.5 "Inter", system-ui, sans-serif; color:var(--mute); text-align:right;
     letter-spacing:.06em; text-transform:uppercase; }
   .kw .o { display:block; font-size:15px; letter-spacing:0; text-transform:none;
@@ -330,10 +339,44 @@ function tipFor(n) {
   bits.push(t === 'changed' ? '<em>changed since you read it</em>' : t === 'read' ? 'read' : 'not read yet');
   return `<div class="t">${esc(n.name)}</div>${n.face ? `<div class="f">${esc(n.face.slice(0,150))}${n.face.length>150?'…':''}</div>` : ''}<div class="s">${bits.join(' · ')}</div>`;
 }
-let LIT = null;
-document.addEventListener('mousemove', e => {
+function nearestMn(wrap, clientY) {
+  const inner = wrap.querySelector('.mini');
+  if (!inner) return null;
+  const k = Number(inner.dataset.k || 1);
+  const y = (clientY - wrap.getBoundingClientRect().top) / (k || 1);
+  let best = null, bestD = Infinity;
+  inner.querySelectorAll('.mn').forEach(el => {
+    const a = el.offsetTop, b = a + el.offsetHeight;
+    const d = y < a ? a - y : y > b ? y - b : 0;
+    if (d < bestD) { bestD = d; best = el; }
+  });
+  return best;
+}
+let LIT = null, PIN = null;
+function unpin() { PIN = null; const t = document.getElementById('tip'); t.classList.remove('pinned'); t.style.display = 'none'; }
+function pin(uid, x, y) {
+  const n = nodeAt(uid); if (!n) return;
+  PIN = uid;
   const tip = document.getElementById('tip');
-  const el = e.target.closest && e.target.closest('[data-uid]');
+  const rooms = n.kids.slice(0, 8).map(k => {
+    const p = pathOf(k); return `<a data-jump="${p.join(',')}">${esc(k.name)}</a>`; }).join('');
+  const backs = pointedFrom(n).slice(0, 6).map(b => {
+    const p = pathOf(b); return `<a data-jump="${p.join(',')}">${esc(b.name)}</a>`; }).join('');
+  tip.innerHTML = tipFor(n) +
+    `<div class="act"><a class="open" data-jump="${uid}">open this room</a>${rooms}</div>` +
+    (backs ? `<div class="act">${backs}</div>` : '') +
+    `<div class="hint">click away to let go</div>`;
+  tip.classList.add('pinned');
+  tip.style.display = 'block';
+  tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 12, x + 14) + 'px';
+  tip.style.top = Math.min(window.innerHeight - tip.offsetHeight - 12, y + 14) + 'px';
+}
+document.addEventListener('mousemove', e => {
+  if (PIN) return;
+  const tip = document.getElementById('tip');
+  const wrap = e.target.closest && e.target.closest('.miniwrap');
+  const el = (wrap && wrap.querySelector('.mini')) ? nearestMn(wrap, e.clientY)
+           : (e.target.closest && e.target.closest('[data-uid]'));
   const uid = el ? el.dataset.uid : null;
   if (uid !== LIT) {
     document.querySelectorAll('.lit').forEach(x => x.classList.remove('lit'));
@@ -387,7 +430,7 @@ function minimap(root, here, cap) {
   const CPL = 78, W = 286;
   const all = flat(root, 0, [], []).filter(x => cap === undefined || x.depth <= cap);
   return all.map(({n, depth, path}) => {
-    const ind = Math.min(depth, 8) * 8, w = W - ind, col = shade(depth);
+    const ind = Math.min(depth, 8) * 8, w = Math.max(40, (W - ind) * (1 - Math.min(depth,5) * 0.07)), col = shade(depth);
     const hw = Math.max(14, Math.min(w, 20 + (n.name||'').length * 3.1));
     const paras = (n.paras||[]).map(len => {
       const full = Math.floor(len / CPL), last = (len % CPL) / CPL;
@@ -496,7 +539,7 @@ function render() {
     const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
       `<span class="room ${g.kids.length ? 'deep' : ''}"><b>${esc(g.name)}</b><i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
     return `<div class="kid" data-kid="${i}" data-uid="${PATH.concat(i).join(',')}">
-      <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face.slice(0,190))}${k.face.length>190?'…':''}</div>${rooms}</div>
+      <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face)}</div>${rooms}</div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
         ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
   };
@@ -507,6 +550,7 @@ function render() {
     (beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : '');
 }
 
+document.addEventListener('keydown', e => { if (e.key === 'Escape') unpin(); });
 document.getElementById('pagewrap').addEventListener('click', e => {
   const wrap = e.currentTarget, r = wrap.getBoundingClientRect();
   const f = (e.clientY - r.top) / Math.max(1, r.height);
@@ -515,7 +559,13 @@ document.getElementById('pagewrap').addEventListener('click', e => {
 });
 document.addEventListener('click', e => {
   const jump = e.target.closest('[data-jump]');
-  if (jump) { go(jump.dataset.jump.split(',').filter(x=>x!=='').map(Number)); return; }
+  if (jump) { unpin(); go(jump.dataset.jump.split(',').filter(x=>x!=='').map(Number)); return; }
+  if (e.target.closest('.tip')) return;
+  const mw = e.target.closest('.miniwrap');
+  const mapEl = (mw && mw.querySelector('.mini')) ? nearestMn(mw, e.clientY)
+              : e.target.closest('svg path[data-uid], .place i[data-uid]');
+  if (mapEl) { pin(mapEl.dataset.uid, e.clientX, e.clientY); return; }
+  if (PIN) { unpin(); return; }
   const a = e.target.closest('.prose a[href], .backs a');
   if (a) {
     const t = resolve(a.getAttribute('href'), at(PATH).path);
