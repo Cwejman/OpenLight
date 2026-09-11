@@ -15,6 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 TASKS = sys.argv[1]
 LAB = sys.argv[2]
 PORT = int(sys.argv[3]) if len(sys.argv) > 3 else 8765
+AGAINST = sys.argv[4] if len(sys.argv) > 4 else None  # a snapshot of the lab to colour change against
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor.html")
 
 state = {"agents": {}, "debrief": {}, "updated": None}
@@ -174,7 +175,7 @@ def read_debrief():
                 (d["sizes"] if "bytes" in line or cells[0].startswith(("the raw", "corpus", "piece")) else d["account"]).append(cells)
     m = re.search(r"### 2\.\d+ Where stage one stands\n\n(.+?)(\n\n|$)", txt, re.S)
     if m:
-        d["standing"] = m.group(1).strip()[:600]
+        d["standing"] = re.sub(r"\*\*?([^*]+)\*\*?", r"\1", m.group(1).strip())[:600]
     files = {}
     for root, _, names in os.walk(LAB):
         for n in names:
@@ -184,6 +185,66 @@ def read_debrief():
                 files[top] = files.get(top, 0) + os.path.getsize(os.path.join(root, n))
     d["tree"] = sorted(files.items())
     return d
+
+
+def sections(text):
+    """(heading, body) for each h2 in a markdown file; the preface counts under the title."""
+    out, head, buf = [], None, []
+    for line in text.splitlines():
+        if line.startswith("## "):
+            if head is not None or buf:
+                out.append((head or "", "\n".join(buf)))
+            head, buf = line[3:].strip(), []
+        else:
+            buf.append(line)
+    out.append((head or "", "\n".join(buf)))
+    return out
+
+
+def status(new, old):
+    if old is None:
+        return "new"
+    return "same" if new == old else "changed"
+
+
+def read_tree(sub):
+    """The corpus as a holarchy: root -> folders and root files -> files -> h2 briefs, with size and change."""
+    base = os.path.join(LAB, sub)
+    if not os.path.isdir(base):
+        return None
+    snap = os.path.join(AGAINST, sub) if AGAINST else None
+
+    def file_node(path):
+        rel = os.path.relpath(path, base)
+        text = open(path, encoding="utf-8", errors="replace").read()
+        old = None
+        if snap and os.path.exists(os.path.join(snap, rel)):
+            old = open(os.path.join(snap, rel), encoding="utf-8", errors="replace").read()
+        oldsec = dict(sections(old)) if old is not None else None
+        kids = []
+        for h, body in sections(text):
+            if not h:
+                continue
+            ob = None if oldsec is None else oldsec.get(h)
+            kids.append({"n": h, "f": excerpt(first_para(body), 200), "b": len(body),
+                         "s": status(body, ob) if oldsec is not None else "same", "k": "brief"})
+        title = next((l[2:].strip() for l in text.splitlines() if l.startswith("# ")), rel)
+        return {"n": rel, "t": title, "f": excerpt(first_para(text), 260), "b": len(text),
+                "s": status(text, old) if snap else "same", "k": "file", "c": kids}
+
+    root = {"n": sub, "b": 0, "s": "same", "k": "root", "c": []}
+    for name in sorted(os.listdir(base)):
+        p = os.path.join(base, name)
+        if os.path.isdir(p):
+            files = [file_node(os.path.join(p, f)) for f in sorted(os.listdir(p)) if f.endswith(".md")]
+            entry = [f for f in files if f["n"].endswith("README.md")]
+            folder = {"n": name, "b": sum(f["b"] for f in files), "k": "folder",
+                      "s": entry[0]["s"] if entry else "same", "c": files}
+            root["c"].append(folder)
+        elif name.endswith(".md"):
+            root["c"].append(file_node(p))
+    root["b"] = sum(c["b"] for c in root["c"])
+    return root
 
 
 def snapshot():
@@ -204,7 +265,32 @@ def snapshot():
                 "children": sorted(a["children"]),
             })
         agents.sort(key=lambda x: x["first"] or "")
-        return {"agents": agents, "debrief": state["debrief"], "updated": time.strftime("%H:%M:%S")}
+        return {"agents": agents, "debrief": state["debrief"], "tree": state.get("tree"), "against": bool(AGAINST), "updated": time.strftime("%H:%M:%S")}
+
+
+SNAPS = os.path.join(LAB, ".snapshots")  # one copy of corpus/ and output/ per round the record names
+
+
+def snapshot_rounds(rounds):
+    """The trail: when the record gains a round, keep the tree as it stands under that round's name."""
+    import shutil
+    # on first sight of a record, only the newest round is a state the files can vouch for;
+    # earlier rounds are marked seen and never copied
+    if not hasattr(snapshot_rounds, "seen"):
+        snapshot_rounds.seen = set(rounds[:-1])
+    for r in rounds:
+        if r in snapshot_rounds.seen:
+            continue
+        snapshot_rounds.seen.add(r)
+        name = re.sub(r"[^A-Za-z0-9.]+", "-", r).strip("-")[:60]
+        dest = os.path.join(SNAPS, name)
+        if os.path.exists(dest):
+            continue
+        os.makedirs(dest)
+        for sub in ("corpus", "output"):
+            src = os.path.join(LAB, sub)
+            if os.path.isdir(src):
+                shutil.copytree(src, os.path.join(dest, sub))
 
 
 def loop():
@@ -213,6 +299,8 @@ def loop():
             tail_all()
             with lock:
                 state["debrief"] = read_debrief()
+                state["tree"] = read_tree("corpus") or read_tree("output")
+            snapshot_rounds(state["debrief"].get("rounds") or [])
         except Exception as e:  # keep serving
             sys.stderr.write(f"tail error: {e}\n")
         time.sleep(3)

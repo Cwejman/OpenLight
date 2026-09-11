@@ -53,12 +53,33 @@
   .rest { opacity:.72; }
   details summary { cursor:pointer; font: 13px/1.4 "Inter", system-ui, sans-serif; color:var(--mute); list-style:none; }
   details summary::-webkit-details-marker { display:none; }
+  .shape { max-width:920px; margin:0 auto 40px; }
+  .shape .lbl { margin-bottom:10px; }
+  .shape svg { width:100%; height:auto; display:block; }
+  .shape .legend { font: 12.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); display:flex; gap:18px; flex-wrap:wrap; margin-top:8px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+  .tip { position:fixed; pointer-events:none; background:var(--paper); border:1px solid var(--line); border-radius:6px;
+    padding:6px 10px; font: 12.5px/1.5 "Inter", system-ui, sans-serif; color:var(--ink); display:none; max-width:320px; }
+  .shape details { margin-top:8px; } .shape table { border-collapse:collapse; font: 12px/1.5 "Inter", system-ui, sans-serif; width:100%; }
+  .shape td, .shape th { text-align:left; padding:2px 10px 2px 0; border-top:1px dashed var(--line); } .shape th { color:var(--mute); font-weight:500; border-top:0; }
+  :root { --chg:#b8542a; --new:#3d6fb0; --same:#9a958c; }
+  @media (prefers-color-scheme: dark) { :root { --chg:#d47a48; --new:#5b8fd6; --same:#6f6a62; } }
+  .entries { max-width:920px; margin:0 auto 44px; }
+  .entries .row { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px 22px; }
+  .entry { border-top:1px solid var(--line); padding-top:10px; }
+  .entry .n { font: 500 13px/1.4 "Inter", system-ui, sans-serif; color:var(--ink); }
+  .entry .n i { font-style:normal; color:var(--mute); font-weight:400; }
+  .entry .f { font-size:14px; color:var(--ink); margin-top:4px; }
+  .entry.changed .n::before { content:"● "; color:var(--chg); } .entry.new .n::before { content:"◎ "; color:var(--new); }
 </style>
 </head>
 <body>
 <div class="head"><h1>The making</h1><div class="now" id="now">connecting…</div></div>
 <div id="standing"></div>
 <div class="rounds" id="rounds"></div>
+<div class="shape" id="shape"></div>
+<div class="entries" id="entries"></div>
+<div class="tip" id="tip"></div>
 <div id="sessions"></div>
 <script>
 const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -87,12 +108,85 @@ function session(a, hero) {
       <span>${hm(a.first)}–${hm(a.last)}</span><span>${state}</span>${a.children.length ? `<span>· sent ${a.children.length} fresh head${a.children.length>1?'s':''}</span>` : ''}</div>
     ${hero ? body : `<details><summary>show</summary>${body}</details>`}</section>`;
 }
+
+// ---- the shape: the corpus as a radial holarchy, change coloured against a snapshot ----
+function layout(root) {
+  // leaves get equal angular share; a parent's angle spans its children
+  const nodes = [];
+  const count = n => n.c && n.c.length ? n.c.reduce((a,c)=>a+count(c),0) : 1;
+  const walk = (n, depth, a0, a1, parent) => {
+    const a = (a0+a1)/2; nodes.push({n, depth, a, parent});
+    if (!n.c) return;
+    let start = a0, total = count(n);
+    for (const c of n.c) { const w = (a1-a0)*count(c)/total; walk(c, depth+1, start, start+w, n); start += w; }
+  };
+  walk(root, 0, -Math.PI/2, 1.5*Math.PI, null);
+  return nodes;
+}
+function shape(tree, against) {
+  if (!tree) return '';
+  const W = 920, H = 620, cx = W/2, cy = H/2, R = [0, 92, 178, 268];
+  const nodes = layout(tree);
+  const maxb = Math.max(...nodes.map(d=>d.n.b||1));
+  // rings breathe: a node sits a little further out the more it holds, so the levels read as organic bands
+  const pos = d => { const r = R[Math.min(d.depth,3)] + (d.depth ? 22*Math.sqrt((d.n.b||1)/maxb) - 8 : 0);
+    return [cx + r*Math.cos(d.a), cy + r*Math.sin(d.a)]; };
+  const col = s => s==='changed' ? 'var(--chg)' : s==='new' ? 'var(--new)' : 'var(--same)';
+  const byNode = new Map(nodes.map(d=>[d.n,d]));
+  let links = '', marks = '', labels = '';
+  for (const d of nodes) {
+    if (d.parent) { const [x1,y1]=pos(byNode.get(d.parent)), [x2,y2]=pos(d);
+      const mx = (x1+x2)/2 + (y1-y2)*0.12, my = (y1+y2)/2 + (x2-x1)*0.12;
+      const lc = d.n.s==='same' ? 'var(--line)' : col(d.n.s);
+      links += `<path d="M${x1},${y1} Q${mx},${my} ${x2},${y2}" fill="none" stroke="${lc}" stroke-opacity="${d.n.s==='same'?1:.55}" stroke-width="${d.n.s==='same'?1:1.4}"/>`; }
+  }
+  for (const d of nodes) {
+    const [x,y]=pos(d); const r = d.depth===0 ? 7 : Math.max(2.5, 13*Math.sqrt((d.n.b||1)/maxb));
+    const c = col(d.n.s), ring = d.n.s==='new' ? `<circle cx="${x}" cy="${y}" r="${r+3}" fill="none" stroke="${c}" stroke-width="1.5"/>` : '';
+    marks += `${ring}<circle class="m" cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="var(--bg)" stroke-width="2" data-n="${esc(d.n.n)}" data-b="${d.n.b}" data-s="${d.n.s}" data-k="${d.n.k}"/>`;
+    if (d.depth===1) { const prev = nodes.filter(o=>o.depth===1 && o.a < d.a).pop();
+      const tight = prev && (d.a - prev.a) * R[1] < 26; const rr = R[1] + (tight && !prev.pushed ? 34 : 18); d.pushed = rr > R[1] + 18;
+      const lx = cx + rr*Math.cos(d.a), ly = cy + rr*Math.sin(d.a);
+      labels += `<text x="${lx}" y="${ly}" font-size="14" font-weight="500" fill="${d.n.s==='same' ? 'var(--mute)' : col(d.n.s)}" text-anchor="${Math.cos(d.a)<-.2?'end':Math.cos(d.a)>.2?'start':'middle'}" dominant-baseline="middle" font-family="Inter, system-ui, sans-serif">${esc(d.n.n.replace('.md',''))}</text>`; }
+  }
+  const counts = {same:0, changed:0, new:0}; nodes.forEach(d=>{ if (d.n.k==='brief') counts[d.n.s]++; });
+  const rows = nodes.filter(d=>d.n.k!=='root' && d.n.s!=='same').map(d=>`<tr><td>${esc(d.n.k)}</td><td>${esc(d.n.n)}</td><td>${Math.round(d.n.b/4)}t</td><td>${d.n.s}</td></tr>`).join('');
+  return `<span class="lbl">the shape of ${esc(tree.n)} · ${against ? 'coloured against the last snapshot' : 'no snapshot to colour against'}</span>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="The corpus as a radial tree: folders, files and briefs, sized by length, coloured by change">
+      
+      ${links}${marks}${labels}</svg>
+    <div class="legend"><span><i style="background:var(--chg)"></i>changed since the snapshot</span><span><i style="background:var(--new);box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--new)"></i>new</span><span><i style="background:var(--same)"></i>unchanged</span>
+      <span>rings: folders · files · briefs</span><span>briefs: ${counts.changed} changed, ${counts.new} new, ${counts.same} unchanged</span></div>
+    <details><summary>as a table</summary><table><tr><th>kind</th><th>name</th><th>size</th><th>state</th></tr>${rows}</table></details>`;
+}
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('tip'); const m = e.target.closest && e.target.closest('circle.m');
+  if (!m) { tip.style.display='none'; return; }
+  tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY+14)+'px';
+  tip.textContent = `${m.dataset.k}: ${m.dataset.n} · ${Math.round(m.dataset.b/4)} tokens · ${m.dataset.s}`;
+});
+
+// ---- hospitable entries: by category, the face of each folder's entry; by change, the faces of what moved last ----
+function entries(tree) {
+  if (!tree) return '';
+  const byCat = tree.c.map(c => {
+    const entry = c.k==='folder' ? (c.c.find(f=>f.n.endsWith('README.md')) || c.c[0]) : c;
+    return `<div class="entry ${c.s}"><div class="n">${esc(entry.t || c.n)} <i>· ${esc(c.n)}</i></div><div class="f">${esc(entry.f||'')}</div></div>`; }).join('');
+  const moved = [];
+  const walk = (n, file) => { if (n.k==='brief' && n.s!=='same') moved.push({...n, file}); (n.c||[]).forEach(k=>walk(k, n.k==='file'? n : file)); };
+  walk(tree, null);
+  const byChange = moved.slice(0, 8).map(m => `<div class="entry ${m.s}"><div class="n">${esc(m.n)} <i>· ${esc(m.file ? m.file.n : '')}</i></div><div class="f">${esc(m.f||'')}</div></div>`).join('');
+  return `<span class="lbl">enter by category</span><div class="row">${byCat}</div>
+    ${moved.length ? `<span class="lbl" style="margin-top:26px">enter by what changed last · ${moved.length} briefs</span><div class="row">${byChange}</div>` : ''}`;
+}
+let lastTree = '';
 async function tick() {
   try {
     const s = await (await fetch('/state')).json();
     const d = s.debrief || {};
     document.getElementById('now').textContent = `${s.updated} · ${s.agents.filter(a=>a.active).length} working · ${s.agents.length} sessions in the record`;
     document.getElementById('standing').innerHTML = d.standing ? `<div class="standing"><span class="lbl">where it stands</span>${esc(d.standing)}</div>` : '';
+    const tj = JSON.stringify(s.tree); if (tj !== lastTree) { lastTree = tj; document.getElementById('shape').innerHTML = shape(s.tree, s.against); document.getElementById('entries').innerHTML = entries(s.tree); }
     document.getElementById('rounds').innerHTML = (d.rounds||[]).map((r,i,arr)=>`<span class="${i===arr.length-1?'now':''}">${esc(r)}</span>`).join('');
     const ag = s.agents.slice().sort((x,y)=> (y.active-x.active) || ((y.last||'').localeCompare(x.last||'')));
     document.getElementById('sessions').innerHTML = ag.map((a,i)=>session(a, i===0 || a.active)).join('');
