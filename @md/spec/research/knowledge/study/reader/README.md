@@ -1,6 +1,6 @@
 # The reader
 
-A page that serves a substrate as what it is: a holarchy of prose, navigable by its shape and weighed by its text. It knows nothing of harnesses, sessions or logs; give it a path and it reads markdown files in folders as [the practice](../10-comprehension/poc.md) defines them. Built 2026-09-11, a first cut.
+A page that serves a substrate as what it is: a holarchy of prose, navigable by its shape and weighed by its text. It knows nothing of harnesses, sessions or logs; give it a path and it reads markdown files in folders as [the practice](../10-comprehension/poc.md) defines them. Built 2026-09-11, a first cut; how it came to be is in [the making](making.md).
 
 ## 1. What it answers
 
