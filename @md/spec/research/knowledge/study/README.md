@@ -119,7 +119,7 @@ Settled by repetition; they feed the markdown practice and the grounds:
 
 ## 7. Beside the labs
 
-Four briefs sit beside the labs and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered, written from the labs' own cost accounts. [Tenants beyond prose](tenants.md) holds the domains that have occurred since, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks a question of synthesis and brings back what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing. Beside them, [what the study measures of itself](measured.md), [what was asked](asked-2026-09-11.md) on the day most of this was written, and two programs, [the surface](surface/README.md) and [the reader](reader/README.md).
+Four briefs sit beside the labs and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered, written from the labs' own cost accounts. [Tenants beyond prose](tenants.md) holds the domains that have occurred since, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks a question of synthesis and brings back what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing. Beside them, [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), [what was asked](asked-2026-09-11.md) on the day most of this was written, and two programs, [the surface](surface/README.md) and [the reader](reader/README.md).
 
 ## 8. Notes
 
