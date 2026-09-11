@@ -173,6 +173,11 @@ def read_debrief():
             cells = [c.strip() for c in line.strip("|").split("|")]
             if sec.startswith("1") and len(cells) >= 3 and cells[0] not in ("step", "what"):
                 (d["sizes"] if "bytes" in line or cells[0].startswith(("the raw", "corpus", "piece")) else d["account"]).append(cells)
+    sp = os.path.join(LAB, "steps.md")
+    if os.path.exists(sp):
+        lines = [l.strip() for l in open(sp, encoding="utf-8", errors="replace").read().splitlines()
+                 if l.strip() and not l.startswith("#")]
+        d["steps"] = lines[:40]
     m = re.search(r"### 2\.\d+ Where stage one stands\n\n(.+?)(\n\n|$)", txt, re.S)
     if m:
         d["standing"] = re.sub(r"\*\*?([^*]+)\*\*?", r"\1", m.group(1).strip())[:600]

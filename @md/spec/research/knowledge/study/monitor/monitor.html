@@ -71,11 +71,16 @@
   .entry .n i { font-style:normal; color:var(--mute); font-weight:400; }
   .entry .f { font-size:14px; color:var(--ink); margin-top:4px; }
   .entry.changed .n::before { content:"● "; color:var(--chg); } .entry.new .n::before { content:"◎ "; color:var(--new); }
+  .steps { max-width:920px; margin:0 auto 40px; }
+  .steps ol { list-style:none; margin:0; padding:0; }
+  .steps li { padding:6px 0 6px 16px; border-left:2px solid var(--line); font-size:15px; }
+  .steps li:first-child { border-left-color:var(--live); }
 </style>
 </head>
 <body>
 <div class="head"><h1>The making</h1><div class="now" id="now">connecting…</div></div>
 <div id="standing"></div>
+<div class="steps" id="steps"></div>
 <div class="rounds" id="rounds"></div>
 <div class="shape" id="shape"></div>
 <div class="entries" id="entries"></div>
@@ -187,6 +192,7 @@ async function tick() {
     document.getElementById('now').textContent = `${s.updated} · ${s.agents.filter(a=>a.active).length} working · ${s.agents.length} sessions in the record`;
     document.getElementById('standing').innerHTML = d.standing ? `<div class="standing"><span class="lbl">where it stands</span>${esc(d.standing)}</div>` : '';
     const tj = JSON.stringify(s.tree); if (tj !== lastTree) { lastTree = tj; document.getElementById('shape').innerHTML = shape(s.tree, s.against); document.getElementById('entries').innerHTML = entries(s.tree); }
+    document.getElementById('steps').innerHTML = (d.steps && d.steps.length) ? `<span class="lbl">the steps, in the session's own words</span><ol>${d.steps.map(l=>`<li>${esc(l.replace(/^[-*]\s*/,''))}</li>`).join('')}</ol>` : '';
     document.getElementById('rounds').innerHTML = (d.rounds||[]).map((r,i,arr)=>`<span class="${i===arr.length-1?'now':''}">${esc(r)}</span>`).join('');
     const ag = s.agents.slice().sort((x,y)=> (y.active-x.active) || ((y.last||'').localeCompare(x.last||'')));
     document.getElementById('sessions').innerHTML = ag.map((a,i)=>session(a, i===0 || a.active)).join('');

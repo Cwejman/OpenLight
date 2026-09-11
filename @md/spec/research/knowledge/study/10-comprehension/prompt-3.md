@@ -32,6 +32,8 @@ Debrief the material under the code into `output/`, with `README.md` as its entr
 
 - Do not commit anything to git.
 
+- *Amended after launch, 2026-09-11, sent to the running writer:* keep `steps.md` beside the record as the skill's sixth section says, one line per step, newest first, written before the step.
+
 ## The debrief
 
 `debrief.md` already holds stage one. Add stage two to it as the skill says a record is kept: your rounds go into its second section, newest first, above stage one's, and stage one's entries stay as they are. Add your steps to the account table in section 1 with the clock time each began, marked as a new session. For each round: which briefs were written again whole, which were moved as they were, which holarchies had their own text redone, what the fresh head handed back, what was left out and what was left open. Numbers and file sections, not commentary. Write your first entry when you begin, and keep the file current after every round.
