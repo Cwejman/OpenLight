@@ -5,7 +5,7 @@ kind: brief
 
 # The surface
 
-A page that shows a lab's substrate and the making of it, read from what the work leaves behind and nothing else: the transcripts the harness writes for every subagent, and the lab's own record, `debrief.md`. It passes nothing through the directing session, so watching costs no context. Built 2026-09-11 during lab 10 and first called a monitor, which it outgrew the same night; a first cut, kept because it worked. How it and [the reader](../reader/README.md) came to be is in [the making](../reader/making.md).
+A page that shows a lab's substrate and the making of it, read from what the work leaves behind and nothing else: the transcripts the harness writes for every subagent, and the lab's own record, `debrief.md`. It passes nothing through the directing session, so watching costs no context. Built 2026-09-11 during lab 10 and first called a monitor, which it outgrew the same night; a first cut, kept because it worked. Its first two sections are what runs. Everything in the third is unbuilt, and a reader who wants only the tool can stop before it. How it and [the reader](../reader/README.md) came to be is in [the making](../reader/making.md).
 
 ## 1. What it shows
 
