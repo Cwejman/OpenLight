@@ -6,7 +6,7 @@ The end this is built toward: a repository's own site is the repository, read th
 
 It is not started until the thing is worth publishing. Two conditions, both judgments rather than measurements.
 
-The balance has to be right: what the surface does against what it costs to keep doing it. Tonight's build is far from that, and [the shortfall](shortfall.md) says why, beginning with the fact that it is hard to use.
+The balance has to be right: what the surface does against what it costs to keep doing it. Tonight's build is far from that, and [the path forward](forward.md) says why, beginning with the fact that it is hard to use.
 
 And the interface itself has to be understood as feasible. Whether the current shape can carry a reader comfortably, or whether it meets an engineering limit better navigated than pushed, is a question to answer before a pipeline is written around it. A published surface fixes a shape in place; fixing the wrong one costs more than waiting.
 
