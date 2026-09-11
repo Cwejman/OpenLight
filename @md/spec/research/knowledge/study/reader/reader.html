@@ -338,6 +338,7 @@ function sunburst(focus) {
     return `M${x0},${y0}L${x1},${y1}A${r1},${r1} 0 ${big} 1 ${x2},${y2}L${x3},${y3}A${r0},${r0} 0 ${big} 0 ${x0},${y0}Z`;
   };
   let out = '', placed = new Map(), IDX = index(focus);
+  ANG = {}; HUB = {c, r0: R0, rmax: R0 + RINGS * RING};
   const walk = (n, depth, a0, a1, path) => {
     if (depth > RINGS || a1 - a0 < 0.003) return;
     if (depth > 0) {
@@ -347,6 +348,7 @@ function sunburst(focus) {
         data-path="${path.join(',')}" data-uid="${PATH.concat(path).join(',')}"></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
       placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
+      ANG[PATH.concat(path).join(',')] = {a: (a0+a1)/2, r: r1};
       const rm = (r0+r1)/2, span = (a1-a0)*rm, band = r1-r0;
       if (span > 30 && band > 12) {
         const deg = (a0+a1)/2 * 180/Math.PI, flip = deg > 90 && deg < 270;
@@ -396,7 +398,10 @@ function sunburst(focus) {
       data-uid="${PATH.join(',')}"/>
     <circle id="progress" cx="${c}" cy="${c}" r="${R0-2.5}" fill="none" stroke="var(--warm)" stroke-width="2.5"
       stroke-linecap="round" pointer-events="none" transform="rotate(-90 ${c} ${c})"
-      stroke-dasharray="${2*Math.PI*(R0-2.5)}" stroke-dashoffset="${2*Math.PI*(R0-2.5)}"/>${ticks}
+      stroke-dasharray="${2*Math.PI*(R0-2.5)}" stroke-dashoffset="${2*Math.PI*(R0-2.5)}"/>
+    <line id="needle" x1="${c}" y1="${c}" x2="${c}" y2="${c}" stroke="var(--seq)" stroke-width="1.6"
+      stroke-linecap="round" opacity="0" pointer-events="none"/>
+    <circle id="needletip" cx="${c}" cy="${c}" r="2.6" fill="var(--seq)" opacity="0" pointer-events="none"/>${ticks}
     <text x="${c}" y="${c - (focus.kids.length ? 5 : 0)}" text-anchor="middle" dominant-baseline="middle"
       font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--ink)"
       pointer-events="none">${fmt(tok(focus.own_n))}</text>${focus.kids.length ? `<text x="${c}" y="${c + 8}"
@@ -472,7 +477,18 @@ function nearestMn(wrap, clientY) {
   });
   return best;
 }
-let LIT = null, PIN = null;
+let LIT = null, PIN = null, ANG = {}, HUB = null;
+function needle(uid) {
+  const l = document.getElementById('needle'), t = document.getElementById('needletip');
+  if (!l || !HUB) return;
+  const p = uid === null ? null : ANG[uid];
+  if (!p) { l.setAttribute('opacity', 0); if (t) t.setAttribute('opacity', 0); return; }
+  const c = HUB.c, r0 = HUB.r0 - 6;
+  l.setAttribute('x1', c + r0 * Math.cos(p.a)); l.setAttribute('y1', c + r0 * Math.sin(p.a));
+  l.setAttribute('x2', c + (p.r + 2) * Math.cos(p.a)); l.setAttribute('y2', c + (p.r + 2) * Math.sin(p.a));
+  l.setAttribute('opacity', .85);
+  if (t) { t.setAttribute('cx', c + (p.r + 4.5) * Math.cos(p.a)); t.setAttribute('cy', c + (p.r + 4.5) * Math.sin(p.a)); t.setAttribute('opacity', .9); }
+}
 function unpin() { PIN = null; const t = document.getElementById('tip'); t.classList.remove('pinned'); t.style.display = 'none'; }
 function pin(uid, x, y) {
   const n = nodeAt(uid); if (!n) return;
@@ -503,9 +519,11 @@ document.addEventListener('mousemove', e => {
   if (uid !== LIT) {
     document.querySelectorAll('.lit, .within').forEach(x => x.classList.remove('lit', 'within'));
     LIT = uid;
+    if (uid === null) needle(null);
     if (uid !== null) {
       const same = document.querySelectorAll(`[data-uid="${uid}"]`);
       same.forEach(x => x.classList.add('lit'));
+      needle(uid);
       // a room deeper than the map's floor has no cell; show the room that holds it
       if (![...same].some(x => x.classList.contains('c'))) {
         const parts = uid === '' ? [] : uid.split(',');
