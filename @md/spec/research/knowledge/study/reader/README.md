@@ -30,11 +30,17 @@ The direction, held 2026-09-11 and not yet built. The page takes its tree from w
 
 What survives of the server is at most a few lines that emit the manifest at publish time, and that is the whole of the gain being weighed: taking on a build step is worth it only because it removes a service, not because it adds a pipeline. Anything more would be running ahead of what is known.
 
-## 5. What is owed next
+## 5. Depth runs to the right
+
+A dive no longer replaces what you were reading. Each level is a spread of its own, laid left to right, so the room you came from stays beside the room you are in and the descent is read as a row. The rightmost spread is the one you are in, at full size; the ones behind it hold their prose at a smaller register and dim until the pointer is over them. Every map in the column follows the spread you are reading.
+
+What is expected of it and not yet built, in the author's terms (2026-09-11): the spreads should not scroll in lockstep. The rightmost runs freely, and each one behind it moves more slowly, since it holds less prose per step of the holarchy; scrolling the stack sideways should let a reader change depth at a chosen level, moving among what stands at that level; and each descent a reader has made should be remembered for its stack, so returning to a level returns to the room they were in there.
+
+## 6. What is owed next
 
 The raw, in the page. A brief should be openable as the markdown it actually is, expanding in place and staying in step with the reading, so a reader can see the text as written without leaving where they stand. It is divided from the prose around it by rhythm alone, like everything else here, and takes a surface of its own only where the pointer asks for one.
 
-## 6. Open
+## 7. Open
 
 It runs a small server because a page cannot read a folder on its own. What it should do instead is read the substrate from the browser: the file system through the client's own access where that is granted, or the git repository directly, so the same page serves a live local substrate and a published read-only one with no service in the middle. That is what would make it web-native and substrate-native at once, and it is the direction, not the state.
 

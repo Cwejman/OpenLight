@@ -135,25 +135,28 @@
                0 0 12px -2px color-mix(in oklab, var(--warm) 26%, transparent); pointer-events:none; }
   .caret { position:absolute; left:0; right:0; height:2px; background:var(--warm); pointer-events:none; }
 
+  /* depth runs to the right: one spread per level, the ones behind kept and readable */
+  .doc { padding:0; overflow:hidden; }
+  .panes { display:flex; gap:calc(var(--r0) * 1.3); overflow-x:auto; overflow-y:hidden;
+    height:calc(100vh - var(--r0) * 1.6); scroll-behavior:smooth; scrollbar-width:none; }
+  .panes::-webkit-scrollbar { display:none; }
+  .pane { flex:0 0 clamp(300px, 33em, 44vw); height:100%; overflow-y:auto; scrollbar-width:none;
+    padding-bottom:14vh; opacity:.6; transition:opacity .18s; }
+  .pane::-webkit-scrollbar { display:none; }
+  .pane.last, .pane:hover { opacity:1; }
+  .ptitle { font:600 var(--t2)/1.2 var(--serif); margin:0 0 var(--r4); letter-spacing:-.014em; cursor:pointer; }
+  .pane.last .ptitle { font-size:var(--t1); line-height:1.1; letter-spacing:-.022em; margin-bottom:var(--r3); }
+  .ptitle:hover, .ptitle.lit { color:var(--seq); }
+  .pmeta { font:var(--t6)/1.6 var(--sans); color:var(--mute); letter-spacing:.08em;
+    text-transform:uppercase; margin-bottom:var(--r3); }
+  .pane .prose { max-width:none; }
+  .pane:not(.last) .prose { font-size:var(--t5); }
+  .pane:not(.last) .prose > p:first-child { font-size:var(--t4); }
+  .kid.chosen { position:relative; }
+  .kid.chosen::before { content:""; position:absolute; left:-14px; top:3px; bottom:var(--r1);
+    width:2px; background:var(--warm); }
   /* the page */
   .doc { padding-bottom:22vh; }
-  @media (min-width: 1280px) {
-    /* the article holds while the index runs past it, as a page holds its lead */
-    .doc { display:grid; grid-template-columns:minmax(0, 33em) minmax(320px, 1fr);
-      column-gap:calc(var(--r0) * 1.4); align-items:start; }
-    .doc > .article { grid-column:1; position:sticky; top:var(--r1); align-self:start;
-      max-height:calc(100vh - var(--r0) * 2); overflow-y:auto; scrollbar-width:none; }
-    .doc > .article::-webkit-scrollbar { display:none; }
-    .doc > .aside { grid-column:2; }
-    .aside .backs, .aside .kids { margin-top:0; }
-    .aside .kids .grp:first-child { margin-top:0; }
-    .aside .kid { padding-bottom:var(--r2); grid-template-columns:minmax(0,1fr) 62px; gap:var(--r2); }
-    .aside .kn { font-size:var(--t3); }
-    .aside .kf { font-size:var(--t5); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3;
-      -webkit-box-orient:vertical; overflow:hidden; }
-    .aside .rooms { display:none; }
-    .aside .kw .tex { display:none; }
-  }
   .crumb { font: var(--t6)/1.7 var(--sans); color:var(--mute); margin-bottom:var(--r2);
     letter-spacing:.08em; text-transform:uppercase; }
   .crumb a { color:var(--soft); text-decoration:none; cursor:pointer; }
@@ -290,19 +293,7 @@
     <div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
       <div class="view" id="view" hidden></div></div>
   </aside>
-  <main class="doc">
-    <div class="article">
-      <div class="crumb" id="crumb"></div>
-      <h2 class="title" id="title"></h2>
-      <div class="meta" id="meta"></div>
-      <div class="weigh" id="weigh"></div>
-      <div class="prose" id="prose"></div>
-    </div>
-    <div class="aside">
-      <div class="backs" id="backs"></div>
-      <div class="kids" id="kids"></div>
-    </div>
-  </main>
+  <main class="doc"><div class="panes" id="panes"></div></main>
 </div>
 <script>
 const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -669,7 +660,7 @@ function drawTrail(here) {
 function go(path, push) {
   PATH = path;
   if (push !== false) history.pushState({path}, '', '#' + path.join('.'));
-  render(); window.scrollTo(0, 0);
+  render();
 }
 window.addEventListener('popstate', e => { PATH = (e.state && e.state.path) || []; render(); });
 function flat(n, depth, path, out) {
@@ -735,28 +726,29 @@ function minimap(root, here, cap) {
 }
 function pagemap() {
   const wrap = document.getElementById('pagewrap'), inner = document.getElementById('pagemap');
-  const doc = document.querySelector('.doc');
+  const doc = activePane();
   if (!wrap || !doc) return;
-  const H = Math.max(1, document.documentElement.scrollHeight);
+  const H = Math.max(1, doc.scrollHeight);
   const W = wrap.clientWidth, HH = wrap.clientHeight, k = W / H;
+  const top0 = doc.getBoundingClientRect().top - doc.scrollTop;
   const parts = [];
-  doc.querySelectorAll('.crumb, .title, .meta, .prose > *, .kids > .grp, .kids > .kid').forEach(el => {
+  doc.querySelectorAll('.ptitle, .pmeta, .prose > *, .grp, .kid').forEach(el => {
     const r = el.getBoundingClientRect();
-    const x = (r.top + window.scrollY) * k, w = Math.max(1, r.height * k);
+    const x = (r.top - top0) * k, w = Math.max(1, r.height * k);
     const tag = el.tagName.toLowerCase(), cls = el.className || '';
     let h = HH * .5, c = 'var(--seq)', o = .5, y = (HH - h) / 2;
     if (cls.includes('kid')) { h = HH * .34; y = HH - h; c = 'var(--ink)'; o = .18; }
     else if (cls.includes('grp') || tag === 'h3') { h = HH; y = 0; c = 'var(--ink)'; o = .6; }
-    else if (tag === 'h4' || cls.includes('meta') || cls.includes('crumb')) { h = HH * .3; y = 0; o = .3; }
-    else if (cls.includes('title')) { h = HH; y = 0; c = 'var(--ink)'; o = .78; }
+    else if (tag === 'h4' || cls.includes('pmeta')) { h = HH * .3; y = 0; o = .3; }
+    else if (cls.includes('ptitle')) { h = HH; y = 0; c = 'var(--ink)'; o = .78; }
     else if (tag === 'pre' || tag === 'blockquote') { h = HH * .4; y = HH * .3; o = .34; }
     parts.push(`<i style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${c};opacity:${o}"></i>`);
   });
   inner.innerHTML = parts.join('');
   const view = document.getElementById('view');
   view.hidden = false;
-  view.style.left = (window.scrollY * k) + 'px';
-  view.style.width = Math.max(3, window.innerHeight * k) + 'px';
+  view.style.left = (doc.scrollTop * k) + 'px';
+  view.style.width = Math.max(3, doc.clientHeight * k) + 'px';
   view.style.top = '0px'; view.style.height = HH + 'px';
 }
 function fit() {
@@ -775,13 +767,14 @@ function cursor() {
   const pr = document.getElementById('progress');
   if (pr) {
     const C = 2 * Math.PI * Number(pr.getAttribute('r'));
-    const sp = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const f = Math.min(1, Math.max(0, window.scrollY / sp));
+    const d0 = activePane();
+    const sp = d0 ? Math.max(1, d0.scrollHeight - d0.clientHeight) : 1;
+    const f = d0 ? Math.min(1, Math.max(0, d0.scrollTop / sp)) : 0;
     pr.setAttribute('stroke-dashoffset', C * (1 - f));
   }
-  const doc = document.querySelector('.doc');
-  const span = Math.max(1, doc.scrollHeight - window.innerHeight);
-  const f = Math.min(1, Math.max(0, window.scrollY / span));
+  const d = activePane();
+  const span = d ? Math.max(1, d.scrollHeight - d.clientHeight) : 1;
+  const f = d ? Math.min(1, Math.max(0, d.scrollTop / span)) : 0;
   document.querySelectorAll('.miniwrap').forEach(wrap => {
     const inner = wrap.querySelector('.mini'), cur = wrap.querySelector('.cursor'), car = wrap.querySelector('.caret');
     if (!inner || !cur || !car) return;
@@ -792,8 +785,60 @@ function cursor() {
     car.hidden = false; car.style.top = (top + f * h) + 'px';
   });
 }
-window.addEventListener('scroll', () => { cursor(); pagemap(); }, {passive:true});
+document.addEventListener('scroll', () => { cursor(); pagemap(); }, {passive:true, capture:true});
 window.addEventListener('resize', () => { fit(); pagemap(); });
+function kidRow(k, path, chosen) {
+  const uid = path.join(',');
+  return `<div class="kid ${chosen ? 'chosen' : ''}" data-jump="${uid}" data-uid="${uid}">
+    <div><div class="kn">${dot(uid)}${esc(k.name)}</div><div class="kf">${esc(k.face)}</div></div>
+    <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span>${texture(k.paras, 12)}
+      ${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
+}
+function backsOf(node, path) {
+  const list = pointedFrom(node);
+  if (!list.length) return '';
+  const parent = path.length ? at(path.slice(0, -1)) : null;
+  const intro = parent ? list.find(b => b.kind === 'brief' && b.path === parent.path
+                 && (pathOf(b) || []).length === path.length) : null;
+  const rest = list.filter(b => b !== intro);
+  const link = b => { const q = pathOf(b) || [];
+    return `<a data-jump="${q.join(',')}" data-uid="${q.join(',')}">${esc(b.name)}${spark(b, 6)}</a>`; };
+  return `<div class="backs">` +
+    (intro ? `<span class="lbl">brought in by the entry, at</span>${link(intro)}` : '') +
+    (rest.length ? `<span class="lbl">pointed at from</span>` + rest.map(link).join('') : '') + `</div>`;
+}
+function pane(node, path, chosen, isLast) {
+  const uid = path.join(',');
+  const heavy = (node.paras || []).filter(x => x > 500).length;
+  const inner = [], beside = [];
+  node.kids.forEach((k, i) => (k.kind === 'brief' ? inner : beside)
+    .push(kidRow(k, path.concat(i), i === chosen)));
+  return `<section class="pane ${isLast ? 'last' : ''}" data-pane="${uid}">
+    <h2 class="ptitle" data-uid="${uid}" data-jump="${uid}">${path.length ? dot(uid) : ''}${esc(node.name)}</h2>
+    <div class="pmeta" data-uid="${uid}">${esc(node.kind)} · ${fmt(tok(node.own_n))} here${
+      node.kids.length ? ` · ${node.kids.length} beneath, ${fmt(tok(node.total_n - node.own_n))} in them` : ''}</div>
+    ${node.paras && node.paras.length ? `<div class="weigh">${texture(node.paras)}<span>${
+      node.paras.length} paragraph${node.paras.length > 1 ? 's' : ''}${heavy ? ` · ${heavy} heavy` : ''}</span></div>` : ''}
+    <div class="prose" data-path="${esc(node.path || '')}">${md(node.own)}</div>
+    ${isLast ? backsOf(node, path) : ''}
+    ${inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : ''}
+    ${beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : ''}
+  </section>`;
+}
+function drawPanes() {
+  const out = [];
+  for (let i = 0; i <= PATH.length; i++)
+    out.push(pane(at(PATH.slice(0, i)), PATH.slice(0, i), PATH[i], i === PATH.length));
+  const el = document.getElementById('panes');
+  el.innerHTML = out.join('');
+  el.querySelectorAll('.prose a[href]').forEach(a => {
+    const t = resolve(a.getAttribute('href'), a.closest('.prose').dataset.path);
+    const q = t && pathOf(t);
+    if (q) { a.dataset.uid = q.join(','); a.title = t.name; } else a.classList.add('out');
+  });
+  requestAnimationFrame(() => { el.scrollLeft = el.scrollWidth; });
+}
+function activePane() { return document.querySelector('.pane.last'); }
 function render() {
   const focus = at(PATH), root = DATA.tree;
   remember(PATH);
@@ -820,62 +865,14 @@ function render() {
     `<i style="flex:${u.unread};background:var(--line)"></i>`;
 
   requestAnimationFrame(() => { fit(); pagemap(); });
-  const crumbs = [];
-  for (let i=0;i<=PATH.length;i++) {
-    const n = at(PATH.slice(0,i));
-    crumbs.push(i === PATH.length ? `<span>${esc(n.name)}</span>`
-      : `<a data-go="${i}" data-uid="${PATH.slice(0,i).join(',')}">${esc(n.name)}${spark(n, 6)}</a>`);
-  }
-  document.getElementById('crumb').innerHTML = crumbs.join('<span class=\"sep\">/</span>');
-  const t = document.getElementById('title');
-  t.textContent = focus.name; t.dataset.uid = PATH.join(',');
-  document.getElementById('meta').dataset.uid = PATH.join(',');
-  document.getElementById('meta').textContent =
-    `${focus.kind} · ${fmt(tok(focus.own_n))} tokens here` +
-    (focus.kids.length ? ` · ${focus.kids.length} beneath, ${fmt(tok(focus.total_n - focus.own_n))} in them` : ' · nothing beneath') +
-    (focus.path && focus.path !== '.' ? ` · ${focus.path}` : '');
-  const heavy = (focus.paras||[]).filter(n=>n>500).length;
-  document.getElementById('weigh').innerHTML = focus.paras && focus.paras.length
-    ? texture(focus.paras) + `<span>${focus.paras.length} paragraph${focus.paras.length>1?'s':''}` +
-      (heavy ? ` · ${heavy} over five hundred characters` : ' · none heavy') + `</span>` : '';
-  document.getElementById('prose').innerHTML = md(focus.own);
-  document.querySelectorAll('.prose a[href]').forEach(a => {
-    const t = resolve(a.getAttribute('href'), focus.path);
-    const p = t && pathOf(t);
-    if (p) { a.dataset.uid = p.join(','); a.title = t.name; } else a.classList.add('out');
-  });
-  const backs = pointedFrom(focus);
-  const parentPath = PATH.slice(0, -1), parent = PATH.length ? at(parentPath) : null;
-  const intro = parent ? backs.find(b => b.kind === 'brief' && b.path === parent.path
-                 && pathOf(b).length === PATH.length) : null;
-  const rest = backs.filter(b => b !== intro);
-  const link = (b, lbl) => { const p = pathOf(b);
-    return `<a data-jump="${p.join(',')}" data-uid="${p.join(',')}">${esc(lbl || b.name)}${spark(b, 6)}</a>`; };
-  document.getElementById('backs').innerHTML =
-    (intro ? `<span class="lbl">brought in by the entry, at</span>${link(intro)}` : '') +
-    (rest.length ? `<span class="lbl">pointed at from</span>` + rest.map(b => link(b)).join('') : '');
-  const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
-  const card = (k, i) => {
-    const _i = i;
-    const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
-      `<span class="room ${g.kids.length ? 'deep' : ''}" data-uid="${PATH.concat(i, k.kids.indexOf(g)).join(',')}"><b>${esc(g.name)}</b>${spark(g, 7)}<i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
-    return `<div class="kid" data-kid="${i}" data-uid="${PATH.concat(i).join(',')}">
-      <div><div class="kn">${dot(PATH.concat(i).join(','))}${esc(k.name)}</div><div class="kf">${esc(k.face)}</div>${rooms}</div>
-      <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
-        ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
-  };
-  const inner = [], beside = [];
-  focus.kids.forEach((k,i) => (k.kind === 'brief' ? inner : beside).push(card(k,i)));
-  document.getElementById('kids').innerHTML =
-    (inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : '') +
-    (beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : '');
+  drawPanes();
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') unpin(); });
 document.getElementById('pagewrap').addEventListener('click', e => {
   const wrap = e.currentTarget, r = wrap.getBoundingClientRect();
   const f = (e.clientX - r.left) / Math.max(1, r.width);
-  window.scrollTo({top: f * document.documentElement.scrollHeight - window.innerHeight/2, behavior:'smooth'});
+  const d = activePane(); if (d) d.scrollTo({top: f * d.scrollHeight - d.clientHeight/2, behavior:'smooth'});
   e.stopPropagation();
 });
 document.addEventListener('click', e => {
@@ -897,9 +894,8 @@ document.addEventListener('click', e => {
   }
   const seg = e.target.closest('.place i[data-uid]');
   if (seg) { go(seg.dataset.uid.split(',').map(Number)); return; }
-  const kid = e.target.closest('.kid'), up = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
-  if (kid) { go(PATH.concat(Number(kid.dataset.kid))); }
-  else if (up) { go(PATH.slice(0, Number(up.dataset.go))); }
+  const up = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
+  if (up) { go(PATH.slice(0, Number(up.dataset.go))); }
   else if (e.target.closest('.mn')) { const d = e.target.closest('.mn').dataset.path;
     go(d ? d.split(',').map(Number) : []); }
   else if (arc && arc.dataset.uid !== undefined) {
