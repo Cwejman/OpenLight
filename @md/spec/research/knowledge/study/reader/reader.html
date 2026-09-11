@@ -136,9 +136,18 @@
   .caret { position:absolute; left:0; right:0; height:2px; background:var(--warm); pointer-events:none; }
 
   /* depth runs to the right: one spread per level, the ones behind kept and readable */
-  .doc { padding:0; overflow:hidden; }
-  .panes { display:grid; gap:calc(var(--r0) * 1.2); overflow:hidden;
+  .doc { padding:0; overflow:hidden; display:flex; flex-direction:column;
     height:calc(100vh - var(--r0) * 1.6); }
+  .rail { display:flex; align-items:baseline; flex-wrap:wrap; gap:0 6px; flex:none;
+    font: var(--t6)/1.7 var(--sans); letter-spacing:.08em; text-transform:uppercase;
+    color:var(--mute); padding-bottom:var(--r3); }
+  .rail a { color:var(--mute); cursor:pointer; white-space:nowrap; }
+  .rail a.shown { color:var(--soft); }
+  .rail a.now { color:var(--ink); font-weight:500; }
+  .rail a:hover, .rail a.lit { color:var(--seq); }
+  .rail .sep { color:var(--line); }
+  .rail .dot { width:5px; height:5px; margin-right:5px; vertical-align:0; }
+  .panes { display:grid; gap:calc(var(--r0) * 1.2); overflow:hidden; flex:1 1 auto; min-height:0; }
   .pane { min-width:0; height:100%; overflow-y:auto; scrollbar-width:none;
     padding-bottom:14vh; opacity:.72; transition:opacity .18s; }
   .pane::-webkit-scrollbar { display:none; }
@@ -303,7 +312,7 @@
     <div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
       <div class="view" id="view" hidden></div></div>
   </aside>
-  <main class="doc"><div class="panes" id="panes"></div></main>
+  <main class="doc"><div class="rail" id="rail"></div><div class="panes" id="panes"></div></main>
 </div>
 <script>
 const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -845,12 +854,23 @@ function pane(node, path, chosen, isLast) {
     ${beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : ''}
   </section>`;
 }
+function drawRail(firstShown) {
+  const bits = [];
+  for (let i = 0; i <= PATH.length; i++) {
+    const n = at(PATH.slice(0, i)), uid = PATH.slice(0, i).join(',');
+    const cls = i === PATH.length ? 'now' : (i >= firstShown ? 'shown' : '');
+    bits.push(`<a class="${cls}" data-jump="${uid}" data-uid="${uid}">${i ? dot(uid) : ''}${
+      esc(n.name.replace(/^[\d.]+\s*/, ''))}</a>`);
+  }
+  document.getElementById('rail').innerHTML = bits.join('<span class="sep">›</span>');
+}
 function drawPanes() {
   const SHOW = 3;
   const first = Math.max(0, PATH.length - (SHOW - 1));
   const out = [];
   for (let i = first; i <= PATH.length; i++)
     out.push(pane(at(PATH.slice(0, i)), PATH.slice(0, i), PATH[i], i === PATH.length));
+  drawRail(first);
   const el = document.getElementById('panes');
   el.style.gridTemplateColumns = `repeat(${out.length}, minmax(0, 1fr))`;
   el.innerHTML = out.join('');
