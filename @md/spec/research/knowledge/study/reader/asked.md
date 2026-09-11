@@ -1,3 +1,10 @@
+---
+under: the code
+kind: record
+entries: oldest first
+note: one entry per ask, in the order they were made
+---
+
 # What was asked, while this was built
 
 The author's own words over the stretch that made [the reader](README.md), on the evening of 2026-09-11, taken from the harness's record of the sitting and kept as they were typed. They are the ground of [the path forward](forward.md), which is written against them rather than against anyone's memory of them.

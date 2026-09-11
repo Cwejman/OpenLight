@@ -1,3 +1,10 @@
+---
+under: the code
+kind: record
+entries: newest first
+note: one line per step, written before the step
+---
+
 # The steps
 
 One line per step, newest first, written before the step is taken: the clock time, what I am about to do, and why. The round's account in prose is in [the debrief](debrief.md).

@@ -44,7 +44,11 @@ Parentheses serve two cases, and they flip. A word that what follows builds on i
 
 ## 9. A file says it is under the code
 
-A repository holds more than knowledge, so a file declares itself: frontmatter at its head stamps it as written under the code, and a reader, a program or a published site digests only what carries the stamp. The writer's intent lives in the file rather than in a tool's guess, and what a repository holds as knowledge becomes countable. The stamp's form is not settled. Open, and wanted before anything publishes a tree.
+A repository holds more than knowledge, so a file declares itself: frontmatter at its head stamps it as written under the code, and a reader, a program or a published site digests only what carries the stamp. The writer's intent lives in the file rather than in a tool's guess, and what a repository holds as knowledge becomes countable.
+
+The stamp also says what kind of file it is, because not everything under the code is a brief. A record is an array of entries in time, newest first or oldest first, and reading it by the gradient is reading it wrongly: its order is chronology, not importance, and its sections are occurrences rather than rooms. A reader that knows the kind can show a record as the sequence it is and a brief as the holarchy it is, instead of conflating them.
+
+The stamp's form is not settled. Open, and wanted before anything publishes a tree.
 
 ## 10. Open
 

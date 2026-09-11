@@ -1,3 +1,10 @@
+---
+under: the code
+kind: record
+entries: newest first
+note: one entry per move of the making
+---
+
 # The making of the reading surface
 
 The record of how these two programs came to be, on the evening of 2026-09-11, in one sitting with the author directing and a session building. Newest first. It covers [the reader](README.md) and [the surface](../surface/README.md), which were built in the same hours and are one effort.

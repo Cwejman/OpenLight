@@ -1,3 +1,10 @@
+---
+under: the code
+kind: record
+entries: mixed
+note: stage two newest first above stage one oldest first
+---
+
 # Lab 10 — the run's record
 
 The run reads the 2026-08-26 sweep of 45 research-agent reports and debriefs it twice: into a corpus, and from the corpus into a piece. This file is written when stage one begins and kept current after every round, so a run cut short still leaves its record.
