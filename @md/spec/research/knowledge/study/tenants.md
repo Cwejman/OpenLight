@@ -20,3 +20,9 @@ The third case is not a domain but what happens between them. Sharing music is t
 
 Reasoned, the author's, the same night; the names are the author's and kept as coined; nothing built.
 
+## 4. The live edge
+
+Every case above has an edge where the world comes in: a stream, a sensor, a market feed, a message from another host. The substrate holds those too, as connections to external sources kept live rather than as data copied in. Compute runs on demand of the event: an external event arrives carrying its data, and the substrate progresses by it, a program matched to what the event gives runs, and what it produces lands back as entries with the event as their ground. Nothing polls and nothing is scheduled; the world advances the substrate, and the record shows what advanced it and when. This is how the drawing stays live, how a shared channel updates, and how a piece of sound or image responds while it is played.
+
+Reasoned, the author's, the same night; nothing built.
+
