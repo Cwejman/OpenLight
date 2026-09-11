@@ -18,10 +18,15 @@
     /* six sizes, absolute under nesting; role is importance, never depth */
     --t1: clamp(30px, 3.4vw, 46px); --t2: clamp(20px, 1.6vw, 24px); --t3: clamp(18px, 1.35vw, 21px);
     --t4: clamp(16px, 1.1vw, 17.5px); --t5: 14.5px; --t6: 11px;
-    --serif: "Newsreader", Georgia, serif; --sans: "Inter", system-ui, sans-serif; }
+    --serif: "Newsreader", Georgia, serif; --sans: "Inter", system-ui, sans-serif;
+    /* a summoned surface: lifted a little off the ground, its edge diffused rather than drawn */
+    --lift: color-mix(in oklab, var(--bg) 92%, #fff 8%);
+    --diffuse-1: rgba(40,30,16,.06); --diffuse-2: rgba(40,30,16,.16); }
   @media (prefers-color-scheme: dark) { :root {
     --bg:#141317; --ink:#efeae0; --soft:#cdc6ba; --mute:#8f887d; --line:#312e38;
-    --seq:#6a9be0; --warm:#e58a5a; } }
+    --seq:#6a9be0; --warm:#e58a5a;
+    --lift: color-mix(in oklab, var(--bg) 86%, #fff 14%);
+    --diffuse-1: rgba(0,0,0,.34); --diffuse-2: rgba(0,0,0,.5); } }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
     font: var(--t4)/1.62 var(--serif); -webkit-font-smoothing:antialiased; }
@@ -68,8 +73,12 @@
   .cells .c { position:absolute; border:.5px solid var(--bg); transition:opacity .12s; }
   .cells .c.read { opacity:.4; }
   .cells .c.changed { box-shadow:inset 0 0 0 1px var(--warm); }
-  .cells .c.here { outline:1.5px solid var(--warm); outline-offset:-1.5px; z-index:40; }
-  .cells .c.lit { outline:2px solid var(--seq); outline-offset:-2px; z-index:50; }
+  .cells .c.here { outline:1.5px solid var(--warm); outline-offset:-1.5px; border-radius:3px; z-index:40;
+    box-shadow:0 0 10px -1px color-mix(in oklab, var(--warm) 45%, transparent); }
+  .cells .c.lit { outline:2px solid var(--seq); outline-offset:-2px; border-radius:3px; z-index:50;
+    box-shadow:0 0 12px -1px color-mix(in oklab, var(--seq) 45%, transparent); }
+  .cells .c.within { outline:1.5px dashed var(--seq); outline-offset:-2px; border-radius:3px; z-index:45;
+    box-shadow:0 0 10px -2px color-mix(in oklab, var(--seq) 34%, transparent); }
   .cells .c span { position:absolute; left:3px; top:1px; right:2px; overflow:hidden;
     font: 9px/1.3 var(--sans); color:var(--ink); opacity:.6; white-space:nowrap; pointer-events:none; }
   .cells .c .own { position:absolute; left:0; top:0; background:var(--ink); opacity:.13; pointer-events:none; }
@@ -77,16 +86,20 @@
     color-mix(in oklab, var(--ink) 13%, transparent) 0 1px, transparent 1px 4px); }
   .pagemap { position:absolute; inset:0; }
   .pagemap i { position:absolute; display:block; }
-  .view { position:absolute; left:0; right:0; background:color-mix(in oklab, var(--warm) 13%, transparent);
-    border-left:2px solid var(--warm); pointer-events:none; }
+  .view { position:absolute; left:0; right:0; border-radius:5px;
+    background:color-mix(in oklab, var(--warm) 12%, transparent);
+    box-shadow:0 0 0 1px color-mix(in oklab, var(--warm) 40%, transparent),
+               0 0 14px -2px color-mix(in oklab, var(--warm) 30%, transparent); pointer-events:none; }
   .mini { position:absolute; inset:0 0 auto 0; transform-origin:top left; }
   .mn { padding:0 0 6px; cursor:pointer; border-left:2px solid transparent; }
   .mn.read { opacity:.42; } .mn.changed { border-left-color:var(--warm); }
   .mn.lit { border-left-color:var(--seq); }
   .mh { height:3px; margin:0 0 3px; } .mp { margin:0 0 2.5px; }
   .mp .ln { height:1px; margin-bottom:1px; } .mp.big .ln { background:var(--warm) !important; }
-  .cursor { position:absolute; left:0; right:0; border-left:2px solid var(--warm);
-    background:color-mix(in oklab, var(--warm) 9%, transparent); pointer-events:none; }
+  .cursor { position:absolute; left:0; right:0; border-radius:5px;
+    background:color-mix(in oklab, var(--warm) 9%, transparent);
+    box-shadow:0 0 0 1px color-mix(in oklab, var(--warm) 34%, transparent),
+               0 0 12px -2px color-mix(in oklab, var(--warm) 26%, transparent); pointer-events:none; }
   .caret { position:absolute; left:0; right:0; height:2px; background:var(--warm); pointer-events:none; }
 
   /* the page */
@@ -96,6 +109,8 @@
   .crumb a { color:var(--soft); text-decoration:none; cursor:pointer; }
   .crumb a:hover { color:var(--seq); }
   .crumb span.sep { margin:0 8px; color:var(--line); }
+  .title[data-uid] { cursor:default; }
+  .title.lit, .meta.lit { color:var(--seq); }
   .title { font: 600 var(--t1)/1.1 var(--serif); margin:0 0 var(--r3); letter-spacing:-.022em; max-width:17em; }
   .meta { font: var(--t6)/1.6 var(--sans); color:var(--mute); letter-spacing:.08em;
     text-transform:uppercase; margin-bottom:var(--r3); }
@@ -168,8 +183,14 @@
 
   /* summoned: present only while the pointer asks */
   .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:340px;
-    background:var(--bg); border-left:2px solid var(--line); padding:var(--r3) var(--r2); }
-  .tip.pinned { pointer-events:auto; border-left-color:var(--warm); }
+    background:var(--lift); border-radius:12px; padding:var(--r2); border:0;
+    box-shadow:0 1px 2px var(--diffuse-1), 0 10px 34px -8px var(--diffuse-2),
+               0 0 0 1px color-mix(in oklab, var(--ink) 6%, transparent);
+    animation:rise .13s ease-out; }
+  @keyframes rise { from { opacity:0; transform:translateY(3px); } }
+  .tip.pinned { pointer-events:auto;
+    box-shadow:0 1px 2px var(--diffuse-1), 0 16px 44px -10px var(--diffuse-2),
+               0 0 0 1px color-mix(in oklab, var(--warm) 34%, transparent); }
   .tip .t { font: 600 var(--t5)/1.3 var(--serif); color:var(--ink); }
   .tip .f { font: var(--t5)/1.45 var(--serif); color:var(--mute); margin-top:var(--r4); }
   .tip .s { font: 10.5px/1.7 var(--sans); color:var(--mute); margin-top:var(--r3);
@@ -327,7 +348,7 @@ function sunburst(focus) {
     <circle class="hub" cx="${c}" cy="${c}" r="${R0-4}" fill="${shade(0)}" stroke="var(--bg)" stroke-width="2"
       data-uid="${PATH.join(',')}"/>${ticks}
     <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle" font-family="Inter, system-ui, sans-serif"
-      font-size="11" fill="var(--ink)" pointer-events="none">${fmt(tok(focus.total_n))}</text>${out}${chords}</svg>`;
+      font-size="11" fill="var(--ink)" pointer-events="none">${fmt(tok(focus.own_n))}</text>${out}${chords}</svg>`;
 }
 
 function gauge(focus) {
@@ -427,9 +448,20 @@ document.addEventListener('mousemove', e => {
   if (el && el.classList && el.classList.contains('c')) { /* a cell answers for itself */ }
   const uid = el ? el.dataset.uid : null;
   if (uid !== LIT) {
-    document.querySelectorAll('.lit').forEach(x => x.classList.remove('lit'));
+    document.querySelectorAll('.lit, .within').forEach(x => x.classList.remove('lit', 'within'));
     LIT = uid;
-    if (uid !== null) document.querySelectorAll(`[data-uid="${uid}"]`).forEach(x => x.classList.add('lit'));
+    if (uid !== null) {
+      const same = document.querySelectorAll(`[data-uid="${uid}"]`);
+      same.forEach(x => x.classList.add('lit'));
+      // a room deeper than the map's floor has no cell; show the room that holds it
+      if (![...same].some(x => x.classList.contains('c'))) {
+        const parts = uid === '' ? [] : uid.split(',');
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const anc = document.querySelector(`.cells .c[data-uid="${parts.slice(0, i).join(',')}"]`);
+          if (anc) { anc.classList.add('within'); break; }
+        }
+      }
+    }
   }
   if (!el) { tip.style.display = 'none'; return; }
   const n = nodeAt(uid);
@@ -611,7 +643,9 @@ function render() {
       : `<a data-go="${i}" data-uid="${PATH.slice(0,i).join(',')}">${esc(n.name)}${spark(n, 6)}</a>`);
   }
   document.getElementById('crumb').innerHTML = crumbs.join('<span class=\"sep\">/</span>');
-  document.getElementById('title').textContent = focus.name;
+  const t = document.getElementById('title');
+  t.textContent = focus.name; t.dataset.uid = PATH.join(',');
+  document.getElementById('meta').dataset.uid = PATH.join(',');
   document.getElementById('meta').textContent =
     `${focus.kind} · ${fmt(tok(focus.own_n))} tokens here` +
     (focus.kids.length ? ` · ${focus.kids.length} beneath, ${fmt(tok(focus.total_n - focus.own_n))} in them` : ' · nothing beneath') +
