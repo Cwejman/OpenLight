@@ -1,45 +1,55 @@
 ## Bootstrap
 
-You are a fresh session with no prior context, deliberately. Bootstrap from named files only; do not read anything else in the repository: no README at the repo root, no spec tree, no other lab directory, nothing beyond what is named here.
+You are a fresh session with no prior context, deliberately. Bootstrap from named files only; do not read anything else in the repository: no README at the repo root, no spec tree, no other lab directory, no memory or instruction the harness offers, nothing beyond what is named here.
 
 Read, in order, paths relative to this prompt file:
 
-1. `code.md`, beside this file. The code: the laws and the principles your writing follows. It is the whole instruction of this run; every part of it binds, including how you apply it.
+1. `code.md`, beside this file. The code. It is the whole instruction of this run; every part of it binds, including its fifth section on how the making runs.
 
-2. `poc.md`, beside this file. The proof of concept: the code worked in markdown files and folders. It is the practice your output follows.
+2. `poc.md`, beside this file. The practice: the code worked in markdown files and folders. Your files follow it, and its seventh section is how you read and move by script.
 
 3. `../../../sweep-2026-08/README.md`, what the raw material is; its named-runs table orients you.
 
-4. All 45 files in `../../../sweep-2026-08/raw/`, unedited research-agent reports from a web sweep, 2026-08-26. Read them whole.
+4. All 45 files in `../../../sweep-2026-08/raw/`, unedited research-agent reports from a web sweep, 2026-08-26. Read them whole, once.
 
 ## Instruction
 
-Debrief that material under the code. What it is for, and for whom, is yours to decide as the code says a writer decides it.
+The run has two stages, and the code's fifth section is the method for both. Nothing here restates the code; where this prompt and the code seem to differ, the code holds.
+
+**Stage one, the corpus.** Debrief the raw into `corpus/` beside this file, with `README.md` as its entry. The raw is forty-five reports from agents who were often sent over the same ground, so much of it says one thing many times; the corpus says each thing once, in its one home, with the confidence each report gave it and that report one link away. It is not a piece for a reader. It is the material, made whole and small enough to hold, for whoever writes from it next. Then a fresh head, as the code describes, but holding the raw and the corpus and asked one question: what does the corpus lose that the raw held. Fold what matters, and go again, until a round finds nothing that matters. Record every round's loss list.
+
+**Stage two, the piece.** From the corpus alone, with the raw one link away for what you need to check, debrief the material under the code into `output/`, with `README.md` as its entry. What it is for, and for whom, is yours to decide as the code says a writer decides it. The rounds and the fresh head are the code's fifth section; run them as it says.
 
 ## Constraints
 
-- Nothing beyond the code and the proof of concept constrains the writing. Earlier runs on this material were forbidden story; this one is not, and the code's principle on it governs.
-
 - Write from the raw alone: fetch nothing from the web, and read nothing beyond the files named in Bootstrap.
 
-- One piece, saved as `output.md` beside this prompt file. If the depth the code asks for runs past what one document's headings carry under the proof of concept, an `output/` folder with `README.md` as its entry is allowed instead; say in your report why the document was not enough.
+- **Run in isolation.** Beside this prompt file there may be a feedback file, a debrief, and outputs of earlier runs. Read none of them: not `feedback.md`, not `debrief.md`, not any file or folder whose name begins with `output` or `corpus`. A fresh head you start reads only what the code says it holds, and nothing the repository or the harness offers it, including any instruction to bootstrap from a README.
 
-- **Run in isolation.** Beside this prompt file there may be a feedback file, a debrief, and outputs of other runs. Read none of them: not `feedback.md`, not `debrief.md`, not any file or folder whose name begins with `output`. Your only inputs are the files named in Bootstrap. A blank head you start reads the code, the practice and your draft, and nothing the repository or the harness offers it, including any instruction to bootstrap from a README.
+- **Read by depth and move by script**, as the practice says. Read a file you wrote in full only where the work needs it, and never a moment after writing it.
+
+- **Work in few, large steps.** Write a whole stage's files in as few turns as they take, not one file per turn. The run before this one was cut short by the harness's turn limit, so `debrief.md` is written when stage one begins and kept current after every round; a run cut short still leaves its record.
+
+- You run on Opus, and so does every fresh head you start; start none on any other model.
 
 - Do not commit anything to git.
 
-- **A change log beside the output.** Before you report, write `debrief.md` beside the output. It is a plain record of the rounds the piece went through, one section per round: which briefs were written again whole, which were moved as they were, and which holarchies had their own text redone; what was left out of the piece and what was left open; and a rough count, per round, of text written against text kept. Numbers and file sections, not commentary.
+## The debrief
+
+`debrief.md`, beside this file, is the run's record and is written as the code says a debrief is. It holds two things.
+
+**The account.** A table, one row per step: what the step was, the clock time it began, and the output tokens so far as the harness shows them. Then the sizes: tokens of the raw, tokens of the corpus after each round, tokens of the piece after each round, counted with one method named in the file.
+
+**The rounds.** One section per round, for both stages: which briefs were written again whole, which were moved as they were, which holarchies had their own text redone; for stage one, the loss list the fresh head returned and what of it was folded; what was left out and what was left open. Numbers and file sections, not commentary.
 
 ---
 
 When done, report back:
 
-1. The file's path.
+1. The paths of the corpus, the piece and the debrief.
 
-2. The why you chose for the whole, and who you wrote it for, in a paragraph.
+2. How far the corpus compressed, in tokens, and how many rounds it took until a round lost nothing that mattered.
 
-3. Where narrative was used, each place, and whether it was archetypal or real; and where you considered it and left it out.
+3. The why you chose for the piece, and who you wrote it for, in a paragraph.
 
-4. What you deliberately left as unopened doors.
-
-5. Where the code or the proof of concept fought you instead of serving you, if anywhere.
+4. Where the code or the practice fought you instead of serving you, if anywhere, and where you had to decide alone.
