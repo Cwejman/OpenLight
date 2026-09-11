@@ -130,9 +130,12 @@
     <div class="sub" id="rootsub"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
-    <span class="lbl" style="margin-top:20px;margin-bottom:0">the whole, as the text it is</span>
-    <div class="miniwrap" id="miniwrap"><div class="mini" id="mini"></div>
-      <div class="cursor" id="cursor" hidden></div><div class="caret" id="caret" hidden></div></div>
+    <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, as the text it is</span>
+    <div class="miniwrap"><div class="mini" data-grade="whole"></div>
+      <div class="cursor" hidden></div><div class="caret" hidden></div></div>
+    <span class="lbl" id="nearlbl" style="margin-top:16px;margin-bottom:0">where you are</span>
+    <div class="miniwrap"><div class="mini" data-grade="near"></div>
+      <div class="cursor" hidden></div><div class="caret" hidden></div></div>
   </aside>
   <main class="doc">
     <div class="crumb" id="crumb"></div>
@@ -237,8 +240,9 @@ function flat(n, depth, path, out) {
   n.kids.forEach((k,i) => flat(k, depth+1, path.concat(i), out));
   return out;
 }
-function minimap(root, here) {
-  const CPL = 78, W = 286, all = flat(root, 0, [], []);
+function minimap(root, here, cap) {
+  const CPL = 78, W = 286;
+  const all = flat(root, 0, [], []).filter(x => cap === undefined || x.depth <= cap);
   return all.map(({n, depth, path}) => {
     const ind = Math.min(depth, 5) * 9, w = W - ind, col = shade(depth);
     const hw = Math.max(14, Math.min(w, 20 + (n.name||'').length * 3.1));
@@ -256,27 +260,28 @@ function minimap(root, here) {
   }).join('');
 }
 function fit() {
-  const wrap = document.getElementById('miniwrap'), inner = document.getElementById('mini');
-  inner.style.transform = 'none';
-  const nat = inner.scrollHeight, avail = wrap.clientHeight;
-  const k = nat ? Math.min(1, avail / nat) : 1;
-  inner.style.transform = `scaleY(${k})`;
-  inner.dataset.k = k;
+  document.querySelectorAll('.miniwrap').forEach(wrap => {
+    const inner = wrap.querySelector('.mini');
+    inner.style.transform = 'none';
+    const nat = inner.scrollHeight, avail = wrap.clientHeight;
+    const k = nat ? Math.min(1, avail / nat) : 1;
+    inner.style.transform = `scaleY(${k})`;
+    inner.dataset.k = k;
+  });
   cursor();
 }
 function cursor() {
-  const inner = document.getElementById('mini'), cur = document.getElementById('cursor'), car = document.getElementById('caret');
-  const k = Number(inner.dataset.k || 1);
-  const el = inner.querySelector('.mn.here');
-  if (!el) { cur.hidden = car.hidden = true; return; }
-  cur.hidden = false;
-  cur.style.top = (el.offsetTop * k) + 'px';
-  cur.style.height = Math.max(3, el.offsetHeight * k) + 'px';
   const doc = document.querySelector('.doc');
   const span = Math.max(1, doc.scrollHeight - window.innerHeight);
   const f = Math.min(1, Math.max(0, window.scrollY / span));
-  car.hidden = false;
-  car.style.top = (el.offsetTop * k + f * Math.max(3, el.offsetHeight * k)) + 'px';
+  document.querySelectorAll('.miniwrap').forEach(wrap => {
+    const inner = wrap.querySelector('.mini'), cur = wrap.querySelector('.cursor'), car = wrap.querySelector('.caret');
+    const k = Number(inner.dataset.k || 1), el = inner.querySelector('.mn.here');
+    if (!el) { cur.hidden = car.hidden = true; return; }
+    const top = el.offsetTop * k, h = Math.max(3, el.offsetHeight * k);
+    cur.hidden = false; cur.style.top = top + 'px'; cur.style.height = h + 'px';
+    car.hidden = false; car.style.top = (top + f * h) + 'px';
+  });
 }
 window.addEventListener('scroll', cursor, {passive:true});
 window.addEventListener('resize', fit);
@@ -285,9 +290,16 @@ function render() {
   document.getElementById('rootname').textContent = root.name;
   document.getElementById('rootsub').textContent =
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
-  document.getElementById('sun').innerHTML = sunburst(focus);
+  document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
   document.getElementById('gauge').innerHTML = gauge(focus);
-  document.getElementById('mini').innerHTML = minimap(root, PATH);
+  document.querySelector('[data-grade="whole"]').innerHTML = minimap(root, PATH);
+  const nearPath = focus.kids.length || !PATH.length ? PATH : PATH.slice(0, -1);
+  const near = at(nearPath);
+  document.querySelector('[data-grade="near"]').innerHTML =
+    minimap(near, PATH.slice(nearPath.length), 1);
+  const nm = near.name.length > 32 ? near.name.slice(0,31) + '…' : near.name;
+  document.getElementById('nearlbl').textContent =
+    focus.kids.length ? `this brief and its rooms` : (PATH.length ? `within ${nm}` : 'where you are');
   requestAnimationFrame(fit);
   const crumbs = [];
   for (let i=0;i<=PATH.length;i++) {
@@ -325,8 +337,11 @@ document.addEventListener('click', e => {
   const kid = e.target.closest('.kid'), go = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
   if (kid) { PATH = PATH.concat(Number(kid.dataset.kid)); render(); window.scrollTo(0,0); }
   else if (go) { PATH = PATH.slice(0, Number(go.dataset.go)); render(); window.scrollTo(0,0); }
-  else if (e.target.closest('.mn')) { const d = e.target.closest('.mn').dataset.path;
-    PATH = d ? d.split(',').map(Number) : []; render(); window.scrollTo(0,0); }
+  else if (e.target.closest('.mn')) { const el = e.target.closest('.mn');
+    const base = el.closest('[data-grade]').dataset.grade === 'near'
+      ? (PATH.length > 1 ? PATH.slice(0, -1) : []) : [];
+    const d = el.dataset.path;
+    PATH = base.concat(d ? d.split(',').map(Number) : []); render(); window.scrollTo(0,0); }
   else if (arc && arc.dataset.path) { PATH = PATH.concat(arc.dataset.path.split(',').map(Number)); render(); window.scrollTo(0,0); }
 });
 
