@@ -27,7 +27,7 @@ So descent is committal and remembered, and looking ahead is free: hovering neve
 
 The spreads are one reading rather than three, so a scroll anywhere moves them all by the same distance, and a shorter spread reaches its end and waits. The head of each spread holds at its top while its prose runs beneath.
 
-*This is the defect the author names first. A scroll moves three spreads at once, so a small gesture changes more than a reader means, and the grading that was asked for, each spread behind moving more slowly than the one you are in, was not built. See [the path forward](forward.md#1-use-before-anything-more).*
+*Reasoned, and unmeasured. The grading that was asked for, each spread behind moving more slowly than the one you are in, was not built, and whether lockstep is the fault it looks like is one of the suspicions in [the path forward](forward.md#1-use-before-anything-more).*
 
 ## 4. Moving
 

@@ -8,7 +8,7 @@ status: in force
 
 What was asked of this program, set against what it actually does. Every direction here comes from [the asks](../asked-2026-09-11.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
 
-The rooms below are in the order the work should take them, not the order they were said, and that order is itself a claim. It says this is next and these wait, which a cold reader can agree with or refuse. Placing it wrongly is a fault of this file, not a matter of taste, and the code asks a plan to carry its place for exactly that reason.
+The rooms below are in the order the work should take them, not the order they were said, and every one of them is work rather than retrospect. That order is itself a claim. It says this is next and these wait, which a cold reader can agree with or refuse. Placing it wrongly is a fault of this file, not a matter of taste, and the code asks a plan to carry its place for exactly that reason.
 
 Reasoned, from the asks and from the program as it stands; no part of this order has been read cold by anyone but its writer.
 
@@ -22,7 +22,7 @@ This is not housekeeping to be done after the features. A reading surface that t
 
 ## 2. The reading surface
 
-What stands: depth runs to the right, up to three spreads divide the width, the rail above carries the whole descent, a spread presents doors rather than serving prose, the column ahead opens whichever door the pointer rests on, and one scroll moves them all by the same distance. Descent reaches inside a file, so a file spans as many spreads as it has depth, and the rail says where the filesystem divides and where a document divides itself.
+What stands is [how it reads](reads.md).
 
 What was asked and is not there, in the author's terms:
 
@@ -38,7 +38,7 @@ What was asked and is not there, in the author's terms:
 
 ## 3. The figures
 
-What stands: the descent named and weighed, a radial of the room you stand in that never vanishes, the whole divided as it divides, the filesystem as an explicit tree, the gauge of what stopping at each level costs, and a strip along the page you are on. Each carries its region's hue, each is a section you can close, and each answers the pointer.
+What stands is [how it maps](maps.md).
 
 What was asked and is not there:
 
@@ -52,13 +52,13 @@ What was asked and is not there:
 
 ## 4. The surfaces
 
-What stands: one ground and no panel, borders gone wherever rhythm already said it, spacing stepping down per level, six absolute type sizes, and the hover card as glass, the page showing through blurred with its edges dissolved, no shadow and no drawn border.
+What stands: one ground and no panel, no border wherever spacing already said it, spacing stepping down per level, six absolute type sizes, and the hover card as glass.
 
 What is owed is small and real: the author asked that a part's estate be respected and that the choice of visible widgets be possible, and both are only half done. The widgets can be closed, but nothing decides for a reader what deserves the room at a given moment.
 
 ## 5. The record, and the sitting itself
 
-What stands: what a reader has seen is kept in their browser, the division dims as it is read and lights where a brief changed, and [`transcript.py`](transcript.py) turns a harness session into a folder this reader opens, every turn a brief in the words it was asked in. [The asks](../asked-2026-09-11.md) beside this file are the first use of it.
+What stands is [what has been read](marks.md#2-what-has-been-read), and `transcript.py`, whose first use is [the asks of the day this was built](../asked-2026-09-11.md).
 
 What was asked and is not there:
 
@@ -72,16 +72,18 @@ What was asked and is not there:
 
 ## 6. Links that hold their state
 
-A link points at a state, not only at a path, and this program resolves it as a path, so a brief written yesterday now points at whatever its target became. [How it marks](marks.md#5-ground-that-moved-after-you-did) holds what the mark can and cannot show.
+This program resolves a link as a path, so a brief written yesterday points at whatever its target became. [What the mark can and cannot show](marks.md#4-ground-that-moved-after-you-did) is the whole of what exists.
 
-It stopped being theoretical here. The lab's corpus and its piece were written against an edition of the code that was changed twice beneath them, once for a rule about what comes next, so their links point past what they were written against. What is owed is to resolve a link to the commit the linking brief came in on, and to show the two states where they differ. Git holds everything needed.
+What is owed is to resolve a link to the commit the linking brief came in on, and to show the two states where they differ. It stopped being theoretical here: the lab's corpus and its piece were written against an edition of the code that changed twice beneath them, so their links point past what they were written against.
 
 ## 7. The medium beyond the page
 
-What stands: nothing yet. The program runs a small server because a page cannot read a folder on its own.
+What stands: nothing. The program runs a small server because a page cannot read a folder on its own.
 
-What was asked: the parsing belongs in the page, so one program reads a granted directory locally and a manifest when published, web-native and substrate-native at once, with the two moments differing only in time. Then [a repository is published as itself](publication.md) by its own pipeline, digesting only the files whose frontmatter stamps them as written under the code. That milestone is gated on the judgments in room 1 and on whether this interface is feasible at all, and nothing should be built toward it until those are answered.
+What was asked: the parsing belongs in the page, so one program reads a granted directory locally and a manifest when published, web-native and substrate-native at once, the two moments differing only in time.
 
-## 8. What this stretch taught the study
+Then the end this is all built toward. A repository's own site is the repository, read through this surface and generated by its pipeline on every change, rather than a site built beside the knowledge and kept in step by hand. What it digests is declared rather than guessed: a file enters the substrate by frontmatter stamping it as written under the code, and everything else stays a file the site leaves alone, which is what lets a directory be onboarded a file at a time. The stamp's form belongs to [the practice](../10-comprehension/poc.md) and is open.
 
-Two findings belong to the code rather than to this program, and both are folded into [the study](../README.md): that heaviness is seen before it is read, which is the judgment the labs have failed most often and which a rule never fixed; and that the reset between labs has ended, because a fresh head buys what it bought more cheaply.
+The pipeline would then be small by design: read the tree, keep the stamped files, emit the manifest, publish the page. The server reduces to those few lines, which is the whole of the gain being weighed, since a build step earns its place by removing a service rather than by adding a pipeline.
+
+None of it begins until two judgments are made, and both are judgments rather than measurements. That what the surface does is worth what it costs to keep doing, which room one says it is not. And that this interface is feasible at all rather than at a limit better navigated than pushed. A published surface fixes a shape in place, and fixing the wrong one costs more than waiting for the right one. *Reasoned, the author's; nothing here is begun.*

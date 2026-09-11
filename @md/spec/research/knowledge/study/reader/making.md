@@ -1,8 +1,7 @@
 ---
 under: the code
-kind: record
-entries: newest first
-note: one entry per move of the making
+kind: brief
+note: its first section is a record, newest first; the rest is not
 ---
 
 # The making of the reading surface
@@ -42,6 +41,10 @@ The record of how these two programs came to be, on the evening of 2026-09-11, i
 **A tool caught what a rule could not.** The heaviness of prose had been a rule in the code and a failure in every lab. Drawn, it was obvious in a second. That is now a finding in [the study](../README.md).
 
 **Every view wants the same object.** Each view was built separately and each needed the same thing: the brief, its weight, its shape, its relations, its read state. When they were finally joined by one identity, the interface stopped being panels and became one thing seen from several distances.
+
+**Heaviness is seen before it is read**, and it is the judgment the labs have failed most often. A writer cannot feel the weight of prose it is inside of, and a count of characters is a threshold rather than a feel, which is why the rule never fixed it and a picture did. Folded into [the study](../README.md), where it belongs rather than here.
+
+**The reset between labs ended on this evening's evidence**, because what it bought, a writer uncontaminated by earlier verdicts, is bought more cheaply by a fresh head, and what it cost was everything already learned in the prose. Also folded into the study.
 
 **The author saw the fault, the session built the fix.** Every move above began with a judgment made by eye, in one sentence, and none of them could have been derived from the code. That division of labour is the art direction the study names as the human's part.
 
