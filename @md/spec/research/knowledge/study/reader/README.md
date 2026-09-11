@@ -36,11 +36,22 @@ A dive no longer replaces what you were reading. Each level is a spread of its o
 
 What is expected of it and not yet built, in the author's terms (2026-09-11): the spreads should not scroll in lockstep. The rightmost runs freely, and each one behind it moves more slowly, since it holds less prose per step of the holarchy; scrolling the stack sideways should let a reader change depth at a chosen level, moving among what stands at that level; and each descent a reader has made should be remembered for its stack, so returning to a level returns to the room they were in there.
 
-## 6. What is owed next
+## 6. The sitting itself, read as substrate
+
+A long working session is knowledge being made, and the harness keeps it as a line of JSON per event, which is the worst possible reading surface for it. [`transcript.py`](transcript.py) turns one into a folder the reader opens: every turn a brief, in the words it was asked in, with what came back beneath it, in order.
+
+```
+python3 transcript.py <session.jsonl> <out dir>
+python3 reader.py <out dir> 8767
+```
+
+What this buys is the thing a long sitting loses. An ask made two hours ago is addressable, weighed, hoverable and linked like anything else, so a requirement said once does not depend on anyone still holding it. The session of 2026-09-11 came to 187 turns and about 91,000 tokens, which is the same size as the corpus the labs spent an evening compressing.
+
+## 7. What is owed next
 
 The raw, in the page. A brief should be openable as the markdown it actually is, expanding in place and staying in step with the reading, so a reader can see the text as written without leaving where they stand. It is divided from the prose around it by rhythm alone, like everything else here, and takes a surface of its own only where the pointer asks for one.
 
-## 7. Open
+## 8. Open
 
 It runs a small server because a page cannot read a folder on its own. What it should do instead is read the substrate from the browser: the file system through the client's own access where that is granted, or the git repository directly, so the same page serves a live local substrate and a published read-only one with no service in the middle. That is what would make it web-native and substrate-native at once, and it is the direction, not the state.
 

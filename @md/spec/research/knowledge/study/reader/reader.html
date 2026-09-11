@@ -43,8 +43,17 @@
     display:flex; flex-direction:column; overflow:hidden; }
   .root { font: 600 var(--t2)/1.2 var(--serif); margin:0 0 2px; letter-spacing:-.012em; }
   .sub { font: var(--t6)/1.5 var(--sans); color:var(--mute); letter-spacing:.06em; text-transform:uppercase; }
+  .map::-webkit-scrollbar { display:none; }
+  .wid { flex:0 0 auto; display:flex; flex-direction:column; min-height:0; }
+  .wid.grow { flex:1 1 auto; }
+  .wid.off .body { display:none; }
+  .wid.off { flex:0 0 auto; }
+  .wid > .body { min-height:0; display:flex; flex-direction:column; }
   .lbl { font: 500 10px/1 var(--sans); letter-spacing:.15em; text-transform:uppercase;
-    color:var(--mute); display:block; margin:var(--r1) 0 var(--r3); }
+    color:var(--mute); display:block; margin:var(--r1) 0 var(--r3); cursor:pointer; }
+  .wid > .lbl::after { content:" —"; color:var(--line); }
+  .wid.off > .lbl::after { content:" +"; }
+  .wid > .lbl:hover { color:var(--ink); }
   svg { display:block; width:100%; height:auto; }
   svg path { cursor:pointer; transition:opacity .12s; }
   svg path:hover { opacity:.72; }
@@ -311,20 +320,22 @@
   <aside class="map">
     <h1 class="root" id="rootname">reading…</h1>
     <div class="sub" id="rootsub"></div>
-    <span class="lbl">where you are, from the root</span>
-    <div class="place" id="place"></div>
-    <div class="trail" id="trail"></div>
-    <div id="sun"></div>
-    <div class="gauge" id="gauge"></div>
-    <span class="lbl">the files, as they lie</span>
-    <div class="dirs" id="dirs"></div>
-    <span class="lbl">the whole, divided as it divides</span>
-    <div class="unread" id="unread"></div>
-    <div class="readbar" id="readbar"></div>
-    <div class="miniwrap cellwrap"><div class="cells" id="cells"></div></div>
-    <span class="lbl" id="nearlbl" style="margin-top:16px;margin-bottom:0">this page, as you scroll it</span>
-    <div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
-      <div class="view" id="view" hidden></div></div>
+    <section class="wid" data-w="place"><span class="lbl">where you are, from the root</span>
+      <div class="body"><div class="place" id="place"></div></div></section>
+    <section class="wid" data-w="trail"><span class="lbl">where you have been</span>
+      <div class="body"><div class="trail" id="trail"></div></div></section>
+    <section class="wid" data-w="sun"><span class="lbl">the rooms of here</span>
+      <div class="body"><div id="sun"></div></div></section>
+    <section class="wid" data-w="gauge"><span class="lbl">what stopping at each level costs</span>
+      <div class="body"><div class="gauge" id="gauge"></div></div></section>
+    <section class="wid" data-w="dirs"><span class="lbl">the files, as they lie</span>
+      <div class="body"><div class="dirs" id="dirs"></div></div></section>
+    <section class="wid grow" data-w="cells"><span class="lbl">the whole, divided as it divides</span>
+      <div class="body"><div class="unread" id="unread"></div><div class="readbar" id="readbar"></div>
+        <div class="miniwrap cellwrap"><div class="cells" id="cells"></div></div></div></section>
+    <section class="wid" data-w="page"><span class="lbl">this page, as you scroll it</span>
+      <div class="body"><div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
+        <div class="view" id="view" hidden></div></div></div></section>
   </aside>
   <main class="doc"><div class="rail" id="rail"></div><div class="panes" id="panes"></div></main>
 </div>
@@ -520,8 +531,7 @@ function gauge(focus) {
       <td><i class="sw" style="background:${shade(d)}"></i>${d === 0 ? 'this room' : d + ' room' + (d>1?'s':'') + ' in'}</td>
       <td class="n">${fmt(tok(acc[d]))}</td>
       <td class="c">${fmt(tok(cum))} to here</td></tr>`; }).join('');
-  return `<span class="lbl">what stopping at each level costs</span>
-    <div class="bar">${bar}</div><table>${rows}</table>
+  return `<div class="bar">${bar}</div><table>${rows}</table>
     <div class="note">tokens, counted as bytes over four</div>`;
 }
 
@@ -680,9 +690,7 @@ function drawTrail(here) {
   const el = document.getElementById('trail');
   if (!el) return;
   if (TRAIL.length < 2) { el.innerHTML = ''; return; }
-  const seen = [];
-  el.innerHTML = `<span class="lbl" style="margin:0 0 var(--r4)">where you have been` +
-    `<a class="back" data-back="1">back</a></span>` +
+  el.innerHTML = `<a class="back" data-back="1">back</a>` +
     TRAIL.map((k, i) => {
       const n = nodeAt(k);
       if (!n) return '';
@@ -869,6 +877,19 @@ function pane(node, path, chosen, isLast) {
     ${beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : ''}
   </section>`;
 }
+const WOFF = (() => { try { return new Set(JSON.parse(localStorage.getItem('reader.off') || '[]')); } catch (e) { return new Set(); } })();
+function applyW() {
+  document.querySelectorAll('.map .wid').forEach(w => w.classList.toggle('off', WOFF.has(w.dataset.w)));
+}
+document.addEventListener('click', e => {
+  const lbl = e.target.closest('.map .wid > .lbl');
+  if (!lbl) return;
+  const k = lbl.parentElement.dataset.w;
+  WOFF.has(k) ? WOFF.delete(k) : WOFF.add(k);
+  try { localStorage.setItem('reader.off', JSON.stringify([...WOFF])); } catch (err) {}
+  applyW(); fit(); pagemap();
+  e.stopPropagation();
+}, true);
 function drawRail(firstShown) {
   const bits = [];
   for (let i = 0; i <= PATH.length; i++) {
@@ -927,7 +948,7 @@ function syncTo(px) {
 }
 document.addEventListener('scroll', e => {
   const pn = e.target.closest && e.target.closest('.pane');
-  if (!pn || SYNCING) return;
+  if (!pn || SYNCING || pn.classList.contains('ahead')) return;
   const px = pn.scrollTop;
   SYNCING = true;
   document.querySelectorAll('.pane').forEach(other => {
@@ -948,6 +969,8 @@ function showAhead(uid) {
   slot.classList.remove('empty');
   slot.innerHTML = pane(n, path, undefined, false)
     .replace(/^<section[^>]*>/, '').replace(/<\/section>\s*$/, '');
+  const held = activePane();
+  if (held) slot.scrollTop = Math.min(held.scrollTop, Math.max(0, slot.scrollHeight - slot.clientHeight));
 }
 function activePane() { return document.querySelector('.pane.last'); }
 function render() {
@@ -956,6 +979,7 @@ function render() {
   document.getElementById('rootname').textContent = root.name;
   document.getElementById('rootsub').textContent =
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
+  applyW();
   drawTrail(PATH);
   document.getElementById('dirs').innerHTML = dirtree();
   document.getElementById('place').innerHTML = placement();
