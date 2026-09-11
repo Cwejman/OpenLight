@@ -85,6 +85,18 @@
   .mp { margin:0 0 2.5px; }
   .mp .ln { height:1px; margin-bottom:1px; border-radius:.5px; }
   .mp.big .ln { background:color-mix(in oklab, var(--warm) 62%, var(--bg)) !important; }
+  .kids .grp { font: 500 10px/1 "Inter", system-ui, sans-serif; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--mute); display:block; margin:34px 0 0; padding-top:10px;
+    border-top:2px solid var(--ink); }
+  .kids .grp.second { border-top-width:1px; border-top-color:var(--rule); }
+  .rooms { margin:12px 0 0 2px; padding-left:16px; border-left:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:3px 18px; }
+  .room { font: 14.5px/1.5 "Newsreader", serif; color:var(--mute); white-space:nowrap; }
+  .room b { font-weight:400; color:var(--soft); }
+  .room i { font-style:normal; font: 11px/1 "Inter", system-ui, sans-serif; color:var(--mute);
+    margin-left:6px; font-variant-numeric:tabular-nums; }
+  .room.deep b { color:var(--ink); }
+  .room.deep::before { content:"›"; color:var(--rule); margin-right:5px; }
   /* the texture: how heavy a brief looks before it is read */
   .tex { display:flex; gap:2px; align-items:flex-end; height:16px; margin:8px 0 0; }
   .tex i { display:block; width:3px; border-radius:1px; background:var(--rule); }
@@ -97,8 +109,9 @@
   /* what lies beneath */
   .kids { margin-top:64px; }
   .kids .lbl { border-top:2px solid var(--ink); padding-top:10px; margin-bottom:4px; }
-  .kid { display:grid; grid-template-columns:1fr 108px; gap:26px; align-items:baseline;
+  .kid { display:grid; grid-template-columns:minmax(0,1fr) 108px; gap:26px; align-items:baseline;
     padding:22px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  .kid > div { min-width:0; }
   .kid:hover .kn { color:var(--seq); }
   .kn { font: 600 21px/1.25 "Newsreader", serif; letter-spacing:-.01em; transition:color .12s; }
   .kf { color:var(--mute); font-size:16px; line-height:1.5; margin-top:5px; max-width:36em; }
@@ -293,10 +306,19 @@ function render() {
       (heavy ? ` · ${heavy} over five hundred characters` : ' · none heavy') + `</span>` : '';
   document.getElementById('prose').innerHTML = md(focus.own);
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
-  document.getElementById('kids').innerHTML = (focus.kids.length ? `<span class="lbl">what lies beneath</span>` : '') + focus.kids.map((k,i) => `<div class="kid" data-kid="${i}">
-      <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face.slice(0,190))}${k.face.length>190?'…':''}</div></div>
+  const card = (k, i) => {
+    const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
+      `<span class="room ${g.kids.length ? 'deep' : ''}"><b>${esc(g.name)}</b><i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
+    return `<div class="kid" data-kid="${i}">
+      <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face.slice(0,190))}${k.face.length>190?'…':''}</div>${rooms}</div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
-        ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' beneath' : 'a leaf'}</div></div>`).join('');
+        ${texture(k.paras, 14)}${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
+  };
+  const inner = [], beside = [];
+  focus.kids.forEach((k,i) => (k.kind === 'brief' ? inner : beside).push(card(k,i)));
+  document.getElementById('kids').innerHTML =
+    (inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : '') +
+    (beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : '');
 }
 
 document.addEventListener('click', e => {
