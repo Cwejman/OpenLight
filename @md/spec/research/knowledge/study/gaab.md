@@ -22,7 +22,11 @@ The gate to another realm of it, the author dares say, is this: when a context i
 
 If a model can be lightly steered as it is used, tuned a little toward the substrate it works in, then a model offered as a service that gives that capability at the same price is the large form of giving as a business: the user's work makes the model better at the user's work, and the service earns on the compounding rather than on the tuning. The local-model direction in the monitor's sketch is the small form of the same idea. Reasoned, the author's proposal.
 
-## 6. The open-source social medium
+## 6. The project directory as a common standard
+
+The directory a harness opens on is already the most open-ended thing in use, and it could become a common standard the way a connector does for hardware: one shape everyone plugs into, so that what is built for one tool piggybacks on what another left. The code, the record, the step notes, the tucked-away raw, a monitor that reads them: none of it is a harness's own, all of it is files under a shape, and a second harness opening the same folder stands on the same ground. A commons compounds only on a standard, and the standard here costs nothing to adopt, since it is a folder. Reasoned, the author's.
+
+## 7. The open-source social medium
 
 Open source has no social medium of its own. Its work happens in repositories and its talk in issues and chat, and the surface that joins the people to the work is the same dry root as everything else. The author's question is where that medium is, and the answer under this stance is that a business would thrive by hosting it: the social environment of open source as the service, the connecting between contributors and the work as the glue a host carries. The choice at the centre of it is to not take money for a certain gain, so that the gain compounds among everyone, and the business earns on the compounding. Which market does not want that: a market where the work is shared by design, so that every wall on it is a loss to all and every connection a gain to all. What the author wants for such a community is that it spread like wildfire, and the reason it could is the code's first section turned outward: joining others is where value comes from, and a medium that unbinds the expressive side of joining, building on another's work as easily as reading it, gives that value nowhere to be stopped. Reasoned, the author's.
 
