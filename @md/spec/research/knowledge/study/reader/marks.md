@@ -31,6 +31,6 @@ Every room carries its texture wherever it is named, warm where a paragraph runs
 
 A room stands on what it links to, and git knows when each file last changed. Where something a room points at was committed after the room itself, the room is marked: its ground moved and it was not written again.
 
-What the mark measures is the distance between two states, the target as it stood when the room was last written and the target as it stands now. Resolving a link to its earlier state is not built, so the mark says the distance exists without being able to show it.
+What the mark measures is the distance between two states, the target as it stood when the room was last written and the target as it stands now. Resolving a link to its earlier state is not built, so the mark says the distance exists without being able to show it. How it should be resolved, by pinning a link to a commit or by keeping a stamped copy of the ground inside the brief that stands on it, is [open in the path forward](forward.md#6-links-that-hold-their-state).
 
 It is a suspicion and not a verdict, since a pointer often survives its target changing. It is also the cheapest honest signal a reader or a harness has, costing nothing but a read of the log. *Seen, on this room: four of its briefs carried the mark on the night it was written, which is what a room that revises its own ground should expect.*

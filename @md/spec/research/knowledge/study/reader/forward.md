@@ -70,6 +70,8 @@ This program resolves a link as a path, so a brief written yesterday points at w
 
 What is owed is to resolve a link to the commit the linking brief came in on, and to show the two states where they differ. It stopped being theoretical here: the lab's corpus and its piece were written against an edition of the code that changed twice beneath them, so their links point past what they were written against.
 
+Two shapes for it were raised at the close of that sitting and neither is chosen. A link may be deliberately pinned to a commit, so that it says what it always meant, the target as it stood when the brief was written, and a reader who wants the present one asks for it. Or a holon may keep its own copy of what it stands on, written into it and stamped as a copy at a commit, so the ground travels with the brief rather than being fetched from a moving tree. The first keeps one home and trusts the history; the second gives up one home to gain independence. *Open, the author's, unresolved.*
+
 ## 7. The medium beyond the page
 
 What stands: nothing. The program runs a small server because a page cannot read a folder on its own.
