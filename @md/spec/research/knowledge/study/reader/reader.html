@@ -45,12 +45,30 @@
   svg path { cursor:pointer; transition:opacity .12s; }
   svg path:hover { opacity:.72; }
 
-  .place { margin:var(--r2) 0 var(--r3); }
-  .place .row { display:flex; gap:2px; height:6px; margin-bottom:2px; }
+  .trail { margin:var(--r2) 0 0; font: var(--t5)/1.5 var(--serif); }
+  .trail a { color:var(--mute); cursor:pointer; }
+  .trail a:hover, .trail a.lit { color:var(--seq); }
+  .trail a.now { color:var(--ink); }
+  .trail .sep { color:var(--line); margin:0 5px; }
+  .trail .back { float:right; font: 10px/1.6 var(--sans); letter-spacing:.1em;
+    text-transform:uppercase; color:var(--mute); }
+  .place { margin:var(--r2) 0 0; }
+  .place .lvl { padding-left:0; margin-bottom:var(--r4); }
+  .place .lvl + .lvl { padding-left:10px; }
+  .place .lvl + .lvl + .lvl { padding-left:20px; }
+  .place .lvl + .lvl + .lvl + .lvl { padding-left:30px; }
+  .place .nm { font: var(--t5)/1.35 var(--serif); color:var(--mute); cursor:pointer;
+    display:inline-block; max-width:78%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    vertical-align:bottom; }
+  .place .lvl.now .nm { color:var(--ink); font-weight:600; }
+  .place .nm:hover, .place .nm.lit { color:var(--seq); }
+  .place .w { font: 10px/1.4 var(--sans); color:var(--mute); float:right;
+    font-variant-numeric:tabular-nums; }
+  .place .row { display:flex; gap:2px; height:5px; margin:3px 0 var(--r3); }
   .place .row i { display:block; background:var(--line); cursor:pointer; min-width:2px; }
   .place .row i.on { background:var(--warm); }
-  .place .row i:hover { background:var(--seq); }
-  .place .cap { font: var(--t6)/1.6 var(--sans); color:var(--mute); letter-spacing:.05em; }
+  .place .row i.been { background:color-mix(in oklab, var(--seq) 55%, var(--line)); }
+  .place .row i:hover, .place .row i.lit { background:var(--seq) !important; }
 
   .gauge { margin:var(--r2) 0 0; }
   .gauge .bar { display:flex; gap:2px; height:16px; }
@@ -223,10 +241,12 @@
   <aside class="map">
     <h1 class="root" id="rootname">reading…</h1>
     <div class="sub" id="rootsub"></div>
+    <span class="lbl">where you are, from the root</span>
     <div class="place" id="place"></div>
+    <div class="trail" id="trail"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
-    <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, divided as it divides</span>
+    <span class="lbl">the whole, divided as it divides</span>
     <div class="unread" id="unread"></div>
     <div class="readbar" id="readbar"></div>
     <div class="miniwrap cellwrap"><div class="cells" id="cells"></div></div>
@@ -285,17 +305,26 @@ function index(root) {
   return {byPath, byKey};
 }
 function placement() {
-  if (!PATH.length) return '';
-  let rows = '';
-  for (let i = 0; i < PATH.length; i++) {
-    const parent = at(PATH.slice(0, i)), tot = parent.kids.reduce((a,k)=>a+Math.max(k.total_n,1),0) || 1;
-    rows += `<div class="row">` + parent.kids.map((k,j) =>
-      `<i class="${j === PATH[i] ? 'on' : ''}" style="flex:${Math.max(k.total_n,1)/tot}"
-        data-uid="${PATH.slice(0,i).concat(j).join(',')}"></i>`).join('') + `</div>`;
+  const root = DATA.tree;
+  const rows = [];
+  for (let i = 0; i <= PATH.length; i++) {
+    const here = at(PATH.slice(0, i));
+    const nm = here.name.replace(/^[\d.]+\s*/, '');
+    const last = i === PATH.length;
+    rows.push(`<div class="lvl ${last ? 'now' : ''}">
+      <a class="nm" data-jump="${PATH.slice(0, i).join(',')}" data-uid="${PATH.slice(0, i).join(',')}">${esc(nm)}</a>
+      <span class="w">${fmt(tok(here.own_n))}${here.kids.length ? ` + ${fmt(tok(here.total_n - here.own_n))}` : ''}</span>` +
+      (last || !here.kids.length ? '' : (() => {
+        const tot = here.kids.reduce((a,k)=>a+Math.max(k.total_n,1),0) || 1;
+        return `<div class="row">` + here.kids.map((k,j) => {
+          const uid = PATH.slice(0, i).concat(j).join(',');
+          const on = j === PATH[i], been = TRAIL.indexOf(uid) >= 0;
+          return `<i class="${on ? 'on' : ''} ${been && !on ? 'been' : ''}" data-uid="${uid}"
+            style="flex:${Math.max(k.total_n,1)/tot}"></i>`;
+        }).join('') + `</div>`;
+      })()) + `</div>`);
   }
-  const here = at(PATH), parent = at(PATH.slice(0,-1));
-  return rows + `<div class="cap">${PATH[PATH.length-1]+1} of ${parent.kids.length} in ${
-    parent.name.length > 26 ? parent.name.slice(0,25)+'…' : parent.name}</div>`;
+  return rows.join('');
 }
 function sunburst(focus) {
   const deep = (function d(n){ return n.kids.length ? 1 + Math.max(...n.kids.map(d)) : 0; })(focus);
@@ -519,6 +548,29 @@ function pointedFrom(focus) {
   })(DATA.tree);
   return out;
 }
+const TRAIL = (() => { try { return JSON.parse(sessionStorage.getItem('reader.trail') || '[]'); } catch (e) { return []; } })();
+function remember(path) {
+  const key = path.join(',');
+  if (TRAIL[TRAIL.length - 1] === key) return;
+  TRAIL.push(key);
+  while (TRAIL.length > 14) TRAIL.shift();
+  try { sessionStorage.setItem('reader.trail', JSON.stringify(TRAIL)); } catch (e) {}
+}
+function drawTrail(here) {
+  const el = document.getElementById('trail');
+  if (!el) return;
+  if (TRAIL.length < 2) { el.innerHTML = ''; return; }
+  const seen = [];
+  el.innerHTML = `<span class="lbl" style="margin:0 0 var(--r4)">where you have been` +
+    `<a class="back" data-back="1">back</a></span>` +
+    TRAIL.map((k, i) => {
+      const n = nodeAt(k);
+      if (!n) return '';
+      const nm = n.name.replace(/^[\d.]+\s*/, '');
+      return `<a class="${i === TRAIL.length - 1 ? 'now' : ''}" data-jump="${k}" data-uid="${k}">${
+        esc(nm.length > 30 ? nm.slice(0, 29) + '…' : nm)}</a>`;
+    }).filter(Boolean).join('<span class="sep">›</span>');
+}
 function go(path, push) {
   PATH = path;
   if (push !== false) history.pushState({path}, '', '#' + path.join('.'));
@@ -647,9 +699,11 @@ window.addEventListener('scroll', () => { cursor(); pagemap(); }, {passive:true}
 window.addEventListener('resize', () => { fit(); pagemap(); });
 function render() {
   const focus = at(PATH), root = DATA.tree;
+  remember(PATH);
   document.getElementById('rootname').textContent = root.name;
   document.getElementById('rootsub').textContent =
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
+  drawTrail(PATH);
   document.getElementById('place').innerHTML = placement();
   document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
   document.getElementById('gauge').innerHTML = gauge(focus);
@@ -726,6 +780,7 @@ document.getElementById('pagewrap').addEventListener('click', e => {
   e.stopPropagation();
 });
 document.addEventListener('click', e => {
+  if (e.target.closest('[data-back]')) { history.back(); return; }
   const jump = e.target.closest('[data-jump]');
   if (jump) { unpin(); go(jump.dataset.jump.split(',').filter(x=>x!=='').map(Number)); return; }
   if (e.target.closest('.tip')) return;
