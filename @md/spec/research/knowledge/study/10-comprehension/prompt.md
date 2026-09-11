@@ -20,6 +20,8 @@ The run has two stages, and the code's fifth section is the method for both. Not
 
 **Stage two, the piece.** From the corpus alone, with the raw one link away for what you need to check, debrief the material under the code into `output/`, with `README.md` as its entry. What it is for, and for whom, is yours to decide as the code says a writer decides it. The rounds and the fresh head are the code's fifth section; run them as it says.
 
+*Amended after launch, 2026-09-11, sent to the running writer:* stage two is not written in the session that holds the raw. When the corpus is settled, a fresh session on Opus holding only the code, the practice and the corpus, with the raw one link away, writes the piece; the first session finishes stage one, keeps the debrief, folds the second session's rounds into it, and reports.
+
 ## Constraints
 
 - Write from the raw alone: fetch nothing from the web, and read nothing beyond the files named in Bootstrap.
