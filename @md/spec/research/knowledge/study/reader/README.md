@@ -10,6 +10,8 @@ It answers a question a file tree cannot. A total tells a reader nothing: thirty
 
 - [How it marks](marks.md) — one brief as one object across every view, what has been read, and the hue of a region.
 
+- [Publishing a repository as itself](publication.md) — the end this is built toward, and what has to be true first.
+
 - [Where it is not what was asked for](shortfall.md) — the gap between the thing built and the thing wanted, stated plainly.
 
 - [The making](making.md) — how it came to be, move by move, and what that taught.

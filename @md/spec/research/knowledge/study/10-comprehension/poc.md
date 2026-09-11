@@ -42,6 +42,10 @@ Two diagnostics for the prose principle, and one convention. A paragraph that re
 
 Parentheses serve two cases, and they flip. A word that what follows builds on is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. A word that only carries is not introduced: the plain word leads, and the exact term follows in parentheses for the reader it grounds. Preferred.
 
-## 9. Open
+## 9. A file says it is under the code
+
+A repository holds more than knowledge, so a file declares itself: frontmatter at its head stamps it as written under the code, and a reader, a program or a published site digests only what carries the stamp. The writer's intent lives in the file rather than in a tool's guess, and what a repository holds as knowledge becomes countable. The stamp's form is not settled. Open, and wanted before anything publishes a tree.
+
+## 10. Open
 
 What this practice has not settled, to be found by observation: how files hang under an entry, and whether the character counts the earlier editions used as red flags, five hundred for a paragraph and three hundred for a bullet, earn a place here.
