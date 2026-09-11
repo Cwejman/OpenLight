@@ -6,6 +6,7 @@ as the practice defines them and serves one page.
 
 Usage: reader.py <root path> [port]
 """
+import hashlib
 import json
 import os
 import re
@@ -70,10 +71,32 @@ def paragraphs(own):
             if p.strip() and not p.strip().startswith("#")]
 
 
+def links_of(own, path):
+    """Where a brief points: relative links resolved to a file, with an anchor if it names one."""
+    out = []
+    for m in re.finditer(r"\[[^\]]*\]\(([^)\s]+)", own):
+        t = m.group(1).strip()
+        if not t or t.startswith(("http", "mailto:", "www.")):
+            continue
+        tgt, _, anc = t.partition("#")
+        if not tgt:
+            out.append(path + "#" + anc)
+            continue
+        out.append(os.path.normpath(os.path.join(os.path.dirname(path), tgt)) + ("#" + anc if anc else ""))
+    return sorted(set(out))
+
+
+def ident(path, name):
+    """A name that survives renumbering, so what a reader has seen stays seen."""
+    return path + "#" + re.sub(r"[^a-z0-9]+", "-", re.sub(r"^[\d.]+\s*", "", name.lower())).strip("-")
+
+
 def node(name, path, anchor, kind, own, kids):
     own_n = len(own)
     return {
         "name": name, "path": path, "anchor": anchor, "kind": kind,
+        "id": ident(path, name), "h": hashlib.md5(own.encode()).hexdigest()[:10],
+        "links": links_of(own, path),
         "own": own, "own_n": own_n, "face": face(own), "paras": paragraphs(own),
         "total_n": own_n + sum(k["total_n"] for k in kids), "kids": kids,
     }

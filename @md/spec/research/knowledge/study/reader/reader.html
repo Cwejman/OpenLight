@@ -97,6 +97,16 @@
     margin-left:6px; font-variant-numeric:tabular-nums; }
   .room.deep b { color:var(--ink); }
   .room.deep::before { content:"›"; color:var(--rule); margin-right:5px; }
+  .pagemap { position:absolute; inset:0; }
+  .pagemap i { position:absolute; display:block; border-radius:1px; }
+  .view { position:absolute; left:-6px; right:-4px; border:1px solid var(--warm); border-radius:3px;
+    background:color-mix(in oklab, var(--warm) 10%, transparent); pointer-events:none; }
+  .mn.read { opacity:.42; }
+  .mn.changed { border-left-color:var(--warm) !important; }
+  .mn.changed .mh { background:var(--warm) !important; }
+  .unread { font: 11.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); margin:6px 0 0;
+    letter-spacing:.05em; }
+  .unread b { color:var(--warm); font-weight:500; }
   /* the texture: how heavy a brief looks before it is read */
   .tex { display:flex; gap:2px; align-items:flex-end; height:16px; margin:8px 0 0; }
   .tex i { display:block; width:3px; border-radius:1px; background:var(--rule); }
@@ -106,6 +116,10 @@
     font: 11.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute);
     letter-spacing:.06em; text-transform:uppercase; }
   .weigh .tex { height:20px; margin:0; }
+  .backs { margin-top:42px; padding-top:14px; border-top:1px solid var(--line); }
+  .backs a { display:inline-block; font: 15px/1.5 "Newsreader", serif; color:var(--soft);
+    margin:0 18px 6px 0; cursor:pointer; border-bottom:1px solid var(--line); }
+  .backs a:hover { color:var(--seq); border-color:var(--seq); }
   /* what lies beneath */
   .kids { margin-top:64px; }
   .kids .lbl { border-top:2px solid var(--ink); padding-top:10px; margin-bottom:4px; }
@@ -131,11 +145,12 @@
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
     <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, as the text it is</span>
+    <div class="unread" id="unread"></div>
     <div class="miniwrap"><div class="mini" data-grade="whole"></div>
       <div class="cursor" hidden></div><div class="caret" hidden></div></div>
-    <span class="lbl" id="nearlbl" style="margin-top:16px;margin-bottom:0">where you are</span>
-    <div class="miniwrap"><div class="mini" data-grade="near"></div>
-      <div class="cursor" hidden></div><div class="caret" hidden></div></div>
+    <span class="lbl" id="nearlbl" style="margin-top:16px;margin-bottom:0">this page, as you scroll it</span>
+    <div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
+      <div class="view" id="view" hidden></div></div>
   </aside>
   <main class="doc">
     <div class="crumb" id="crumb"></div>
@@ -143,6 +158,7 @@
     <div class="meta" id="meta"></div>
     <div class="weigh" id="weigh"></div>
     <div class="prose" id="prose"></div>
+    <div class="backs" id="backs"></div>
     <div class="kids" id="kids"></div>
   </main>
 </div>
@@ -180,8 +196,16 @@ function md(src) {
   return out;
 }
 
+function index(root) {
+  const byPath = {}, byKey = {};
+  (function w(n){ if ((n.kind === 'file' || n.kind === 'folder') && !byPath[n.path]) byPath[n.path] = n;
+    if (n.anchor) byKey[n.path + '#' + n.anchor] = n; n.kids.forEach(w); })(root);
+  return {byPath, byKey};
+}
 function sunburst(focus) {
-  const R0 = 34, RING = 30, RINGS = 4, S = (R0 + RINGS*RING + 6) * 2, c = S/2;
+  const deep = (function d(n){ return n.kids.length ? 1 + Math.max(...n.kids.map(d)) : 0; })(focus);
+  const RINGS = Math.max(1, Math.min(7, deep)), R0 = 34, RING = Math.max(16, Math.min(30, 150 / RINGS));
+  const S = (R0 + RINGS*RING + 6) * 2, c = S/2;
   const arc = (r0, r1, a0, a1) => {
     if (a1 - a0 > 6.2829) a1 = a0 + 6.2829;
     const p = (r,a) => [c + r*Math.cos(a), c + r*Math.sin(a)];
@@ -189,15 +213,16 @@ function sunburst(focus) {
     const big = a1-a0 > Math.PI ? 1 : 0;
     return `M${x0},${y0}L${x1},${y1}A${r1},${r1} 0 ${big} 1 ${x2},${y2}L${x3},${y3}A${r0},${r0} 0 ${big} 0 ${x0},${y0}Z`;
   };
-  let out = '';
+  let out = '', placed = new Map(), IDX = index(focus);
   const walk = (n, depth, a0, a1, path) => {
-    if (depth > RINGS || a1 - a0 < 0.004) return;
+    if (depth > RINGS || a1 - a0 < 0.003) return;
     if (depth > 0) {
-      const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - 2;
+      const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - Math.min(2, RING/8);
       const own = n.total_n ? Math.max(0.08, n.own_n / n.total_n) : 1;
       out += `<path d="${arc(r0, r1, a0, a1)}" fill="${shade(depth)}" stroke="var(--paper)" stroke-width="1.5"
         data-path="${path.join(',')}"><title>${esc(n.name)} — ${fmt(tok(n.own_n))} own, ${fmt(tok(n.total_n))} with everything beneath</title></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
+      placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
     }
     let s = a0;
     const tot = n.kids.reduce((a,k)=>a+Math.max(k.total_n, 1), 0) || 1;
@@ -207,10 +232,22 @@ function sunburst(focus) {
     }
   };
   walk(focus, 0, -Math.PI/2, 1.5*Math.PI, []);
+  let chords = '';
+  for (const [n, from] of placed) {
+    for (const l of (n.links || [])) {
+      const t = IDX.byKey[l] || IDX.byPath[l.split('#')[0]];
+      const to = t && placed.get(t);
+      if (!to || t === n) continue;
+      const pt = (r,a) => [c + r*Math.cos(a), c + r*Math.sin(a)];
+      const [x1,y1] = pt(from.r, from.a), [x2,y2] = pt(to.r, to.a);
+      chords += `<path d="M${x1},${y1} Q${c},${c} ${x2},${y2}" fill="none" stroke="var(--warm)"
+        stroke-width=".8" stroke-opacity=".5" pointer-events="none"/>`;
+    }
+  }
   return `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="The holarchy, each arc weighted by the text beneath it">
     <circle cx="${c}" cy="${c}" r="${R0-4}" fill="${shade(0)}" stroke="var(--paper)" stroke-width="2"/>
     <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle" font-family="Inter, system-ui, sans-serif"
-      font-size="11" fill="var(--ink)">${fmt(tok(focus.total_n))}</text>${out}</svg>`;
+      font-size="11" fill="var(--ink)">${fmt(tok(focus.total_n))}</text>${out}${chords}</svg>`;
 }
 
 function gauge(focus) {
@@ -220,7 +257,7 @@ function gauge(focus) {
   let cum = 0;
   const bar = ds.map(d => `<i style="width:${100*acc[d]/total}%;background:${shade(d)}" title="level ${d}"></i>`).join('');
   const rows = ds.map(d => { cum += acc[d]; return `<tr>
-      <td><i class="sw" style="background:${shade(d)}"></i>${d === 0 ? 'this brief' : 'level ' + d}</td>
+      <td><i class="sw" style="background:${shade(d)}"></i>${d === 0 ? 'this room' : d + ' room' + (d>1?'s':'') + ' in'}</td>
       <td class="n">${fmt(tok(acc[d]))}</td>
       <td class="c">${fmt(tok(cum))} to here</td></tr>`; }).join('');
   return `<span class="lbl">what stopping at each level costs</span>
@@ -235,6 +272,43 @@ function texture(paras, cap) {
     `<i class="${n > 500 ? 'big' : ''}" style="height:${Math.max(2, Math.round(16*n/max))}px" title="${n} characters"></i>`
   ).join('') + `</div>`;
 }
+const SEEN = (() => { try { return JSON.parse(localStorage.getItem('reader.seen') || '{}'); } catch (e) { return {}; } })();
+function saveSeen() { try { localStorage.setItem('reader.seen', JSON.stringify(SEEN)); } catch (e) {} }
+function trait(n) { const was = SEEN[n.id]; return was === undefined ? '' : (was === n.h ? 'read' : 'changed'); }
+function unreadCount(root) {
+  let unread = 0, changed = 0;
+  (function w(n) { const t = trait(n); if (t === '') unread++; else if (t === 'changed') changed++; n.kids.forEach(w); })(root);
+  return {unread, changed};
+}
+function pathOf(target) {
+  let found = null;
+  (function w(n, p) { if (found) return; if (n === target) { found = p; return; } n.kids.forEach((k,i)=>w(k,p.concat(i))); })(DATA.tree, []);
+  return found;
+}
+function resolve(href, fromPath) {
+  if (!href || /^(https?:|mailto:|www\.)/.test(href)) return null;
+  const [tgt, anc] = href.split('#');
+  const base = (fromPath || '').split('/').slice(0, -1);
+  const segs = tgt ? base.concat(tgt.split('/')) : (fromPath || '').split('/');
+  const out = [];
+  for (const sg of segs) { if (!sg || sg === '.') continue; if (sg === '..') out.pop(); else out.push(sg); }
+  const p = out.join('/'), IDX = index(DATA.tree);
+  return (anc && IDX.byKey[p + '#' + anc]) || IDX.byPath[p] || null;
+}
+function pointedFrom(focus) {
+  const IDX = index(DATA.tree), out = [];
+  (function w(n) {
+    if (n !== focus && (n.links || []).some(l => (IDX.byKey[l] || IDX.byPath[l.split('#')[0]]) === focus)) out.push(n);
+    n.kids.forEach(w);
+  })(DATA.tree);
+  return out;
+}
+function go(path, push) {
+  PATH = path;
+  if (push !== false) history.pushState({path}, '', '#' + path.join('.'));
+  render(); window.scrollTo(0, 0);
+}
+window.addEventListener('popstate', e => { PATH = (e.state && e.state.path) || []; render(); });
 function flat(n, depth, path, out) {
   out.push({n, depth, path});
   n.kids.forEach((k,i) => flat(k, depth+1, path.concat(i), out));
@@ -244,7 +318,7 @@ function minimap(root, here, cap) {
   const CPL = 78, W = 286;
   const all = flat(root, 0, [], []).filter(x => cap === undefined || x.depth <= cap);
   return all.map(({n, depth, path}) => {
-    const ind = Math.min(depth, 5) * 9, w = W - ind, col = shade(depth);
+    const ind = Math.min(depth, 8) * 8, w = W - ind, col = shade(depth);
     const hw = Math.max(14, Math.min(w, 20 + (n.name||'').length * 3.1));
     const paras = (n.paras||[]).map(len => {
       const full = Math.floor(len / CPL), last = (len % CPL) / CPL;
@@ -255,13 +329,38 @@ function minimap(root, here, cap) {
     }).join('');
     const on = path.join(',') === here.join(',');
     const space = Math.max(0, (4 - Math.min(depth,4)) * 7);
-    return `<div class="mn ${on ? 'here' : ''}" data-path="${path.join(',')}" style="margin-left:${ind}px;margin-top:${space}px" title="${esc(n.name)} — ${fmt(tok(n.own_n))} tokens">
+    return `<div class="mn ${on ? 'here' : ''} ${trait(n)}" data-path="${path.join(',')}" style="margin-left:${ind}px;margin-top:${space}px" title="${esc(n.name)} — ${fmt(tok(n.own_n))} tokens">
       <div class="mh" style="width:${hw}px;background:${col}"></div>${paras}</div>`;
   }).join('');
+}
+function pagemap() {
+  const wrap = document.getElementById('pagewrap'), inner = document.getElementById('pagemap');
+  const doc = document.querySelector('.doc');
+  if (!wrap || !doc) return;
+  const H = Math.max(1, document.documentElement.scrollHeight), k = wrap.clientHeight / H, W = 286;
+  const parts = [];
+  doc.querySelectorAll('.crumb, .title, .meta, .prose > *, .kids > .grp, .kids > .kid').forEach(el => {
+    const r = el.getBoundingClientRect();
+    const top = (r.top + window.scrollY) * k, h = Math.max(1, r.height * k);
+    const tag = el.tagName.toLowerCase(), cls = el.className || '';
+    let w = W, c = 'var(--seq)', o = .5, x = 0;
+    if (cls.includes('kid')) { w = W - 12; x = 12; c = 'var(--ink)'; o = .16; }
+    else if (cls.includes('grp') || tag === 'h3') { w = W * .55; c = 'var(--ink)'; o = .62; }
+    else if (tag === 'h4' || cls.includes('meta') || cls.includes('crumb')) { w = W * .38; o = .3; }
+    else if (cls.includes('title')) { w = W * .78; c = 'var(--ink)'; o = .8; }
+    else if (tag === 'pre' || tag === 'blockquote') { w = W - 14; x = 14; o = .34; }
+    parts.push(`<i style="top:${top}px;height:${h}px;left:${x}px;width:${w}px;background:${c};opacity:${o}"></i>`);
+  });
+  inner.innerHTML = parts.join('');
+  const view = document.getElementById('view');
+  view.hidden = false;
+  view.style.top = (window.scrollY * k) + 'px';
+  view.style.height = Math.max(3, window.innerHeight * k) + 'px';
 }
 function fit() {
   document.querySelectorAll('.miniwrap').forEach(wrap => {
     const inner = wrap.querySelector('.mini');
+    if (!inner) return;
     inner.style.transform = 'none';
     const nat = inner.scrollHeight, avail = wrap.clientHeight;
     const k = nat ? Math.min(1, avail / nat) : 1;
@@ -276,6 +375,7 @@ function cursor() {
   const f = Math.min(1, Math.max(0, window.scrollY / span));
   document.querySelectorAll('.miniwrap').forEach(wrap => {
     const inner = wrap.querySelector('.mini'), cur = wrap.querySelector('.cursor'), car = wrap.querySelector('.caret');
+    if (!inner || !cur || !car) return;
     const k = Number(inner.dataset.k || 1), el = inner.querySelector('.mn.here');
     if (!el) { cur.hidden = car.hidden = true; return; }
     const top = el.offsetTop * k, h = Math.max(3, el.offsetHeight * k);
@@ -283,8 +383,8 @@ function cursor() {
     car.hidden = false; car.style.top = (top + f * h) + 'px';
   });
 }
-window.addEventListener('scroll', cursor, {passive:true});
-window.addEventListener('resize', fit);
+window.addEventListener('scroll', () => { cursor(); pagemap(); }, {passive:true});
+window.addEventListener('resize', () => { fit(); pagemap(); });
 function render() {
   const focus = at(PATH), root = DATA.tree;
   document.getElementById('rootname').textContent = root.name;
@@ -292,15 +392,14 @@ function render() {
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
   document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
   document.getElementById('gauge').innerHTML = gauge(focus);
+  SEEN[focus.id] = focus.h; saveSeen();
   document.querySelector('[data-grade="whole"]').innerHTML = minimap(root, PATH);
-  const nearPath = focus.kids.length || !PATH.length ? PATH : PATH.slice(0, -1);
-  const near = at(nearPath);
-  document.querySelector('[data-grade="near"]').innerHTML =
-    minimap(near, PATH.slice(nearPath.length), 1);
-  const nm = near.name.length > 32 ? near.name.slice(0,31) + '…' : near.name;
-  document.getElementById('nearlbl').textContent =
-    focus.kids.length ? `this brief and its rooms` : (PATH.length ? `within ${nm}` : 'where you are');
-  requestAnimationFrame(fit);
+  const u = unreadCount(root);
+  document.getElementById('unread').innerHTML = u.unread || u.changed
+    ? `${u.unread ? `<b>${u.unread}</b> not read yet` : ''}${u.unread && u.changed ? ' · ' : ''}${u.changed ? `<b>${u.changed}</b> changed since you read them` : ''}`
+    : 'all of it read, none changed since';
+
+  requestAnimationFrame(() => { fit(); pagemap(); });
   const crumbs = [];
   for (let i=0;i<=PATH.length;i++) {
     const n = at(PATH.slice(0,i));
@@ -317,6 +416,11 @@ function render() {
     ? texture(focus.paras) + `<span>${focus.paras.length} paragraph${focus.paras.length>1?'s':''}` +
       (heavy ? ` · ${heavy} over five hundred characters` : ' · none heavy') + `</span>` : '';
   document.getElementById('prose').innerHTML = md(focus.own);
+  const backs = pointedFrom(focus);
+  document.getElementById('backs').innerHTML = backs.length
+    ? `<span class="lbl">pointed at from</span>` + backs.map(b => {
+        const p = pathOf(b);
+        return `<a data-jump="${p.join(',')}">${esc(b.name)}</a>`; }).join('') : '';
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
   const card = (k, i) => {
     const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
@@ -333,23 +437,37 @@ function render() {
     (beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : '');
 }
 
+document.getElementById('pagewrap').addEventListener('click', e => {
+  const wrap = e.currentTarget, r = wrap.getBoundingClientRect();
+  const f = (e.clientY - r.top) / Math.max(1, r.height);
+  window.scrollTo({top: f * document.documentElement.scrollHeight - window.innerHeight/2, behavior:'smooth'});
+  e.stopPropagation();
+});
 document.addEventListener('click', e => {
-  const kid = e.target.closest('.kid'), go = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
-  if (kid) { PATH = PATH.concat(Number(kid.dataset.kid)); render(); window.scrollTo(0,0); }
-  else if (go) { PATH = PATH.slice(0, Number(go.dataset.go)); render(); window.scrollTo(0,0); }
-  else if (e.target.closest('.mn')) { const el = e.target.closest('.mn');
-    const base = el.closest('[data-grade]').dataset.grade === 'near'
-      ? (PATH.length > 1 ? PATH.slice(0, -1) : []) : [];
-    const d = el.dataset.path;
-    PATH = base.concat(d ? d.split(',').map(Number) : []); render(); window.scrollTo(0,0); }
-  else if (arc && arc.dataset.path) { PATH = PATH.concat(arc.dataset.path.split(',').map(Number)); render(); window.scrollTo(0,0); }
+  const jump = e.target.closest('[data-jump]');
+  if (jump) { go(jump.dataset.jump.split(',').filter(x=>x!=='').map(Number)); return; }
+  const a = e.target.closest('.prose a[href], .backs a');
+  if (a) {
+    const t = resolve(a.getAttribute('href'), at(PATH).path);
+    if (t) { e.preventDefault(); const p = pathOf(t); if (p) go(p); return; }
+  }
+  const kid = e.target.closest('.kid'), up = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
+  if (kid) { go(PATH.concat(Number(kid.dataset.kid))); }
+  else if (up) { go(PATH.slice(0, Number(up.dataset.go))); }
+  else if (e.target.closest('.mn')) { const d = e.target.closest('.mn').dataset.path;
+    go(d ? d.split(',').map(Number) : []); }
+  else if (arc && arc.dataset.path) { go(PATH.concat(arc.dataset.path.split(',').map(Number))); }
 });
 
 async function load() {
   const d = await (await fetch('/tree')).json();
   const first = !DATA;
   DATA = d;
-  if (first) render();
+  if (first) {
+    const h = (location.hash || '').replace('#','').split('.').filter(x=>x!=='').map(Number);
+    try { at(h); PATH = h; } catch (e) { PATH = []; }
+    render();
+  }
   else { try { at(PATH); } catch (e) { PATH = []; } render(); }
 }
 load(); setInterval(load, 5000);
