@@ -148,7 +148,7 @@ A working session is knowledge being made, so what the code asks of a brief it a
 
 Held this way the code is not obeyed but embodied, in how one talks and works. And whoever holds it can hold the step for the other, the person for the agent and the agent for the person, wherever one of them runs ahead. This is where the code stops being a shape and becomes a medium.
 
-This section holds early experience, and what it finds will reach the whole code once it is lived enough to lift. Where it comes from is more than method, and the author says so in [a personal note](), an ontological view of existence, the ground the code emanated from.
+This section holds early experience, and what it finds will reach the whole code once it is lived enough to lift. Where it comes from is more than method, and the author says so in [a personal note](note.md), an ontological view of existence, the ground the code emanated from.
 
 ### 5.1 What inference can do
 
