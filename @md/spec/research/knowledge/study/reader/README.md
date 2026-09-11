@@ -35,8 +35,11 @@ The path is the root, capped there: a repository, a folder inside one, a single 
 A sitting is knowledge too. [`transcript.py`](transcript.py) turns a harness session into a folder this reader opens, every turn a brief in the words it was asked in, so an ask made hours ago stays addressable instead of surviving in scrollback. The asks beside this file were made with it.
 
 ```
-python3 transcript.py <session.jsonl> <out dir>
+python3 transcript.py <session.jsonl> <out dir>          a brief per turn
+python3 transcript.py <session.jsonl> asked.md --asks    the record, refreshed
 ```
+
+The record is refreshed rather than rewritten: entries already corrected by hand are kept as they are, so a later pass never undoes an earlier one.
 
 ## 3. How it reads a holarchy
 

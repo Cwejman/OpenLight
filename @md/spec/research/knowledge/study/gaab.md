@@ -30,7 +30,13 @@ The directory a harness opens on is already the most open-ended thing in use, an
 
 Steering a model at use, taken to its end, is a model that evolves in the open. Start from open weights, let the steering that happens in use be kept, and as many people run the same model for the same kind of cognitive work, around one tool call, one junction, one shape of task, the weights facet: a part of the model becomes good at that work because the work was shared. This is compute shared around programs, compounding the way knowledge does, and what it yields is small language models that stay capable of calling tools, specialised by use rather than by training runs nobody sees. The service earns by hosting the compounding, and everyone's use makes everyone's model better. Reasoned, the author's; nothing here is demonstrated.
 
-## 8. The open-source social medium
+## 8. A harness's history belongs in the repository
+
+The record of how work was done lives in the harness, in a format made for replay rather than for reading, and outside the repository the work produced. That separation is the reason a long sitting loses what was said in it. Kept in git beside the knowledge, and stamped so a surface knows what kind of thing it is, the history becomes introspectable by the harness that made it, readable by the frontend that serves the knowledge, and ground that whoever comes next can stand on.
+
+This is the general case of what this study did by hand: [the asks of a sitting](reader/asked.md) kept as a record and made the ground of a plan. A service that gives its users their own history does more for them than one that keeps it, which is this file's stance applied to a service's own exhaust. Reasoned, the author's.
+
+## 9. The open-source social medium
 
 Open source has no social medium of its own. Its work happens in repositories and its talk in issues and chat, and the surface that joins the people to the work is the same dry root as everything else. The author's question is where that medium is, and the answer under this stance is that a business would thrive by hosting it: the social environment of open source as the service, the connecting between contributors and the work as the glue a host carries. The choice at the centre of it is to not take money for a certain gain, so that the gain compounds among everyone, and the business earns on the compounding. Which market does not want that: a market where the work is shared by design, so that every wall on it is a loss to all and every connection a gain to all. What the author wants for such a community is that it spread like wildfire, and the reason it could is the code's first section turned outward: joining others is where value comes from, and a medium that unbinds the expressive side of joining, building on another's work as easily as reading it, gives that value nowhere to be stopped. Reasoned, the author's.
 

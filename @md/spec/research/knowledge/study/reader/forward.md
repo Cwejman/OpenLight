@@ -58,6 +58,8 @@ What was asked and is not there:
 
 - **Notification is a subscription to a level of summary**, so a reader following a region hears what changed at the grain they chose. What exists is read and unread in one browser, which is memory rather than subscription, and it tells nobody anything.
 
+- **A harness's history belongs in git**, beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and the substrate can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](asked.md) now are, rather than exported once and left behind.
+
 - **The sitting should be integrated, not exported.** The harness's own files belong in the substrate, so that the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Today it is a separate folder read by a second copy of the program.
 
 - **The records should become organic** as the work goes on: kept as the work happens rather than recovered at the end. This file and [the making](making.md) were both written after the fact, which is the failure the study keeps naming, met again by the people who named it.
