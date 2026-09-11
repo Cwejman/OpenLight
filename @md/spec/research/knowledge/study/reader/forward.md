@@ -2,7 +2,9 @@
 
 What was asked of this program, set against what it actually does. Every direction here comes from [the asks](asked.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
 
-The rooms below are in the order the work should take them, not the order they were said.
+The rooms below are in the order the work should take them, not the order they were said, and that order is itself a claim. It says this is next and these wait, which a cold reader can agree with or refuse. Placing it wrongly is a fault of this file, not a matter of taste, and the code asks a plan to carry its place for exactly that reason.
+
+Reasoned, from the asks and from the program as it stands; no part of this order has been read cold by anyone but its writer.
 
 ## 1. Use, before anything more
 
