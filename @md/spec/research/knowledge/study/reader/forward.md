@@ -22,9 +22,7 @@ This is not housekeeping to be done after the features. A reading surface that t
 
 ## 2. The reading surface
 
-What stands is [how it reads](reads.md).
-
-What was asked and is not there, in the author's terms:
+The reading surface works and is not tuned. It stands as [how it reads](reads.md) describes, and four things asked of it are missing, in the author's terms:
 
 - **The spreads should not scroll in lockstep.** The one you are in runs freely, and each behind it moves more slowly, since it holds less prose per step of the holarchy. What was built is one distance for all, which is synchrony without the grading.
 
@@ -38,9 +36,7 @@ What was asked and is not there, in the author's terms:
 
 ## 3. The figures
 
-What stands is [how it maps](maps.md).
-
-What was asked and is not there:
+The figures stand as [how it maps](maps.md) describes them, and four things asked of them are missing:
 
 - **The figure and the texture should merge.** Each arc should carry the lines of its own prose rather than a flat fill, and nodes and edges with text among them were asked for, as an earlier drawing had. What exists is names, weights, ticks at the hub and chords for links: the arcs are flat, and the chords mark that relations exist rather than drawing them.
 
@@ -58,9 +54,7 @@ What is owed is small and real: the author asked that a part's estate be respect
 
 ## 5. The record, and the sitting itself
 
-What stands is [what has been read](marks.md#2-what-has-been-read), and `transcript.py`, whose first use is [the asks of the day this was built](../asked-2026-09-11.md).
-
-What was asked and is not there:
+What a reader has seen is kept, as [how it marks](marks.md#2-what-has-been-read) describes, and a session can be turned into substrate by `transcript.py`, whose first use is [the asks of the day this was built](../asked-2026-09-11.md). Three things asked of the record are missing:
 
 - **Notification is a subscription to a level of summary**, so a reader following a region hears what changed at the grain they chose. What exists is read and unread in one browser, which is memory rather than subscription, and it tells nobody anything.
 

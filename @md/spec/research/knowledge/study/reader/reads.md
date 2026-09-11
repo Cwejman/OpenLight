@@ -19,7 +19,7 @@ Nothing beyond a room's own prose is loaded into a spread. A brief with twenty r
 
 A chosen room becomes a spread. The rooms not yet chosen all contend for the same next column, and that asks for its own mechanic rather than a click into the dark.
 
-That column belongs to whichever room the pointer rests on, wherever the pointer is: a door in a spread, a segment of a division, an arc of the figure, a step of the rail. The room opens there as the spread it would become. A click commits it.
+That column belongs to whichever room the pointer rests on, wherever the pointer is: a door in a spread, a step of the rail, or any name in [the figures](maps.md). The room opens there as the spread it would become. A click commits it.
 
 So descent is committal and remembered, and looking ahead is free: hovering never enters the record of where you have been and never marks a room read. *Reasoned, then built; nobody but its writer has used it.*
 
@@ -27,7 +27,7 @@ So descent is committal and remembered, and looking ahead is free: hovering neve
 
 The spreads are one reading rather than three, so a scroll anywhere moves them all by the same distance, and a shorter spread reaches its end and waits. The head of each spread holds at its top while its prose runs beneath.
 
-*Reasoned, and unmeasured. The grading that was asked for, each spread behind moving more slowly than the one you are in, was not built, and whether lockstep is the fault it looks like is one of the suspicions in [the path forward](forward.md#1-use-before-anything-more).*
+*Reasoned, and unmeasured; what was asked of the scroll and what was built are in [the path forward](forward.md#2-the-reading-surface).*
 
 ## 4. Moving
 

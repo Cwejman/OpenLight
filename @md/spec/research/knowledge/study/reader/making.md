@@ -1,7 +1,8 @@
 ---
 under: the code
-kind: brief
-note: its first section is a record, newest first; the rest is not
+kind: record
+entries: newest first
+note: one entry per move of the evening
 ---
 
 # The making of the reading surface

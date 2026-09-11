@@ -5,7 +5,7 @@ kind: brief
 
 # How it marks
 
-A reader who meets the same room in four figures and a column should meet one thing, not five. So everything that names a room carries the same identity, and pointing at any of them lights all of them at once.
+A reader who meets the same room in six figures and a column should meet one thing, not seven. So everything that names a room carries the same identity, and pointing at any of them lights all of them at once. *Seen.*
 
 ## 1. The hover, and the card
 
@@ -13,7 +13,7 @@ A pointer on anything that names a room lights that room in every view, swings t
 
 The card is summoned rather than placed, so it is glass rather than a box: the ground shows through it, blurred, its edges dissolved, with no shadow and no drawn border. A click pins it, and pinned it can be acted in, offering its rooms, what points at it, the way in and the step out. *Seen.*
 
-Where a room lies deeper than the division's floor it has no region of its own, so the room that holds it is marked instead. The lighting always resolves to something a reader can see. *Reasoned, and built after the floor left deep rooms unanswerable.*
+Where a room lies deeper than the division's floor it has no tile of its own, so the room that holds it is marked instead. The lighting always resolves to something a reader can see. *Reasoned, and built after the floor left deep rooms unanswerable.*
 
 ## 2. What has been read
 
@@ -34,7 +34,3 @@ A room stands on what it links to, and git knows when each file last changed. Wh
 What the mark measures is the distance between two states, the target as it stood when the room was last written and the target as it stands now. Resolving a link to its earlier state is not built, so the mark says the distance exists without being able to show it.
 
 It is a suspicion and not a verdict, since a pointer often survives its target changing. It is also the cheapest honest signal a reader or a harness has, costing nothing but a read of the log. *Seen, on this room: four of its briefs carried the mark on the night it was written, which is what a room that revises its own ground should expect.*
-
-## 5. The stamp it reads
-
-A file says at its head whether it is under the code and what kind it is, and this program obeys that: a record's parts are shown as the entries it declares, in the order it declares them, rather than as rooms to descend by importance. Reading a sequence by the gradient reads it wrongly. What the stamp is for, and why it is what lets a directory reach a public surface a file at a time, is in [the path forward](forward.md#7-the-medium-beyond-the-page). *Seen.*
