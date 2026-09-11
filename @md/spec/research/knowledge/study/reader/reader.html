@@ -143,12 +143,14 @@
     padding-bottom:14vh; opacity:.72; transition:opacity .18s; }
   .pane::-webkit-scrollbar { display:none; }
   .pane.last, .pane:hover { opacity:1; }
+  .phead { position:sticky; top:0; z-index:2; padding-bottom:var(--r3);
+    background:linear-gradient(var(--bg) 76%, transparent); }
   .ptitle { font:600 var(--t2)/1.2 var(--serif); margin:0 0 var(--r4); letter-spacing:-.014em; cursor:pointer; }
   .pane.last .ptitle { font-size:var(--t1); line-height:1.1; letter-spacing:-.022em; margin-bottom:var(--r3); }
   .ptitle:hover, .ptitle.lit { color:var(--seq); }
   .pmeta { font:var(--t6)/1.6 var(--sans); color:var(--mute); letter-spacing:.08em;
     text-transform:uppercase; margin-bottom:var(--r3); }
-  .pane .prose { max-width:none; }
+  .pane .prose { max-width:none; padding-bottom:var(--r1); }
   .pane:not(.last) .prose { font-size:var(--t5); }
   .pane:not(.last) .prose > p:first-child { font-size:var(--t4); }
   /* the room you went into, marked so it cannot be missed */
@@ -215,10 +217,10 @@
 
   /* what lies beneath: rhythm groups it, nothing encloses it */
   .kids { margin-top:var(--r0); }
-  .kids .grp { font: 500 10px/1 var(--sans); letter-spacing:.15em; text-transform:uppercase;
-    color:var(--mute); display:block; margin:var(--r0) 0 var(--r2); }
-  .kid { display:grid; grid-template-columns:minmax(0,1fr) 104px; gap:var(--r1);
-    align-items:baseline; padding:0 0 var(--r1); cursor:pointer; }
+  .kids .grp, .pane .grp { font: 500 10px/1 var(--sans); letter-spacing:.15em; text-transform:uppercase;
+    color:var(--mute); display:block; margin:calc(var(--r0) * 1.5) 0 var(--r1); }
+  .kid { display:grid; grid-template-columns:minmax(0,1fr) 92px; gap:var(--r2);
+    align-items:baseline; padding:var(--r2) 0 calc(var(--r0) * .8); cursor:pointer; }
   .kid > div { min-width:0; }
   @media (min-width: 1240px) {
     /* the estate a card takes follows what it holds, not the width available */
@@ -822,6 +824,7 @@ function pane(node, path, chosen, isLast) {
   node.kids.forEach((k, i) => (k.kind === 'brief' ? inner : beside)
     .push(kidRow(k, path.concat(i), i === chosen)));
   return `<section class="pane ${isLast ? 'last' : ''}" data-pane="${uid}">
+    <div class="phead">
     <h2 class="ptitle" data-uid="${uid}" data-jump="${uid}">${path.length ? dot(uid) : ''}${esc(node.name)}</h2>
     <div class="pmeta" data-uid="${uid}">${esc(node.kind)} · ${fmt(tok(node.own_n))} here${
       node.kids.length ? ` · ${node.kids.length} beneath, ${fmt(tok(node.total_n - node.own_n))} in them` : ''}</div>
@@ -835,6 +838,7 @@ function pane(node, path, chosen, isLast) {
           data-uid="${u}" data-jump="${u}" style="flex:${Math.max(k.total_n,1)/tot}"></i>`;
       }).join('');
     })() + `</div>` : ''}
+    </div>
     <div class="prose" data-path="${esc(node.path || '')}">${md(node.own)}</div>
     ${isLast ? backsOf(node, path) : ''}
     ${inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : ''}
@@ -850,12 +854,11 @@ function drawPanes() {
   const el = document.getElementById('panes');
   el.style.gridTemplateColumns = `repeat(${out.length}, minmax(0, 1fr))`;
   el.innerHTML = out.join('');
-  // a spread behind opens at the room you went into, so the mark is where the eye is
+  // one scroll for all of them: the spreads move together, each at its own length
   requestAnimationFrame(() => {
-    el.querySelectorAll('.pane:not(.last)').forEach(pn => {
-      const ch = pn.querySelector('.kid.chosen');
-      if (ch) pn.scrollTop = Math.max(0, ch.offsetTop - pn.clientHeight * .34);
-    });
+    const parent = el.querySelector('.pane:not(.last):last-of-type');
+    const ch = parent && parent.querySelector('.kid.chosen');
+    syncTo(ch ? Math.max(0, ch.offsetTop - parent.clientHeight * .34) : 0);
     pagemap();
   });
   el.querySelectorAll('.prose a[href]').forEach(a => {
@@ -864,6 +867,25 @@ function drawPanes() {
     if (q) { a.dataset.uid = q.join(','); a.title = t.name; } else a.classList.add('out');
   });
 }
+let SYNCING = false;
+function syncTo(px) {
+  SYNCING = true;
+  document.querySelectorAll('.pane').forEach(pn => {
+    pn.scrollTop = Math.min(px, Math.max(0, pn.scrollHeight - pn.clientHeight));
+  });
+  requestAnimationFrame(() => { SYNCING = false; });
+}
+document.addEventListener('scroll', e => {
+  const pn = e.target.closest && e.target.closest('.pane');
+  if (!pn || SYNCING) return;
+  const px = pn.scrollTop;
+  SYNCING = true;
+  document.querySelectorAll('.pane').forEach(other => {
+    if (other === pn) return;
+    other.scrollTop = Math.min(px, Math.max(0, other.scrollHeight - other.clientHeight));
+  });
+  requestAnimationFrame(() => { SYNCING = false; });
+}, {passive:true, capture:true});
 function activePane() { return document.querySelector('.pane.last'); }
 function render() {
   const focus = at(PATH), root = DATA.tree;
