@@ -146,6 +146,7 @@
   .rail a.now { color:var(--ink); font-weight:500; }
   .rail a:hover, .rail a.lit { color:var(--seq); }
   .rail .sep { color:var(--line); }
+  .rail .sep.file { color:var(--mute); font-weight:500; }
   .rail .dot { width:5px; height:5px; margin-right:5px; vertical-align:0; }
   .panes { display:grid; gap:calc(var(--r0) * 1.2); overflow:hidden; flex:1 1 auto; min-height:0; }
   .pane { min-width:0; height:100%; overflow-y:auto; scrollbar-width:none;
@@ -862,7 +863,17 @@ function drawRail(firstShown) {
     bits.push(`<a class="${cls}" data-jump="${uid}" data-uid="${uid}">${i ? dot(uid) : ''}${
       esc(n.name.replace(/^[\d.]+\s*/, ''))}</a>`);
   }
-  document.getElementById('rail').innerHTML = bits.join('<span class="sep">›</span>');
+  // the separator says where the filesystem divides and where a document divides itself
+  let out = '';
+  for (let i = 0; i < bits.length; i++) {
+    if (i) {
+      const prev = at(PATH.slice(0, i - 1)), cur = at(PATH.slice(0, i));
+      out += `<span class="sep ${prev.path === cur.path ? 'inside' : 'file'}">${
+        prev.path === cur.path ? '§' : '/'}</span>`;
+    }
+    out += bits[i];
+  }
+  document.getElementById('rail').innerHTML = out;
 }
 function drawPanes() {
   const SHOW = 3;
