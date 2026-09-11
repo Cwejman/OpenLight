@@ -102,14 +102,31 @@ def node(name, path, anchor, kind, own, kids):
     }
 
 
+def frontmatter(text):
+    """The stamp at a file's head: whether it is under the code, and what kind of file it is."""
+    if not text.startswith("---"):
+        return {}, text
+    end = text.find("\n---", 3)
+    if end < 0:
+        return {}, text
+    meta = {}
+    for line in text[3:end].splitlines():
+        if ":" in line:
+            k, _, v = line.partition(":")
+            meta[k.strip()] = v.strip()
+    return meta, text[end + 4:].lstrip("\n")
+
+
 def read_file(path):
     text = open(path, encoding="utf-8", errors="replace").read()
+    meta, text = frontmatter(text)
     lines = text.splitlines()
     title = next((l[2:].strip() for l in lines if l.startswith("# ")), os.path.basename(path))
     body = [l for l in lines if not l.startswith("# ")]
     rel = os.path.relpath(path, ROOT)
     n = from_lines(title, body, 2, rel, "")
-    n["kind"] = "file"
+    n["kind"] = "record" if meta.get("kind") == "record" else "file"
+    n["meta"] = meta
     return n
 
 
@@ -134,6 +151,64 @@ def read_dir(path):
     return node(os.path.basename(path), rel, "", "pile", "", kids)
 
 
+COMMITS = {"at": 0, "by_path": {}}
+
+
+def commit_times():
+    """When each file was last committed, so a brief can be told its ground moved after it did."""
+    import subprocess
+    if time.time() - COMMITS["at"] < 20:
+        return COMMITS["by_path"]
+    COMMITS["at"] = time.time()
+    try:
+        out = subprocess.run(["git", "log", "--pretty=format:@%ct", "--name-only", "--", "."],
+                             cwd=ROOT if os.path.isdir(ROOT) else os.path.dirname(ROOT),
+                             capture_output=True, text=True, timeout=20).stdout
+    except Exception:
+        return COMMITS["by_path"]
+    by, now = {}, 0
+    for line in out.splitlines():
+        if line.startswith("@") and line[1:].isdigit():
+            now = int(line[1:])
+        elif line.strip() and line not in by:
+            by[line.strip()] = now
+    COMMITS["by_path"] = by
+    return by
+
+
+def stale_marks(root):
+    """A brief is stale where something it stands on was committed after it was."""
+    by = commit_times()
+    if not by:
+        return
+    base = os.path.basename(ROOT) if os.path.isdir(ROOT) else ""
+    def when(path):
+        for k, v in by.items():
+            if k.endswith("/" + path) or k == path or k.endswith("/" + base + "/" + path):
+                return v
+        return 0
+    index = {}
+    def walk(n):
+        if n["kind"] in ("file", "folder"):
+            index.setdefault(n["path"], n)
+        for k in n["kids"]:
+            walk(k)
+    walk(root)
+    def mark(n):
+        mine = when(n["path"])
+        late = []
+        for l in n.get("links", []):
+            tp = l.split("#")[0]
+            t = when(tp)
+            if mine and t and t > mine:
+                late.append(tp)
+        n["stale"] = sorted(set(late))
+        n["at"] = mine
+        for k in n["kids"]:
+            mark(k)
+    mark(root)
+
+
 def build():
     return read_dir(ROOT) if os.path.isdir(ROOT) else read_file(ROOT)
 
@@ -151,6 +226,7 @@ def loop():
     while True:
         try:
             t = build()
+            stale_marks(t)
             with lock:
                 state["tree"] = t
                 state["depths"] = depths(t)

@@ -253,6 +253,11 @@
     .kid { grid-template-columns:minmax(0,1fr) 104px; max-width:62em; }
   }
   .kn .dot { width:7px; height:7px; vertical-align:2px; margin-right:9px; }
+  .stale > .kn::after, .ptitle.stale::after { content:"·  ground moved since"; margin-left:10px;
+    font: 500 9.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--warm);
+    vertical-align:2px; }
+  .dr.stale a::after { content:" ·"; color:var(--warm); }
+  .pmeta { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .kn { font: 600 var(--t3)/1.28 var(--serif); letter-spacing:-.012em; transition:color .12s; max-width:22em; }
   .pane.last .kn { font-size:var(--t2); }
   .kid:hover .kn { color:var(--seq); }
@@ -399,12 +404,12 @@ function dirtree() {
   const rows = [];
   (function walk(n, depth, path) {
     n.kids.forEach((k, i) => {
-      if (k.kind !== 'file' && k.kind !== 'folder') return;
+      if (k.kind !== 'file' && k.kind !== 'folder' && k.kind !== 'record') return;
       const uid = path.concat(i).join(',');
       const onPath = PATH.slice(0, path.length + 1).join(',') === uid;
       const open = OPEN.has(uid) || onPath;
       const sub = k.kids.some(x => x.kind === 'file' || x.kind === 'folder');
-      rows.push(`<div class="dr ${onPath ? 'on' : ''} ${trait(k)}" style="padding-left:${depth * 11}px" data-uid="${uid}">
+      rows.push(`<div class="dr ${onPath ? 'on' : ''} ${trait(k)} ${(k.stale||[]).length ? 'stale' : ''}" style="padding-left:${depth * 11}px" data-uid="${uid}">
         <span class="tw">${sub ? (open ? '▾' : '▸') : ''}</span>${dot(uid)}<a data-jump="${uid}">${esc(base(k))}</a>
         <span class="w">${fmt(tok(k.total_n))}</span></div>`);
       if (open) walk(k, depth + 1, path.concat(i));
@@ -572,6 +577,7 @@ function tipFor(n) {
   if (n.paras && n.paras.length) bits.push(`${n.paras.length} paragraph${n.paras.length>1?'s':''}${heavy ? `, <em>${heavy} heavy</em>` : ''}`);
   if (outs) bits.push(`points at ${outs}`);
   if (ins) bits.push(`${ins} point here`);
+  if ((n.stale || []).length) bits.push(`<em>${n.stale.length} thing${n.stale.length>1?'s':''} it stands on changed after it did</em>`);
   bits.push(t === 'changed' ? '<em>changed since you read it</em>' : t === 'read' ? 'read' : 'not read yet');
   return `<div class="t">${esc(n.name)}</div>${n.face ? `<div class="f">${esc(n.face.slice(0,150))}${n.face.length>150?'…':''}</div>` : ''}<div class="s">${bits.join(' · ')}</div>`;
 }
@@ -831,7 +837,7 @@ document.addEventListener('scroll', () => { cursor(); pagemap(); }, {passive:tru
 window.addEventListener('resize', () => { fit(); pagemap(); });
 function kidRow(k, path, chosen) {
   const uid = path.join(',');
-  return `<div class="kid ${chosen ? 'chosen' : ''}" data-jump="${uid}" data-uid="${uid}">
+  return `<div class="kid ${chosen ? 'chosen' : ''} ${(k.stale||[]).length ? 'stale' : ''}" data-jump="${uid}" data-uid="${uid}">
     <div><div class="kn">${dot(uid)}${esc(k.name)}</div><div class="kf">${esc(k.face)}</div></div>
     <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span>${texture(k.paras, 12)}
       ${k.kids.length ? k.kids.length + ' within' : 'a leaf'}</div></div>`;
@@ -852,13 +858,15 @@ function backsOf(node, path) {
 function pane(node, path, chosen, isLast) {
   const uid = path.join(',');
   const heavy = (node.paras || []).filter(x => x > 500).length;
+  const isRecord = node.kind === 'record';
   const inner = [], beside = [];
   node.kids.forEach((k, i) => (k.kind === 'brief' ? inner : beside)
     .push(kidRow(k, path.concat(i), i === chosen)));
   return `<section class="pane ${isLast ? 'last' : ''}" data-pane="${uid}">
     <div class="phead">
-    <h2 class="ptitle" data-uid="${uid}" data-jump="${uid}">${path.length ? dot(uid) : ''}${esc(node.name)}</h2>
-    <div class="pmeta" data-uid="${uid}">${esc(node.kind)} · ${fmt(tok(node.own_n))} here${
+    <h2 class="ptitle ${(node.stale||[]).length ? 'stale' : ''}" data-uid="${uid}" data-jump="${uid}">${path.length ? dot(uid) : ''}${esc(node.name)}</h2>
+    <div class="pmeta" data-uid="${uid}">${esc(node.kind)}${
+      node.meta && node.meta.under ? ' under ' + esc(node.meta.under) : ''} · ${fmt(tok(node.own_n))} here${
       node.kids.length ? ` · ${node.kids.length} beneath, ${fmt(tok(node.total_n - node.own_n))} in them` : ''}</div>
     ${node.paras && node.paras.length ? `<div class="weigh">${texture(node.paras)}<span>${
       node.paras.length} paragraph${node.paras.length > 1 ? 's' : ''}${heavy ? ` · ${heavy} heavy` : ''}</span></div>` : ''}
@@ -873,7 +881,8 @@ function pane(node, path, chosen, isLast) {
     </div>
     <div class="prose" data-path="${esc(node.path || '')}">${md(node.own)}</div>
     ${isLast ? backsOf(node, path) : ''}
-    ${inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : ''}
+    ${inner.length ? `<span class="grp">${isRecord
+      ? 'entries, ' + esc((node.meta || {}).entries || 'in order') : 'rooms of this brief'}</span>` + inner.join('') : ''}
     ${beside.length ? `<span class="grp ${inner.length ? 'second' : ''}">standing beside it, each its own</span>` + beside.join('') : ''}
   </section>`;
 }
