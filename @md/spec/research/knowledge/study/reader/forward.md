@@ -6,7 +6,7 @@ status: in force
 
 # The path forward
 
-What was asked of this program, set against what it actually does. Every direction here comes from [the asks](asked.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
+What was asked of this program, set against what it actually does. Every direction here comes from [the asks](../asked-2026-09-11.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
 
 The rooms below are in the order the work should take them, not the order they were said, and that order is itself a claim. It says this is next and these wait, which a cold reader can agree with or refuse. Placing it wrongly is a fault of this file, not a matter of taste, and the code asks a plan to carry its place for exactly that reason.
 
@@ -28,13 +28,13 @@ What was asked and is not there, in the author's terms:
 
 - **The spreads should not scroll in lockstep.** The one you are in runs freely, and each behind it moves more slowly, since it holds less prose per step of the holarchy. What was built is one distance for all, which is synchrony without the grading.
 
-- **Moving along the stack should change depth**, choosing among what stands at a chosen level. Today the stack does nothing; depth changes only by entering a room.
+- **Moving sideways along the row of spreads should change depth**, choosing among what stands at a chosen level. Today the row does nothing; depth changes only by entering a room.
 
-- **Each descent should be remembered for its stack**, so returning to a level returns to the room you were in there. It is not remembered.
+- **A descent should be remembered**, so returning to a level returns to the room you were in there rather than to its closed doors. It is not remembered.
 
 - **The raw should be openable in place**, expanding where the reader stands, in step with the reading, divided from the prose by rhythm alone and taking a surface only where the pointer asks. Nothing of it is built.
 
-- **Narrow screens want a stack navigation of their own.** At narrow widths the maps simply fall above the spreads.
+- **Narrow screens want a navigation of their own.** At narrow widths the maps simply fall above the spreads.
 
 ## 3. The figures
 
@@ -44,7 +44,7 @@ What was asked and is not there:
 
 - **The figure and the texture should merge.** Each arc should carry the lines of its own prose rather than a flat fill, and nodes and edges with text among them were asked for, as an earlier drawing had. What exists is names, weights, ticks at the hub and chords for links: the arcs are flat, and the chords mark that relations exist rather than drawing them.
 
-- **A part's form should collaborate with its text's estate** by its granularity. It does so only crudely: a label appears when the arc can hold it whole and is dropped when it cannot.
+- **A part should be given room in proportion to what its text needs**, which the author asked for and the program only half does: an arc takes its name when it can hold the whole of it, and otherwise takes none.
 
 - **One more grade of bounding**, the file you are inside rather than the section, was named as a small change and not made.
 
@@ -58,13 +58,13 @@ What is owed is small and real: the author asked that a part's estate be respect
 
 ## 5. The record, and the sitting itself
 
-What stands: what a reader has seen is kept in their browser, the division dims as it is read and lights where a brief changed, and [`transcript.py`](transcript.py) turns a harness session into a folder this reader opens, every turn a brief in the words it was asked in. [The asks](asked.md) beside this file are the first use of it.
+What stands: what a reader has seen is kept in their browser, the division dims as it is read and lights where a brief changed, and [`transcript.py`](transcript.py) turns a harness session into a folder this reader opens, every turn a brief in the words it was asked in. [The asks](../asked-2026-09-11.md) beside this file are the first use of it.
 
 What was asked and is not there:
 
 - **Notification is a subscription to a level of summary**, so a reader following a region hears what changed at the grain they chose. What exists is read and unread in one browser, which is memory rather than subscription, and it tells nobody anything.
 
-- **A harness's history belongs in git**, beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and the substrate can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](asked.md) now are, rather than exported once and left behind.
+- **A harness's history belongs in git**, beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and the substrate can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](../asked-2026-09-11.md) now are, rather than exported once and left behind.
 
 - **The sitting should be integrated, not exported.** The harness's own files belong in the substrate, so that the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Today it is a separate folder read by a second copy of the program.
 
@@ -72,11 +72,9 @@ What was asked and is not there:
 
 ## 6. Links that hold their state
 
-A link points at a state, not only at a path, and the reader resolves it as a path. So a brief written against a file yesterday now points at whatever that file became, and nothing shows the reader which one the writer meant.
+A link points at a state, not only at a path, and this program resolves it as a path, so a brief written yesterday now points at whatever its target became. [How it marks](marks.md#5-ground-that-moved-after-you-did) holds what the mark can and cannot show.
 
-This stopped being theoretical during the sitting that built all of this. The lab's corpus and its piece were written against an edition of the code, and that edition was changed twice after they were finished, once for a rule about what comes next. Their links now point past what they were written against, and only the staleness mark says so, without being able to show what moved.
-
-What is owed: resolve a link to the target as of the commit the linking brief last came in on, show the two states side by side where they differ, and make the mark a difference a reader can open rather than a warning they must trust. Git holds everything needed. The practice carries the rule; this program does not carry it yet.
+It stopped being theoretical here. The lab's corpus and its piece were written against an edition of the code that was changed twice beneath them, once for a rule about what comes next, so their links point past what they were written against. What is owed is to resolve a link to the commit the linking brief came in on, and to show the two states where they differ. Git holds everything needed.
 
 ## 7. The medium beyond the page
 
@@ -86,8 +84,4 @@ What was asked: the parsing belongs in the page, so one program reads a granted 
 
 ## 8. What this stretch taught the study
 
-Two things that belong to the code and not to the program, both already folded into [the study](../README.md).
-
-Heaviness is seen before it is read, and it is the judgment the labs have failed most often. A writer cannot feel the weight of prose it is inside of, and a character count is a threshold rather than a feel, which is why the rule never fixed it and a picture did.
-
-And the reset ended. From lab 11 a lab takes the standing output and the standing edition and changes what the last read found wanting, because what the reset bought is bought more cheaply by a fresh head, and what it cost was everything already learned in the prose.
+Two findings belong to the code rather than to this program, and both are folded into [the study](../README.md): that heaviness is seen before it is read, which is the judgment the labs have failed most often and which a rule never fixed; and that the reset between labs has ended, because a fresh head buys what it bought more cheaply.

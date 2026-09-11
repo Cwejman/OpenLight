@@ -5,47 +5,41 @@ kind: brief
 
 # The reader
 
-A page that serves a substrate as what it is: prose in a holarchy, read by moving through it rather than by scrolling a file. Give it a path and it reads markdown files in folders as [the practice](../10-comprehension/poc.md) defines them, weighs every room by the text in it, and lets a reader descend without losing where they came from. Built 2026-09-11 in one sitting, and not yet good to use.
+A body of knowledge under the code is a holarchy: wholes that are also parts, the biggest understanding first and the detail beneath it. A file tree cannot show that, and a total cannot either, since thirty-three thousand tokens is neither large nor small until you know where the words sit. This program serves such a body as what it is, so that a reader descends it by understanding rather than by scrolling, and can see at a glance what stopping at each level would cost.
 
-It answers a question a file tree cannot. A total tells a reader nothing: thirty-three thousand tokens is neither large nor small until you know where the words sit and what stopping at each level would cost. So everything here is weighed, and every view of the whole is the same whole seen at a different distance.
+Built 2026-09-11 in one sitting, and not yet good to use.
 
-## 1. What this room holds
+## 1. What a room is
 
-Three briefs describe the program as it stands, and each is worth reading only if you will work on that part of it.
+A **room** is a holon: a folder, a file, or a section inside one, each a whole that can be read alone and a part of the whole above it. A folder's own prose is its entry file; a file's own prose is its title and preface; a section's is whatever stands before its first subheading. What a room **owns** is that prose. What it **totals** is that plus everything in the rooms beneath it. Every weight in this program is one of those two numbers, counted as tokens, which here means bytes over four, the same approximation the labs' records use. *Reasoned; the approximation is stated because every figure in the program rests on it.*
 
-- [How it reads](reads.md) — the spreads, the doors, the room ahead, and the one scroll that moves them.
+So the filesystem's divisions and a document's own nesting are one structure, and a descent can pass from a folder to a file to a section without changing kind. The program says which boundary it crossed rather than flattening them.
 
-- [How it maps](maps.md) — the descent, the figure, the division, the files, the gauge, and the strip along the page.
+## 2. What it does with a room
 
-- [How it marks](marks.md) — one brief as one object across every view, what has been read, and the hue of a region.
+It lays the descent from left to right, a **spread** for each level, so entering a room does not replace the room you came from. It draws the whole from several distances at once, weighted by the text in each part. And it gives one room one identity, so that pointing at it anywhere lights it everywhere.
 
-Three more carry where it came from and where it goes, and they are the ones to read first if you are picking the work up.
+Those three are a brief each, and they are the program as it stands: [how it reads](reads.md), [how it maps](maps.md), [how it marks](marks.md).
 
-- [The path forward](forward.md) — what was asked set against what stands, in the order the work should take it. It opens with the verdict that matters most, that the thing is hard to use.
+## 3. Where it is going
 
-- [What was asked, through the sitting](asked.md) — every ask of the day this was built, in the author's own words, the ground the path forward is written on.
+It is far from what was asked of it, and the distance is written down rather than remembered. [The path forward](forward.md) sets every direction against what stands, in the order the work should take, and opens with the verdict that matters most, that the thing is hard to use. It stands on [what was asked](../asked-2026-09-11.md), the record of the day this was built. Its last step is [publishing a repository as itself](publication.md), which is gated and not begun.
 
-- [Publishing a repository as itself](publication.md) — the end this is built toward, and the two judgments that have to be made before it begins.
+[The making](making.md) keeps the record of how this and [the surface](../surface/README.md) were built, since they were one evening's work and one effort.
 
-And one keeps the record of the building: [the making](making.md), move by move, with what it taught.
-
-## 2. Running it
+## 4. Running it
 
 ```
 python3 reader.py <path> [port]
 ```
 
-The path is the root, capped there: a repository, a folder inside one, a single file. It serves on `http://127.0.0.1:8766` by default and re-reads every few seconds, so editing a file changes the page. Sizes are tokens counted as bytes over four, the same method the labs' records use.
+The path is the root and the program will not read above it: a repository, a folder inside one, a single file. It serves on `http://127.0.0.1:8766` by default and re-reads every few seconds, so editing a file changes the page.
 
-A sitting is knowledge too. [`transcript.py`](transcript.py) turns a harness session into a folder this reader opens, every turn a brief in the words it was asked in, so an ask made hours ago stays addressable instead of surviving in scrollback. The asks beside this file were made with it.
+A sitting is knowledge too. [`transcript.py`](transcript.py) turns a harness session into substrate, either a brief per turn or one record of the asks, so what was said hours ago stays addressable instead of surviving in scrollback.
 
 ```
-python3 transcript.py <session.jsonl> <out dir>          a brief per turn
-python3 transcript.py <session.jsonl> asked.md --asks    the record, refreshed
+python3 transcript.py <session.jsonl> <out dir>                      a brief per turn
+python3 transcript.py <session.jsonl> <record.md> --asks             the record, refreshed
 ```
 
 The record is refreshed rather than rewritten: entries already corrected by hand are kept as they are, so a later pass never undoes an earlier one.
-
-## 3. How it reads a holarchy
-
-A folder is a holon whose brief is its entry file, and whose parts are that entry's own sections followed by the files and folders beside it. A file is a holon whose own prose is its title and preface, and whose parts are its sections. A section is a holon the same way, down to the last heading. What a holon owns is the prose before its first part; what it totals is that plus everything beneath. So the filesystem's divisions and a document's own nesting are one structure, and the reader says which is which rather than flattening them.

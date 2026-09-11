@@ -10,11 +10,7 @@ The end this is built toward: a repository's own site is the repository, read th
 
 ## 1. The gate
 
-It is not started until the thing is worth publishing. Two conditions, both judgments rather than measurements.
-
-The balance has to be right: what the surface does against what it costs to keep doing it. Tonight's build is far from that, and [the path forward](forward.md) says why, beginning with the fact that it is hard to use.
-
-And the interface itself has to be understood as feasible. Whether the current shape can carry a reader comfortably, or whether it meets an engineering limit better navigated than pushed, is a question to answer before a pipeline is written around it. A published surface fixes a shape in place; fixing the wrong one costs more than waiting.
+It is not started until the thing is worth publishing, and [the path forward](forward.md#7-the-medium-beyond-the-page) holds the two judgments that decide it. Both are judgments rather than measurements, and neither has been made. What is worth repeating here is only the reason to wait: a published surface fixes a shape in place, and fixing the wrong one costs more than waiting for the right one.
 
 ## 2. What is digested, and what is not
 
