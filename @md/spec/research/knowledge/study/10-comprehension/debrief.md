@@ -40,6 +40,8 @@ One row per step: what the step was, the clock time it began, and the tokens the
 | stage two, round 4: fresh head on the draft | 21:41 | 14,515,884 |
 | stage two, round 5: fold the six material findings, write again | 21:46 | 14,497,996 |
 | stage two, round 5: fresh head on the draft | 21:48 | 14,483,651 |
+| stage two, round 6: fold the four material findings | 21:55 | 14,458,395 |
+| stage two, round 6: fresh head on the draft | 21:56 | 14,444,686 |
 
 ### 1.1 The sizes
 
@@ -58,13 +60,32 @@ Counted with one method throughout: bytes divided by four, from `wc -c`, rounded
 | the piece after round 3 | 125,320 | 31,300 |
 | the piece after round 4 | 130,606 | 32,700 |
 | the piece after round 5 | 133,674 | 33,400 |
+| the piece after round 6 | 137,101 | 34,300 |
 
 ## 2. The rounds
 
 One section per round, for both stages. Numbers and file sections, not commentary.
 
 
-### 2.1 Stage two, round 4
+### 2.1 Stage two, round 5
+
+**Amended in place, by section:** `README.md` intro, §§2, 4, 5, 7 · `claims.md` §5 · `verdict.md` §§1, 6 · `reading/README.md` §§2, 3 · `structure/README.md` §4 · `survival.md` §4 · `medium/README.md` intro · `ground.md` §§2, 3. **Moved as they were:** every other brief; no brief was written again whole, because no understanding changed that a paragraph could not carry. The piece went 20 briefs and 33,400 tokens to 20 briefs and 34,300 tokens.
+
+The fifth head returned 9 places it did not understand, 6 where ground came after use, 10 it would cut, and 12 missing on the piece's own terms, and ranked four as leaving a reader materially worse off. All four were folded.
+
+One was an outright error of fact. `survival.md` §4 attributed a ten-to-fifteen-point bound to the 845,000-repository context-file evaluation; the bound belongs to a second, three-repository study, and `practice.md` §4 had it right. The clause is gone.
+
+One was the piece's strongest support for the code graded three different ways: narrative appeared as "the largest effect in the literature" unmarked in the entry, with its sample sizes and no mark in `reading/README.md` §2, and inside a blanket "*measured or observed*" in `verdict.md` §6 — while `reading/effects.md` §1 says plainly that the sweep never opened that paper. All four places now say so.
+
+Two were briefs of this piece contradicting each other. `reading/README.md` §3 still carried the equation of the gradient with Ausubel's advance organizer that `verdict.md` §1 had retracted a round earlier, and the reader met the retraction first; both now carry the same argued reading. And `structure/README.md` §4 called a model-only result the most direct evidence against arrangement helping a reader, where `structure/models.md` §6 says the human-and-model question is not measurable in either direction; it is now scoped to a model reader and says why it cannot be carried across.
+
+Two further findings were folded because they were the gradient's own faults. The case against depth existed in three places and was never written as one understanding — a third level costing orientation for readers, a second routing level giving nothing for models, and the design prescription against layering depth — and `verdict.md` §1 now gathers them. And the piece never said whose it was, which `ground.md` §3 now states: a session working inside the thing being weighed.
+
+**Left out at this round.** The head's cuts, again ranked by it as cost rather than harm: `verdict.md` carrying content its leaves own, the confidence vocabulary glossed in both the entry and `ground.md` §2 (the second is now a pointer), and the brief openings that enumerate their own sections, which the code names as a map of the parts to come.
+
+**Left open.** That last one is the sharpest thing left. The head observed that `verdict.md` §1 defends the gradient by citing the code's rule against opening with a map of the parts — and that most of this piece's own briefs open with exactly such a map. Either the defence is weaker than stated or the piece does not follow the rule it defends by. It is not resolved here.
+
+### 2.2 Stage two, round 4
 
 **Written again whole:** `verdict.md` §§1, 2, 5, 6 — the understanding changed, not the words. **Amended in place, by section:** `README.md` intro, §2 · `claims.md` §4 · `practice.md` intro · `reading/README.md` §2 · `reading/effects.md` §1 · `making.md` §4 · `survival.md` §2 · `ceiling.md` §7 · `unknown.md` §6. **Moved as they were:** every other brief. **New:** `verdict.md` §1.1, the first heading in the piece to nest. The piece went 20 briefs and 32,700 tokens to 20 briefs and 33,400 tokens.
 
@@ -80,7 +101,7 @@ Two were ground arriving eighteen files late: the grade words the italic lines u
 
 **Left open.** Whether `structure/inferred.md` §2 and `structure/models.md` §1 should break into their constituent studies, which is the last level-not-broken-down the heads have named twice without it changing a reader's beliefs.
 
-### 2.2 Stage two, round 3
+### 2.3 Stage two, round 3
 
 **Written again whole:** `README.md`, `claims.md`, `verdict.md`, `structure/README.md`, `unknown.md`, `ground.md`. **Amended in place, by section:** `practice.md` §§1, 2 · `reading/README.md` §§1, 3, 4 · `reading/effects.md` §§2, 5 · `structure/models.md` §1 · `structure/inferred.md` §§1, 5 · `survival.md` §§2, 3, 4 · `making.md` §6 · `medium/README.md` intro · `medium/built.md` intro, §§1, 2 · `medium/breaks.md` intro · `medium/against.md` §2. **Moved as they were:** `reading/professionals.md`, `reading/finding.md`, `medium/breaks.md` §§1–6 bodies. **Cut:** `ceiling.md` §6, the Windows Vista defect-prediction section, which the brief itself conceded was not about documents; the decision tree in `structure/README.md` §1, which two heads in a row named as a second home for the five questions stated in the prose above it. The piece went 20 briefs and 31,300 tokens to 20 briefs and 32,700 tokens.
 
@@ -92,7 +113,7 @@ Four were ground the piece never gave: there was no link to the code anywhere, a
 
 **Left open.** Whether `verdict.md` and the entry's territory sections are two homes for one understanding. The head called it the largest structural fact about the draft and could not rank it. The entry now says why both cuts exist — one answers the question, the other holds the evidence — and the territory sections were shortened so the verdict's sentences are not restated in them.
 
-### 2.3 Stage two, round 2
+### 2.4 Stage two, round 2
 
 **Written again whole:** all 17 briefs. **New:** `output/verdict.md` and `output/making.md`, and `output/claims.md` written for the first time at the end of round 1's fold. **Moved as they were:** none; the fold reached every brief. **Holarchies whose own text was redone:** all four — `output/README.md`, `reading/README.md`, `structure/README.md`, `medium/README.md`. The piece went 17 briefs and 24,300 tokens to 20 briefs and 31,300 tokens.
 
@@ -110,7 +131,7 @@ Four more that changed briefs: one finding — models scoring better on shuffled
 
 **Left open.** Whether the diagram in `structure/README.md` §1 earns its place beside the prose that states the same five questions; the head called it a second home, and it stayed because the prose gives the understanding and the diagram gives the enumeration.
 
-### 2.4 Stage two, round 1
+### 2.5 Stage two, round 1
 
 The piece was written whole into `output/`: 17 briefs, 97,267 bytes, 24,300 tokens. Entry `output/README.md` with eight sections; `practice.md`, `survival.md`, `ceiling.md`, `unknown.md`, `ground.md` beside it; folders `reading/` (README, effects, professionals, finding), `structure/` (README, models, inferred), `medium/` (README, built, breaks, against). Nothing was moved; there was nothing to move. Links to the corpus rather than restating it: 11 pointers into `../corpus/`.
 
@@ -126,7 +147,7 @@ Four more that changed briefs rather than words: the grade vocabulary promised i
 
 **Left open at this round.** Whether the piece should carry the claims it weighs, or assume them.
 
-### 2.5 Stage one, round 1
+### 2.6 Stage one, round 1
 
 Pending.
 
@@ -144,7 +165,7 @@ The corpus was written whole in one pass, as the code's fifth section asks: the 
 
 **Checked.** All 219 relative links resolve; none point outside the repository.
 
-### 2.6 Stage one, round 2
+### 2.7 Stage one, round 2
 
 The fresh head held the code, the 45 raw reports and the corpus, and was asked only what the corpus loses. It returned twelve losses that matter, twelve distortions, fifteen facts stated in full in two places, and four places where a claim was laid before its ground. Every item was folded.
 
@@ -178,7 +199,7 @@ Four. The entry's method caveat sat after two sections of figures; it now opens 
 
 **Checked.** All relative links resolve after the round.
 
-### 2.7 Stage one, round 3
+### 2.8 Stage one, round 3
 
 The second fresh head held the code, the raw and the corpus after round 2. It returned fifteen losses, nine distortions, twelve facts still stated in full in two places, and four orderings. Its opening judgement was that the compression is disciplined and that what fails clusters in three places: findings that cut *against* the corpus's own conclusions, dropped confidence flags, and one systematic omission about the evidence grade of a whole territory. Every item was folded.
 
@@ -218,7 +239,7 @@ Four. `writing/README.md` §2 declared its folder unreadable without a brief in 
 
 **Left open.** Whether the corpus should carry the sweep's unverified chart contents at all, as a record of what was *not* followed. It does not; `method.md` §5 names the territories instead.
 
-### 2.8 Stage one, round 4
+### 2.9 Stage one, round 4
 
 The third fresh head was asked to rank, and to say plainly if nothing remained that mattered. It did not say so. Its verdict: **three losses that matter, five distortions, four facts still stated twice, two orderings** — and the judgement that what remained was "narrow, and I am confident it is narrow because I checked the raw report-by-report rather than sampling."
 
@@ -246,7 +267,7 @@ Four: the hypertext disorientation figures (`reading/text-design.md` §2), the a
 
 Two, both the same shape — an effect stated before the bound that governs it. `agents/README.md` gave the positive results in §§1–2 and the noise floor in §3, when that floor is within striking distance of the gains; §3 now says so and names what it bounds. `reading/README.md` gave effect sizes in §1 and the two bounds on all of them in §4; the bounds now open §1.
 
-### 2.9 Stage one, round 5
+### 2.10 Stage one, round 5
 
 The fourth fresh head held the code, the 45 raw reports and the corpus after round 4, and was asked only what the corpus loses. It returned **eighteen losses** — of which it marked two minor, plus a bundle of five it declined to write sentences for — **eight distortions**, three of them minor, **six facts still stated in two homes**, two minor, and **six orderings**, one minor. Its opening judgement was that four rounds show: most of what the raw still holds is genuinely omissible, and what is left is concentrated. Its closing judgement was that a fifth pass would still find something and a sixth would not.
 
@@ -302,7 +323,7 @@ Two section pointers into `reading/text-design.md` named §7, where the redundan
 
 **Checked.** All 296 relative links resolve, every numbered cross-reference names a heading that exists, and section numbering is contiguous in every file.
 
-### 2.10 Where stage one stands
+### 2.11 Where stage one stands
 
 Four fresh heads were run, each on Opus, each holding the code, the 45 raw reports and the corpus, each asked only what the corpus loses. The losses that mattered fell **12 → 15 → 3 → 6**; the second figure is higher than the first because the second head read a corpus whose round-1 entry had been rewritten, and the fourth is higher than the third because round 4 was the first fold no head had read, and because this head went at the material the earlier rounds had shed rather than at the material they had folded.
 

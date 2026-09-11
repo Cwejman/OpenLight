@@ -294,14 +294,15 @@ def snapshot_rounds(rounds):
     # on first sight of a record, only the newest round is a state the files can vouch for;
     # earlier rounds are marked seen and never copied
     if not hasattr(snapshot_rounds, "seen"):
-        snapshot_rounds.seen = set(rounds[:-1])
+        snapshot_rounds.seen = set(rounds[:-1]) if not os.path.isdir(SNAPS) else set(rounds)
     for r in rounds:
         if "round" not in r.lower():  # renumbering makes new names for standing sections; only rounds are states
             continue
         if r in snapshot_rounds.seen:
             continue
         snapshot_rounds.seen.add(r)
-        name = re.sub(r"[^A-Za-z0-9.]+", "-", r).strip("-")[:60]
+        # key on the round, not its number: the record renumbers as entries are inserted
+        name = re.sub(r"[^A-Za-z0-9]+", "-", re.sub(r"^[\d.]+\s*", "", r)).strip("-")[:60]
         dest = os.path.join(SNAPS, name)
         if os.path.exists(dest):
             continue
