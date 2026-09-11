@@ -74,7 +74,21 @@ Confidence is written. A claim says whether it was measured, seen, reasoned or p
 
 The laws state the conditions, and a wide rule is easy to honour loosely. The principles are the laws made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the laws bind, and they are few, because each one is a place the laws were quietly broken. Each closes by saying how strongly it holds, measured, seen, reasoned or preferred; where it came from is kept in the grounds, linked at the end.
 
-### 4.1 The order of a holarchy
+### 4.1 The prose of a brief
+
+This principle is how the prose of a brief is composed. The measure is ease: how readily a reader understands what they read. Everything here follows from that.
+
+A brief speaks to its reader about the reading itself. Its title and first paragraph say what it gives, so the reader knows whether to enter, and the why comes before the win, so the win is understood knowing what it is for. Where the ground shifts inside it, the prose says so: what is now held, and what comes next. And it looks easy, because a reader who opens a brief and finds it overwhelming expects to fail. A reader who knows where they stand reads with confidence, and comprehension follows confidence.
+
+Understanding sets the size. A paragraph that makes you understand one thing is easy. One that makes you understand three at once is hard. So a paragraph carries one point, a claim with its ground, and a sentence carries one idea. The easiest way to say a thing is usually the shortest, and that is why the unit is named brief.
+
+*The points, and their order, come from comprehending what the brief has to convey. Comprehend it, and the points show themselves: the win, and what it needs to be understood. Then two orders pull on them, the two forces of a brief. By importance, the biggest win first, so a reader who stops early leaves with the most. By comprehension, what a point stands on before the point, so nothing arrives before its ground. Their balance is the gradient, and the paragraphs follow it.*
+
+The words never run ahead of the reader. Plain everyday words, and a word the knowledge itself carries is not used before it has been given.
+
+Simple is not terse. Cutting explanation does not make prose easy, it makes it thin. The simplicity is in the words and the sentences: short, one idea each, not chained into a long one.
+
+### 4.2 The order of a holarchy
 
 The holarchy is ordered, because prose is. At every level the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after, and what is nested under a brief is what its level did not need. The laws say nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
 
@@ -85,20 +99,6 @@ A folder has no order of its own; its entry file is prose, and that is where its
 The failure is a level not broken down, and it wears two costumes. A paragraph with bullets, where the paragraph is the lead-in and the bullets are the content, force-fed at one depth. And a section that is not brief, which the reader takes in whole to find the win and cannot skip. Both break the balance the brief is made of: the biggest win first, and what it does not need moved down.
 
 So when you meet either, read the whole, ask what it conveys, and write that win as the brief; then let what remains find its own shape by what it conveys, never item by item. What is one thing takes one heading, and what has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. This holds at every grain and no size sets it: wherever a win can be lifted, lift it, and let the details it does not need descend. Measured.
-
-### 4.2 The prose of a brief
-
-A reader takes prose one point at a time, in words they already hold. Everything the principle asks follows from that: a paragraph makes one point, a sentence one idea, and the words are the ones everyday speech uses. Where the writing breaks this, the reader spends reading for nothing. The test is a reader from outside the field following every sentence on first read.
-
-A point is a claim with what grounds it, and a paragraph matches the point. Prose is modular: a brief is points connected in order, and the reader takes them one at a time. So what drives a paragraph is understanding what it has to say, before any words are chosen: find each point the brief has to make, say it once with its reason, and stop. A paragraph that reads heavy holds two points; one that reads as a crumb holds a claim cut from its reason. Both are one fault, the paragraph not matching the point.
-
-Parentheses serve two cases, and they flip. A word that what follows builds on is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. A word that only carries is not introduced: the plain word leads, and the exact term follows in parentheses for the reader it grounds.
-
-A word that much of what follows stands on is a win of its own. It gets its own brief, and where it is used, it links there.
-
-Simple is not terse: everything is explained, and the simplicity is in the words and the sentences, never in cutting the explanation. Preferred, and seen in every read since.
-
-Open: how long a point runs, and when one point is two, is judged by the reader and not yet by a rule. No count of sentences or characters has earned a place; the earlier editions carried one, and the practice holds it as a question.
 
 ### 4.3 Work in progress
 

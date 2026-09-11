@@ -34,6 +34,12 @@ The second use is the image in an artful sense, as a blog post uses one: breathi
 
 The cycle wants a tool that is not built. It reads a document by depth: the title and the first paragraphs, then one level down, then the next, so a session holds the gradient without reading the files whole. It traces links as structure, not as text to open. And it moves a brief by its address or replaces one whole, so a rewrite touches only the brief named. Until it exists, headings do the reading and scripts do the moving. Open, and needed soon.
 
-## 8. Open
+## 8. Reading a paragraph
+
+Two diagnostics for the prose principle, and one convention. A paragraph that reads heavy holds two points; one that reads as a crumb holds a claim cut from its reason. Both are the one fault, the paragraph not matching the point, and the fix goes back to the points, not the words. Seen.
+
+Parentheses serve two cases, and they flip. A word that what follows builds on is introduced: it leads, and the plain explanation follows in parentheses, once, where it is first used. A word that only carries is not introduced: the plain word leads, and the exact term follows in parentheses for the reader it grounds. Preferred.
+
+## 9. Open
 
 What this practice has not settled, to be found by observation: how files hang under an entry; whether an intro carries a short guide to how the text is read; and whether the character counts the earlier editions used as red flags, five hundred for a paragraph and three hundred for a bullet, earn a place here.
