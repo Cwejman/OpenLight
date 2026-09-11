@@ -107,6 +107,12 @@
   .unread { font: 11.5px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); margin:6px 0 0;
     letter-spacing:.05em; }
   .unread b { color:var(--warm); font-weight:500; }
+  .place { margin:2px 0 14px; }
+  .place .row { display:flex; gap:2px; height:7px; margin-bottom:3px; }
+  .place .row i { display:block; border-radius:2px; background:var(--line); cursor:pointer; min-width:2px; }
+  .place .row i.on { background:var(--warm); }
+  .place .row i:hover { background:var(--seq); }
+  .place .cap { font: 11px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); letter-spacing:.05em; }
   /* one thing, lit wherever it appears */
   .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:330px;
     background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:10px 13px;
@@ -157,6 +163,7 @@
   <aside class="map">
     <h1 class="root" id="rootname">reading…</h1>
     <div class="sub" id="rootsub"></div>
+    <div class="place" id="place"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
     <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, as the text it is</span>
@@ -216,6 +223,19 @@ function index(root) {
   (function w(n){ if ((n.kind === 'file' || n.kind === 'folder') && !byPath[n.path]) byPath[n.path] = n;
     if (n.anchor) byKey[n.path + '#' + n.anchor] = n; n.kids.forEach(w); })(root);
   return {byPath, byKey};
+}
+function placement() {
+  if (!PATH.length) return '';
+  let rows = '';
+  for (let i = 0; i < PATH.length; i++) {
+    const parent = at(PATH.slice(0, i)), tot = parent.kids.reduce((a,k)=>a+Math.max(k.total_n,1),0) || 1;
+    rows += `<div class="row">` + parent.kids.map((k,j) =>
+      `<i class="${j === PATH[i] ? 'on' : ''}" style="flex:${Math.max(k.total_n,1)/tot}"
+        data-uid="${PATH.slice(0,i).concat(j).join(',')}"></i>`).join('') + `</div>`;
+  }
+  const here = at(PATH), parent = at(PATH.slice(0,-1));
+  return rows + `<div class="cap">${PATH[PATH.length-1]+1} of ${parent.kids.length} in ${
+    parent.name.length > 26 ? parent.name.slice(0,25)+'…' : parent.name}</div>`;
 }
 function sunburst(focus) {
   const deep = (function d(n){ return n.kids.length ? 1 + Math.max(...n.kids.map(d)) : 0; })(focus);
@@ -439,6 +459,7 @@ function render() {
   document.getElementById('rootname').textContent = root.name;
   document.getElementById('rootsub').textContent =
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
+  document.getElementById('place').innerHTML = placement();
   document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
   document.getElementById('gauge').innerHTML = gauge(focus);
   SEEN[focus.id] = focus.h; saveSeen();
@@ -500,6 +521,8 @@ document.addEventListener('click', e => {
     const t = resolve(a.getAttribute('href'), at(PATH).path);
     if (t) { e.preventDefault(); const p = pathOf(t); if (p) go(p); return; }
   }
+  const seg = e.target.closest('.place i[data-uid]');
+  if (seg) { go(seg.dataset.uid.split(',').map(Number)); return; }
   const kid = e.target.closest('.kid'), up = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
   if (kid) { go(PATH.concat(Number(kid.dataset.kid))); }
   else if (up) { go(PATH.slice(0, Number(up.dataset.go))); }
