@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Tails Claude Code subagent transcripts and a lab debrief; serves one page that polls it.
+"""The surface: reads a lab's substrate and the record its sessions leave, and serves one page.
 
-Usage: monitor.py <tasks_dir> <lab_dir> [port]
+Usage: surface.py <tasks_dir> <lab_dir> [port] [snapshot_dir]
 """
 import glob
 import json
@@ -16,7 +16,7 @@ TASKS = sys.argv[1]
 LAB = sys.argv[2]
 PORT = int(sys.argv[3]) if len(sys.argv) > 3 else 8765
 AGAINST = sys.argv[4] if len(sys.argv) > 4 else None  # a snapshot of the lab to colour change against
-HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor.html")
+HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "surface.html")
 
 state = {"agents": {}, "debrief": {}, "updated": None}
 offsets = {}   # file -> byte offset already parsed
@@ -175,8 +175,8 @@ def read_debrief():
                 (d["sizes"] if "bytes" in line or cells[0].startswith(("the raw", "corpus", "piece")) else d["account"]).append(cells)
     sp = os.path.join(LAB, "steps.md")
     if os.path.exists(sp):
-        lines = [l.strip() for l in open(sp, encoding="utf-8", errors="replace").read().splitlines()
-                 if l.strip() and not l.startswith("#")]
+        lines = [l.strip().lstrip("-* ") for l in open(sp, encoding="utf-8", errors="replace").read().splitlines()
+                 if re.match(r"^[-*\s]*\d{1,2}[:.]\d{2}", l)]
         d["steps"] = lines[:40]
     m = re.search(r"### 2\.\d+ Where stage one stands\n\n(.+?)(\n\n|$)", txt, re.S)
     if m:
@@ -212,12 +212,24 @@ def status(new, old):
     return "same" if new == old else "changed"
 
 
+def against_dir():
+    """Colour against the state at the last round, unless a snapshot was named on the command line."""
+    if AGAINST:
+        return AGAINST
+    if os.path.isdir(SNAPS):
+        kids = [os.path.join(SNAPS, d) for d in os.listdir(SNAPS) if os.path.isdir(os.path.join(SNAPS, d))]
+        if kids:
+            return max(kids, key=os.path.getmtime)
+    return None
+
+
 def read_tree(sub):
     """The corpus as a holarchy: root -> folders and root files -> files -> h2 briefs, with size and change."""
     base = os.path.join(LAB, sub)
     if not os.path.isdir(base):
         return None
-    snap = os.path.join(AGAINST, sub) if AGAINST else None
+    _a = against_dir()
+    snap = os.path.join(_a, sub) if _a else None
 
     def file_node(path):
         rel = os.path.relpath(path, base)
@@ -270,7 +282,7 @@ def snapshot():
                 "children": sorted(a["children"]),
             })
         agents.sort(key=lambda x: x["first"] or "")
-        return {"agents": agents, "debrief": state["debrief"], "tree": state.get("tree"), "against": bool(AGAINST), "updated": time.strftime("%H:%M:%S")}
+        return {"agents": agents, "debrief": state["debrief"], "tree": state.get("tree"), "against": bool(against_dir()), "updated": time.strftime("%H:%M:%S")}
 
 
 SNAPS = os.path.join(LAB, ".snapshots")  # one copy of corpus/ and output/ per round the record names
@@ -284,6 +296,8 @@ def snapshot_rounds(rounds):
     if not hasattr(snapshot_rounds, "seen"):
         snapshot_rounds.seen = set(rounds[:-1])
     for r in rounds:
+        if "round" not in r.lower():  # renumbering makes new names for standing sections; only rounds are states
+            continue
         if r in snapshot_rounds.seen:
             continue
         snapshot_rounds.seen.add(r)
@@ -304,7 +318,7 @@ def loop():
             tail_all()
             with lock:
                 state["debrief"] = read_debrief()
-                state["tree"] = read_tree("corpus") or read_tree("output")
+                state["tree"] = read_tree("output") or read_tree("corpus")
             snapshot_rounds(state["debrief"].get("rounds") or [])
         except Exception as e:  # keep serving
             sys.stderr.write(f"tail error: {e}\n")

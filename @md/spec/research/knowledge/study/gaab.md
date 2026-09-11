@@ -12,7 +12,7 @@ The labs' accounts put it in numbers: a session's cost is mostly its context re-
 
 ## 3. A step is the holon viewed by its change
 
-One more thing to be authored, said here so it is not lost. A holon is a holon, and a brief is a brief; a step is the holon viewed by its change. The trail projection in [the monitor](monitor/README.md) is that view drawn: the same shape, column by column, each column what one step changed. Reasoned, held for the edition.
+One more thing to be authored, said here so it is not lost. A holon is a holon, and a brief is a brief; a step is the holon viewed by its change. The trail projection in [the surface](surface/README.md) is that view drawn: the same shape, column by column, each column what one step changed. Reasoned, held for the edition.
 
 ## 4. The context as a projection of the substrate
 
@@ -20,11 +20,11 @@ The gate to another realm of it, the author dares say, is this: when a context i
 
 ## 5. Light steering at use, without a price change
 
-If a model can be lightly steered as it is used, tuned a little toward the substrate it works in, then a model offered as a service that gives that capability at the same price is the large form of giving as a business: the user's work makes the model better at the user's work, and the service earns on the compounding rather than on the tuning. The local-model direction in the monitor's sketch is the small form of the same idea. Reasoned, the author's proposal.
+If a model can be lightly steered as it is used, tuned a little toward the substrate it works in, then a model offered as a service that gives that capability at the same price is the large form of giving as a business: the user's work makes the model better at the user's work, and the service earns on the compounding rather than on the tuning. The local-model direction in the surface's sketch is the small form of the same idea. Reasoned, the author's proposal.
 
 ## 6. The project directory as a common standard
 
-The directory a harness opens on is already the most open-ended thing in use, and it could become a common standard the way a connector does for hardware: one shape everyone plugs into, so that what is built for one tool piggybacks on what another left. The code, the record, the step notes, the tucked-away raw, a monitor that reads them: none of it is a harness's own, all of it is files under a shape, and a second harness opening the same folder stands on the same ground. A commons compounds only on a standard, and the standard here costs nothing to adopt, since it is a folder. Reasoned, the author's.
+The directory a harness opens on is already the most open-ended thing in use, and it could become a common standard the way a connector does for hardware: one shape everyone plugs into, so that what is built for one tool piggybacks on what another left. The code, the record, the step notes, the tucked-away raw, a surface that reads them: none of it is a harness's own, all of it is files under a shape, and a second harness opening the same folder stands on the same ground. A commons compounds only on a standard, and the standard here costs nothing to adopt, since it is a folder. Reasoned, the author's.
 
 ## 7. The open-source social medium
 
