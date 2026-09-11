@@ -183,7 +183,8 @@
   .tip .hint { font: 10px/1.5 var(--sans); color:var(--mute); letter-spacing:.1em;
     text-transform:uppercase; margin-top:var(--r3); }
   [data-uid] { cursor:pointer; }
-  svg path.lit { stroke:var(--seq) !important; stroke-width:2 !important; }
+  svg path.lit, svg circle.lit { stroke:var(--seq) !important; stroke-width:2 !important; }
+  svg circle.hub { cursor:pointer; }
   .mn.lit, .kid.lit { background:color-mix(in oklab, var(--seq) 8%, transparent); }
 </style>
 </head>
@@ -284,7 +285,7 @@ function sunburst(focus) {
     if (depth > 0) {
       const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - Math.min(2, RING/8);
       const own = n.total_n ? Math.max(0.08, n.own_n / n.total_n) : 1;
-      out += `<path d="${arc(r0, r1, a0, a1)}" fill="${shade(depth)}" stroke="var(--paper)" stroke-width="1.5"
+      out += `<path d="${arc(r0, r1, a0, a1)}" fill="${shade(depth)}" stroke="var(--bg)" stroke-width="1.5"
         data-path="${path.join(',')}" data-uid="${PATH.concat(path).join(',')}"></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
       placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
@@ -309,10 +310,20 @@ function sunburst(focus) {
         stroke-width=".8" stroke-opacity=".5" pointer-events="none"/>`;
     }
   }
+  const paras = focus.paras || [], pmax = Math.max(600, ...paras, 1);
+  const ticks = paras.map((len, i) => {
+    const a = -Math.PI/2 + (i + .5) / Math.max(1, paras.length) * Math.PI * 2;
+    const r1 = R0 - 7, r0 = r1 - Math.max(2, (R0 - 20) * len / pmax);
+    return `<line x1="${c + r0*Math.cos(a)}" y1="${c + r0*Math.sin(a)}"
+      x2="${c + r1*Math.cos(a)}" y2="${c + r1*Math.sin(a)}"
+      stroke="${len > 500 ? 'var(--warm)' : 'var(--ink)'}" stroke-opacity="${len > 500 ? .75 : .3}"
+      stroke-width="1.6" pointer-events="none"/>`;
+  }).join('');
   return `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="The holarchy, each arc weighted by the text beneath it">
-    <circle cx="${c}" cy="${c}" r="${R0-4}" fill="${shade(0)}" stroke="var(--paper)" stroke-width="2"/>
+    <circle class="hub" cx="${c}" cy="${c}" r="${R0-4}" fill="${shade(0)}" stroke="var(--bg)" stroke-width="2"
+      data-uid="${PATH.join(',')}"/>${ticks}
     <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle" font-family="Inter, system-ui, sans-serif"
-      font-size="11" fill="var(--ink)">${fmt(tok(focus.total_n))}</text>${out}${chords}</svg>`;
+      font-size="11" fill="var(--ink)" pointer-events="none">${fmt(tok(focus.total_n))}</text>${out}${chords}</svg>`;
 }
 
 function gauge(focus) {
@@ -393,8 +404,9 @@ function pin(uid, x, y) {
     const p = pathOf(k); return `<a data-jump="${p.join(',')}">${esc(k.name)}</a>`; }).join('');
   const backs = pointedFrom(n).slice(0, 6).map(b => {
     const p = pathOf(b); return `<a data-jump="${p.join(',')}">${esc(b.name)}</a>`; }).join('');
+  const up = uid === '' ? '' : `<a data-jump="${uid.split(',').slice(0,-1).join(',')}">step out</a>`;
   tip.innerHTML = tipFor(n) +
-    `<div class="act"><a class="open" data-jump="${uid}">open this room</a>${rooms}</div>` +
+    `<div class="act"><a class="open" data-jump="${uid}">open this room</a>${up}${rooms}</div>` +
     (backs ? `<div class="act">${backs}</div>` : '') +
     `<div class="hint">click away to let go</div>`;
   tip.classList.add('pinned');
@@ -640,7 +652,7 @@ document.addEventListener('click', e => {
   if (e.target.closest('.tip')) return;
   const mw = e.target.closest('.miniwrap');
   const mapEl = (mw && mw.querySelector('.mini')) ? nearestMn(mw, e.clientY)
-              : e.target.closest('.cells .c[data-uid], svg path[data-uid], .place i[data-uid]');
+              : e.target.closest('.cells .c[data-uid], svg path[data-uid], svg circle[data-uid], .place i[data-uid]');
   if (mapEl) { pin(mapEl.dataset.uid, e.clientX, e.clientY); return; }
   if (PIN) { unpin(); return; }
   const a = e.target.closest('.prose a[href], .backs a');
