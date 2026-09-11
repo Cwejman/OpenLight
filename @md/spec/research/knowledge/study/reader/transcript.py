@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Turns a session's transcript into a substrate: what was asked, in order, as briefs.
+"""Turns a session's transcript into substrate: what was asked, in order.
 
 The harness keeps a session as a line of JSON per event. This reads one and writes
-a folder the reader can open, so what a person asked for during a long sitting is
-addressable afterwards instead of buried in scrollback.
+either a folder of briefs the reader can open, or a single record of the asks, so
+what a person asked for during a long sitting is addressable afterwards instead of
+buried in scrollback.
 
-Usage: transcript.py <session.jsonl> <out dir>
+Usage: transcript.py <session.jsonl> <out dir>          a brief per turn
+       transcript.py <session.jsonl> <file.md> --asks   one record of the asks
+
+The record keeps whatever cleaned entries the file already carries, so a pass that
+corrected spelling is not undone by a later refresh.
 """
 import json
 import os
@@ -61,7 +66,33 @@ def slug(s, i):
     return f"{i:03d}-" + (re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:48] or "turn")
 
 
+def asks_record(path):
+    """One record of the asks, refreshed without losing entries already cleaned by hand."""
+    ts = turns(SRC)
+    old, kept = "", []
+    if os.path.exists(path):
+        old = open(path, encoding="utf-8").read()
+        kept = re.split(r"\n## \d+\. At \d\d:\d\d\n", old)[1:]
+    start = max(0, len(ts) - len(kept))
+    head = old.split("## 1. At")[0].rstrip() if old else ""
+    if not head:
+        head = ("---\nunder: the code\nkind: record\nentries: oldest first\n---\n\n"
+                "# What was asked, through the sitting\n\nEvery ask of the sitting, in order, "
+                "taken from the harness's record.")
+    out = [head, ""]
+    for i, t in enumerate(ts, 1):
+        out += [f"## {i}. At {t['at']}", ""]
+        body = kept[i - start - 1].strip() if i > start and (i - start - 1) < len(kept) else t["said"].strip()
+        for para in body.split("\n"):
+            if para.strip():
+                out += [para.strip(), ""]
+    open(path, "w", encoding="utf-8").write("\n".join(out).rstrip() + "\n")
+    print(f"{len(ts)} asks written to {path}, {len(kept)} kept as already cleaned")
+
+
 def main():
+    if "--asks" in sys.argv:
+        return asks_record(OUT)
     ts = turns(SRC)
     os.makedirs(OUT, exist_ok=True)
     rows = []
