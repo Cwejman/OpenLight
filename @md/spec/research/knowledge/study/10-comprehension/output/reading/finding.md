@@ -35,3 +35,5 @@ Polyhierarchy — the same item appearing in several places — is normatively e
 Costs have been measured only on the machine side, where following every path a graph permits is expensive; that is in [what breaks](../medium/breaks.md) §3. For a human reader, nothing is known.
 
 The detail is in [the material's finding file](../../corpus/reading/finding.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

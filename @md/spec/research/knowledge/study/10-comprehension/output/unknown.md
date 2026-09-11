@@ -53,3 +53,5 @@ The honest position is that they are cheap, and that cheap untested rules are wo
 Named as out of scope and not covered: design systems as a source of truth, localisation and what a reader in another language does to an English corpus, API documentation as the derived-documentation case, teaching materials written for learners of the mechanics, the economics of who pays for documentation, and whether Markdown in a repository is the end form.
 
 The full list of what the sweep was asked and what came back is in [the material's method file](../corpus/method.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).

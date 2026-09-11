@@ -12,7 +12,7 @@ None of that makes the practices wrong. It means they are preference, and anythi
 
 Take the four that land hardest.
 
-The most-adopted convention in the field is `AGENTS.md`, a file of instructions for coding agents, in roughly 845,000 repositories. The one rigorous evaluation found it does not generally improve task success while raising inference cost by over a fifth, and the content type that failed is the repository overview that every vendor guide recommends most. Its figures, its corroboration and the run-to-run noise floor it has to be read against are in [what models do with what we write](structure/models.md) §§2 and 5.
+The most-adopted convention in the field is `AGENTS.md`, a file of instructions for coding agents, in roughly 845,000 repositories. The one rigorous evaluation found it does not generally improve task success while raising inference cost by over a fifth, and the content type that failed is the repository overview that every vendor guide recommends most. Its figures, its corroboration and the run-to-run variation any single-run result in this territory has to be read against are in [what models do with what we write](structure/models.md) §§2 and 5.
 
 Architecture decision records reached "Adopt" on ThoughtWorks' technology radar fourteen months after Nygard's post, on no data. Fifteen years later, the first study to look for an effect — reusing the same 921 repositories and about 5,800 of those records — found the variables "exhibit predominantly small correlations with code quality and productivity metrics, suggesting that ADR adoption is associated with, at most, modest observable effects at scale." *Measured, observational, paper-only.*
 
@@ -37,3 +37,5 @@ Three mechanisms produce nearly all of this field's folklore: a figure read off 
 It does not license dismissing the practices. A null on documentation format is not evidence that documentation does not matter, and two of the four nulls above are underpowered enough that "no difference found" is not "no effect" — the format study at 65 participants, and the corroborating agent-file study, which bounds its own result to within ten to fifteen percentage points.
 
 What it licenses is refusing to treat adoption as evidence. If a rule is worth holding, it is worth holding as a preference you have reasoned about and can state as one.
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).

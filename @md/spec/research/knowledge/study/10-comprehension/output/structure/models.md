@@ -32,9 +32,9 @@ Forcing output to match a schema during generation costs reasoning, worsening wi
 
 ## 5. The noise floor under all of it
 
-Temperature-zero inference flips about 9% of per-instance outcomes between byte-identical runs on the benchmark most of these results use. That is a floor within striking distance of the single-digit gains in section 1 and of the nulls in section 2 alike, which means a single-run ablation claiming a few points from documentation cannot be distinguished from run-to-run variation.
+Temperature-zero inference flips about 9% of per-instance outcomes between byte-identical runs on the benchmark most of these results use. What that bounds needs stating carefully, because it is easy to overclaim and this piece did. A per-instance flip rate is not an error bar on an aggregate: if the flips fall both ways, the aggregate moves by something closer to a point or two on a few hundred instances, not by nine. So the figure does not put the six-point description gain or the seven-point file-finding gain inside the noise. What it does mean is that any *single* run of any of these ablations is untrustworthy on its own, and that a result reported from one run without repeats cannot be told from chance.
 
-It was measured on one benchmark and bounds the context-file nulls and the file-finding result directly. Whether the description results in section 1 sit on a comparable floor is unmeasured, and nobody has looked. *Measured, on one benchmark; the extension to others is reasoned. This is this figure's one home.*
+It was measured on one benchmark. *Measured; what it bounds is this piece's own reasoning, corrected after a reader pointed out that the first version treated a per-instance rate as an aggregate interval. This is the figure's one home.*
 
 ## 6. Whether a model reads like a person is not currently a measurable question
 
@@ -55,3 +55,5 @@ Two further results bear on any structured medium. Compressing a conversation to
 And progressive disclosure — routing a reader through an index to the content — has a measured ceiling. One level degrades gracefully and eventually beats raw navigation; a second gives no benefit and sometimes reduces accuracy. That shallow ceiling is roughly where the human depth experiments land too, in [what a reader is measured to get](../reading/README.md) §4. *Measured, paper-only; one controlled ablation each.*
 
 The detail is in [the material's agents folder](../../corpus/agents/README.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

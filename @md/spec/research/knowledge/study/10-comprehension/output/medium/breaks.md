@@ -43,3 +43,5 @@ Notion, Airtable, Tana and Anytype each let you add types and add properties to 
 Meanwhile React deleted its only runtime contract in version 19, silently ignoring prop-type checks, during exactly the period when agents started needing to introspect components. *Observational; read from protocols and SDK source during the sweep.*
 
 The detail is in [the material's substrate folder](../../corpus/substrate/README.md) and [its interface folder](../../corpus/interface/README.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

@@ -45,3 +45,5 @@ The agent that read this literature end to end closed with a prescription, and i
 *Reasoned by one agent from the studies in sections 1 to 5; not itself measured, and it is one head's synthesis rather than a finding.* Held at that weight it is still the single thing in this material that argues hardest against arrangement being the lever, which is why it is stated here rather than left in the raw.
 
 The detail is in [the material's professionals file](../../corpus/reading/professionals.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

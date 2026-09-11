@@ -2,6 +2,7 @@
 
 One line per step, newest first, written before the step is taken: the clock time, what I am about to do, and why. The round's account in prose is in [the debrief](debrief.md).
 
+22:02 — Folding the sixth head's six findings and stopping there, because two are a statistical inference I got wrong twice and the rest are mine to fix, and the run has to end somewhere it can defend.
 21:56 — Sending a sixth fresh head, the last one I will run, because each head has found less than the one before and I need to see whether a round now finds only words.
 21:55 — Folding the fifth head's four material findings, because one is an outright factual error in what a study bounded and three are briefs of mine giving opposite answers to the same question.
 21:48 — Sending a fifth fresh head, because round 5 changed a verdict and not only words, which is the test the code sets for stopping.

@@ -8,7 +8,7 @@ Follow the failure through once and it stays with you.
 
 *The scene that follows is an archetype, not a case: its shape is what the studies in section 2 measure, and no confidence attaches to the numbers in it.*
 
-A field is declared, and a model fills it across ten thousand records. It is right seven times in ten. Nobody checks, because checking ten thousand records is the work the field was meant to save. Later someone asks how many records fall in a category — a question prose could never have answered, which is exactly why the field exists. They get a number. The number is wrong by thirty per cent, and nothing about it looks wrong: it has no ragged edge, no hedge, no visible gap where the missing part would be. A paragraph that does not know something reads as a paragraph that does not know something. A field that does not know something answers anyway.
+A field is declared, and a model fills it across ten thousand records. It is right seven times in ten. Nobody checks, because checking ten thousand records is the work the field was meant to save. Later someone asks how many records fall in a category — a question prose could never have answered, which is exactly why the field exists. They get a number. It is wrong — by how much, nobody can say, because that depends on which way each error fell, and nothing about the number shows it: no ragged edge, no hedge, no visible gap where the missing part would be. A paragraph that does not know something reads as a paragraph that does not know something. A field that does not know something answers anyway.
 
 That asymmetry is the whole argument for the gate, and it is why the gate outranks every reason to type a thing.
 
@@ -41,3 +41,5 @@ Entity resolution — deciding that two names denote the same thing — remains 
 And the decay is silent. Across 19,099 of the servers that offer tools to models, watched over 88.6 days, re-auditing the 5% most likely to have drifted catches only about a tenth of the descriptions that actually changed, because half the changes land on entries that did not exist at the last audit. The one control that works is binding content to a hash and revalidating the moment it moves — which is itself a typed field, and no model capability substitutes for it. *Measured, one census.*
 
 The detail is in [the material's adversarial brief](../../corpus/substrate/does-structure-pay.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

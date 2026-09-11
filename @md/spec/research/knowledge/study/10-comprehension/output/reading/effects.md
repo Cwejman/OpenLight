@@ -39,3 +39,5 @@ That bears on the rule that a brief should open by saying what it gives, and it 
 Three cautions belong to the literature as a whole rather than to any figure in it. Cognitive load theory survived by amputation, dropping one of its three categories of load in response to the charge that the theory could not be falsified. Disfluency as a desirable difficulty — the idea that making text harder to read helps — is refuted by direct replication. And the discipline this all sits in returned a 36% replication rate in its largest replication effort.
 
 The detail is in [the material's text-design file](../../corpus/reading/text-design.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

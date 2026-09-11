@@ -41,3 +41,5 @@ The difference the code asserts is that a debrief is written to be read once, by
 Of the code's making, one part is supported at a low level and once, one part is unmeasured, one part is unmeasurable from this material, and one part inherits a finding that predicts its decay. Nothing here refutes any of it, and the sweep is the wrong instrument: it was sent to read a literature, and the making is a practice. What would settle it is running it and measuring, which is what this piece is a product of and not evidence about.
 
 The detail is in [the material's writing folder](../corpus/writing/README.md), for the review findings and the cost of writing up front, and [its agents folder](../corpus/agents/README.md) for the fresh-reader measurement.
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).

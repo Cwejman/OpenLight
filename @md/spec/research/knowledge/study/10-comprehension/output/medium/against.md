@@ -39,3 +39,5 @@ A type rots silently. Text rots loudly — you read it and see it is stale — w
 And the reader for whom structure was an affordance is being replaced. If the structure premium is a tax on weak models, betting a substrate on it is betting against the trend line, and the trend line is the one thing in this material that has moved consistently in one direction.
 
 The detail is in [the material's opposition brief](../../corpus/field/opposition.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

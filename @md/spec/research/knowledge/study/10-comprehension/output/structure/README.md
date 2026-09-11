@@ -20,7 +20,7 @@ The gate outranks the five questions because of an asymmetry in how the two medi
 
 The agent-facing lane is the only territory in the sweep producing clean controlled experiments, and its results split along the same line. Typing what a model must choose from or act within — a tool catalogue, an operation set — improves task success and selection under intervention. Writing prose at a model does not, and the content type that fails is the repository overview that every vendor guide recommends most. The one thing prose buys is navigational: agents reach the right file while patch quality stays flat.
 
-One caveat bounds the negative half directly and the positive half only by inference. Run-to-run variation on the benchmark behind the nulls and the file-finding result flips about a tenth of individual outcomes between identical runs, which is the same order as the effects being claimed there. Whether the description results sit on a comparable floor has not been measured and nobody has looked. So "not settled" is the honest reading of the nulls, and the gains stand on their own benchmark until someone checks. [What models do with what we write](models.md) §5 is that floor's home.
+One caveat travels with all of it. On the benchmark most of this work uses, identical runs flip about a tenth of individual outcomes, so any result reported from a single run cannot be told from chance. That does not put the measured gains inside the noise — the arithmetic for why is in [what models do with what we write](models.md) §5, which is that figure's home — but it does mean a claim of a few points from one run is not evidence, and several claims in this territory are exactly that.
 
 ## 4. The one result that cuts hardest against arrangement
 
@@ -35,3 +35,5 @@ The case for waiting is real. Schema compliance is already near-perfect, format 
 What it never touches is the writing side. A rule that must hold even when the model is wrong or attacked cannot live in the prompt, because a model that has read a row has already read it — no increase in capability turns a reader into a gatekeeper. Provenance, because where a claim came from is a fact about the world rather than a property of whoever reads it. Coordination between several writers. Cost that grows with the catalogue. And staleness detection, whose one working control is in [what happens when the types are inferred](inferred.md) §5.
 
 The asymmetry is exact: scaling dissolves the problems of reading, and does not touch the problems of writing, of committing a claim, and of being accountable for it later. *Reasoned by one agent; the individual results on both sides are measured.*
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

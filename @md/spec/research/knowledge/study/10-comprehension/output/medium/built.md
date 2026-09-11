@@ -37,3 +37,5 @@ Jonathan Edwards, closing two decades of his own structure-editor experiments, d
 That is the most transferable warning in the lineage, and it is aimed precisely at anyone assembling a combination nobody has assembled before. *Opinion, from a practitioner reflecting on his own failures.*
 
 The detail is in [the material's substrate folder](../../corpus/substrate/README.md) and [its field folder](../../corpus/field/README.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](../ground.md).

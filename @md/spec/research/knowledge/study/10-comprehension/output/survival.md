@@ -43,3 +43,5 @@ One large-corpus finding cuts against the reading above and changes its shape ra
 So it is not that people do not record why. They record it in the commit — the artifact something downstream consumes — and the decision record, the artifact the practice names, is the one that goes unmaintained. *Measured, observational; neither study ties recording to a maintenance outcome.*
 
 The detail is in [the material's writing folder](../corpus/writing/README.md) and [its people folder](../corpus/people/README.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).

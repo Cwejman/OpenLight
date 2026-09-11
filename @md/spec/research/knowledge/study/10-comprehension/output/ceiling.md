@@ -55,3 +55,5 @@ The scope is easy to overstate: individual-task experiments do exist, and sectio
 So what a structure can plausibly do is reduce friction where two parties differ in vocabulary or in meaning. There is no evidence it closes a boundary of interest, none that it substitutes for mentorship, and good evidence that it decays unless something downstream consumes it.
 
 The detail is in [the material's people folder](../corpus/people/README.md).
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).

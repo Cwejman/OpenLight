@@ -34,10 +34,12 @@ The fifth claim is the widest, and its first half is easy to misstate. Prose is 
 
 It is that the shape underneath — wholes that are also parts, laid by the gradient, joined by links, in one medium everything lives in — should be taken beyond prose to the rest of what a computer holds, so that programs say what they take and what they give in the medium itself and meet by matching rather than by glue. Its author states plainly that this does not exist and is reasoned rather than shown.
 
-The evidence tests an operational reading of it: a typed, versioned, permission-governed store, because that is what a medium in which things say what they take and give has to be, and because that is the form the field has actually tried to build. The reading is this piece's, and where a verdict turns on the harder form rather than on the words above, it says so. [The verdict on it](verdict.md) §5, with the evidence in [where structure pays](structure/README.md) and [the substrate question](medium/README.md).
+The evidence tests an operational reading of it: a typed, versioned, permission-governed store, because that is what a medium in which things say what they take and give has to be, and because that is the form the field has actually tried to build. The reading is this piece's, and where a verdict turns on the harder form rather than on the words above, it says so. *Reasoned, by this piece, from what the field has built rather than from the claim's own words; it is the substitution that routes two of the five folders, and it is not the author's.* [The verdict on it](verdict.md) §5, with the evidence in [where structure pays](structure/README.md) and [the substrate question](medium/README.md).
 
 ## 6. Where the position is not neutral
 
 Four of the rules above have no direct experimental test anywhere in this material: writing a claim's confidence into the text, treating a reader who stops early as having been paid, writing a link so it says what following it gives, and giving a fact exactly one home. This piece is written under all four.
 
 That is stated here, before the evidence, because a reader should be able to discount the piece's own form as evidence for its own rules from the start. The ground for it is in [the missing studies](unknown.md) §5.
+
+What every figure above inherits — the sweep's conditions, whose marks these are, and what was never checked — is in [what this rests on](ground.md).
