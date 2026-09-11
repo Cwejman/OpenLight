@@ -34,6 +34,12 @@ Notification was to be a subscription to a level of summary, so that a reader fo
 
 A stack navigation for narrow screens was raised and not built; at narrow widths the maps simply fall above the spreads. A third bounding between the whole and the page, the file you are inside rather than the section, was named as a one-line change and not made. And a small local model was to choose the projection and caption a group of events, which is the only part of the drawing that wants a model at all; there is none.
 
-## 8. What this file is for
+## 8. It is hard to use
+
+Stated by the author at the close, and it outranks everything above: scrolling and the overall usability are critically low. The parts are there and using them is work. What is known of the causes, none of it measured: the one scroll moves three spreads at once so a small gesture changes more than a reader means; the room ahead opens on any hover, so the pointer crossing a list churns a whole column; the spreads are narrow because three share the width, which sets the prose against its own measure; the maps are many and each one asks for the estate the reading wants; and nothing is tuned, since every part was built once and never returned to.
+
+None of this is a detail to be swept up after the features. A reading surface that is tiring to use fails at the only thing it is for, which is the code's own argument turned on the tool: what looks like too much is harder to understand, and effort begins before the reading does. The next sitting on this should spend itself on use rather than on more.
+
+## 9. What this file is for
 
 The code says a brief carries its confidence and that nothing is settled that has not been said. A built thing is no different: the distance between what was asked and what stands is knowledge about the thing, and keeping it beside the thing is the only way the next sitting starts on ground instead of in a pile. Seen, in this sitting: most of what is listed here was said clearly, acknowledged, and would have been lost.
