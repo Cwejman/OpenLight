@@ -12,7 +12,7 @@ It answers a question a file tree cannot. A total tells a reader nothing: thirty
 
 - [Publishing a repository as itself](publication.md) — the end this is built toward, and what has to be true first.
 
-- [Where it is not what was asked for](shortfall.md) — the gap between the thing built and the thing wanted, stated plainly.
+- [The path forward](forward.md) — what was asked set against what stands, in the order the work should take it, standing on [the asks](asked.md) as they were made.
 
 - [The making](making.md) — how it came to be, move by move, and what that taught.
 
