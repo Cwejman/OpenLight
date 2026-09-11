@@ -137,11 +137,10 @@
 
   /* depth runs to the right: one spread per level, the ones behind kept and readable */
   .doc { padding:0; overflow:hidden; }
-  .panes { display:flex; gap:calc(var(--r0) * 1.3); overflow-x:auto; overflow-y:hidden;
-    height:calc(100vh - var(--r0) * 1.6); scroll-behavior:smooth; scrollbar-width:none; }
-  .panes::-webkit-scrollbar { display:none; }
-  .pane { flex:0 0 clamp(300px, 33em, 44vw); height:100%; overflow-y:auto; scrollbar-width:none;
-    padding-bottom:14vh; opacity:.6; transition:opacity .18s; }
+  .panes { display:grid; gap:calc(var(--r0) * 1.2); overflow:hidden;
+    height:calc(100vh - var(--r0) * 1.6); }
+  .pane { min-width:0; height:100%; overflow-y:auto; scrollbar-width:none;
+    padding-bottom:14vh; opacity:.72; transition:opacity .18s; }
   .pane::-webkit-scrollbar { display:none; }
   .pane.last, .pane:hover { opacity:1; }
   .ptitle { font:600 var(--t2)/1.2 var(--serif); margin:0 0 var(--r4); letter-spacing:-.014em; cursor:pointer; }
@@ -152,9 +151,18 @@
   .pane .prose { max-width:none; }
   .pane:not(.last) .prose { font-size:var(--t5); }
   .pane:not(.last) .prose > p:first-child { font-size:var(--t4); }
+  /* the room you went into, marked so it cannot be missed */
   .kid.chosen { position:relative; }
-  .kid.chosen::before { content:""; position:absolute; left:-14px; top:3px; bottom:var(--r1);
-    width:2px; background:var(--warm); }
+  .kid.chosen::before { content:""; position:absolute; left:-16px; right:-12px; top:-6px; bottom:var(--r2);
+    background:color-mix(in oklab, var(--warm) 11%, transparent); border-left:3px solid var(--warm);
+    border-radius:0 6px 6px 0; pointer-events:none; }
+  .kid.chosen .kn { color:var(--ink); }
+  /* each spread's own division: this level's rooms, weighted */
+  .plocal { display:flex; gap:2px; height:9px; margin:0 0 var(--r3); }
+  .plocal i { display:block; background:var(--line); cursor:pointer; min-width:2px; border-radius:1px; }
+  .plocal i.on { background:var(--warm); }
+  .plocal i.been { background:color-mix(in oklab, var(--seq) 50%, var(--line)); }
+  .plocal i:hover, .plocal i.lit { background:var(--seq) !important; }
   /* the page */
   .doc { padding-bottom:22vh; }
   .crumb { font: var(--t6)/1.7 var(--sans); color:var(--mute); margin-bottom:var(--r2);
@@ -819,6 +827,14 @@ function pane(node, path, chosen, isLast) {
       node.kids.length ? ` · ${node.kids.length} beneath, ${fmt(tok(node.total_n - node.own_n))} in them` : ''}</div>
     ${node.paras && node.paras.length ? `<div class="weigh">${texture(node.paras)}<span>${
       node.paras.length} paragraph${node.paras.length > 1 ? 's' : ''}${heavy ? ` · ${heavy} heavy` : ''}</span></div>` : ''}
+    ${node.kids.length ? `<div class="plocal">` + (() => {
+      const tot = node.kids.reduce((a,k)=>a+Math.max(k.total_n,1),0) || 1;
+      return node.kids.map((k,i) => {
+        const u = path.concat(i).join(',');
+        return `<i class="${i === chosen ? 'on' : ''} ${TRAIL.indexOf(u) >= 0 && i !== chosen ? 'been' : ''}"
+          data-uid="${u}" data-jump="${u}" style="flex:${Math.max(k.total_n,1)/tot}"></i>`;
+      }).join('');
+    })() + `</div>` : ''}
     <div class="prose" data-path="${esc(node.path || '')}">${md(node.own)}</div>
     ${isLast ? backsOf(node, path) : ''}
     ${inner.length ? `<span class="grp">rooms of this brief</span>` + inner.join('') : ''}
@@ -826,17 +842,27 @@ function pane(node, path, chosen, isLast) {
   </section>`;
 }
 function drawPanes() {
+  const SHOW = 3;
+  const first = Math.max(0, PATH.length - (SHOW - 1));
   const out = [];
-  for (let i = 0; i <= PATH.length; i++)
+  for (let i = first; i <= PATH.length; i++)
     out.push(pane(at(PATH.slice(0, i)), PATH.slice(0, i), PATH[i], i === PATH.length));
   const el = document.getElementById('panes');
+  el.style.gridTemplateColumns = `repeat(${out.length}, minmax(0, 1fr))`;
   el.innerHTML = out.join('');
+  // a spread behind opens at the room you went into, so the mark is where the eye is
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.pane:not(.last)').forEach(pn => {
+      const ch = pn.querySelector('.kid.chosen');
+      if (ch) pn.scrollTop = Math.max(0, ch.offsetTop - pn.clientHeight * .34);
+    });
+    pagemap();
+  });
   el.querySelectorAll('.prose a[href]').forEach(a => {
     const t = resolve(a.getAttribute('href'), a.closest('.prose').dataset.path);
     const q = t && pathOf(t);
     if (q) { a.dataset.uid = q.join(','); a.title = t.name; } else a.classList.add('out');
   });
-  requestAnimationFrame(() => { el.scrollLeft = el.scrollWidth; });
 }
 function activePane() { return document.querySelector('.pane.last'); }
 function render() {
