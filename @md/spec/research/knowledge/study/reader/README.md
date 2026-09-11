@@ -18,7 +18,7 @@ Three more carry where it came from and where it goes, and they are the ones to 
 
 - [The path forward](forward.md) — what was asked set against what stands, in the order the work should take it. It opens with the verdict that matters most, that the thing is hard to use.
 
-- [What was asked, while this was built](asked.md) — the author's own words over the stretch that made it, the ground the path forward is written on.
+- [What was asked, through the sitting](asked.md) — every ask of the day this was built, in the author's own words, the ground the path forward is written on.
 
 - [Publishing a repository as itself](publication.md) — the end this is built toward, and the two judgments that have to be made before it begins.
 
