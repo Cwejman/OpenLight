@@ -101,7 +101,7 @@
 
   .miniwrap { flex:1 1 auto; position:relative; overflow:hidden; margin-top:var(--r3); min-height:110px; }
   .cellwrap { flex:1 1 auto; }
-  #pagewrap { flex:0 0 clamp(64px, 9vh, 110px); }
+  #pagewrap { flex:0 0 30px; margin-top:var(--r3); }
   .cells { position:absolute; inset:0; }
   .cells .c { position:absolute; border:.5px solid var(--bg); transition:opacity .12s; }
   .cells .c.read { opacity:.4; }
@@ -119,7 +119,7 @@
     color-mix(in oklab, var(--ink) 13%, transparent) 0 1px, transparent 1px 4px); }
   .pagemap { position:absolute; inset:0; }
   .pagemap i { position:absolute; display:block; }
-  .view { position:absolute; left:0; right:0; border-radius:5px;
+  .view { position:absolute; border-radius:5px;
     background:color-mix(in oklab, var(--warm) 12%, transparent);
     box-shadow:0 0 0 1px color-mix(in oklab, var(--warm) 40%, transparent),
                0 0 14px -2px color-mix(in oklab, var(--warm) 30%, transparent); pointer-events:none; }
@@ -138,14 +138,21 @@
   /* the page */
   .doc { padding-bottom:22vh; }
   @media (min-width: 1280px) {
-    .doc { display:grid; grid-template-columns:minmax(0, 38em) minmax(300px, 1fr);
-      column-gap:var(--r0); align-items:start; }
-    .doc > .crumb { grid-column:1; grid-row:1; } .doc > .title { grid-column:1; grid-row:2; }
-    .doc > .meta { grid-column:1; grid-row:3; } .doc > .weigh { grid-column:1; grid-row:4; }
-    .doc > .prose { grid-column:1; grid-row:5; }
-    .doc > .aside { grid-column:2; grid-row:1 / 6; }
+    /* the article holds while the index runs past it, as a page holds its lead */
+    .doc { display:grid; grid-template-columns:minmax(0, 33em) minmax(320px, 1fr);
+      column-gap:calc(var(--r0) * 1.4); align-items:start; }
+    .doc > .article { grid-column:1; position:sticky; top:var(--r1); align-self:start;
+      max-height:calc(100vh - var(--r0) * 2); overflow-y:auto; scrollbar-width:none; }
+    .doc > .article::-webkit-scrollbar { display:none; }
+    .doc > .aside { grid-column:2; }
     .aside .backs, .aside .kids { margin-top:0; }
     .aside .kids .grp:first-child { margin-top:0; }
+    .aside .kid { padding-bottom:var(--r2); grid-template-columns:minmax(0,1fr) 62px; gap:var(--r2); }
+    .aside .kn { font-size:var(--t3); }
+    .aside .kf { font-size:var(--t5); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3;
+      -webkit-box-orient:vertical; overflow:hidden; }
+    .aside .rooms { display:none; }
+    .aside .kw .tex { display:none; }
   }
   .crumb { font: var(--t6)/1.7 var(--sans); color:var(--mute); margin-bottom:var(--r2);
     letter-spacing:.08em; text-transform:uppercase; }
@@ -284,11 +291,13 @@
       <div class="view" id="view" hidden></div></div>
   </aside>
   <main class="doc">
-    <div class="crumb" id="crumb"></div>
-    <h2 class="title" id="title"></h2>
-    <div class="meta" id="meta"></div>
-    <div class="weigh" id="weigh"></div>
-    <div class="prose" id="prose"></div>
+    <div class="article">
+      <div class="crumb" id="crumb"></div>
+      <h2 class="title" id="title"></h2>
+      <div class="meta" id="meta"></div>
+      <div class="weigh" id="weigh"></div>
+      <div class="prose" id="prose"></div>
+    </div>
     <div class="aside">
       <div class="backs" id="backs"></div>
       <div class="kids" id="kids"></div>
@@ -728,25 +737,27 @@ function pagemap() {
   const wrap = document.getElementById('pagewrap'), inner = document.getElementById('pagemap');
   const doc = document.querySelector('.doc');
   if (!wrap || !doc) return;
-  const H = Math.max(1, document.documentElement.scrollHeight), k = wrap.clientHeight / H, W = 286;
+  const H = Math.max(1, document.documentElement.scrollHeight);
+  const W = wrap.clientWidth, HH = wrap.clientHeight, k = W / H;
   const parts = [];
   doc.querySelectorAll('.crumb, .title, .meta, .prose > *, .kids > .grp, .kids > .kid').forEach(el => {
     const r = el.getBoundingClientRect();
-    const top = (r.top + window.scrollY) * k, h = Math.max(1, r.height * k);
+    const x = (r.top + window.scrollY) * k, w = Math.max(1, r.height * k);
     const tag = el.tagName.toLowerCase(), cls = el.className || '';
-    let w = W, c = 'var(--seq)', o = .5, x = 0;
-    if (cls.includes('kid')) { w = W - 12; x = 12; c = 'var(--ink)'; o = .16; }
-    else if (cls.includes('grp') || tag === 'h3') { w = W * .55; c = 'var(--ink)'; o = .62; }
-    else if (tag === 'h4' || cls.includes('meta') || cls.includes('crumb')) { w = W * .38; o = .3; }
-    else if (cls.includes('title')) { w = W * .78; c = 'var(--ink)'; o = .8; }
-    else if (tag === 'pre' || tag === 'blockquote') { w = W - 14; x = 14; o = .34; }
-    parts.push(`<i style="top:${top}px;height:${h}px;left:${x}px;width:${w}px;background:${c};opacity:${o}"></i>`);
+    let h = HH * .5, c = 'var(--seq)', o = .5, y = (HH - h) / 2;
+    if (cls.includes('kid')) { h = HH * .34; y = HH - h; c = 'var(--ink)'; o = .18; }
+    else if (cls.includes('grp') || tag === 'h3') { h = HH; y = 0; c = 'var(--ink)'; o = .6; }
+    else if (tag === 'h4' || cls.includes('meta') || cls.includes('crumb')) { h = HH * .3; y = 0; o = .3; }
+    else if (cls.includes('title')) { h = HH; y = 0; c = 'var(--ink)'; o = .78; }
+    else if (tag === 'pre' || tag === 'blockquote') { h = HH * .4; y = HH * .3; o = .34; }
+    parts.push(`<i style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${c};opacity:${o}"></i>`);
   });
   inner.innerHTML = parts.join('');
   const view = document.getElementById('view');
   view.hidden = false;
-  view.style.top = (window.scrollY * k) + 'px';
-  view.style.height = Math.max(3, window.innerHeight * k) + 'px';
+  view.style.left = (window.scrollY * k) + 'px';
+  view.style.width = Math.max(3, window.innerHeight * k) + 'px';
+  view.style.top = '0px'; view.style.height = HH + 'px';
 }
 function fit() {
   document.querySelectorAll('.miniwrap').forEach(wrap => {
@@ -863,7 +874,7 @@ function render() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') unpin(); });
 document.getElementById('pagewrap').addEventListener('click', e => {
   const wrap = e.currentTarget, r = wrap.getBoundingClientRect();
-  const f = (e.clientY - r.top) / Math.max(1, r.height);
+  const f = (e.clientX - r.left) / Math.max(1, r.width);
   window.scrollTo({top: f * document.documentElement.scrollHeight - window.innerHeight/2, behavior:'smooth'});
   e.stopPropagation();
 });
