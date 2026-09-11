@@ -22,7 +22,15 @@ The path is the root, capped there: a repository, a folder inside one, a single 
 
 A folder is a holon whose brief is its entry file, and whose parts are the entry's own sections followed by the files and folders beside it. A file is a holon whose own prose is its title and preface, and whose parts are its sections. A section is a holon the same way, down to the last heading. What a holon owns is the prose before its first part; what it totals is that plus everything beneath.
 
-## 4. Open
+## 4. Where the server goes
+
+The reader runs a small server, and it should not. The server does two things, walk a directory and read markdown into a holarchy, and both belong in the page: then one parser serves every source, and the page is the whole program.
+
+The direction, held 2026-09-11 and not yet built. The page takes its tree from whichever source it is given. Locally, a directory the reader grants it, read live through the browser's own file access, with no service at all. Published, a single manifest beside the page, or the repository read over its host's interface. The parsing is the same in each case, so the two are one program and not two.
+
+What survives of the server is at most a few lines that emit the manifest at publish time, and that is the whole of the gain being weighed: taking on a build step is worth it only because it removes a service, not because it adds a pipeline. Anything more would be running ahead of what is known.
+
+## 5. Open
 
 It runs a small server because a page cannot read a folder on its own. What it should do instead is read the substrate from the browser: the file system through the client's own access where that is granted, or the git repository directly, so the same page serves a live local substrate and a published read-only one with no service in the middle. That is what would make it web-native and substrate-native at once, and it is the direction, not the state.
 

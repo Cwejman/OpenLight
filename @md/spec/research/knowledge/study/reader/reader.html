@@ -97,6 +97,18 @@
     margin-left:6px; font-variant-numeric:tabular-nums; }
   .room.deep b { color:var(--ink); }
   .room.deep::before { content:"›"; color:var(--rule); margin-right:5px; }
+  .cellwrap { flex:1.6 1 auto; }
+  .cells { position:absolute; inset:0; }
+  .cells .c { position:absolute; border:.5px solid var(--paper); border-radius:1.5px;
+    transition:opacity .12s, box-shadow .12s; }
+  .cells .c.read { opacity:.4; }
+  .cells .c.changed { box-shadow:inset 0 0 0 1px var(--warm); }
+  .cells .c.here { box-shadow:0 0 0 1.5px var(--warm); z-index:3; }
+  .cells .c.lit { box-shadow:0 0 0 1.5px var(--seq); z-index:4; }
+  .cells .c span { position:absolute; left:2px; top:1px; right:2px; overflow:hidden;
+    font: 9px/1.25 "Inter", system-ui, sans-serif; color:var(--ink); opacity:.62;
+    white-space:nowrap; pointer-events:none; }
+  .cells .c .own { position:absolute; left:0; top:0; background:var(--ink); opacity:.13; pointer-events:none; }
   .pagemap { position:absolute; inset:0; }
   .pagemap i { position:absolute; display:block; border-radius:1px; }
   .view { position:absolute; left:-6px; right:-4px; border:1px solid var(--warm); border-radius:3px;
@@ -113,6 +125,16 @@
   .place .row i.on { background:var(--warm); }
   .place .row i:hover { background:var(--seq); }
   .place .cap { font: 11px/1.6 "Inter", system-ui, sans-serif; color:var(--mute); letter-spacing:.05em; }
+  /* the small shapes, used wherever a name needs its weight */
+  .spark { display:inline-flex; gap:1.5px; align-items:flex-end; height:10px; margin-left:7px;
+    vertical-align:-1px; }
+  .spark i { display:block; width:2px; border-radius:.5px; background:var(--rule); }
+  .spark i.big { background:var(--warm); }
+  .room .spark, .backs .spark { opacity:.85; }
+  .crumb .spark { height:8px; margin-left:5px; }
+  .readbar { display:flex; height:5px; border-radius:3px; overflow:hidden; background:var(--line);
+    margin:7px 0 0; }
+  .readbar i { display:block; }
   /* one thing, lit wherever it appears */
   .tip { position:fixed; z-index:9; pointer-events:none; display:none; max-width:340px;
     background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:10px 13px;
@@ -175,10 +197,10 @@
     <div class="place" id="place"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
-    <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, as the text it is</span>
+    <span class="lbl" style="margin-top:18px;margin-bottom:0">the whole, divided as it divides</span>
     <div class="unread" id="unread"></div>
-    <div class="miniwrap"><div class="mini" data-grade="whole"></div>
-      <div class="cursor" hidden></div><div class="caret" hidden></div></div>
+    <div class="readbar" id="readbar"></div>
+    <div class="miniwrap cellwrap"><div class="cells" id="cells"></div></div>
     <span class="lbl" id="nearlbl" style="margin-top:16px;margin-bottom:0">this page, as you scroll it</span>
     <div class="miniwrap" id="pagewrap"><div class="pagemap" id="pagemap"></div>
       <div class="view" id="view" hidden></div></div>
@@ -309,6 +331,14 @@ function gauge(focus) {
     <div class="note">tokens, counted as bytes over four</div>`;
 }
 
+function spark(n, cap) {
+  const paras = n.paras || [];
+  if (!paras.length) return '';
+  const max = Math.max(600, ...paras);
+  return `<span class="spark">` + paras.slice(0, cap || 9).map(len =>
+    `<i class="${len > 500 ? 'big' : ''}" style="height:${Math.max(2, Math.round(10*len/max))}px"></i>`
+  ).join('') + `</span>`;
+}
 function texture(paras, cap) {
   if (!paras || !paras.length) return '';
   const max = Math.max(600, ...paras), show = cap ? paras.slice(0, cap) : paras;
@@ -377,6 +407,7 @@ document.addEventListener('mousemove', e => {
   const wrap = e.target.closest && e.target.closest('.miniwrap');
   const el = (wrap && wrap.querySelector('.mini')) ? nearestMn(wrap, e.clientY)
            : (e.target.closest && e.target.closest('[data-uid]'));
+  if (el && el.classList && el.classList.contains('c')) { /* a cell answers for itself */ }
   const uid = el ? el.dataset.uid : null;
   if (uid !== LIT) {
     document.querySelectorAll('.lit').forEach(x => x.classList.remove('lit'));
@@ -425,6 +456,39 @@ function flat(n, depth, path, out) {
   out.push({n, depth, path});
   n.kids.forEach((k,i) => flat(k, depth+1, path.concat(i), out));
   return out;
+}
+function treemap(root, here) {
+  const W = 286, H = 100;  // laid out in percentages, so the box can be any size
+  const out = [];
+  (function lay(n, x, y, w, h, depth, path) {
+    out.push({n, x, y, w, h, depth, path});
+    if (!n.kids.length || w < 1.2 || h < 1.2) return;
+    const across = depth % 2 === 0;
+    const ownF = Math.min(.5, n.own_n / Math.max(1, n.total_n));
+    // the brief's own prose keeps its share of its own room; the rooms divide the rest
+    let cx = x, cy = y, cw = w, ch = h;
+    if (across) { cx = x + w * ownF; cw = w - w * ownF; } else { cy = y + h * ownF; ch = h - h * ownF; }
+    const tot = n.kids.reduce((a, k) => a + Math.max(k.total_n, 1), 0) || 1;
+    let px = cx, py = cy;
+    for (let i = 0; i < n.kids.length; i++) {
+      const k = n.kids[i], f = Math.max(k.total_n, 1) / tot;
+      if (across) { const kw = cw * f; lay(k, px, cy, kw, ch, depth + 1, path.concat(i)); px += kw; }
+      else { const kh = ch * f; lay(k, cx, py, cw, kh, depth + 1, path.concat(i)); py += kh; }
+    }
+  })(root, 0, 0, 100, 100, 0, []);
+  const hereKey = here.join(',');
+  return out.map(({n, x, y, w, h, depth, path}) => {
+    const uid = path.join(','), on = uid === hereKey;
+    const inset = Math.min(1.1, depth * .28);
+    const label = (w > 13 && h > 4.2) ? `<span>${esc(n.name.replace(/^[\d.]+\s*/, ''))}</span>` : '';
+    const ownF = Math.min(.5, n.own_n / Math.max(1, n.total_n));
+    const own = n.kids.length && ownF > .02
+      ? (depth % 2 === 0 ? `<i class="own" style="width:${ownF*100}%;height:100%"></i>`
+                         : `<i class="own" style="width:100%;height:${ownF*100}%"></i>`) : '';
+    return `<div class="c ${trait(n)} ${on ? 'here' : ''}" data-uid="${uid}"
+      style="left:${x+inset*.1}%;top:${y+inset*.1}%;width:${Math.max(.3,w-inset*.2)}%;height:${Math.max(.3,h-inset*.2)}%;
+      background:${shade(depth)};z-index:${depth}">${own}${label}</div>`;
+  }).join('');
 }
 function minimap(root, here, cap) {
   const CPL = 78, W = 286;
@@ -506,17 +570,24 @@ function render() {
   document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
   document.getElementById('gauge').innerHTML = gauge(focus);
   SEEN[focus.id] = focus.h; saveSeen();
-  document.querySelector('[data-grade="whole"]').innerHTML = minimap(root, PATH);
+  document.getElementById('cells').innerHTML = treemap(root, PATH);
   const u = unreadCount(root);
   document.getElementById('unread').innerHTML = u.unread || u.changed
     ? `${u.unread ? `<b>${u.unread}</b> not read yet` : ''}${u.unread && u.changed ? ' · ' : ''}${u.changed ? `<b>${u.changed}</b> changed since you read them` : ''}`
     : 'all of it read, none changed since';
+  const total = Math.max(1, u.unread + u.changed + (function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root) - u.unread - u.changed);
+  const all = (function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root);
+  document.getElementById('readbar').innerHTML =
+    `<i style="flex:${all-u.unread-u.changed};background:var(--seq)"></i>` +
+    `<i style="flex:${u.changed};background:var(--warm)"></i>` +
+    `<i style="flex:${u.unread};background:var(--line)"></i>`;
 
   requestAnimationFrame(() => { fit(); pagemap(); });
   const crumbs = [];
   for (let i=0;i<=PATH.length;i++) {
     const n = at(PATH.slice(0,i));
-    crumbs.push(i === PATH.length ? `<span>${esc(n.name)}</span>` : `<a data-go="${i}">${esc(n.name)}</a>`);
+    crumbs.push(i === PATH.length ? `<span>${esc(n.name)}</span>`
+      : `<a data-go="${i}" data-uid="${PATH.slice(0,i).join(',')}">${esc(n.name)}${spark(n, 6)}</a>`);
   }
   document.getElementById('crumb').innerHTML = crumbs.join('<span class=\"sep\">/</span>');
   document.getElementById('title').textContent = focus.name;
@@ -533,11 +604,12 @@ function render() {
   document.getElementById('backs').innerHTML = backs.length
     ? `<span class="lbl">pointed at from</span>` + backs.map(b => {
         const p = pathOf(b);
-        return `<a data-jump="${p.join(',')}" data-uid="${p.join(',')}">${esc(b.name)}</a>`; }).join('') : '';
+        return `<a data-jump="${p.join(',')}" data-uid="${p.join(',')}">${esc(b.name)}${spark(b, 6)}</a>`; }).join('') : '';
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
   const card = (k, i) => {
+    const _i = i;
     const rooms = k.kids.length ? `<div class="rooms">` + k.kids.map(g =>
-      `<span class="room ${g.kids.length ? 'deep' : ''}"><b>${esc(g.name)}</b><i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
+      `<span class="room ${g.kids.length ? 'deep' : ''}" data-uid="${PATH.concat(i, k.kids.indexOf(g)).join(',')}"><b>${esc(g.name)}</b>${spark(g, 7)}<i>${fmt(tok(g.total_n))}</i></span>`).join('') + `</div>` : '';
     return `<div class="kid" data-kid="${i}" data-uid="${PATH.concat(i).join(',')}">
       <div><div class="kn">${esc(k.name)}</div><div class="kf">${esc(k.face)}</div>${rooms}</div>
       <div class="kw"><span class="o">${fmt(tok(k.total_n))}</span><div class="b"><i style="width:${100*k.total_n/max}%"></i></div>
@@ -563,7 +635,7 @@ document.addEventListener('click', e => {
   if (e.target.closest('.tip')) return;
   const mw = e.target.closest('.miniwrap');
   const mapEl = (mw && mw.querySelector('.mini')) ? nearestMn(mw, e.clientY)
-              : e.target.closest('svg path[data-uid], .place i[data-uid]');
+              : e.target.closest('.cells .c[data-uid], svg path[data-uid], .place i[data-uid]');
   if (mapEl) { pin(mapEl.dataset.uid, e.clientX, e.clientY); return; }
   if (PIN) { unpin(); return; }
   const a = e.target.closest('.prose a[href], .backs a');
