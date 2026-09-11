@@ -153,6 +153,13 @@
     padding-bottom:14vh; opacity:.72; transition:opacity .18s; }
   .pane::-webkit-scrollbar { display:none; }
   .pane.last, .pane:hover { opacity:1; }
+  .pane.ahead { opacity:.9; }
+  .pane.ahead.empty { opacity:.5; }
+  .waiting { font: var(--t6)/1.7 var(--sans); color:var(--mute); letter-spacing:.08em;
+    text-transform:uppercase; padding-top:var(--r4); }
+  .pane.ahead .ptitle { font-size:var(--t2); }
+  .pane.ahead::before { content:"ahead"; display:block; font: 500 10px/1 var(--sans);
+    letter-spacing:.15em; text-transform:uppercase; color:var(--warm); margin-bottom:var(--r3); }
   .phead { position:sticky; top:0; z-index:2; padding-bottom:var(--r3);
     background:linear-gradient(var(--bg) 76%, transparent); }
   .ptitle { font:600 var(--t2)/1.2 var(--serif); margin:0 0 var(--r4); letter-spacing:-.014em; cursor:pointer; }
@@ -612,6 +619,7 @@ document.addEventListener('mousemove', e => {
       const same = document.querySelectorAll(`[data-uid="${uid}"]`);
       same.forEach(x => x.classList.add('lit'));
       needle(uid);
+      showAhead(uid);
       // a room deeper than the map's floor has no cell; show the room that holds it
       if (![...same].some(x => x.classList.contains('c'))) {
         const parts = uid === '' ? [] : uid.split(',');
@@ -876,11 +884,16 @@ function drawRail(firstShown) {
   document.getElementById('rail').innerHTML = out;
 }
 function drawPanes() {
+  const focus = at(PATH);
+  // the rooms not yet chosen all contend for one column: it shows whichever the pointer is on
+  const wantsPreview = focus.kids.length > 0;
   const SHOW = 3;
-  const first = Math.max(0, PATH.length - (SHOW - 1));
+  const first = Math.max(0, PATH.length - (SHOW - (wantsPreview ? 2 : 1)));
   const out = [];
   for (let i = first; i <= PATH.length; i++)
     out.push(pane(at(PATH.slice(0, i)), PATH.slice(0, i), PATH[i], i === PATH.length));
+  if (wantsPreview) out.push(`<section class="pane ahead" id="ahead"><div class="waiting">${
+    focus.kids.length} room${focus.kids.length > 1 ? 's' : ''} wait here · point at one</div></section>`);
   drawRail(first);
   const el = document.getElementById('panes');
   el.style.gridTemplateColumns = `repeat(${out.length}, minmax(0, 1fr))`;
@@ -917,6 +930,19 @@ document.addEventListener('scroll', e => {
   });
   requestAnimationFrame(() => { SYNCING = false; });
 }, {passive:true, capture:true});
+let AHEAD = null;
+function showAhead(uid) {
+  const slot = document.getElementById('ahead');
+  if (!slot) return;
+  if (uid === AHEAD) return;
+  AHEAD = uid;
+  const path = uid === '' ? [] : uid.split(',').map(Number);
+  if (path.length !== PATH.length + 1) return;
+  let n; try { n = at(path); } catch (e) { return; }
+  slot.classList.remove('empty');
+  slot.innerHTML = pane(n, path, undefined, false)
+    .replace(/^<section[^>]*>/, '').replace(/<\/section>\s*$/, '');
+}
 function activePane() { return document.querySelector('.pane.last'); }
 function render() {
   const focus = at(PATH), root = DATA.tree;
