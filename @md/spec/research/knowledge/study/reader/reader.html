@@ -203,7 +203,7 @@ function render() {
   document.getElementById('meta').textContent =
     `${focus.kind} · ${fmt(tok(focus.own_n))} tokens here` +
     (focus.kids.length ? ` · ${focus.kids.length} beneath, ${fmt(tok(focus.total_n - focus.own_n))} in them` : ' · nothing beneath') +
-    (focus.path ? ` · ${focus.path}` : '');
+    (focus.path && focus.path !== '.' ? ` · ${focus.path}` : '');
   document.getElementById('prose').innerHTML = md(focus.own);
   const max = Math.max(1, ...focus.kids.map(k=>k.total_n));
   document.getElementById('kids').innerHTML = (focus.kids.length ? `<span class="lbl">what lies beneath</span>` : '') + focus.kids.map((k,i) => `<div class="kid" data-kid="${i}">
