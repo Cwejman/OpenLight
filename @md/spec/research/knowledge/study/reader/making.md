@@ -39,6 +39,11 @@ The record of how these two programs came to be, on the evening of 2026-09-11, i
 
 ## 2. What the making taught
 
+**The stretch was itself the fault the code names.** Running ahead is a step taken before the one beneath it is whole, and this evening is the clearest instance of it either of us has produced: a program was built out through a dozen shapes in three hours, each change made before the last had been used, let alone read, while the piece the labs exist to judge sat unjudged beside it. The author ran ahead in asking and the session ran ahead in building, and neither noticed until the asking stopped. What would have been the step, taken whole, is the first cut with the gauge in it, used for an evening and then changed on what that use found.
+
+That this is visible at all is the substrate's doing rather than anyone's memory: the asks are kept in order, the commits carry their reasons, and the distance between what was asked and what stands is written down. Seen, once, in the sitting that produced this file.
+
+
 **A tool caught what a rule could not.** The heaviness of prose had been a rule in the code and a failure in every lab. Drawn, it was obvious in a second. That is now a finding in [the study](../README.md).
 
 **Every view wants the same object.** Each view was built separately and each needed the same thing: the brief, its weight, its shape, its relations, its read state. When they were finally joined by one identity, the interface stopped being panels and became one thing seen from several distances.
