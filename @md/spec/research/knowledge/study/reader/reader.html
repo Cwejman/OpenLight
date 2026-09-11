@@ -49,6 +49,15 @@
   svg path { cursor:pointer; transition:opacity .12s; }
   svg path:hover { opacity:.72; }
 
+  .dirs { flex:0 1 auto; min-height:80px; max-height:24vh; overflow-y:auto; margin:0 0 var(--r2); }
+  .dr { display:flex; align-items:baseline; gap:0; font: 13px/1.65 var(--sans); color:var(--mute); }
+  .dr.read { opacity:.55; } .dr.changed a { color:var(--warm); }
+  .dr.on > a { color:var(--ink); font-weight:500; }
+  .dr a { color:var(--soft); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dr a:hover, .dr.lit a { color:var(--seq); }
+  .dr .tw { width:12px; flex:none; cursor:pointer; color:var(--mute); font-size:9px; }
+  .dr .w { margin-left:auto; padding-left:8px; font-size:10px; font-variant-numeric:tabular-nums; flex:none; }
+  .dr .dot { width:5px; height:5px; margin-right:6px; }
   .trail { margin:var(--r2) 0 0; font: var(--t5)/1.5 var(--serif); }
   .trail a { color:var(--mute); cursor:pointer; }
   .trail a:hover, .trail a.lit { color:var(--seq); }
@@ -128,6 +137,16 @@
 
   /* the page */
   .doc { padding-bottom:22vh; }
+  @media (min-width: 1280px) {
+    .doc { display:grid; grid-template-columns:minmax(0, 38em) minmax(300px, 1fr);
+      column-gap:var(--r0); align-items:start; }
+    .doc > .crumb { grid-column:1; grid-row:1; } .doc > .title { grid-column:1; grid-row:2; }
+    .doc > .meta { grid-column:1; grid-row:3; } .doc > .weigh { grid-column:1; grid-row:4; }
+    .doc > .prose { grid-column:1; grid-row:5; }
+    .doc > .aside { grid-column:2; grid-row:1 / 6; }
+    .aside .backs, .aside .kids { margin-top:0; }
+    .aside .kids .grp:first-child { margin-top:0; }
+  }
   .crumb { font: var(--t6)/1.7 var(--sans); color:var(--mute); margin-bottom:var(--r2);
     letter-spacing:.08em; text-transform:uppercase; }
   .crumb a { color:var(--soft); text-decoration:none; cursor:pointer; }
@@ -234,6 +253,7 @@
     text-transform:uppercase; margin-top:var(--r3); }
   [data-uid] { cursor:pointer; }
   svg path.lit, svg circle.lit { stroke:var(--seq) !important; stroke-width:2 !important; }
+  svg path.athere { stroke:var(--warm) !important; stroke-width:2 !important; }
   .room.lit b, .backs a.lit, .crumb a.lit { color:var(--seq); }
   .room.lit i, .place i.lit { background:var(--seq); }
   .place i.lit { background:var(--seq) !important; }
@@ -253,6 +273,8 @@
     <div class="trail" id="trail"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
+    <span class="lbl">the files, as they lie</span>
+    <div class="dirs" id="dirs"></div>
     <span class="lbl">the whole, divided as it divides</span>
     <div class="unread" id="unread"></div>
     <div class="readbar" id="readbar"></div>
@@ -267,8 +289,10 @@
     <div class="meta" id="meta"></div>
     <div class="weigh" id="weigh"></div>
     <div class="prose" id="prose"></div>
-    <div class="backs" id="backs"></div>
-    <div class="kids" id="kids"></div>
+    <div class="aside">
+      <div class="backs" id="backs"></div>
+      <div class="kids" id="kids"></div>
+    </div>
   </main>
 </div>
 <script>
@@ -321,6 +345,29 @@ function index(root) {
     if (n.anchor) byKey[n.path + '#' + n.anchor] = n; n.kids.forEach(w); })(root);
   return {byPath, byKey};
 }
+const OPEN = new Set();
+function base(n) {
+  const p = n.path || '';
+  const b = p.split('/').filter(Boolean).pop() || p;
+  return n.kind === 'folder' ? b + '/' : b;
+}
+function dirtree() {
+  const rows = [];
+  (function walk(n, depth, path) {
+    n.kids.forEach((k, i) => {
+      if (k.kind !== 'file' && k.kind !== 'folder') return;
+      const uid = path.concat(i).join(',');
+      const onPath = PATH.slice(0, path.length + 1).join(',') === uid;
+      const open = OPEN.has(uid) || onPath;
+      const sub = k.kids.some(x => x.kind === 'file' || x.kind === 'folder');
+      rows.push(`<div class="dr ${onPath ? 'on' : ''} ${trait(k)}" style="padding-left:${depth * 11}px" data-uid="${uid}">
+        <span class="tw">${sub ? (open ? '▾' : '▸') : ''}</span>${dot(uid)}<a data-jump="${uid}">${esc(base(k))}</a>
+        <span class="w">${fmt(tok(k.total_n))}</span></div>`);
+      if (open) walk(k, depth + 1, path.concat(i));
+    });
+  })(DATA.tree, 0, []);
+  return rows.join('');
+}
 function placement() {
   const root = DATA.tree;
   const rows = [];
@@ -344,7 +391,7 @@ function placement() {
   }
   return rows.join('');
 }
-function sunburst(focus) {
+function sunburst(focus, basePath) {
   const deep = (function d(n){ return n.kids.length ? 1 + Math.max(...n.kids.map(d)) : 0; })(focus);
   const RINGS = Math.max(1, Math.min(7, deep)), R0 = 34, RING = Math.max(16, Math.min(30, 150 / RINGS));
   const S = (R0 + RINGS*RING + 6) * 2, c = S/2;
@@ -357,16 +404,19 @@ function sunburst(focus) {
   };
   let out = '', placed = new Map(), IDX = index(focus);
   ANG = {}; HUB = {c, r0: R0, rmax: R0 + RINGS * RING};
+  const hereKey = PATH.join(',');
   const walk = (n, depth, a0, a1, path) => {
     if (depth > RINGS || a1 - a0 < 0.003) return;
     if (depth > 0) {
       const r0 = R0 + (depth-1)*RING, r1 = r0 + RING - Math.min(2, RING/8);
       const own = n.total_n ? Math.max(0.08, n.own_n / n.total_n) : 1;
-      out += `<path d="${arc(r0, r1, a0, a1)}" fill="${tint(PATH.concat(path).join(','), depth)}" stroke="var(--bg)" stroke-width="1.5"
-        data-path="${path.join(',')}" data-uid="${PATH.concat(path).join(',')}"></path>`;
+      const uid = basePath.concat(path).join(',');
+      out += `<path class="${uid === hereKey ? 'athere' : ''}" d="${arc(r0, r1, a0, a1)}"
+        fill="${tint(uid, depth)}" stroke="var(--bg)" stroke-width="1.5"
+        data-path="${path.join(',')}" data-uid="${uid}"></path>`;
       out += `<path d="${arc(r0, r0 + (RING-2)*own, a0, a1)}" fill="var(--ink)" fill-opacity=".14" pointer-events="none"/>`;
       placed.set(n, {r: (r0+r1)/2, a: (a0+a1)/2});
-      ANG[PATH.concat(path).join(',')] = {a: (a0+a1)/2, r: r1};
+      ANG[basePath.concat(path).join(',')] = {a: (a0+a1)/2, r: r1};
       const rm = (r0+r1)/2, span = (a1-a0)*rm, band = r1-r0;
       if (span > 30 && band > 12) {
         const deg = (a0+a1)/2 * 180/Math.PI, flip = deg > 90 && deg < 270;
@@ -413,7 +463,7 @@ function sunburst(focus) {
   }).join('');
   return `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="The holarchy, each arc weighted by the text beneath it">
     <circle class="hub" cx="${c}" cy="${c}" r="${R0-4}" fill="${shade(0)}" stroke="var(--bg)" stroke-width="2"
-      data-uid="${PATH.join(',')}"/>
+      data-uid="${basePath.join(',')}"/>
     <circle id="progress" cx="${c}" cy="${c}" r="${R0-2.5}" fill="none" stroke="var(--warm)" stroke-width="2.5"
       stroke-linecap="round" pointer-events="none" transform="rotate(-90 ${c} ${c})"
       stroke-dasharray="${2*Math.PI*(R0-2.5)}" stroke-dashoffset="${2*Math.PI*(R0-2.5)}"/>
@@ -740,8 +790,10 @@ function render() {
   document.getElementById('rootsub').textContent =
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
   drawTrail(PATH);
+  document.getElementById('dirs').innerHTML = dirtree();
   document.getElementById('place').innerHTML = placement();
-  document.getElementById('sun').innerHTML = focus.kids.length ? sunburst(focus) : '';
+  const sunAt = focus.kids.length ? PATH : (PATH.length ? PATH.slice(0, -1) : PATH);
+  document.getElementById('sun').innerHTML = sunburst(at(sunAt), sunAt);
   document.getElementById('gauge').innerHTML = gauge(focus);
   SEEN[focus.id] = focus.h; saveSeen();
   document.getElementById('cells').innerHTML = treemap(root, PATH);
@@ -816,6 +868,8 @@ document.getElementById('pagewrap').addEventListener('click', e => {
   e.stopPropagation();
 });
 document.addEventListener('click', e => {
+  const tw = e.target.closest('.dr .tw');
+  if (tw) { const u = tw.parentElement.dataset.uid; OPEN.has(u) ? OPEN.delete(u) : OPEN.add(u); render(); return; }
   if (e.target.closest('[data-back]')) { history.back(); return; }
   const jump = e.target.closest('[data-jump]');
   if (jump) { unpin(); go(jump.dataset.jump.split(',').filter(x=>x!=='').map(Number)); return; }
@@ -837,7 +891,8 @@ document.addEventListener('click', e => {
   else if (up) { go(PATH.slice(0, Number(up.dataset.go))); }
   else if (e.target.closest('.mn')) { const d = e.target.closest('.mn').dataset.path;
     go(d ? d.split(',').map(Number) : []); }
-  else if (arc && arc.dataset.path) { go(PATH.concat(arc.dataset.path.split(',').map(Number))); }
+  else if (arc && arc.dataset.uid !== undefined) {
+    go(arc.dataset.uid === '' ? [] : arc.dataset.uid.split(',').map(Number)); }
 });
 
 async function load() {
