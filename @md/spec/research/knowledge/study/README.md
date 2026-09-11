@@ -5,7 +5,7 @@ kind: brief
 
 # The study
 
-The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`10-comprehension/code.md`](10-comprehension/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
+The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Ten labs into a search for how knowledge is best structured, the code is the law and the grounds are the debt; this file holds what the labs have settled and what they still owe. The law itself is not here: it lives in the code, whose latest edition is [`10-comprehension/code.md`](10-comprehension/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.
 
 ## 1. The finish line
 
@@ -40,6 +40,8 @@ Provenance recovered late survives only by luck, and the loss is invisible: the 
 **The arrears are real.** Labs 01 to 06 produced the findings the current principles rest on, and none of it was written as grounds — it lives scattered in session narratives, in this file's verdict lines, and inside the outputs themselves. Walking that record and turning it into entries is a cheap pass for a session pointed at this section, and it has to happen before the three artifacts can be generated.
 
 ## 3. Where the search stands
+
+The labs are laid newest first, from ten down.
 
 Eight labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
 
@@ -113,7 +115,11 @@ Settled by repetition; they feed the markdown practice and the grounds:
 
 - **Record the method at the moment of the work.** Three times now the evidence for a rule existed only in a session that was about to end. This is the finding that [§2.2](#22-the-duty-is-per-session) makes a standing duty.
 
-## 7. Notes
+## 7. Beside the labs
+
+Four briefs sit beside the labs and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered, written from the labs' own cost accounts. [Tenants beyond prose](tenants.md) holds the domains that have occurred since, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks a question of synthesis and brings back what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing. Beside them, [what was asked](asked-2026-09-11.md) on the day most of this was written, and two programs, [the surface](surface/README.md) and [the reader](reader/README.md).
+
+## 8. Notes
 
 - **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation (the ratified [`../code.md`](../code.md), [`naming.md`](../naming.md)) rides the study's maturation; those files still say fold.
 
