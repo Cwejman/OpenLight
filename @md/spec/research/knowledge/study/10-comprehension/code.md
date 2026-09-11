@@ -10,7 +10,7 @@ Comprehension is what most value is built on. Insight compounds when separate un
 
 That joining comes with friction. We meet it in our own progress, more in a team working toward a common goal, and most in large organisations. What makes it hard is having to join what each of us carries, across our different roles, background and processes.
 
-Every gain in comprehension is a win. The biggest win is the one that gives the most understanding for the least reading.
+Every gain in comprehension is a win. The biggest win is the one that gives the most understanding for the least effort.
 
 The code is a set of principles for structuring knowledge into brief wins. The biggest wins come first, and each breaks down into smaller wins, down to every detail that grounds them.
 
@@ -18,7 +18,7 @@ The code is a set of principles for structuring knowledge into brief wins. The b
 
 The first section gave the thesis. This one gives what it is for, and what it takes to begin.
 
-People join what they can easily take in. Knowledge that gives the most understanding for the least reading, the biggest first and each piece once it can be understood, is easy to take in. Kept alive in computers, it becomes a medium that connects us: comprehension evolves inside it, and each of us partakes at the depth we need and brings our own back.
+People join what they can easily take in. Knowledge that gives the most understanding for the least effort, the biggest first and each piece once it can be understood, is easy to take in. Kept alive in computers, it becomes a medium that connects us: comprehension evolves inside it, and each of us partakes at the depth we need and brings our own back.
 
 That is the joining the first section found hard. On an ordinary day it means nobody has to be the way to a thing, nothing is decided twice, and keeping order stops being a job, because each addition lands where it belongs and the top stays short.
 
@@ -32,7 +32,7 @@ The code is not something you move into. It compounds on prose, and prose is alr
 
 ## 3. What knowledge is made of
 
-You now hold why the code exists and what it is for. Here is what knowledge is made of under it: broken into parts and organised in alignment to the thesis.
+You now hold why the code exists and what it is for. This section gives what knowledge is made of under it. The gradient is the thesis given shape. The brief is the part that carries one understanding. The ground is what keeps a brief true for whoever stands on it next.
 
 ### 3.1 The gradient
 
@@ -56,23 +56,25 @@ The brief is as large as its understanding needs, and that is a limit, never a l
 
 The verbs are everyday. To brief someone is to hand them the understanding they need to act. To debrief is the making: when a stretch of work ends, its conclusion goes to the surface and the detail stays beneath, for whoever needs it. To unpack is to open what was kept.
 
+What holds between briefs holds inside one: the prose of a brief is laid by the same forces, point by point. How is the first of the principles, in the next section, once the ground for it is laid.
+
 A brief joins the rest of the knowledge in two ways. What it gives without, the smaller understandings, stand as briefs beneath it. What it relates to but does not carry, wherever that lies, it points to. The first is the holarchy, the second the link.
 
 #### 3.2.1 The holarchy
 
-Briefs beneath briefs make a holarchy, and the word is chosen because it says more than hierarchy does. A hierarchy says only how the parts rank, above and below. A holon is a whole that is also a part, and a holarchy is an order made of them, so the word says of every brief what the code needs said: it stands whole and can be read alone, it is a part of the understanding above it, and it is free to relate beyond its place by linking.
+Briefs beneath briefs make a holarchy, and the word is chosen because it says more than hierarchy does. A hierarchy says only how the parts rank, above and below. A holon is a whole that is also a part, and a holarchy is an order made of them, so the word says of every brief what the code needs said: it stands whole and can be read alone, it is a part of the understanding above it and is itself broken down beneath, and it is free to relate beyond its place by linking.
 
 So a brief with everything beneath it is a holon, and the holarchy is the gradient made concrete: the bigger understanding above, the smaller ones it did not need beneath, all the way down.
 
 #### 3.2.2 The link
 
-Nesting gives a brief its place, and the link gives it its relations. What a brief relates to may lie anywhere in the knowledge, above it, beneath it, or in another branch altogether, and the link reaches it. The order is one; the relations are many.
+Nesting gives a brief its place in the gradients holarchy, and the link gives it its free relations. What a brief relates to may lie anywhere in the knowledge, above it, beneath it, or in another branch altogether, and the link reaches it. The order is one; the relations are many.
 
 A link is an offer, never a missing piece. The brief reads whole without it, and the sentence around it says what following it gives, so the reader chooses in the open, as at every checkpoint. A link points back, to what was given elsewhere, or forward, to what is not yet given. Forward links are few, because the gradient already puts ground before what stands on it.
 
 ### 3.3 The ground
 
-A brief is read once and stood on for long after, and a team's knowledge compounds only as far as its briefs are safe to stand on. Two things make them safe.
+A brief is read once and stood on for long after, and peoples' knowledge compounds only as far as its briefs are safe to stand on. Two things make them safe.
 
 A fact has one home. It is said once and pointed to from everywhere else, so when it changes, its one home changes and every pointer stays true. Copies instead drift: three copies of a rule quietly become three rules.
 
@@ -80,35 +82,37 @@ Confidence is written. A claim says whether it was measured, seen, reasoned or p
 
 ## 4. The principles
 
-The gradient, the brief and the ground state the conditions, and a wide rule is easy to honour loosely. The principles are those conditions made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the conditions bind, and they are few, because each one is a place the conditions were quietly broken. Each closes by saying how strongly it holds, measured, seen, reasoned or preferred; where it came from is kept in the grounds, linked at the end.
+The gradient, the brief and the ground state the conditions, and a wide rule is easy to honour loosely. The principles are those conditions made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the conditions bind, and they are few, because each one is a place the conditions were quietly broken. Each closes with a line set apart, saying how strongly it holds: measured, seen, reasoned or preferred. Where it came from is kept in [grounds.md]() (the process behind building the code), linked at the end.
 
 ### 4.1 The prose of a brief
 
 This principle is how the prose of a brief is composed. The measure is the one the gradient set, ease: how readily a reader understands what they read. Everything here follows from that.
 
-A brief speaks to its reader about the reading itself. Its title and first paragraph say what it gives, so the reader knows whether to enter, and the why comes before the win, so the win is understood knowing what it is for. Where the ground shifts inside it, the prose says so: what is now held, and what comes next. A reader who knows where they stand reads with confidence.
+A brief speaks to its reader about the reading itself. Its title and first paragraph say what it gives, so the reader knows whether to enter, and the why comes before the win, so the win is understood knowing what it is for. They say it in the reader's terms, giving the understanding in small, never a map of the parts to come. Where the ground shifts inside it, the prose says so: what is now held, and what comes next. A reader who knows where they stand reads with confidence.
 
-Understanding sets the size. A paragraph that makes you understand one thing is easy. One that makes you understand three at once is hard. So a paragraph carries one point, a claim with its ground, and a sentence carries one idea. The easiest way to say a thing is usually the shortest, and that is why the unit is named brief.
+Understanding sets the size. A paragraph that makes you understand one thing is easy. One that makes you understand three at once is harder. So a paragraph carries one point, a claim with its ground, and a sentence carries one idea. The easiest way to say a thing is usually the shortest, and that is why the unit is named brief.
 
-The prose follows from the understanding. Comprehend what the brief has to give, and its points are there: what the understanding is, and what it rests on. They lie in the reader's order, what a point rests on before the point, and the understanding itself as early as that allows. A point that turns out to need a whole of its own is not a point but a brief, and goes beneath. And prose that reads heavy is seldom a fault of the words: it is the understanding not yet held clearly, or its points not yet in their order.
+The prose follows from the understanding. Comprehend what the brief has to give, and its points are there: what the understanding is, and what it rests on. They lie in the reader's order, what a point rests on before the point, and the understanding itself as early as that allows. A point that turns out to need a whole of its own is not a point but a brief, and goes beneath. And prose that reads heavy is seldom a fault of the words: it is the understanding not yet held clearly, or its points not disposed correctly.
 
 The words never run ahead of the reader. Plain everyday words, and a word the knowledge itself carries is not used before it has been given.
 
 Simple is not terse. Cutting explanation does not make prose easy, it makes it thin. The simplicity is in the words and the sentences: short, one idea each, not chained into a long one.
 
+*Seen, in every read since it was written; not measured.*
+
 ### 4.2 The order of a holarchy
 
-The holarchy is ordered, because prose is. At every level the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after, and what is nested under a brief is what its level did not need. The gradient says nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
+Beside every brief lie others at the same depth, and they come in an order. This principle is that order: how it is chosen, and what it lets a reader pass over. It is the easiest place to break the gradient without noticing: a brief laid before what it stands on reads fine to the writer, who already holds both, and fails only for the reader who arrives.
 
-Because the nested is what the level did not need, a reader may skip it, on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. Where a brief must stand on something nested in a predecessor, it links there, since the reader was allowed to skip it; and when that is frequent or plain, the win was misplaced and belonged at this level.
+At every level the briefs are laid in the order they stand on each other, each on the ones before it and never on the ones after. Beneath each lies what its level did not need.
 
-The nesting comes in three forms, and they differ. A folder with an entry file: the entry is the brief, the files and folders beside it are its parts, and this nests without limit. A document's headings: a heading with the paragraphs under it is the brief, its subheadings are its parts, and this nests a few levels before a document is better split into a folder. A paragraph with its bullets: the paragraph is the brief and each bullet a part, and this nests no further. It is the end of the arc, where a part is too small to be a brief of its own.
+That is what a reader may skip, on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. Where it must, it links there, since the reader was allowed to skip. Where that is frequent, the understanding was misplaced and belonged at this level.
 
-A folder has no order of its own; its entry file is prose, and that is where its order comes from. A file enters where the entry's prose reaches it, briefed and linked there, and when a document's depth outgrows its headings a folder takes over and the nesting continues. How files are best used under an entry is open; the order is the entry's, never the listing's.
+Nesting comes in three forms, and the order is met in each. A folder with its entry file: the entry is the brief, the files and folders beside it are its parts, and the entry's prose is what orders them, never the directories naming order listing. A document's headings: a heading with its paragraphs is the brief, its subheadings are its parts, and when the depth outgrows the headings a folder takes over. A paragraph with its bullets: the paragraph is the brief and each bullet a part, and this nests no further, since a bullet cannot be broken up and no link can reach it.
 
-The failure is a level not broken down, and it wears two costumes. A paragraph with bullets, where the paragraph is the lead-in and the bullets are the content, force-fed at one depth. And a section that is not brief, which the reader takes in whole to find the win and cannot skip. Both break the balance the brief is made of: the biggest win first, and what it does not need moved down.
+A level not broken down wears two costumes. A paragraph with bullets where the paragraph is the lead-in and the bullets carry the content, force-fed at one depth. And a section that is not brief, which the reader takes in whole to find its understanding and cannot skip. Both are the break of the gradient not taken: read the whole, ask what it conveys, write that as the brief, and let what remains find its own shape by what it conveys, never item by item. What has no understanding of its own stays a bullet, a name, a fact in one line.
 
-So when you meet either, read the whole, ask what it conveys, and write that win as the brief; then let what remains find its own shape by what it conveys, never item by item. What is one thing takes one heading, and what has no win of its own stays a bullet, an item, a name, a fact in one line, since a bullet cannot be broken up and no link can reach it. This holds at every grain and no size sets it: wherever a win can be lifted, lift it, and let the details it does not need descend. Measured.
+*Measured once, one level deeper reading shorter at the depth a reader stops while holding more, and seen in every run since.*
 
 ### 4.3 Work in progress
 
@@ -116,23 +120,23 @@ The code can sound as if it describes a finished thing. It never is: knowledge i
 
 The first is a brief not yet written. A question set down before its answer exists, or a piece owed but not yet made, links to where it will be, and the link is empty until then. The text reads whole without it, and the sentence around it says what will be there.
 
-The second is a source outside the knowledge, not yet digested: a web page, a paper, a book, a conversation. The link goes to the source itself, and the sentence says what it holds and that it has not been brought in. It is the brief nobody wrote yet, and a reader who wants it goes to the source directly. Both kinds are offers like any other link, and both stay honest by saying what they are.
+The second is a source outside the knowledge, not yet digested: a web page, a paper, a book, a conversation. The link goes to the source itself, and the sentence says what it holds and that it has not been brought in. It is the briefs nobody wrote yet, and a reader who wants it goes to the source directly. Both kinds are offers like any other link, and both stay honest by saying what they are and in what grounds.
 
-What is not allowed is saying much about a source inside a brief. That is a brief growing in the wrong place. Give the source its own brief, what is known so far with the pointer to it, until the day it is digested into briefs of its own. Seen.
+What is not allowed is saying much about a source inside a brief. That is a brief growing in the wrong place. Give the source its own brief, what is known so far with the pointer to it, until the day it is digested into briefs of its own.
+
+*Seen, in every piece written under the code so far; not measured.*
 
 ### 4.4 A story carries the causes
 
-A story, or narrative, is read faster and remembered longer than the same content as statements, and relating to it is only part of the reason. A story is a chain of causes, each event explaining the next, and understanding it is rebuilding that chain, which is the same work as understanding anything [Trabasso and van den Broek 1985]. Statements hand the reader facts; a story leaves the connections for the reader to infer, and what a reader infers, they keep [Willingham 2004]. So the code asks for a story where it carries the win's causes, the archetypal shape first, and never as content added to engage.
+Some understandings are chains of causes, and for those a story is the lightest prose there is. To understand a chain of causes is to rebuild it, and a story is that chain in a shape every reader already holds: a setting, a goal, an attempt, an outcome. Statements hand the reader the links; a story lets them make the connections, and what a reader infers, they keep. A story also lands a claim in a situation the reader has lived or am able to imagine, which is ground they hold before the claim arrives.
 
-A story also arrives in a shape the reader already holds, a setting, a goal, an attempt, an outcome, so the shape costs nothing to parse [Mandler and Johnson 1977]. That is what the archetypal story buys: the shape the reader knows, with nothing the win does not need, no particular person, no background.
+So the code asks for a story where the understanding is a chain of causes, and never as something added to engage. The first form is the archetypal story: the shape the reader knows, with nothing the understanding does not need, no particular person, no background. A real story, the inventor and what happened, belongs where the understanding is about that particular thing, and it still obeys the rest of the code, plain words and light paragraphs.
 
-A story also grounds. An abstract claim placed in a situation the reader has lived, the team that cannot join what its members carry, lands where the bare claim would not [Bransford and Johnson 1972]. That is narrative even before it is a story.
+Two things bound it. Detail that interests but does not serve costs the understanding, because readers remember the detail instead. And a story lowers the reader's guard, so it never carries a claim's confidence; that is written beside it, as for any claim.
 
-A real story is welcome where the win is about that particular thing, the inventor and what happened. It engages, and it still obeys the rest of the code, plain words and a light paragraph.
+The test is the one every brief meets: if the understanding comes easier without the story, the story is wrong.
 
-Two things bound it. Details that interest but do not serve the win cost the win, because readers remember them instead [Harp and Mayer 1998]. And a story lowers the reader's guard, so it never carries a claim's confidence; that is written beside it, as for any claim [Green and Brock 2000].
-
-The test is the same as for any brief: if the essence reads shorter and clearer without the story, the story is wrong. Measured, by others: the sources are cited from the writer's memory, a model's, and are not yet verified or ratified. Here seen once and reasoned, with studies owed.
+*Reasoned, and seen once. The studies it rests on are owed to the grounds, unverified until they are read.*
 
 ### 4.5 The iteration of inference
 
@@ -154,7 +158,9 @@ When the break is in the order or the entry, the holarchy's own text is written 
 
 #### 4.5.3 The debrief
 
-A session ends, and what it did not write is lost with it. So before it ends it debriefs: the piece it made stands as the brief, and beside it, in a few lines, what it left out, what it left open, and what it decided on its own. Written then or never, since how the work went exists only while the session does. Seen, three times.
+A session ends, and what it did not write is lost with it. So before it ends it debriefs: the piece it made stands as the brief, and beside it, in a few lines, what it left out, what it left open, and what it decided on its own. Written then or never, since how the work went exists only while the session does.
+
+*Seen, in one run of the cycle and in three debriefs; not measured.*
 
 ## 5. How far this goes
 
