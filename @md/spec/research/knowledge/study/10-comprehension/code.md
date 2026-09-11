@@ -14,23 +14,25 @@ Every gain in comprehension is a win. The biggest win is the one that gives the 
 
 The code is a set of principles for structuring knowledge into brief wins. The biggest wins come first, and each breaks down into smaller wins, down to every detail that grounds them.
 
-## 2. What it changes
+## 2. What it is for
 
-This is what the code is for first: what changes in practice once knowledge is written this way, and what it takes to begin.
+The first section gave the thesis. This one gives what it is for, and what it takes to begin.
 
-People and models hit the same wall. A person forgets. A model's context fills and gets worse as it fills. Both must hold what matters and reach for the rest. So writing for people and building context for models are one problem, not two.
+People join what they can easily take in. Knowledge that gives the most understanding for the least reading, the biggest first and each piece once it can be understood, is easy to take in. Kept alive in computers, it becomes a medium that connects us: comprehension evolves inside it, and each of us partakes at the depth we need and brings our own back.
 
-What changes first is who has to explain. Nobody has to be walked through it, and the person who knows a thing stops being the only way to it. A new colleague, or a fresh agent session, opens the top and reads down to the depth their task needs. A fresh session holds nothing else, so it becomes what it reads, and the difference people blame on models is mostly a difference in ground. The same decision is not made twice, because it has one home.
+That is the joining the first section found hard. On an ordinary day it means nobody has to be the way to a thing, nothing is decided twice, and keeping order stops being a job, because each addition lands where it belongs and the top stays short.
 
-And keeping it in order stops being a job of its own. Each addition lands where it belongs, and the top stays short, so the knowledge gets better as it grows instead of worse. That follows from the shape of the knowledge itself, not from anyone's discipline. Most of the effort that remains is work AI compute can do. How much human judgment it still needs is not known, and review will almost certainly stay with people. You take part in the knowledge and add to it, and clarity, connection and faster shared comprehension are what come out.
+### 2.1 What AI needs
 
-Taken together, this is a substantial change in how we work.
+AI is what keeps the medium alive. It is inference without bound, and it performs reliably on two conditions. Ground that is whole: a fresh session becomes what it reads, and a gap a person works around, a model falls through. And comprehension: a model infers, it does not comprehend, and the code is what lets it work with knowledge as knowledge rather than as text.
 
-None of this waits on new technology to propel its capability. Nothing here is typed. No schemas, no edge types, only prose in structured pieces under a defined law, which is why markdown in directories is enough. A [proof of concept](poc.md) runs this with git and the harnesses that exist today. It pays soonest in IT, where part of the group already works with them.
+### 2.2 Beginning today
+
+The code is not something you move into. It compounds on prose, and prose is already everywhere, in every tool and every practice. The full experience needs technology that is not built: a medium open to everyone's technology and practices. But a harness opened on a folder, with full reach into everything in it, is the most open-ended way of using AI today, and with the code it practises most of the medium now. A [proof of concept](poc.md) runs it with git and the harnesses that exist today.
 
 ## 3. What knowledge is made of
 
-You now hold why the code exists and what it changes. Here is what knowledge is made of under it: broken into parts and organised in alignment to the thesis.
+You now hold why the code exists and what it is for. Here is what knowledge is made of under it: broken into parts and organised in alignment to the thesis.
 
 ### 3.1 The gradient
 
