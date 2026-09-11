@@ -36,33 +36,39 @@ You now hold why the code exists and what it is for. Here is what knowledge is m
 
 ### 3.1 The gradient
 
-A win is understanding gained for the reading it cost. The gradient is how a body of knowledge is arranged to give the most of it: broken down into parts by importance, the win everyone shares at the top, and beneath each part what it did not need, down to the details. A reader goes down as far as their need takes them, and stops whole.
+Reading is linear. A reader takes one thing after another, and prose can be laid in only one order. Knowledge is not linear: what matters most stands on many things. So the order has to be chosen, and two forces pull on it. Importance wants the biggest understanding first. Comprehension allows only what can be understood from what the reader already holds.
 
-Every breakdown raises the win. A part holding several wins makes every reader read all of it to get any, and that, a part not broken down, is the common failure.
+The gradient is their balance: at every point, the biggest understanding that can be given in what the reader holds there, and beneath it what that understanding did not need. What everyone shares sits at the top, what fewer need sits deeper, and the same holds again at every depth. There is no set number of layers, only the next understanding under the last.
 
-Two forces set the descent: importance, the biggest win as early as possible, and comprehension, built only on comprehension already held, so a win cannot be given in terms the reader does not have yet. The gradient is their balance at every point.
+Every part on the way down is a checkpoint. The reader has gained the most important understanding there was to gain by then, and stands whole. From there the choice is theirs: go on down this path, or go back up and take another. Stopping is never a loss.
 
-Why before how follows. A win understood at the top is real but not yet practical, and each step down is taken knowing what it is for. This is the code's thesis, and everything else in it serves it.
+A win is understanding gained for the effort it cost. The effort is what the reading asks of the reader, and it begins before the reading does: a part that looks like too much is harder to understand, because comprehension follows the reader's confidence in it.
+
+So the gradient is won one part at a time. Take any part and ask whether its most important understanding can be given without the rest. If it can, the rest goes beneath, and that break is a win in itself: the reader who wanted only the top now gets it for less, and the reader who wants the rest still finds it. The gradient is made of every such break, and it has as many steps as the knowledge yields.
+
+Why before how follows. The understanding at the top is real but not yet practical, and each step down is taken knowing what it is for. This is the code's thesis, and everything else in it serves it.
 
 ### 3.2 The brief
 
-Each part on the gradient is a brief: one win, handed whole. Everything the win needs to be understood is in the brief or pointed out of it, so a reader may stop after it and keep what they read.
+A part on the gradient is a brief: one piece of prose that gives one understanding, handed whole. It may make several points, but they add up to one thing. Everything the understanding needs is in the brief or pointed out of it, and that is what makes a brief a checkpoint.
 
-A brief gives its win as briefly as the win allows. What the win needs stays. What it does not need, the smaller wins beneath it, goes down the gradient into briefs of their own, to be entered wiser.
+The brief is as large as its understanding needs, and that is a limit, never a licence. The break of the gradient applies inside it: whatever the understanding can be given without goes beneath, into briefs of their own, to be entered wiser. Breaking down as far as the knowledge yields costs the reader nothing and hands them a checkpoint, so where a brief can be broken, it is.
 
 The verbs are everyday. To brief someone is to hand them the understanding they need to act. To debrief is the making: when a stretch of work ends, its conclusion goes to the surface and the detail stays beneath, for whoever needs it. To unpack is to open what was kept.
 
-This is the first law: a brief is understood in the reader's order, and leaves the reader whole wherever they stop.
-
-A brief that meets its limit does one of two things. Holding more than one win, it breaks down. Needing ground it cannot carry, it points out. The first is the holarchy, the second the link.
+A brief joins the rest of the knowledge in two ways. What it gives without, the smaller understandings, stand as briefs beneath it. What it relates to but does not carry, wherever that lies, it points to. The first is the holarchy, the second the link.
 
 #### 3.2.1 The holarchy
 
-Briefs sit within briefs. Each is whole, readable alone, and also a part: it belongs to the brief above it, whose win it breaks down. This is the gradient made concrete. The brief above is the bigger win, and the briefs within are the smaller wins it did not need.
+Briefs beneath briefs make a holarchy, and the word is chosen because it says more than hierarchy does. A hierarchy says only how the parts rank, above and below. A holon is a whole that is also a part, and a holarchy is an order made of them, so the word says of every brief what the code needs said: it stands whole and can be read alone, it is a part of the understanding above it, and it is free to relate beyond its place by linking.
+
+So a brief with everything beneath it is a holon, and the holarchy is the gradient made concrete: the bigger understanding above, the smaller ones it did not need beneath, all the way down.
 
 #### 3.2.2 The link
 
-Nesting is one join; the link is the other. A holarchy is not a hierarchy: what a brief stands on may lie anywhere, not only above it or within it, and a link reaches it. A link points back, to ground given elsewhere, or forward, to something not yet given. Forward links are kept few, because a win should not run ahead of its ground, and the gradient's order is what keeps them few. Every link says what following it gives, so nobody enters blind.
+Nesting gives a brief its place, and the link gives it its relations. What a brief relates to may lie anywhere in the knowledge, above it, beneath it, or in another branch altogether, and the link reaches it. The order is one; the relations are many.
+
+A link is an offer, never a missing piece. The brief reads whole without it, and the sentence around it says what following it gives, so the reader chooses in the open, as at every checkpoint. A link points back, to what was given elsewhere, or forward, to what is not yet given. Forward links are few, because the gradient already puts ground before what stands on it.
 
 ### 3.3 The ground
 
@@ -72,21 +78,19 @@ A fact has one home. It is said once and pointed to from everywhere else, so whe
 
 Confidence is written. A claim says whether it was measured, seen, reasoned or preferred, never left for the reader to sense, since an unmarked guess read a year later becomes law. A claim carried from a source carries the source's grade and says that it was not checked, since a mark the reader takes for the writer's own is a borrowed certainty. A brief that directs rather than describes, a goal, a plan, a decision, carries status instead: in force, fulfilled or superseded. And settled means settled for now, given what it stands on, because a new brief can arrive and change what the old ones meant.
 
-This is the second law: the ground stays true for whoever stands on it next.
-
 ## 4. The principles
 
-The laws state the conditions, and a wide rule is easy to honour loosely. The principles are the laws made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the laws bind, and they are few, because each one is a place the laws were quietly broken. Each closes by saying how strongly it holds, measured, seen, reasoned or preferred; where it came from is kept in the grounds, linked at the end.
+The gradient, the brief and the ground state the conditions, and a wide rule is easy to honour loosely. The principles are those conditions made specific: the same rules, met where knowledge was actually rewritten under them and read cold, and tuned by what that found. They bind as the conditions bind, and they are few, because each one is a place the conditions were quietly broken. Each closes by saying how strongly it holds, measured, seen, reasoned or preferred; where it came from is kept in the grounds, linked at the end.
 
 ### 4.1 The prose of a brief
 
-This principle is how the prose of a brief is composed. The measure is ease: how readily a reader understands what they read. Everything here follows from that.
+This principle is how the prose of a brief is composed. The measure is the one the gradient set, ease: how readily a reader understands what they read. Everything here follows from that.
 
-A brief speaks to its reader about the reading itself. Its title and first paragraph say what it gives, so the reader knows whether to enter, and the why comes before the win, so the win is understood knowing what it is for. Where the ground shifts inside it, the prose says so: what is now held, and what comes next. And it looks easy, because a reader who opens a brief and finds it overwhelming expects to fail. A reader who knows where they stand reads with confidence, and comprehension follows confidence.
+A brief speaks to its reader about the reading itself. Its title and first paragraph say what it gives, so the reader knows whether to enter, and the why comes before the win, so the win is understood knowing what it is for. Where the ground shifts inside it, the prose says so: what is now held, and what comes next. A reader who knows where they stand reads with confidence.
 
 Understanding sets the size. A paragraph that makes you understand one thing is easy. One that makes you understand three at once is hard. So a paragraph carries one point, a claim with its ground, and a sentence carries one idea. The easiest way to say a thing is usually the shortest, and that is why the unit is named brief.
 
-*The points, and their order, come from comprehending what the brief has to convey. Comprehend it, and the points show themselves: the win, and what it needs to be understood. Then two orders pull on them, the two forces of a brief. By importance, the biggest win first, so a reader who stops early leaves with the most. By comprehension, what a point stands on before the point, so nothing arrives before its ground. Their balance is the gradient, and the paragraphs follow it.*
+The prose follows from the understanding. Comprehend what the brief has to give, and its points are there: what the understanding is, and what it rests on. They lie in the reader's order, what a point rests on before the point, and the understanding itself as early as that allows. A point that turns out to need a whole of its own is not a point but a brief, and goes beneath. And prose that reads heavy is seldom a fault of the words: it is the understanding not yet held clearly, or its points not yet in their order.
 
 The words never run ahead of the reader. Plain everyday words, and a word the knowledge itself carries is not used before it has been given.
 
@@ -94,7 +98,7 @@ Simple is not terse. Cutting explanation does not make prose easy, it makes it t
 
 ### 4.2 The order of a holarchy
 
-The holarchy is ordered, because prose is. At every level the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after, and what is nested under a brief is what its level did not need. The laws say nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
+The holarchy is ordered, because prose is. At every level the briefs are laid in the order the wins demand, each standing on the ones before it and never on the ones after, and what is nested under a brief is what its level did not need. The gradient says nothing arrives before its ground, and order is where that is quietly broken, because order is easy to write loosely and hard to see broken.
 
 Because the nested is what the level did not need, a reader may skip it, on one condition: the next brief on a level stands only on the briefs beside it, never on what is nested inside them. Where a brief must stand on something nested in a predecessor, it links there, since the reader was allowed to skip it; and when that is frequent or plain, the win was misplaced and belonged at this level.
 
@@ -108,7 +112,7 @@ So when you meet either, read the whole, ask what it conveys, and write that win
 
 ### 4.3 Work in progress
 
-The laws can sound as if they describe a finished thing. It never is: knowledge is built step by step on work in progress, and the code is made for that. So a link needs no finished target, and two kinds of target are always allowed.
+The code can sound as if it describes a finished thing. It never is: knowledge is built step by step on work in progress, and the code is made for that. So a link needs no finished target, and two kinds of target are always allowed.
 
 The first is a brief not yet written. A question set down before its answer exists, or a piece owed but not yet made, links to where it will be, and the link is empty until then. The text reads whole without it, and the sentence around it says what will be there.
 
@@ -138,7 +142,7 @@ The first draft is the whole piece, top to bottom, not its top layer first: whic
 
 #### 4.5.1 The read against the code
 
-The writer reads the draft from the top, brief by brief, asking of each what the laws and the principles ask.
+The writer reads the draft from the top, brief by brief, asking of each what the code asks.
 
 Then a session that holds only the code, the practice and the draft reads it, and hands back what it did not understand, what came before its ground, and what it would cut. It writes nothing; the writer holds the material, and a blank head reads the draft alone, never the material, so its reading stays cheap.
 
@@ -164,4 +168,4 @@ None of that exists today. A context is assembled for the occasion, belongs to o
 
 ## 6. Open
 
-What the code does not yet know, it says. How briefs divide in practice, how deep they go, and what an entry looks like are to be observed, not prescribed; the observing is in [the proof of concept](poc.md), the code worked in markdown files and folders. And the code obeys its own second law: where each rule came from and how strongly it holds is kept in [the grounds](), not yet written.
+What the code does not yet know, it says. How briefs divide in practice, how deep they go, and what an entry looks like are to be observed, not prescribed; the observing is in [the proof of concept](poc.md), the code worked in markdown files and folders. And the code keeps its own ground true: where each rule came from and how strongly it holds is kept in [the grounds](), not yet written.
