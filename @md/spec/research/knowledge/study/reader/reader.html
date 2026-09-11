@@ -72,6 +72,15 @@
   .prose a { color:var(--seq); text-decoration:none; border-bottom:1px solid color-mix(in oklab, var(--seq) 35%, transparent); }
   .prose a.empty { color:var(--mute); border-bottom:1px dotted var(--rule); }
 
+  /* the minimap: the whole holarchy as the text it is */
+  .mini { margin:26px 0 0; }
+  .mn { padding:0 0 7px; cursor:pointer; border-left:2px solid transparent; }
+  .mn:hover { border-left-color:var(--rule); background:color-mix(in oklab, var(--ink) 3%, transparent); }
+  .mn.here { border-left-color:var(--warm); }
+  .mh { height:3px; border-radius:1.5px; margin:0 0 3px; }
+  .mp { margin:0 0 2.5px; }
+  .mp .ln { height:1px; margin-bottom:1px; border-radius:.5px; }
+  .mp.big .ln { background:color-mix(in oklab, var(--warm) 62%, var(--bg)) !important; }
   /* the texture: how heavy a brief looks before it is read */
   .tex { display:flex; gap:2px; align-items:flex-end; height:16px; margin:8px 0 0; }
   .tex i { display:block; width:3px; border-radius:1px; background:var(--rule); }
@@ -104,6 +113,7 @@
     <div class="sub" id="rootsub"></div>
     <div id="sun"></div>
     <div class="gauge" id="gauge"></div>
+    <div class="mini" id="mini"></div>
   </aside>
   <main class="doc">
     <div class="crumb" id="crumb"></div>
@@ -203,6 +213,28 @@ function texture(paras, cap) {
     `<i class="${n > 500 ? 'big' : ''}" style="height:${Math.max(2, Math.round(16*n/max))}px" title="${n} characters"></i>`
   ).join('') + `</div>`;
 }
+function flat(n, depth, path, out) {
+  out.push({n, depth, path});
+  n.kids.forEach((k,i) => flat(k, depth+1, path.concat(i), out));
+  return out;
+}
+function minimap(root, here) {
+  const CPL = 78, W = 286, all = flat(root, 0, [], []);
+  return `<span class="lbl">the whole, as the text it is</span>` + all.map(({n, depth, path}) => {
+    const ind = Math.min(depth, 5) * 9, w = W - ind, col = shade(depth);
+    const hw = Math.max(14, Math.min(w, 20 + (n.name||'').length * 3.1));
+    const paras = (n.paras||[]).map(len => {
+      const full = Math.floor(len / CPL), last = (len % CPL) / CPL;
+      let ln = '';
+      for (let i=0;i<Math.min(full, 40);i++) ln += `<div class="ln" style="width:${w}px;background:${col}"></div>`;
+      if (last > 0.04) ln += `<div class="ln" style="width:${Math.round(w*last)}px;background:${col}"></div>`;
+      return `<div class="mp ${len > 500 ? 'big' : ''}">${ln}</div>`;
+    }).join('');
+    const on = path.join(',') === here.join(',');
+    return `<div class="mn ${on ? 'here' : ''}" data-path="${path.join(',')}" style="margin-left:${ind}px" title="${esc(n.name)} — ${fmt(tok(n.own_n))} tokens">
+      <div class="mh" style="width:${hw}px;background:${col}"></div>${paras}</div>`;
+  }).join('');
+}
 function render() {
   const focus = at(PATH), root = DATA.tree;
   document.getElementById('rootname').textContent = root.name;
@@ -210,6 +242,7 @@ function render() {
     `${fmt(tok(root.total_n))} tokens in ${(function c(n){return 1+n.kids.reduce((a,k)=>a+c(k),0);})(root)} briefs`;
   document.getElementById('sun').innerHTML = sunburst(focus);
   document.getElementById('gauge').innerHTML = gauge(focus);
+  document.getElementById('mini').innerHTML = minimap(root, PATH);
   const crumbs = [];
   for (let i=0;i<=PATH.length;i++) {
     const n = at(PATH.slice(0,i));
@@ -237,6 +270,8 @@ document.addEventListener('click', e => {
   const kid = e.target.closest('.kid'), go = e.target.closest('[data-go]'), arc = e.target.closest('[data-path]');
   if (kid) { PATH = PATH.concat(Number(kid.dataset.kid)); render(); window.scrollTo(0,0); }
   else if (go) { PATH = PATH.slice(0, Number(go.dataset.go)); render(); window.scrollTo(0,0); }
+  else if (e.target.closest('.mn')) { const d = e.target.closest('.mn').dataset.path;
+    PATH = d ? d.split(',').map(Number) : []; render(); window.scrollTo(0,0); }
   else if (arc && arc.dataset.path) { PATH = PATH.concat(arc.dataset.path.split(',').map(Number)); render(); window.scrollTo(0,0); }
 });
 

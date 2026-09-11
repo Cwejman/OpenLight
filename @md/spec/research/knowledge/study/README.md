@@ -88,7 +88,7 @@ What the search believes lives in the latest edition, nowhere else. What it wait
 
 Settled by repetition; they feed the markdown practice and the grounds:
 
-- **Heaviness is seen before it is read.** A reader judges a brief's difficulty from its shape, the size of its paragraphs and the density of the page, before spending any reading on it, and under the code that judgment is the verdict: a part that looks like too much is harder to understand, because comprehension follows confidence. So a piece can be failed at a glance, and it should be looked at blurred before it is read. Seen, on lab 10's output.
+- **Heaviness is seen before it is read.** A reader judges a brief's difficulty from its shape, the size of its paragraphs and the density of the page, before spending any reading on it, and under the code that judgment is the verdict: a part that looks like too much is harder to understand, because comprehension follows confidence. So a piece can be failed at a glance, and it should be looked at blurred before it is read. This is the judgment the labs have failed most often, lab 10 included, and a rule has never fixed it: the writer cannot feel the weight of prose it is inside of, and a character count is a threshold rather than a feel. What serves it is a picture. [The reader](reader/README.md) draws every brief as the lines it actually is, so the heavy blocks show before a word is read. Seen, across the labs; the count of paragraphs past five hundred characters is measured.
 
 - **A fresh head finds what the writer cannot.** The writer's closure is invisible from inside — three times evidenced. The cold read is part of shipping, not an aspiration.
 

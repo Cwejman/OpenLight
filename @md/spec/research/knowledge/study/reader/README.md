@@ -8,6 +8,8 @@ A total tells a reader nothing. Thirty-five thousand tokens is neither large nor
 
 The map is the navigation, as a minimap is in an editor. Each arc is a holon and its angle is the text beneath it, so the shape shows where the substance is before a word is read; the darker inner band of each arc is that holon's own prose against what it holds. Clicking descends, the trail back sits above the title, and the prose of wherever you stand is the page itself.
 
+The third view is the whole as the text it is. Every brief in the tree is drawn as the lines it actually occupies, indented by its depth and marked where a paragraph runs past five hundred characters, so the shape of the writing is visible before any of it is read: where it is light, where it thickens, and which briefs a reader will struggle through. This is the judgment the studies have failed most often, and it is a feel rather than a number, so it wants a picture and not a rule.
+
 ## 2. Running it
 
 ```
