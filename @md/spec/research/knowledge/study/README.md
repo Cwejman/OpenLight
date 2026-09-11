@@ -85,6 +85,8 @@ What the search believes lives in the latest edition, nowhere else. What it wait
 
 - **The cold reads of 03–07** — the deciding evidence for the editions' engagement and language principles. Each verdict lands as a refinement in the next edition, with its evidence recorded beside it, as [07's first](07-breakdown/evidence-unit-of-change.md) was.
 
+- **Owed to the edition**: the step, named as the holon viewed by its change, which the drawings want and the code does not yet carry.
+
 - **Labs to cut**: the research-allowed A/B — does lifting the raw-alone wall restore the depth the 04 verdict found missing ([issue #1](https://github.com/Cwejman/OpenLight/issues/1)); the relaxation of the order law's recursion, a later study; and, should structure alone fall flat in the reads, the combined arm — structure plus narrative.
 
 - **Team opens** ([issue #1](https://github.com/Cwejman/OpenLight/issues/1) — Eric, Emelie, Sanna): what the second level of a document is; whether an intro carries a short guide to how the text is read; how running-text source references are handled; expand/collapse folding — blocked for now, since GitHub does not guarantee an anchor reaches into a collapsed section.
