@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Structure vs text, for models
 
 Night's substrate and the code both stand on a bet: that typed structure serves models better than pasted text. The sweep put that bet through an adversarial stress-test and a pile of 2026 experiments, and the result is not a win or a loss but a line — **structure demonstrably pays on the edges of knowledge and demonstrably fails as its body**. This fold states the line, the rule for finding it, and the nulls that bound it.

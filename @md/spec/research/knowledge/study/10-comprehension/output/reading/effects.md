@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the effects actually say
 
 These are the figures under the three effects that replicate, the two costs that replicate against them, and how to write for a reader who already knows the subject. All of it is carried from one agent's read of the primary meta-analyses, with effect sizes taken from source where the publisher allowed. The notation is glossed in [the folder's entry](README.md).

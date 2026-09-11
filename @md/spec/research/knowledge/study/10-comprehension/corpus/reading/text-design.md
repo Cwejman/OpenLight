@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What document design is measured to do
 
 This is the cognitive-science floor under any set of writing principles: which text-design effects replicate, how large they are, and which widely-held principles the evidence specifically contradicts. It comes from one agent's read of the primary meta-analyses, with effect sizes taken from source where the publisher allowed.

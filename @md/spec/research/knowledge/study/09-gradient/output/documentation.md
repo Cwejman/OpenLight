@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What a document changes
 
 The code promises that knowledge written its way changes how a team works. Read this and you will know what evidence exists that a document of any kind changes an outcome, why knowledge fails to travel inside an organisation and where a document's ceiling therefore sits, what became of decision records and design docs, and why every documentation system the sweep found is unmeasured or in retreat. The grades are the agents'; nothing was checked again.

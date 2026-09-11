@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The code
 
 This code turns written knowledge into a medium, one that joins us to what we know and to each other. Keeping it in order stops being a job of its own. You take part in it, and you add to it. This document is the whole code, and reading it leaves you able to write under it.

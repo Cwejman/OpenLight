@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 ## Bootstrap
 
 You are a fresh session with no prior context, deliberately. Bootstrap from named files only; do not read anything else in the repository — no README at the repo root, no spec tree, no other lab directory, nothing beyond what is named here.

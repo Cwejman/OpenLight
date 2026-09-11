@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Does typed structure pay for a model?
 
 One agent was sent to argue against the project's own thesis at full strength, and it produced the most decision-shaped brief in the sweep. This holds its verdict, the evidence on both sides, and the rule it distilled.

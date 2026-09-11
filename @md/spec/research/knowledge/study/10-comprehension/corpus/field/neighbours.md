@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Who else argues this, claim by claim
 
 One agent's brief was to find whoever else holds the thesis. Its method note matters for how the absences read: the session's web-search budget was exhausted before a single query, and every general search engine reachable by direct fetch returned captchas or rate limits, so the work rests on a forum's full-corpus API, an accelerator company dataset, and direct page fetches. That is strong on essays with traction, funded startups and named sites; weak on venture-capital writing, academic venues and non-English material. **Absences in those three areas are unproven.**

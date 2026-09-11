@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What this rests on
 
 Every figure in this piece inherits the conditions of the sweep that produced it, and those conditions are unusual enough to change how the numbers should be read. They are stated here once and pointed to from the entry rather than repeated in every brief.

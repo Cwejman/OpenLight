@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Giving as a business
 
 The author's positions on how a model and a harness should be offered, written down 2026-09-11 from the labs' cost accounts so they stand beside the numbers that provoked them. They are the author's, marked so, and open; nothing in the code depends on them. The word for the stance is giving as a business: a service earns by what it lets its users compound, not by what it withholds from them. The author gives the name a second reading, glue as a business: what the walls of today's products sell as integrations, the glue between them, is under the substrate the one honest service, the connecting itself, and a host that offers it is offering glue as a service. The two readings are one stance seen from the user's side and from the host's.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the practice of writing things down buys
 
 Four lanes of the sweep examined the practices organisations use to write knowledge down — documentation frameworks, decision records, review processes, and the profession that carries them. This is where the gap between adoption and evidence is widest, and it is wide enough to be the finding rather than a caveat on it.

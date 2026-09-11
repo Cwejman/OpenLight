@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Interface as data
 
 The claim that an interface can be data over the same contracts as the data has been tried, at scale, by teams who then wrote down what it cost. Five lanes of the sweep covered it: server-driven interfaces at Airbnb, Uber, Plaid, DoorDash, Lyft and Shopify; the generative-interface protocol race; schema-driven forms and component contracts; the product view layers; and the low-code market around them.

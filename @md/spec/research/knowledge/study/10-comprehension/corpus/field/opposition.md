@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The case against, at full strength
 
 Argued at its best, the case against a typed medium runs in three layers, and the layers reinforce each other. The third is the one to take most seriously, and it is not the one usually anticipated.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The product view layers stop at a closed enum
 
 Four products are built on the idea that structure is data: Notion, Airtable, Tana and Anytype. One agent read their protocols and SDK source directly to find where the extensibility ends. It ends in the same place in all four, and one level deeper than usually claimed.

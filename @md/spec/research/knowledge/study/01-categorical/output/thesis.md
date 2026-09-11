@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Where the thesis stands
 
 Night claims a typed, versioned substrate where completion happens from a point in a field, programs compound structurally, and the interface is data over the same contracts. This fold places that claim among its neighbours: who already holds which piece, what the strongest opposition actually argues, and what restatement the evidence supports. The short answer: **nobody argues the whole thesis, the parts are individually contested, and the combination is unclaimed ground — but two of the six claims are actively losing public arguments and need the restatement at the end of this fold.**

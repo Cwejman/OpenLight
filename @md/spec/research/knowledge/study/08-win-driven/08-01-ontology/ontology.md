@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Ontology
 
 *The words the code and the platform built for it are made of, and the dynamics between them: what is, the parts of meaning that make it, the right words in their right relations, and nothing more detailed than that. Its goal is the code's, that knowledge reaches whoever needs it next, person or model, and every word is graded toward it. Each word is a brief: its essence first, then the relations it stands on, one per heading, the heading a prose title with the word it reaches linked. A relation lives under the word that depends and nowhere else; what stands on a word is not written as a relation under it, because the trail shows it. Words are ordered by win toward that goal: the biggest gain toward knowledge reaching whoever needs it next comes first. That order is a reader's judgment, observed; how many words stand on each is counted beside it as the check, in [`evidence-reach.md`](evidence-reach.md), and the two agree where value and dependence coincide and part where they do not. A web has no order in which every word is given before use, so this file borrows forward and declares it here, which the code's first law allows; the nearest line is in [`evidence-series.md`](evidence-series.md). Confidence is in the writing: **measured** means numbers exist, **observed** means seen in the work, **reasoned** means argued only, **ruled** means the author decided; a word whose name is not settled says so, and rests on its notion; a better word comes when it comes, and nothing waits on it. Who changed what is in the git log.*

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the code stands on
 
 [The code](../code.md) asks every rule to say how strongly it holds, and says its grounds are not yet written. This is a first cut of those grounds from one source: a web sweep run on 2026-08-26, forty-five reports by research agents, each on one subject, read whole. Reading it, you know which of the code's rules the world's evidence carries (supports, with a measured effect behind them), which it bounds (supports, but only so far), which it says to stop claiming, and, for the code's [§5, how far this goes](../code.md#5-how-far-this-goes), what has been tried beyond prose. It is written for whoever writes under the code, or is deciding to, and wants to know where they stand on measurement and where on preference.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The market around derived interfaces
 
 Three agents covered the commercial layer: low-code platforms, open-source internal-tool builders, and the vibe-coding companies. The verdict is bifurcation with one real casualty class, and one reversal that is the load-bearing datum for anyone betting on derived interfaces.

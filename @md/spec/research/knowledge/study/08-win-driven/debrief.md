@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Debrief: the rounds of output
 
 The change log for `output/`, one section per round. Counts are words, rounded, from `wc -w`.

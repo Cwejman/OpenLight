@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Records of decisions, and the processes that make them
 
 Architecture decision records, RFCs, PEPs, KEPs, design docs and the older design-rationale research form one body. Four agents worked it independently and returned the same shape: the practice spreads on an experience report, nobody measures it, roughly half of what gets written is written once and abandoned, and heavyweight processes accumulate a backlog with no exit path.

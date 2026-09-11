@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Context: the monolith claim, fact-checked
 
 The README claims a session chains completion to a context that only grows — no branch, nowhere to step back to, compression only by inference over text. The sweep tested that claim against shipped products and the 2026 literature. **Half has been overtaken by product; the other half — addressable, queryable, reproducible — is intact everywhere, and it is night's ground.** This fold carries the split, the science of context degradation, and what happened to retrieval and agent memory.

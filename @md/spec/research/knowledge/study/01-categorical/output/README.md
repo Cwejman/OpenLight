@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The sweep's findings
 
 *Research register: structured, uncommitted. Derived 2026-08-28 from all 45 raw reports, read whole in one session, written under [the code](../../../code.md) — and the first structure built under it, so its shape is itself an experiment the code's *Open* section is waiting on.*

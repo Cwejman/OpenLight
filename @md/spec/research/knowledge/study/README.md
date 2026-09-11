@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The study
 
 The study is the search for how knowledge is best structured — for people and AI alike — run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Reading this file gives you where the search stands, what it waits on, and how the next lab runs. The law itself is not here: it lives in the code, whose latest edition is [`08-win-driven/code.md`](08-win-driven/code.md) — each lab ships its own edition, and the ratified ancestor stands at [`../code.md`](../code.md) (2026-08-30). A claim matures in the labs, enters an edition, and its row retires from this file; git keeps everything that leaves.

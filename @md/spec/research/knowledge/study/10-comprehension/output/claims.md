@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What is being weighed
 
 Evidence is only useful against a claim, so this says what the claims are. They are drawn from [the code](../code.md) as it stood on 2026-09-11 and stated in its own terms, before any evidence arrives, so a reader can check whether they are fairly put and can tell what is being argued about. Nothing here is a finding; it is the position.

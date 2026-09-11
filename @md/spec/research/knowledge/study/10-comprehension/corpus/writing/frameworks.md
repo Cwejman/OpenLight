@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The documentation frameworks, at full strength
 
 Three frameworks dominate how technical knowledge is organised: Diátaxis, DITA and topic-based authoring, and docs-as-code. The sweep read each at its own best, found its critics, and checked whether anything moved between 2024 and 2026. This brief holds what each actually claims and what its adopters added.

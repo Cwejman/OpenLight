@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 *Retroactive record (2026-08-30): this lab predates the study structure. The prompt below was given verbatim on 2026-08-29 to a fresh background session with no project context — the purity rule: the categorical reading's verdict framing must not contaminate the voice. The output then lived at `sweep-2026-08/encounters.md` and moved here when the labs were gathered; the output path named below is that original location.*
 
 ---

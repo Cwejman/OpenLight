@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What documentation has actually been measured to do
 
 Three agents went looking for studies in which documentation was the manipulated variable and a performance outcome was measured. The honest answer is: almost none. This brief holds the handful that exist, the one organisation that restructured content and measured it, and the public collapse of the only large-N effort to link documentation to outcomes.

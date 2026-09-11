@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Permission, and what transitivity costs
 
 One agent read Google's authorization paper and the ecosystem built on it, and found that the hard problem is named by the authors themselves rather than by commentators — and that a retrieval layer turned a latent problem into an actual one.

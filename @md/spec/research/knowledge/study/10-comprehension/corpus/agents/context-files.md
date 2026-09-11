@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Context files: the widest adoption and the clearest null
 
 `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `llms.txt` and `SKILL.md` are the conventions by which people write prose for models. Three agents covered them independently. The adoption is enormous, the vendor guidance is confident, and the controlled evidence says the most-recommended content does not work.

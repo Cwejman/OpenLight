@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The profession that carried these practices
 
 The structured-authoring tradition has an institutional layer — societies, standards bodies, conferences, a vendor market — and its state is a fact about how much weight the tradition can still bear. One agent checked it at source and found a structural shock that is widely under-weighted.

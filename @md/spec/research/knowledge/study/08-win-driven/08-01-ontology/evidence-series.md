@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: the ontology cut as a line
 
 *What cutting the ontology in dependence order showed, 2026-09-04 and 05. The cut itself, every word given before use and every relation carried once on the side that depends, was kept as `series.md` and is retired to git at d54a11d: it copied the ontology whole and would rot beside it. What it produced is here. The order it settled, for the words as they stood: knower, comprehension, win, brief, ground, amplify, link, holon, gradient, medium, word, citizen, interface, trail, contract, prism, kernel, processor, program, substrate, engine, specification, harness. Strength: **reasoned**, one steward's pass; **observed** twice for the backlink, as the last section says.*

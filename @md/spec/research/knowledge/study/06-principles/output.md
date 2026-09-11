@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The ground others hold
 
 *Written 2026-09-01 from the 45 raw reports of [the August sweep](../../../sweep-2026-08/README.md), read whole. Nothing here comes from anywhere else.*

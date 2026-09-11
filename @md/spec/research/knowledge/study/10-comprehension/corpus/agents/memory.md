@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Agent memory, and how the labs took the layer
 
 Between April and August 2026 the memory layer was commoditised from above. One agent measured the delta against a survey run the same month the commoditisation began, and the finding is that the independent vendors' centre of gravity moved from being the memory database to being the memory of the coding agent.

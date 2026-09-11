@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Server-driven interfaces: what it cost the people who shipped it
 
 Six large engineering organisations built and documented server-driven interface systems between 2021 and 2023. The write-ups are unusually candid, and together they are the best available record of what happens when the interface becomes data.

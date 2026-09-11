@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the bounded-head studies actually support
 
 Every argument for keeping a piece of writing small eventually reaches for a number — seven, four, two levels, fifty kilobytes. The sweep chased each of those numbers to its primary source. This brief holds why none of them can be quoted flat, and then the formulations the sources will bear. What they do *not* support is retired in [`folklore.md`](../folklore.md).

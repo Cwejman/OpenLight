@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Why insight does not travel
 
 The organisational-knowledge literature is older and better-designed than anything in the documentation lane, and it names the mechanisms that make knowledge stick where it is. This brief holds what is established, what is framework, and what is folklore — because the folklore in this territory is unusually dense.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The substrate question
 
 The widest of the claims is that the shape should be taken past prose, so that data and programs live in one medium and meet by matching contracts rather than by hand-written glue. What the field has actually tried to build, and what this folder therefore weighs, is the operational reading of that: a typed, versioned, permission-governed store. The substitution is argued in [what is being weighed](../claims.md) §5. Several lanes of the sweep tested whether that is buildable and whether anyone has built it. This brief holds five answers: the combination does not exist, the market went the other way, three things break when such a system runs, two arguments against it stand, and nobody holds the whole position.

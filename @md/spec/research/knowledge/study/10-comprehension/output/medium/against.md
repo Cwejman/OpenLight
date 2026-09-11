@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The case against
 
 Argued at its best the case against a typed medium runs in three layers that reinforce each other. The third is the serious one, and it has an answer that concedes half of itself. The first two do not have answers, and this brief ends with them, because they are what has to be carried rather than won.

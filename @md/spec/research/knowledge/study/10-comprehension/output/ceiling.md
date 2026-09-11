@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Where better writing stops helping
 
 The organisational literature is older and better designed than anything in the documentation lane, and it sets a ceiling on what any document can do. The ceiling is not set by how well the document is written. It is set by who is receiving it, what relationship they stand in, and what a document structurally cannot do that a conversation can. It also holds the strongest measured pro-writing result in the material, because a ceiling is not a dismissal.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Four findings that carry the rest
 
 *Research register — structured, uncommitted. Written from the 45 raw reports of the [2026-08 sweep](../../../sweep-2026-08/README.md) alone; nothing fetched from the web. Links out are offers, not missing pieces: each sentence around one says what opening it gives, and the text reads whole without it.*

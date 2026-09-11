@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the evidence did to each claim
 
 This is the answer to the question the piece asks: taking the five claims in [what is being weighed](claims.md) one at a time, what did the material do to them. Three come out unvalidated rather than refuted, one is barely touched, and one survives narrowly. The last section holds what the evidence supports that the claims did not have to argue for, because a weighing that only prosecutes is not a weighing.

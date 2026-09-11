@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The code
 
 The code is a set of working rules for how knowledge is written and arranged. Their one aim: whoever comes to the knowledge, with whatever need, finds what serves that need at hand — the most important things first, the detail within reach. This document is the whole code. Reading it leaves you able to write under it: you will hold why it exists, the two pieces knowledge is built from, the laws and the principles that guide the writing, and how AI applies them.

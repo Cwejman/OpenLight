@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Recording why: what the capture evidence says
 
 Night bets on recorded rationale — decisions written down, records that amend state and retire into git, a field where every change walks back to its cause. The sweep pulled the design-rationale, ADR, RFC, and design-doc literatures whole, and the news is uncomfortable: **capture fails structurally and the failure is well-theorized; the measured benefit of recorded why is nearly empty; and the one place a positive effect has appeared is brand new — rationale as *machine* context.** The fold ends with the boundary condition that decides whether night's bet escapes the graveyard.

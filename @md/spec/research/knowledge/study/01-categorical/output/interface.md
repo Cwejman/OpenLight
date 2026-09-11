@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The interface claim against the shipped world
 
 Night claims components declare what they take, mounting is a call, and which component can draw a thing is a read of the field. The sweep tested this against the product view layers, server-driven UI at five companies' scale, the component-contract standards, the generative-UI protocol race, and the research lineage. The finding: **the vacancy is real — nobody ships a general renderer-bid — the pattern is proven piecemeal at scale, and the expensive lessons are all about versioning and escape hatches, not about whether the model works.**

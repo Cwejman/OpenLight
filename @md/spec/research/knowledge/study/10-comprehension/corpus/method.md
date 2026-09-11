@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How the sweep was made, and what it can bear
 
 Every figure in this corpus inherits the conditions of the sweep that produced it. Those conditions are unusual enough to change how the numbers should be read, and they are stated here once rather than repeated in every brief.

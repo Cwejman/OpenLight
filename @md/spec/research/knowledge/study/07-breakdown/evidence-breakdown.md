@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: a bullet list is a brief whose nested briefs have no headings
 
 *Recorded 2026-09-02, the day of lab 07's run. Grounds the breakdown rule the lab was cut to test. Strength: **measured** — the counts and the depth measurement below were taken from the two outputs by script, not estimated. What the measurement does not reach is marked at the end.*

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Letting go by contract
 
 The author's thought of 2026-09-11 on how a substrate is let go of gracefully, for a context or for anything else, and why that is the same act as directing a program. Held open, the author's, the names kept as coined.

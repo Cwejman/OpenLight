@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What happens when the types are inferred
 
 Microsoft's WinFS, a typed filesystem cancelled in 2006, failed on a bottleneck that has now disappeared: clean typed metadata could not be produced at all. In 2026 a model will fill any field you declare, cheaply, at whatever precision it happens to reach. *Observational; the cheapness is visible in every study below rather than measured as such.* This brief holds why that is a worse problem than the old one, the studies that bound it, and the one operational rule that falls out of them.

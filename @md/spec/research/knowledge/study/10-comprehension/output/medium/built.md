@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What is built, and what happened to the rest
 
 One agent was sent to map the competitive landscape for a typed, versioned, permission-governed data layer and opened with a correction: the claim that nobody combines version control with knowledge structure is false, and has been false since 2019. This brief holds what that map shows, and then the part that transfers — why the dead ones died, including one killed by the very thing that makes this claim look timely.

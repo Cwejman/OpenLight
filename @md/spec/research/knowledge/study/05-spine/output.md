@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The ground out there
 
 *One piece, built only from the 45 raw reports of the web sweep dated 2026-08-26. Every claim below carries the confidence the sweep gave it; where an agent could not open a source, that is said. Two cautions from the sweep apply throughout: the agents' search budgets often ran out mid-work, so freely available sources are over-represented; and two agents caught automated summarisers inventing quotations and sample sizes, so every figure here is worth what its agent's own check made it worth — no more.*

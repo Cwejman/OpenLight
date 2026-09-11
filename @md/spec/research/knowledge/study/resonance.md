@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How two holons drive each other
 
 The code gives two joins: a brief holds smaller briefs beneath it, and a link reaches what lies elsewhere. Neither is two wholes driving each other at once. This brief asks how that is done, by asking it of the one field that has answered it in working machines, and brings back what the answer requires. Derived 2026-09-11, from the author's question about resonance between the operators of a synthesizer.

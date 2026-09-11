@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What keeps a document alive
 
 The most actionable finding in this material is not about how to write. It is about what happens to a document after it is written: what is consumed downstream is kept current, and what merely describes is not. That accounts for every decay figure in the sweep, it explains why discipline never fixes the problem, and it lands squarely on prose knowledge, which is descriptive by construction.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How professionals actually read
 
 Two agents were sent to find out whether the student results transfer to people reading documents as part of their work. The answer is that the transfer is narrow, the best professional studies point the opposite way from the folklore, and the dominant failure in long professional documents is finding the right part rather than understanding it.

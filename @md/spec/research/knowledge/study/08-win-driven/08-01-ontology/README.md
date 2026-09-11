@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The ontology, set aside
 
 *Sub-study of lab 08, postponed by the author 2026-09-07. It ran a step ahead: the edition's §4 was to be elevated from it, and the author chose to write the rest of the code first, by hand. Nothing here is retired. The file rested at thirty-one words after eight rounds of fresh readers ([`evidence-clean-room.md`](evidence-clean-room.md), *Round eight, and rest*), and it is rerun with more ideas once the code stands. Its own rule, written at its top, holds while it rests: every change is committed, and the commit is the ratification.*

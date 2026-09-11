@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How readers actually comprehend
 
 The code makes claims about how understanding is built — why before how, folds that stand alone, links as offers, one home per fact, confidence in the writing. The sweep pulled the cognitive-science floor and the professional-reader evidence under those claims. **The sweep ran against the code's six-rule predecessor; the mapping onto the current code is ours, and marked.** The headline: the ordering and bounding instincts hold, several justifications the project has leaned on do not, the professional evidence relocates the failure mode from comprehension to *retrieval*, and the code's actual domain — long interlinked documents read repeatedly by knowledgeable readers — is almost entirely unstudied.

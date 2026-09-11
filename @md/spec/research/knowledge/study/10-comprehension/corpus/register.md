@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Which report said what
 
 Every brief in this corpus links the reports it rests on. This is the reverse index: each of the 45 raw files, its subject, and where in the corpus its findings landed. Use it to go from a report back to its home, or to check that nothing was dropped.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How this reading was made
 
 *Retroactive record (2026-08-30): this lab predates the study structure, and no bootstrap prompt ever existed — the reading was performed in-session, in dialogue, on 2026-08-28. This file carries the method as recorded the day after the work; the output lived at `sweep-2026-08/findings/` and moved to [`output/`](output/README.md) when the labs were gathered.*

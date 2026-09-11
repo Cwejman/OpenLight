@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Folklore: do not cite
 
 Numbers that circulate as established fact and are not. Each entry gives the claim, what the trace found, and — where one exists — the safe formulation. Where a correction reshapes a live question, the topic fold owns the full account and is linked; this list is the index a writer checks before citing. Two sweep-level rules first: several agents caught summarisers **fabricating quotes and sample sizes**, so any figure is worth its verification note; and most of these traces ran without web search, so a "no primary source found" below means *not found in the indexed literature* — strong for academic claims, weaker for trade press.

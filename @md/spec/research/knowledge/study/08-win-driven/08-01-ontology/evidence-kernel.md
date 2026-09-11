@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: whether the medium needs a kernel
 
 *The author's question, marked open in the ontology on 2026-09-05 and explored the same evening: does the medium need a kernel, or is the engine a primal thing of the medium, one of many, so that the core is unbound? Technique: one fresh session read the ontology's platform entries and the pilot's substrate and engine specifications, listed every duty the pilot's one process performs, asked of each whether an engine that reads the law as data could do it for itself, named what cannot be distributed, described three shapes with prior art verified on the web, and stated the dynamic underneath in the ontology's words. The report is in git at the commit that adds `passes/round-5/r5-kernel.md`. Strength: **reasoned**, one session, with prior art verified.*

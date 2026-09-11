@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Typed, versioned, permission-governed stores
 
 One agent was sent to find the competitive landscape for a typed, versioned, permission-governed data layer, and opened with a correction: the claim that nobody combines version control with knowledge structure is false, and has been false since 2019. This brief holds the map organised by what the primitive actually is, the nearest neighbours, and the graveyard.

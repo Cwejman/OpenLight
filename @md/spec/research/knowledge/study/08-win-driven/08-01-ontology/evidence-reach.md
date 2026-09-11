@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: reach and dependence, counted
 
 *The ontology's own claim, that place follows reach and reach can be counted, tested on the ontology itself, 2026-09-05. Technique: a script reads every relation heading, takes each link as the word above standing on the word linked, and counts for each word how many stand on it. The same links give a dependence order and show mutual dependence. Strength: **measured**.*

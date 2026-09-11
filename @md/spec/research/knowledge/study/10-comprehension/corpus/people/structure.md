@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Structure beats artifacts
 
 The hardest evidence in the organisational lane is not about documents at all. It is about how an organisation is shaped, and it out-predicts everything measurable about the code. This brief holds that finding, the two results that bound what a document can add, and the one distinction that predicts whether a document survives.

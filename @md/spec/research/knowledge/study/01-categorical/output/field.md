@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The state of the field
 
 Timing ground: what the surrounding ecosystem did in 2025–26, for the pilot's bets about where to build and what to build on. Five movements matter.

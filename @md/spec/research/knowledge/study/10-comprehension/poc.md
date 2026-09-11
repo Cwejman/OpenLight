@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The proof of concept
 
 The code run in the simplest medium there is: markdown files in folders, tracked in git, read by people and by sessions bootstrapped against them. This document is the practice, the code made concrete for that medium, and it is where the code's open question is answered by observation: how briefs divide, how deep they go, what an entry looks like. It is a first cut, reasoned from the studies and lived only in the labs so far; each rule says how strongly it holds, and the ones marked open are being found out.

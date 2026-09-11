@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Debrief: the rounds behind `output/`
 
 A plain record of the rounds the piece went through. One section per round: which briefs were written again whole, which were moved as they were, which holarchies had their own text redone; what was left out and left open; and a rough count of text written against text kept.

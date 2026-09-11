@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Tenants beyond prose
 
 Knowledge is the substrate's first tenant, and the code's sixth section says the shape reaches further. This file holds the cases as they occur, between the study and the project's vision: each a domain named as it would look as entries in the substrate, held open and marked so. Begun 2026-09-11.

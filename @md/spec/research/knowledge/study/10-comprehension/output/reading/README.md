@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What a reader is measured to get
 
 There is a real science under document design, and it is smaller, older and narrower than the practice that cites it. This folder holds what survived checking: two bounds that govern every figure, three effects that replicate, the most-cited principle inverting, the absence where the length and depth numbers should be, and what changes when the reader is a professional rather than a student.

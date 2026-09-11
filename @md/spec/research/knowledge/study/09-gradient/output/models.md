@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What a model reads
 
 The code says writing for people and building context for models are one problem. Read this and you will know where the evidence agrees, where the model's wall matches the person's, what helps a model and what does not, and how the harness has moved since the claims about it in the code and the material behind it were written. The grades are the agents'; nothing was checked again.

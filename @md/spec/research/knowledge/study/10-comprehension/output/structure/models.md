@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What models do with what we write
 
 This is the only territory in the sweep with clean controlled experiments, and its results fall on both sides of one line: descriptions a model chooses or acts from pay, and prose aimed at a model does not. Read all of it against the noise floor in section 5, and against one caveat that covers the lane — none of this work is peer-reviewed, so the sharpest evidence in this material is also the least reviewed.

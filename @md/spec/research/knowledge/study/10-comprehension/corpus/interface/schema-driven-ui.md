@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Component contracts as data
 
 Is a component's accepted-types contract queryable at runtime? One agent went looking, in form generators, design-token standards, component manifests and component frameworks. The answer is yes in exactly one mainstream system, and the dominant framework moved in the opposite direction during exactly the period when agents started needing it.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Beyond prose: what has been tried
 
 This is what shipped systems and 2026 studies say about the code's [§5, how far this goes](../code.md#5-how-far-this-goes): a medium in which a program, a screen and a model can each say what it takes and gives, and be joined by that. It stands on [the adversarial stress test](../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [the semantic-web report](../../../../sweep-2026-08/raw/adc9dab44aefdde97.md), [the typed-substrate landscape](../../../../sweep-2026-08/raw/abffcf492c6f3d77d.md), [the schema-evolution deep read](../../../../sweep-2026-08/raw/ad341d6da8eaac361.md), [the agent-memory delta](../../../../sweep-2026-08/raw/a187277ed3a006fbc.md), [the server-driven-UI report](../../../../sweep-2026-08/raw/a57740ddd62e39ab6.md), [the schema-driven-UI report](../../../../sweep-2026-08/raw/a458ace67969949f3.md) and [the report on who else argues this](../../../../sweep-2026-08/raw/a09867b88abcb610b.md), which hold the system links, the exact wording and the full numbers behind every finding here. Reading it, you know which parts of that hope have precedent that worked, which have precedent that died, and which nobody has built.

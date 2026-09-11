@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What documentation does, on the evidence
 
 This is what has been measured about documentation as a thing organisations make: whether it changes outcomes, whether it stays true, and why knowledge fails to travel even when written. It stands on [the organisational-knowledge report](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), [the documentation-effectiveness sweep](../../../../sweep-2026-08/raw/a7b21ac3d71f8c8f6.md), [the minimalism and quality sweep](../../../../sweep-2026-08/raw/a5e1231b95c4c9ac5.md), [the decision-record sweep](../../../../sweep-2026-08/raw/aae121db667d39f2d.md) and [the DORA audit](../../../../sweep-2026-08/raw/abeeefde341d33a2d.md), which hold the paper links, the exact wording and the full numbers behind every finding here. Reading it, you know what a writer under the code can expect a brief to do for a team, and what bounds the code's promise that nobody has to be walked through it.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What is known about a reader
 
 The code rests on claims about how a reader takes in prose: why before how, a whole unit that stands alone, a link that says what it gives, one home for a fact, a stopping point that pays. Read this and you will know which of those the science of reading supports, which justifications behind them fell, how a professional actually reads a long document, and how far any of the evidence reaches from a classroom to a specification read over months. The grades are the agents'; nothing was checked again, and the numbers this stands on are corrected in [the numbers brief](numbers.md).

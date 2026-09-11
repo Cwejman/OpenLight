@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Local-first, and what the field learned expensively
 
 The local-first field consolidated hard in the twelve months to August 2026. Three of the best-known independents exited, the two loudest retrospectives the field has produced are systems abandoning conflict-free replicated data types, and the substrate layer grew enormously — pulled by AI tooling rather than by demand for collaborative applications.

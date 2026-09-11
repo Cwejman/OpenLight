@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Who else is on this ground
 
 One agent was sent to find whoever argues the same thesis, and whoever argues hardest against it; two more mapped the products and the research lineage that surround it. This folder holds what they found, and the shape of the finding is itself useful: the position is unoccupied, the neighbours are commercially crowded and shallow, and the best objection is not the obvious one.

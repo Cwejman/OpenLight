@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How people read, and what it does to the code
 
 This is what the reading and learning sciences say about the code's first law, its principle on the order of a holarchy, its prose principle and its story principle: which rules are carried, by how much, on whom, and where the code's readers fall outside what was measured. It stands on three sweep reports, [the cognitive-science floor](../../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md), [the professional-reader sweep](../../../../sweep-2026-08/raw/a4071d48c3f5d869c.md) and [the citation audit](../../../../sweep-2026-08/raw/a3f4c332843acf946.md), which hold the paper links, the exact wording and the full numbers behind every finding here. Reading it, you know which of the code's rules about the brief rest on measurement and which on preference.

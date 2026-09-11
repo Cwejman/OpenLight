@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How people take in written knowledge
 
 There is a real science under document design, and the sweep read it at source. What it establishes is narrower than the practice that cites it, the effects are small, and almost all of it was measured on students reading short passages once. This folder holds what survived checking, what did not, and the gap between the population studied and the population a specification is written for.

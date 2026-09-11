@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The catalogue, and how the numbers came to exist
 
 The entry says the practice has no authority to lend. This brief is the evidence for that: the five canonical texts, the four places measurement was attempted, the mechanism by which this field's circulating numbers came to exist — which is the part worth carrying, because it repeats — and what all of it does and does not license.

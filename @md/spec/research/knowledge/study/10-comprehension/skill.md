@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The skill
 
 This is what a session does with files under the code, said in prose so that it writes the script it needs at the moment it needs it, in whatever language is at hand. Nothing here is code, and nothing here need be kept as code: the substrate is prose, and a script is a sentence made exact for a minute.

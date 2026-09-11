@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What models do with what we write
 
 Five lanes of the sweep covered the agent-facing layer: context files, tool descriptions, context engineering, agent memory, and retrieval. This is the only territory in the whole sweep producing clean controlled experiments, and its results are the sharpest thing the raw has to give — because they split cleanly along a line that is useful to design against.

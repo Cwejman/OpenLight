@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Typed structure as a medium
 
 Several lanes of the sweep tested whether a typed, versioned, permission-governed substrate is buildable, whether anyone has built one, and whether typed structure earns its cost for a model reader. The word *substrate* is given in the corpus entry: the common floor that data and programs live on, as prose is the floor knowledge lives on. This folder holds the answers and the graveyard.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Machine-facing descriptions: where the gains are
 
 The one place in the whole sweep where writing something better produced a measured improvement, repeatedly and under intervention, is the description attached to a tool or an API. This brief holds those results and the reason they are not transferable to prose.

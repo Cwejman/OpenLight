@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What a screen driven from data costs
 
 The code's fifth section says what draws a screen should declare what it takes and gives in the same medium as the data, and the plan's sketch goes further: which component can draw a thing would be a query over those declarations. Read this and you will know what happened to everyone who tried: the note-taking tools that typed their objects, the editors that stored code as structure, five companies that drove their interfaces from the server, the form libraries that render from a schema, the low-code market, and the protocol that just won for agent interfaces. The pattern matches [the medium's](medium.md), and it is more specific about what a contract must carry: a capability the client can name, a version stamped on every declaration, and an escape hatch that is a tier rather than a shame. The grades are the agents'; nothing was checked again.

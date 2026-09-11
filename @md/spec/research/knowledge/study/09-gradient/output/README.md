@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What the sweep leaves standing
 
 On 2026-08-26 eighteen research agents, and twenty-seven they spawned, swept the web for what the world already knows about the claims [the code](../code.md) makes, about the numbers its earlier editions leaned on, and about the plan its last section reasons toward. Read this and you will know which of those claims the world backs, which numbers you may no longer cite, and where the plan meets ground that has already been tried. It is written for whoever holds the code and the plan, to decide what the next edition says and what gets built first; anyone joining the work can read it for the same reason. The forty-five reports in [`raw/`](../../../../sweep-2026-08/raw/) are the ground. Every claim here carries the grade its agent gave it and was not checked again.

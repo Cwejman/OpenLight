@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Does insight travel?
 
 The code opens on a failure: something is understood, and it does not reach whoever needs it next — and the cost lands later, cut off from its cause. The sweep grounded that claim in the organisational-knowledge literature and then bounded it hard. **The core is real and better than folklore: the barriers to knowledge moving are knowledge-side, not motivational. But the ceiling findings are severe — no causal study of documentation exists anywhere — and they end up being night's best argument, not its refutation.**

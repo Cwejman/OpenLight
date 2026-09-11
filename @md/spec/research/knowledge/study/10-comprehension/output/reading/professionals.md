@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # How professionals actually read
 
 Almost all of the comprehension evidence was measured on students reading a short passage once, so the question that matters is whether it transfers to someone reading a document as part of their work. Two agents were sent to find out. Expertise turns out not to protect anyone, the reversal effect everyone cites has no professional evidence, finding rather than understanding is where the failures happen, preference is not comprehension, and the lane closed with the only design prescription in the sweep.

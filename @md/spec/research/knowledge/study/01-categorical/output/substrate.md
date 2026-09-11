@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The substrate against the prior art
 
 Night's substrate combines a typed chunk store, contracts as data in the field they govern, commits and branches over everything, and attach between stores. The sweep checked each piece against what has shipped, and the finding is double-edged: **every piece has precedent — some of it refuting night's novelty claims outright — and the combination is genuinely unheld; but the seams between the pieces are exactly where every shipped system capitulated.** This fold carries the prior art, the schema-evolution law the industry independently converged on, and the recommendations the sweep landed for night's own law.

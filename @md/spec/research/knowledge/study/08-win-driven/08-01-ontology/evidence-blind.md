@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: the blind reconstruction
 
 *Whether a heading carries its paragraph's win, measured 2026-09-05. Technique: a fresh session was given the ontology's headings alone, every h2 word and every h3 title with its links, and asked to write the paragraphs; a second fresh session graded each reconstructed paragraph against the original as match, partial or diverge. The skeleton and both reports are in git at 8ddd4b7, `passes/round-1/`. Strength: **measured**.*

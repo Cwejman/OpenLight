@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The numbers you may no longer cite
 
 Every figure the material behind the code leaned on was chased to its source by one agent working only from primary texts, and a second set fell in other reports of the sweep. Read this and you will know, for each, what the source actually says and what sentence may be used in its place. Each entry gives the number once; the other parts of this debrief point here rather than repeat it. The grades are the agents'; nothing was checked again.

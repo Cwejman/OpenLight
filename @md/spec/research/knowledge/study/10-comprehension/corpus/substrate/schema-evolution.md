@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Schema evolution: the confessed unsolved problem
 
 Two agents worked this, one of them at depth. The finding is that the research which named the problem closed the file, the theory proves the composition law you would need is unattainable, and every system that survived schema change bought safety by forbidding things rather than by translating them.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What moves knowledge between people
 
 One agent was sent to the organisational literature, and it came back with better-designed studies than anything in the documentation lane and a conclusion that bounds them. This is where the ceiling on what a document can do is set — not by how well it is written, but by who is receiving it and what relationship they stand in.

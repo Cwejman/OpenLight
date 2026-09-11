@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The semantic web lineage, and what it settled
 
 Two agents read the formal-knowledge-representation tradition at source. The lineage splits into three things with three different fates: the vision failed, the vocabularies succeeded narrowly, and the reasoning layer lost to the validation layer. Several of its hard-won design decisions are directly usable.

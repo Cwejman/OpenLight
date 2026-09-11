@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The research lineage, and its post-mortems
 
 Two agents censused the structure-editor, codebase-as-database and interface-as-data research lineage. The post-mortems are unusually candid, and they are the most useful part — three ventures converged on the same funding answer within a year, and the one explicit commercial post-mortem names the structured editor itself as the thing models invalidated.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The numbers that did not survive
 
 Roughly forty figures in wide circulation were traced by the sweep to nothing, or to a source that says the opposite of what it is cited for. They have one home here so that no brief has to carry a warning about a number it does not use. Each entry names the claim, what the primary source actually says, and the report that chased it. A last section holds the handful of *practices* the sweep retired by name, which are verdicts rather than figures.

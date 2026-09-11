@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What Holds
 
 *Research register — structured, uncommitted. One reading of the 45 raw reports from the [2026-08-26 web sweep](../../../sweep-2026-08/README.md), written from the raw alone. Figures carry the verification notes their agents attached; where an agent did not check a number at its source, that is said in the sentence. Two cautions from the sweep travel with everything here: agents ran out of search budget and leaned on open-access sources, and two agents caught automated summarisers inventing quotes and sample sizes — so a figure is worth what its note says, no more.*

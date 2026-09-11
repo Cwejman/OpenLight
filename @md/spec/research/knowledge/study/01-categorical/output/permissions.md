@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Permissions: the evidence is one-directional
 
 Night makes boundaries architectural: one-hop, non-transitive, judged by the engine under one call context, uniformly across reads, writes, counts, and search. The sweep found this the best-supported design decision in the whole tree — **transitive permission is a documented performance and safety failure, the industry is being dragged toward exactly night's shape, and yet nobody has published the argument for it** — with one careful restatement needed on what "uniform filtering" can claim.

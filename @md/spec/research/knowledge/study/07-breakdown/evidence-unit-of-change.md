@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Evidence: the brief as the unit of change
 
 *Recorded 2026-09-01, from the Lab 06 writer session's own accounting of its edit log, queried right after its run. The candidate rule under test — small fixes in place, meaning-changing edits regenerate the brief whole — was added to this study's `code.md` (How AI applies the code) the same day. The writer was asked for an honest accounting, violations as valuable as compliance.*

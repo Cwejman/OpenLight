@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Writing knowledge down, weighed against the evidence
 
 There is a [code for writing knowledge down](../code.md) — knowledge laid as a gradient of small briefs, each readable alone, nested and linked, one home per fact, confidence written in the text — and a wider claim that the same shape should be taken past prose into the medium beneath, so that programs meet by matching contracts rather than by hand-written glue. This piece weighs that position against the evidence, and the verdict is that three of its five claims are unvalidated rather than refuted, one is barely examined, and the fifth survives narrowly — while the materials the code is built from, stories and hierarchy and signals and prose and plain files, are the ones with evidence behind them.

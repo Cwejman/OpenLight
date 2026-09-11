@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What is known about the making
 
 The claim that work proceeds in whole steps — written whole, read again under the code, with a fresh session reading the draft cold and a debrief at the end — is the one the sweep engages least. This brief holds the four partial answers it does give and the one clean absence, because a claim nobody looked at should be distinguishable from a claim that failed.

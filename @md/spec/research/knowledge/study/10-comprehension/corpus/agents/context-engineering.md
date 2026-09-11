@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Context engineering: measured diagnosis, unmeasured prescription
 
 Context engineering settled in 2025–26 on a four-part decomposition — instructions, retrieval, memory, tools — and one physical premise: context is a finite attention budget, not a container. What is genuinely methodical is the **diagnosis**; the **prescription** is almost entirely vendor blog posts with anecdotes rather than ablations.

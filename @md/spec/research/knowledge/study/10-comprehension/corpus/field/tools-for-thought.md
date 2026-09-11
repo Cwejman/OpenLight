@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The tools-for-thought products, August 2026
 
 Two agents censused the personal-knowledge and tools-for-thought category. Three structural facts came back, and the first of them is the most consequential single finding in the commercial half of the sweep.

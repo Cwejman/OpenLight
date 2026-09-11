@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Arranging knowledge so it can be found
 
 Information architecture is the practice of arranging a body of knowledge so a reader reaches the part they need. Two agents were sent to find its evidence base. It is thinner than the comprehension literature's, largely vendor-authored, and the single most direct validity test returned a null.

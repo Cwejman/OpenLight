@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Feedback on the run
 
 *The steward's reading of the run and of the piece, 2026-09-09, with the author. The piece is [`output/`](output/README.md), the writer's record of its rounds is [`debrief.md`](debrief.md), and the account in minutes and tokens sits there too. Round one's outputs are in git. What is here is what the run teaches for the next one, and a record: what is folded from it retires with it. Reasoned, from one run, unless marked.*

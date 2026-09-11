@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The generative-interface protocol race, and its winner
 
 Consolidation happened, inside the Model Context Protocol, and the winning unit is opaque. That is the decisive fact for anyone whose interface is already typed data — and it is better news than it sounds.

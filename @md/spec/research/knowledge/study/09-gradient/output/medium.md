@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What may be typed, and what must stay prose
 
 The code's fifth section reasons that the shape of knowledge, wholes that are also parts joined by links, could hold beyond prose if everything lived in one typed medium. Read this and you will know what the world says back: what happens to a type a model infers, what the semantic web's lineage learned, whether anyone has versioned structure or merged it, how permission behaves when it is transitive, and who else argues the plan's thesis or its opposite. The grades are the agents'; nothing was checked again.

@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The sweep, read
 
 On 2026-08-26 a fleet of research agents swept the ground this project stands on and returned 45 reports. They were often sent over the same territory, so the raw says many things many times. This corpus says each thing once, in one place, with the confidence its report gave it and that report one link away. It is not a piece for a reader; it is the material, made small enough to hold by whoever writes from it next. Before quoting any figure below, read [`method.md`](method.md): the sweep has two systematic biases and one caught fabrication, and every number in this corpus inherits them.

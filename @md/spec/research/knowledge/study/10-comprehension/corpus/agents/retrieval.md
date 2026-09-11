@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Retrieval: what structure buys when a model reads
 
 Three lanes of the sweep covered retrieval — graph-based RAG, chunking, and long context against retrieval. The results converge, and they are deflationary about the expensive options and specific about the cheap one that works.

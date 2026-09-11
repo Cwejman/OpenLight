@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # Where structure pays, and the gate
 
 Structure here means anything typed rather than written out: a field with a declared meaning, a schema, a description attached to a tool, a permission rule, a link whose relation is named. One agent was sent to argue against the typed-medium claim at full strength, and the boundary it came back with is sharp enough to design against. This brief holds that boundary, the gate that overrides it, what a model gets from what you write, the one result that cuts hardest against arrangement, and the part of the argument that no increase in capability will move.

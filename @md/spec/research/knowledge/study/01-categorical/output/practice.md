@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # The documentation field's own methods, graded
 
 The code will be compared to the documentation frameworks that already exist — Diátaxis above all — and night's docs will live in a world whose serving layer just flipped to agents. This fold grades the field's methods by their actual evidence, so the code borrows what is real and declines the rest with grounds.

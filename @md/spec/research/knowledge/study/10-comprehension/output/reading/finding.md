@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What is known about finding
 
 Finding the right part is where professional readers fail, so the practice that exists to solve it matters more than its size suggests. Information architecture is that practice, and its evidence base is the thinnest in this material: a citation chain nobody walked back, a null where the validity test should be, and a method that is unstable in ways its users do not report. What it does have evidence for is narrower and more useful than what it claims.

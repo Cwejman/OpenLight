@@ -1,3 +1,8 @@
+---
+under: the code
+kind: brief
+---
+
 # What breaks
 
 Three things break when a typed medium runs, and all three are documented by the people who hit them rather than by their critics. This brief takes them in the order of how badly they bite: schema change, which nobody has solved and the theory says nobody will; transitive permission, whose cost is stated in its own source; and deriving the interface from the data, where six organisations hit the same wall independently. The last two sections hold what that third lane found that generalises past interfaces, and where the shipped products stop.
