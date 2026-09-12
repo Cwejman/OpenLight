@@ -5,11 +5,9 @@ kind: brief
 
 # The skill
 
-This is what a session does with files under the code, said in prose so that it writes the script it needs at the moment it needs it, in whatever language is at hand. Nothing here is code, and nothing here need be kept as code: the substrate is prose, and a script is a sentence made exact for a minute.
-
 ## 1. Read by depth
 
-A file or a folder is read the way the gradient is laid: the title and the first paragraph, then each heading with its first paragraph, then one level deeper, and so on to the depth the work needs. A script that prints headings with the paragraph under each, to a chosen depth, gives a session the shape of a piece for a fraction of reading it whole. A brief is read in full only where the work will touch it, and never a moment after the session wrote it; the fresh read belongs to a fresh head.
+A file or a folder is read the way the gradient is laid: the brief that mounts it, or the title and the first paragraph where nothing does, then each heading with its first paragraph, then one level deeper, and so on to the depth the work needs. A script that prints headings with the paragraph under each, to a chosen depth, gives a session the shape of a piece for a fraction of reading it whole. A brief is read in full only where the work will touch it, and never a moment after the session wrote it; the fresh read belongs to a fresh head.
 
 ## 2. Address by number
 
@@ -19,7 +17,7 @@ Headings carry numbers, and a brief is named by its number and its file: `readin
 
 Inserting or moving a brief renumbers every heading after it, and every pointer written by number goes stale without any link breaking. So after every round a script lists every `§` reference in the tree and checks that the number it names still heads the brief it meant, by the heading's words and not only its number. Links are checked the same way, that each resolves to a file and an anchor that exist.
 
-Two more lists come from the mounts. Every file and folder in a space is mounted by exactly one brief of its entry, by a paragraph that is nothing but the link and stands last in that brief, and every mounted file's title matches that brief's heading. Both go stale the moment a part is renamed or moved, and both are a few lines of script. A round is not done until all four lists are empty.
+More lists come from the mounts, over the files under the code. Every file and folder in a space is mounted by at most one brief of its entry, by a paragraph that is nothing but the link and stands last in that brief. Every mounted file's title matches that brief's heading, it carries no prose before its first section, and it has at least one section. And the files nothing mounts are listed too, not as faults, since orphans are allowed, but so that a part left unconnected is seen. All of them go stale the moment a part is renamed or moved, and each is a few lines of script. A round is not done until every list but the orphans is empty.
 
 ## 4. Count one way
 

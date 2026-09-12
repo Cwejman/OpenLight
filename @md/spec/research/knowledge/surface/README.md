@@ -6,10 +6,6 @@ status: in force
 
 # The surface
 
-Knowledge under the code stands in a shape, and nothing it is written in lets a reader either move by that shape or see it. A document makes you scroll past whatever you meant to skip. A directory listing gives you names and nothing of the shape they stand in. Neither tells you what a part will cost before you have spent the reading on it.
-
-The surface is the interface those two are missing. It lays a body out by its own shape so a reader descends it rather than scrolling, and it plots that shape so a reader can see the body whole and reach any part of it from wherever they stand. Both stand on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
-
 ## 1. One interface, and what refusing more buys
 
 One interface serves two moments of the same repository. Locally it reads a working tree, again as the files change, which is the live view a session needs while it works. Published, it reads what a build emits from that same tree, so a repository's site is the repository rather than a site kept in step by hand.

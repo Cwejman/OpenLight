@@ -5,8 +5,6 @@ kind: brief
 
 # The code
 
-This code turns written knowledge into a medium, one that joins us to what we know and to each other. Keeping it in order stops being a job of its own. You take part in it, and you add to it. This document is the whole code, and reading it leaves you able to write under it.
-
 ## 1. Why there is a code
 
 This is the essence the rest of the code rests on: what knowledge is (its ontology), and what shape it takes (its topology). It leaves a good deal to your imagination, this is broken down further as the document progresses.

@@ -5,8 +5,6 @@ kind: brief
 
 # Giving as a business
 
-The author's positions on how a model and a harness should be offered, written down 2026-09-11 from the labs' cost accounts so they stand beside the numbers that provoked them. They are the author's, marked so, and open; nothing in the code depends on them. The word for the stance is giving as a business: a service earns by what it lets its users compound, not by what it withholds from them. The author gives the name a second reading, glue as a business: what the walls of today's products sell as integrations, the glue between them, is under the substrate the one honest service, the connecting itself, and a host that offers it is offering glue as a service. The two readings are one stance seen from the user's side and from the host's.
-
 ## 1. A stateless experience at the same price
 
 The model is stateless; every call is a whole context sent fresh. A harness that offers only an append-only transcript, and prices any other shape of context as if it were new work, withholds what the model already is. The author's position: a harness should give the stateless experience, a context assembled from a place rather than a trail, at the same level of pricing as the transcript, and doing otherwise is a disgrace to giving as a business.

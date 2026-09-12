@@ -5,10 +5,6 @@ kind: brief
 
 # The study
 
-The study is the search for how knowledge is best structured, for people and AI alike, run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. This file is its notebook. It holds where the search stands and what it still owes.
-
-The law is not here. It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
-
 ## 1. The finish line
 
 The search ends when the proof is lived, not argued. Three marks:
@@ -62,6 +58,8 @@ Four records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-20
 The surface a body of knowledge is read through left the study on 2026-09-12 and stands at [the arc's root](../surface/README.md), since it serves the whole arc rather than these labs. The program built here on 2026-09-11 was retired with it, so that the understanding is built before the program is.
 
 ## 5. Notes
+
+- **The law is not here.** It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md). A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
 
 - **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation ([the edition of 2026-08-30](code-2026-08-30.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 

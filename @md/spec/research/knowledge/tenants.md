@@ -5,8 +5,6 @@ kind: brief
 
 # Tenants beyond prose
 
-A tenant is a domain that lives in the substrate the way knowledge does. Knowledge is the first, and the code's sixth section says the shape reaches further. This file holds the cases as they occur, between the study and the project's vision: each named as it would look as entries in the substrate, held open and marked so. Most are domains; two are not, and say so where they stand. Begun 2026-09-11.
-
 ## 1. Sound
 
 A digital audio workstation as the substrate would hold it. A patch, an instrument's configuration, is a brief: whole, readable alone, and a part of a track, which is a part of an arrangement, which is a part of a piece. The temporal buffers, MIDI and audio, are the raw beneath it, one link away from the patch that plays them and never restated inside it.
