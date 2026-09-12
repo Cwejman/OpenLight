@@ -67,7 +67,7 @@ After the labs come the two unwritten artifacts of [§2](#2-what-the-study-ships
 
 A lab is one directory beside this file, `<nn>-<name>/`, and since lab 06 it ships three things:
 
-- **Its code edition** (`code.md`) — the full law the writer follows, extended as if the lab's claims were always its own. The code carries everything; the prompt carries nothing but mechanics. The exception is a lab that *tests* a candidate rule rather than adopting one: there the candidate stays in the prompt, so a rule the lab may reject never enters the law (lab 07).
+- **Its code edition** (`code.md`) — the full law the writer follows, extended as if the lab's claims were always its own. From lab 11 it is not a copy but a link file pinned to a commit, as [the practice](10-comprehension/poc.md#4-links-and-citations) sets out, so the law lives once above the labs and a lab records which state of it ran. The code carries everything; the prompt carries nothing but mechanics. The exception is a lab that *tests* a candidate rule rather than adopting one: there the candidate stays in the prompt, so a rule the lab may reject never enters the law (lab 07).
 
 - **Its prompt** (`prompt.md`) — bootstrap, the author's request, constraints. Both files are written before the run, so together they are the method record by construction.
 

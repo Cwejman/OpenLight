@@ -31,6 +31,10 @@ This binds whoever edits a brief that others stand on. Changing it is allowed, a
 
 How a link should hold its state is not settled, and two shapes stand against each other. A link pinned to a commit keeps one home for the fact and trusts git to serve the old state on request. A copy of the ground written into the brief that stands on it, stamped as a copy at a commit, gives up one home and gains a brief that travels whole, needing no history to be read. A third shape was raised 2026-09-12, and it puts the stamp on the target rather than the pin on the link. A brief removed while others still stand on it comes back at the path they name, carrying in its frontmatter the commit it is taken from, so it reads as a past state and not as a living brief. It is the cheapest of the three, since nothing is written until something actually breaks, and the weakest, since it rests on whoever removes a file noticing that anything pointed at it.
 
+A lab, or any state someone still stands on, pins the law it ran under with a file rather than a copy. A link file carries no prose of its own: frontmatter naming the path it stands for and the commit it is pinned to, and nothing more. So the code and this practice live once, at the top of the knowledge they govern, and a lab that launches drops a link file for each and evolves neither.
+
+Beyond one home, that buys a decidable answer to what may be removed. A rule that reads backward through history for pointers can never say no to a removal, since some commit always linked the file; the link file is that rule with its bound written down, one declaration per past state anyone still stands on. From lab 11. *Reasoned, the author's, 2026-09-12; nothing renders a link file yet.*
+
 The first is cheaper than the second and the second is sturdier, and which a substrate wants may differ between a tree read in place and a tree published elsewhere. *Open, raised 2026-09-11 and not resolved; wanted before a tree is published.*
 
 ## 5. Files
