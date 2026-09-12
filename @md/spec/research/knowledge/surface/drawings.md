@@ -32,7 +32,7 @@ How much room it may take before it pulls at the reading is not settled. It belo
 
 ## 3. The body, as droplets on a plate
 
-A level, a path and a brief's level are each a slice, so none of them shows the body whole. A reader cannot see how deep it runs beside them, or what branches stand next to the one they are in.
+A level, a path and a brief's level are each a slice, so none of them shows the body whole. Only the whole carries proportion: how deep the body runs beside where a reader stands, what branches lie next to theirs, and which of them holds the weight of the knowledge.
 
 The body is drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each of those carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each of them holds.
 

@@ -46,13 +46,15 @@ Pressing a brief opens the level under it. You do not enter the brief, because y
 
 ## 3. What the prose cannot say
 
-Reading is a spend, and prose never tells a reader the price. How long a brief is, how dense, how much hangs beneath it: none of that is in the words, so a reader either spends blind or hesitates.
+A brief says what it means. It cannot say what it is, and it can say nothing at all about the body it sits in, because no brief can see the whole.
 
-So the surface draws it. What it draws is a minimap, the small picture an editor puts beside a long file, except that these map briefs and the prose in them rather than lines of text. A reader weighs a part before entering it, which matters because a reader who expects difficulty reads worse.
+Drawn, that body is a second reading rather than a convenience. Seen as shape it says where its mass actually sits, which regions have been worked and which are thin, and whether the gradient it was written by holds at all. That last turns the code's own promise into something a reader can check: if the biggest understanding really comes first then the top is short and each level below it heavier, and a picture shows that failing where it fails.
+
+Closer in, the same drawing answers a reader's immediate question, which is the price. Reading is a spend and prose never quotes it, so a reader weighs a part before entering. That is the job a minimap does beside a long file, and it is the least of what these do.
 
 A picture is also a way in. Pointing at any part of any of them reaches that part, so the body becomes something a reader moves around in by association and not only by descending a level at a time.
 
-*Reasoned, the author's, 2026-09-12. That a reader judges a part by its look before reading it is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked: a rule never fixed it and a picture did.*
+*Reasoned, the author's, 2026-09-12. Two halves of it are measured: [the study counted its own tree as shape](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and found both that the gradient holds and where heaviness does not, and judging a part by its look before reading it is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read). Both carried here unchecked.*
 
 [the level beneath](drawings.md)
 
