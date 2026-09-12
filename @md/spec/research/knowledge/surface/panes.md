@@ -8,34 +8,42 @@ status: in force
 
 ## 1. A brief with nothing beneath it is not a door
 
-A door is a brief with a level under it, and it is the only kind that can be pressed. A brief with nothing beneath has no level to open, so pressing it would do nothing and it does not offer to.
+A door is a brief with a level under it, and it is the only kind a reader can press. A brief with nothing beneath has no level to open, so it does not offer to be pressed.
 
-The difference is drawn rather than discovered. So a level read straight down says where its depth lies, and a reader learns which way is down without trying doors that are not there.
+The difference is visible before a reader tries it, since [a brief's level is drawn beside its heading](drawings.md#2-a-briefs-level-beside-its-heading) and a leaf has nothing to draw. So a level read straight down says where its depth lies.
 
 *Reasoned, the author's, 2026-09-12.*
 
 ## 2. A pane is short, and scrolls one way
 
-A pane scrolls when its content exceeds it, on one axis, which is [the design language's rule](../../../design.md#scroll-and-seams) and not this surface's own.
-
 A level's briefs carry their own prose only, so a pane is short because a brief is brief. Where a pane does not overflow it does not scroll, and nothing in the reading depends on a pane having scroll to give.
 
-A level too big to read is the exception, and the surface does not hide it. A level of seventy-odd briefs makes a punishing pane, and that is the code's verdict on the writing showing through, not a case for the surface to soften.
+Where it does overflow it scrolls on one axis and never two, since two axes in one region are two regions pretending to be one.
 
-*Reasoned, 2026-09-12; that a real body carries such a level is measured in [the study](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and carried here unchecked.*
+A level too big to read is the exception, and the surface does not soften it. A level of seventy-odd briefs makes a punishing pane, and that is the writing's fault rather than the surface's: hiding it would hide the one thing a reader most needs to know about that level.
 
-## 3. A record is read as the sequence it is
+*Reasoned, 2026-09-12. The one-axis rule is [the design language's](../../../design.md#scroll-and-seams) and not this surface's own. That a real body carries a level that size is measured in [the study](../study/measured.md#1-the-study-against-the-gradient-2026-09-12), and carried here unchecked.*
 
-The stamp says what kind of file it is, and a record is not a holarchy. Its order is chronology and its sections are occurrences rather than briefs ranked by importance, so reading one by the gradient reads it wrongly.
+## 3. A record is shown as the sequence it is
+
+Not everything under the code is a holarchy. [The practice's stamp](../poc.md#9-a-file-says-it-is-under-the-code) also says what kind of file it is, and a record's order is chronology rather than importance.
 
 So a pane holding a record shows the sequence it declares itself to be, in the order it declares, and never descends it as though its entries were parts of a whole.
 
-*Seen.*
+*Reasoned, carried from the practice and not checked here.*
 
-## 4. What is open
+## 4. A link is not a path move, and that is unsettled
 
-A link is not a path move, and it is the sharpest thing unsettled. Following one lands you at a brief whose own path from the root differs from the path you stand in. Rebuild the panes to the target's path and where you came from is lost. Keep them and the path lies about where you are.
+A brief's relations reach anywhere, while a pane only ever descends. So following a link lands a reader at a brief whose own path from the root differs from the path they stand in, and the two cannot both be honoured.
 
-The narrow screen. That the panes become a stack and one is seen at a time is decided; nothing else about it is, neither how the path is held there nor how a reader moves along a stack.
+Rebuild the panes to the target's path and where the reader came from is lost, which is the one thing this reading exists to keep. Keep them and the drawing of the path lies about where the reader is. Neither can simply be chosen, and nothing here chooses it.
+
+It is the sharpest thing open in this holon, and whatever is built will meet it on the first day, because a body of prose is dense with links.
+
+*Open, 2026-09-12.*
+
+## 5. Where only one pane fits
+
+On a narrow screen the panes become a stack and one is seen at a time. That much is decided and nothing else about it is: not how the path is held when the row of drawings cannot stand, not how a reader moves along a stack, and not what replaces a pointer.
 
 *Open, 2026-09-12.*

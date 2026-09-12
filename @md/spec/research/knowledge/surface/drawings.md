@@ -6,86 +6,68 @@ status: in force
 
 # What the prose cannot say
 
-## 1. It goes where the prose in view leaves something out
+## 1. Above the panes, a drawing per level and the path whole
 
-The drawing never has to argue for its place, because it is only put where the reading cannot answer for itself. Where a reader would want something the prose in front of them does not carry, the drawing carries it; where the prose has arrived, it withdraws.
+A pane scrolls down, and the drawing of its level runs left to right above it, wide and short rather than tall and narrow. Turned that way it costs height instead of width, so it stands over the prose without taking width from the line.
 
-That is also what decides how many there are: one for each gap the reading leaves, and not one more. A drawing that is merely available is a drawing competing with the prose.
+It shows the level whole, its briefs in order with their paragraphs sized as they are, so the rhythm of a level can be judged before a word of it is read.
 
-*Reasoned, the author's, 2026-09-12.*
+Every level's drawing is the same height, so the row of them reads as the path, level by level, left to right, and in each the brief whose level stands in the pane to the right is marked. A selection is shown where it was made.
 
-### 1.1 A level, above its pane
+But a viewport holds only a few panes, so that row reaches only the part of a path in view. The path is therefore drawn whole as well, full width above everything, compressed to fit rather than scrolled, since a drawing that must be scrolled has stopped being one.
 
-A pane scrolls down, and the drawing of its level runs left to right above it, wide and short rather than tall and narrow. Turned that way it costs height instead of width, so it stands over the prose without taking anything from the measure.
+Two drawings of one path, then, and the second earns its place by reaching what the first cannot.
 
-It shows the level whole: its briefs in order, their paragraphs sized as they are, so the rhythm of a level can be judged before a word of it is read.
+*Reasoned, the author's, 2026-09-12. That the row alone was the path, needing no second drawing, was claimed here and withdrawn the same day: a row of visible panes cannot show a path that runs off screen.*
 
-*Reasoned, the author's, 2026-09-12.*
+## 2. A brief's level, beside its heading
 
-### 1.2 The path, above the panes
+Beside a brief's heading the drawing shows the level beneath that brief. It is the only place a reader learns what a descent would give before taking it, since that level is never in view from the brief's own prose, and it is what a preview pane would have been at a fraction of the room.
 
-Every level's drawing is the same height, so the row of them standing above their panes reads as the path, level by level, left to right. In each, the brief whose level stands in the pane to the right is marked, so a selection is shown where it was made.
-
-But a viewport holds only a few panes, so the row shows only the part of a path in reach. The path is therefore also drawn whole, full width above everything, compressed to fit rather than scrolled, since a drawing that must be scrolled has stopped being one.
-
-Two drawings of one path, and the second earns its place by showing what the first cannot reach. That the row alone is the path was claimed here and is withdrawn: a row of visible panes cannot show a path that runs off screen.
-
-*Reasoned, the author's, 2026-09-12.*
-
-### 1.3 A brief's level, beside its heading
-
-Beside a brief's heading the drawing shows the level beneath that brief. It is the only place a reader learns what a descent would give before spending it, since that level is never in view from the brief's own prose.
-
-So it is what a preview pane would have been, at a fraction of the room.
-
-How much room it may take before it pulls at the reading is not settled. It belongs there if it is small enough not to take focus, and that is judged by eye against real prose rather than by a size.
+How much room it may take before it pulls at the reading is not settled. It belongs there if it is small enough not to take focus, and that is judged by eye against real prose rather than set as a number.
 
 *Reasoned, the author's, 2026-09-12; the room it may take is open.*
 
-### 1.4 The body, as droplets on a plate
+## 3. The body, as droplets on a plate
 
 A level, a path and a brief's level are each a slice, so none of them shows the body whole. A reader cannot see how deep it runs beside them, or what branches stand next to the one they are in.
 
 The body is drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each of those carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each of them holds.
 
-What that buys over a rectangle dividing into rectangles is shape, not room. A rectangle's cells degenerate into slivers, which a pointer cannot hit and an eye cannot place. A droplet stays compact however small it gets, so it stays findable down to the floor.
+What that buys over a rectangle dividing into rectangles is shape, not room. A rectangle's cells degenerate into slivers a pointer cannot hit and an eye cannot place, where a droplet stays compact however small it gets. Room it does not buy, since a ring's length grows with its radius while a level's cells multiply with depth.
 
-It buys no extra room, and the claim here that it did was wrong. A ring's length grows with its radius while a level's cells multiply with depth, so room per cell falls either way, and the plate meets the same floor a rectangle does.
+So the figure lives or dies on how far out it can go before a droplet is too small to hit. Drawing it once against a real body and measuring its smallest cell is the test, and it has not been run.
 
-*Reasoned, the author's, 2026-09-12, the geometry corrected the same day. Where the plate's floor actually falls is open below.*
+Where it goes on screen is not settled either. Room yielded by a pane behind the reader is a short wide notch and a plate wants a squarish region, so either the plate takes a pane's whole column or it is summoned over the reading rather than standing beside it.
 
-## 2. It shows nothing a reader cannot trust or cannot see
+*Reasoned, the author's, 2026-09-12. It was claimed here that the plate buys room as well as shape, and that was withdrawn the same day on the arithmetic above.*
+
+## 4. It shows nothing a reader cannot trust or cannot see
 
 Every shape is computed from the substrate and none is invented, because a picture a reader cannot trust is worse than no picture at all.
 
-Nor is anything drawn too small to read. A paragraph a pixel wide says nothing, so as room runs out the drawing steps down a ladder, from paragraphs to briefs to levels to branches, showing the finest of them the room allows and marking that it holds more.
+Nor is anything drawn too small to read. The drawing has a floor, the smallest cell a pointer can hit and an eye can place, and rather than shrink through it the drawing shows less: it steps down a ladder from paragraphs to briefs to levels to branches, drawing the finest of them the room allows and marking that it holds more.
 
-That ladder is the gradient turned on the drawing: the biggest understanding the room can carry, and never more than it can carry legibly. It is the same law that turns spacing into navigation when [rhythm hits its floor](../../../design.md#rhythm--depth-derived-never-stated-twice), met in a picture instead of in a layout.
+That is the gradient turned on the drawing, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
 
 *Reasoned, 2026-09-12.*
 
-## 3. One brief, lit wherever it is drawn
+## 5. One brief, lit wherever it is drawn
 
-Pointing at anything that names a brief lights that brief everywhere it is drawn at once, and moves a cursor that follows the reading without a reader placing it. One brief is one thing seen at several sizes, and a drawing whose lighting does not follow has left the reading.
+Pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen at several sizes, and a drawing whose lighting does not follow has left the reading.
 
 Where the drawing has stepped down past the brief being pointed at, the cell holding it is lit instead, so the lighting always resolves to something on screen.
 
 *Reasoned, 2026-09-12; resolving to a holding cell was built once, after the floor left deep briefs unanswerable.*
 
-## 4. It never takes more than the reading can spare
+## 6. It earns its place, and ink is what limits it
 
-What decides between aid and distraction is how much ink a drawing spends, since ink spent past what a reader needs is ink taken from the reading. That is [the design language's own measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact), where marks are spent in proportion to how alive the fact is.
+The drawing never has to argue for its place, because nowhere it appears repeats what is in view. Beside a brief it shows a level not in view at all. Above a pane it shows a level whole where the prose gives only the part in reach. The path and the body are not in view either. So there is one drawing for each gap the reading leaves and not one more, since a drawing that is merely available competes with the prose.
+
+What limits it is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
 
 Room goes the same way. The pane being read keeps its height, a pane behind it yields, and it takes its height back when a reader returns to it.
 
-*Reasoned, the author's, 2026-09-12; every quantity in it is open below.*
+How much of either, in numbers, is not settled. A drawing of the path, a drawing per pane, the prose and the plate all want vertical room, and the prose is spent first while the rest is what is left, which is a rule about priority and not yet a layout.
 
-## 5. What is open
-
-Where the body's plate goes. Room yielded by a pane behind you is a short wide notch, and a plate wants a squarish region, so the two do not fit. Either the plate takes a pane's whole column, or it is summoned over the reading rather than standing beside it. Neither is chosen.
-
-Whether the plate survives its own floor. With any real branching, cells a few levels down fall below what a pointer can hit, so the figure lives or dies on where the floor lands. Drawing it once against a real body and measuring its smallest cell is the test, and it has not been run.
-
-The heights. A path drawing, a drawing per pane, the prose and the plate all want vertical room, and no height is set for any of them. The prose is spent first and the rest is what is left, which is a rule about priority and not yet a layout.
-
-*Open, 2026-09-12.*
+*Reasoned, the author's, 2026-09-12; every quantity is open.*
