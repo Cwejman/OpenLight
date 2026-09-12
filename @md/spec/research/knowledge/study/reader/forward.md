@@ -4,82 +4,84 @@ kind: plan
 status: in force
 ---
 
-# The path forward
+# The order of work
 
-What was asked of this program, set against what it actually does. Every direction here comes from [the asks](../asked-2026-09-11.md), the author's own words over the stretch that built it, and every judgment of what stands comes from the program as it is at the close of 2026-09-11. Written so that the next sitting starts on ground instead of on anyone's memory of a long evening.
+[The briefs beside this one](README.md) say what the reader is to be. This says what is built, in what order the rest is taken, and how far it is worth going. It is the only home for the distance between the specification and the program; a brief that describes the target never also reports on the build.
 
-The rooms below are in the order the work should take them, not the order they were said, and every one of them is work rather than retrospect. That order is itself a claim. It says this is next and these wait, which a cold reader can agree with or refuse. Placing it wrongly is a fault of this file, not a matter of taste, and the code asks a plan to carry its place for exactly that reason.
+The order is a claim, not a taste. It says this is next and these wait, and a cold reader can agree with it or refuse it.
 
-Reasoned, from the asks and from the program as it stands; no part of this order has been read cold by anyone but its writer.
+*Reasoned, from [the asks](../asked-2026-09-11.md) and from the program as it stands at the close of 2026-09-11. No part of this order has been read cold by anyone but its writer.*
 
-## 1. Use, before anything more
+## 1. What grades the investment
 
-The author's verdict at the close outranks every direction that follows: scrolling and the overall usability are critically low. The parts exist and using them is work.
+One question decides how far to go: **what does reading lab ten's piece actually require?**
 
-What is suspected, none of it measured. One scroll moves three spreads at once, so a small gesture changes more than a reader means. The room ahead opens on any hover, so a pointer crossing a list churns a whole column. Three spreads share the width, which sets the prose against its own measure. The maps are many and each asks for estate the reading wants. And nothing was tuned, because every part was built once and never returned to.
+That is why the program exists now rather than later. The author judged the piece heavy at a glance, without spending reading on it, and wants to see that judgment made properly before spending the reading. Everything the piece's reading needs is worth building. Everything else waits for a use that asks for it.
 
-This is not housekeeping to be done after the features. A reading surface that tires a reader fails at the only thing it is for, which is the code's own argument turned on the tool: what looks like too much is harder to understand, and effort begins before the reading does. The next sitting spends itself here.
+The second grade is feasibility. It is not settled that this interface is workable rather than at a limit better navigated than pushed, and nothing that fixes a shape in place is begun until it is.
 
-## 2. The reading surface
+## 2. Use, before anything more
 
-The reading surface works and is not tuned. It stands as [how it reads](reads.md) describes, and four things asked of it are missing, in the author's terms:
+The author's verdict outranks every direction below it: scrolling and the overall usability are critically low. The parts exist and using them is work.
 
-- **The spreads should not scroll in lockstep.** The one you are in runs freely, and each behind it moves more slowly, since it holds less prose per step of the holarchy. What was built is one distance for all, which is synchrony without the grading.
+What is suspected, none of it measured. One scroll moves three spreads at once, so a small gesture changes more than a reader means. The room ahead opens on any hover, so a pointer crossing a list churns a whole column. Three spreads share the width, which sets the prose against its own measure. The instrument is many figures rather than one, each asking for estate the reading wants. And nothing was tuned, because every part was built once and never returned to.
 
-- **Moving sideways along the row of spreads should change depth**, choosing among what stands at a chosen level. Today the row does nothing; depth changes only by entering a room.
+A reading surface that tires a reader fails at the only thing it is for. This is the code's own argument turned on the tool: what looks like too much is harder to understand, and effort begins before the reading does.
 
-- **A descent should be remembered**, so returning to a level returns to the room you were in there rather than to its closed doors. It is not remembered.
+*Buys the whole of the criterion; nothing below is usable until this is. Costs a sitting of tuning against real reading, not a rewrite.*
 
-- **The raw should be openable in place**, expanding where the reader stands, in step with the reading, divided from the prose by rhythm alone and taking a surface only where the pointer asks. Nothing of it is built.
+## 3. The spreads as specified
 
-- **Narrow screens want a navigation of their own.** At narrow widths the maps simply fall above the spreads.
+Five things [the reading](reads.md) specifies are not built. The spreads do not divide the screen as three columns taking the whole width; what stands is a frame with its own scrolling. The spreads scroll in lockstep rather than graded, the one you are in running freely and each behind it more slowly. Moving sideways along the row does nothing, where it should change which level is in focus. A descent is not remembered, so returning to a level returns you to closed doors. And the raw is not openable in place, expanding where the reader stands.
 
-## 3. The figures
+Narrow screens have no navigation of their own; the instrument simply falls above the spreads.
 
-The figures stand as [how it maps](maps.md) describes them, and four things asked of them are missing:
+*Buys the reading itself, which the criterion requires. Costs the largest single piece of work here, and it is where the feasibility question is answered.*
 
-- **The figure and the texture should merge.** Each arc should carry the lines of its own prose rather than a flat fill, and nodes and edges with text among them were asked for, as an earlier drawing had. What exists is names, weights, ticks at the hub and chords for links: the arcs are flat, and the chords mark that relations exist rather than drawing them.
+## 4. The gauge as one instrument
 
-- **A part should be given room in proportion to what its text needs**, which the author asked for and the program only half does: an arc takes its name when it can hold the whole of it, and otherwise takes none.
+[The gauge](gauges.md) exists as six separate figures rather than one in composing grades. Making them one is what returns estate to the reading, and it is the second half of what the criterion needs: the author cannot judge heaviness at a glance while the instrument is competing with the prose for room.
 
-- **One more grade of bounding**, the file you are inside rather than the section, was named as a small change and not made.
+The cursor does not move on its own in every grade, and not every grade fits whole at its own size.
 
-- **A small local model** should choose the projection, the centre and the depth, and caption a group of events. It is the only part of the drawing that wants a model at all, and there is none.
+*Buys the other half of the criterion. Costs less than the spreads, and pays back into them immediately.*
 
-## 4. The surfaces
+## 5. The drawing
 
-What stands: one ground and no panel, no border wherever spacing already said it, spacing stepping down per level, six absolute type sizes, and the hover card as glass.
+[The drawing](draws.md) is names, weights, ticks and chords. What it owes is text among the shapes, organic bands rather than rigid rings, estate proportional to what a part's text needs, and a hub that carries granularity instead of a number. One more grade of bounding, the file you are inside rather than the section, was named as a small change and not made.
 
-What is owed is small and real: the author asked that a part's estate be respected and that the choice of visible widgets be possible, and both are only half done. The widgets can be closed, but nothing decides for a reader what deserves the room at a given moment.
+The trail projected sideways is not begun and needs no decision before the shapes above are settled.
 
-## 5. The record, and the sitting itself
+*Buys legibility at smaller sizes, which buys estate. Costs a redraw rather than a rebuild. Not required by the criterion; taken as far as the estate problem needs and no further.*
 
-What a reader has seen is kept, as [how it marks](marks.md#2-what-has-been-read) describes, and a session can be turned into substrate by `transcript.py`, whose first use is [the asks of the day this was built](../asked-2026-09-11.md). Three things asked of the record are missing:
+## 6. The marks
 
-- **Notification is a subscription to a level of summary**, so a reader following a region hears what changed at the grain they chose. What exists is read and unread in one browser, which is memory rather than subscription, and it tells nobody anything.
+Not every hover syncs. Colour does not run into the prose. Subscription does not exist; what is kept is read and unread in one browser, which is memory and tells nobody anything.
 
-- **A harness's history belongs in git**, beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and the substrate can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](../asked-2026-09-11.md) now are, rather than exported once and left behind.
+*The hover sync is required by the criterion, since a lighting that fails is a reading that breaks. The rest is not. Costs little.*
 
-- **The sitting should be integrated, not exported.** The harness's own files belong in the substrate, so that the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Today it is a separate folder read by a second copy of the program.
+## 7. The record, and the sitting itself
 
-- **The records should become organic** as the work goes on: kept as the work happens rather than recovered at the end. This file and [the making](making.md) were both written after the fact, which is the failure the study keeps naming, met again by the people who named it.
+A harness's history belongs in git beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and whoever comes next can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](../asked-2026-09-11.md) now are, rather than exported once and left behind.
 
-## 6. Links that hold their state
+The sitting should be integrated rather than exported: the harness's own files belong in the substrate, so the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Today it is a separate folder read by a second copy of the program.
 
-This program resolves a link as a path, so a brief written yesterday points at whatever its target became. [What the mark can and cannot show](marks.md#4-ground-that-moved-after-you-did) is the whole of what exists.
+And the records should become organic, kept as the work happens rather than recovered at the end. This file and [the making](making.md) were both written after the fact, which is the failure the study keeps naming, met again by the people who named it.
 
-What is owed is to resolve a link to the commit the linking brief came in on, and to show the two states where they differ. It stopped being theoretical here: the lab's corpus and its piece were written against an edition of the code that changed twice beneath them, so their links point past what they were written against.
+*Buys the joining of the harness's outlook and a reader's onto one record. Not required by the criterion. Costs a convention more than a program.*
 
-Two shapes for it were raised at the close of that sitting and neither is chosen. A link may be deliberately pinned to a commit, so that it says what it always meant, the target as it stood when the brief was written, and a reader who wants the present one asks for it. Or a holon may keep its own copy of what it stands on, written into it and stamped as a copy at a commit, so the ground travels with the brief rather than being fetched from a moving tree. The first keeps one home and trusts the history; the second gives up one home to gain independence. *Open, the author's, unresolved.*
+## 8. Publication, gated
 
-## 7. The medium beyond the page
+The program runs a small server because a page cannot read a folder on its own. What was asked is that the parsing belong in the page, so one program reads a granted directory locally and a manifest when published, web-native and substrate-native at once, the two moments differing only in time.
 
-What stands: nothing. The program runs a small server because a page cannot read a folder on its own.
+Then the end this is built toward. A repository's own site is the repository, read through this surface and generated by its pipeline on every change, rather than a site built beside the knowledge and kept in step by hand. What it digests is declared rather than guessed, which is what lets a directory be onboarded a file at a time. The pipeline is small by design: read the tree, keep the stamped files, emit the manifest, publish the page, and the server reduces to those few lines, which is the whole of the gain, since a build step earns its place by removing a service rather than by adding a pipeline.
 
-What was asked: the parsing belongs in the page, so one program reads a granted directory locally and a manifest when published, web-native and substrate-native at once, the two moments differing only in time.
+None of it begins until both judgments in section 1 are made. A published surface fixes a shape in place, and fixing the wrong one costs more than waiting for the right one.
 
-Then the end this is all built toward. A repository's own site is the repository, read through this surface and generated by its pipeline on every change, rather than a site built beside the knowledge and kept in step by hand. What it digests is declared rather than guessed: a file enters the substrate by frontmatter stamping it as written under the code, and everything else stays a file the site leaves alone, which is what lets a directory be onboarded a file at a time. The stamp's form belongs to [the practice](../../poc.md) and is open.
+*Gated. Buys the medium the author wants to share this in, and nothing for reading lab ten.*
 
-The pipeline would then be small by design: read the tree, keep the stamped files, emit the manifest, publish the page. The server reduces to those few lines, which is the whole of the gain being weighed, since a build step earns its place by removing a service rather than by adding a pipeline.
+## 9. The model that chooses
 
-None of it begins until two judgments are made, and both are judgments rather than measurements. That what the surface does is worth what it costs to keep doing, which room one says it is not. And that this interface is feasible at all rather than at a limit better navigated than pushed. A published surface fixes a shape in place, and fixing the wrong one costs more than waiting for the right one. *Reasoned, the author's; nothing here is begun.*
+Last, and only after everything above is settled. [What a model may choose](draws.md#8-what-a-model-may-choose) is the projection, the centre, the depth and a caption, never the geometry.
+
+*Gated on the drawing being settled enough to have a vocabulary to declare over. Buys nothing the criterion asks for.*
