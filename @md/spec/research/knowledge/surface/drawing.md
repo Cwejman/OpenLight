@@ -12,7 +12,7 @@ So the surface draws them, and the code says why it must. A reader judges what a
 
 ## 1. One drawing, and the paragraph is its smallest mark
 
-There is one drawing. Paragraphs group into briefs, briefs into a level, levels into a path, paths into the whole body, and the paragraph is the finest thing it ever draws. Every grade shows that same material and differs only in how much of it is the subject.
+There is one drawing. Paragraphs group into briefs, briefs into a level, levels into the body, and the paragraph is the finest thing it ever draws. Every grade shows that same material and differs only in how much of it is the subject.
 
 Four subjects are in use: one level, the path, the whole body, and the level beneath a single brief. So these are not four widgets with four designs. They are one drawing given four extents, and a reader who learns to read one has learned all of them.
 
@@ -46,17 +46,21 @@ It is scrubbed as a level's drawing is, and that is how a reader moves among pan
 
 *Reasoned, the author's, 2026-09-12, and the first cut's two-axis frame is the fault it answers.*
 
-## 5. The whole body radiates from a centre
+## 5. The whole body is droplets on a plate
 
 A level, a path and a brief's level are each a slice, so nothing yet draws the body whole. A reader cannot see how deep it runs beside them, or what branches stand next to the one they are in, which is the peripheral sense the other extents cannot give.
 
-A rectangle dividing into rectangles was tried and it fails on geometry rather than on taste. Each division reuses the extent it was given, so depth makes cells thinner until a brief is a sliver and its place cannot be found by a pointer or by eye.
+A rectangle dividing into rectangles was tried and it fails on geometry rather than on taste. Each division reuses the extent it was given, so depth makes cells thinner until a brief is a sliver, and a sliver cannot be found by a pointer or by eye.
 
-A radial inverts exactly that. Depth is distance from the centre, and circumference grows with distance, so an outer level has more room than an inner one rather than less. Depth becomes one dimension a reader measures by eye, and a branch keeps its own sector however far it runs.
+So the body is drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each of those carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each of them holds.
 
-What it owes is what the first cut did not give. Bands that widen as they go out, each part taking room in proportion to what it holds, names and weights inside the figure rather than beside it, and a centre carrying the body being read rather than decoration.
+That is what a rectangle could not do. Room grows outward, since a ring of the plate widens the further out it lies, and a droplet stays a shape a pointer can hit. Depth is distance from the centre, one dimension a reader measures by eye, and a branch keeps its own region however far it runs.
 
-*Reasoned, the author's, 2026-09-12. The geometry is not in doubt; the figure has never been drawn this way, and the first cut's rigid rings were judged failed.*
+Your path is outlined through it, and so is whatever the pointer rests on. That is all the marking it needs, since the shapes already say where everything is.
+
+Neither rings nor bars: the first cut drew rigid rings with the text outside and an empty centre, and the author judged it failed.
+
+*Reasoned, the author's, 2026-09-12. Nothing of this figure is drawn, and it is small enough in plain SVG that the first attempt is the test.*
 
 ## 6. Estate follows the live reading
 
@@ -94,17 +98,23 @@ Pointing at anything that names a brief lights that brief in every grade at once
 
 *Seen as a fault: the first cut's hovers did not all sync, and the author named it twice in one sitting.*
 
-## 10. Asking for more, and keeping it
+## 10. The rest of a brief is told on asking
 
-A reader who wants more than the lighting asks for it in place. The drawing of what the pointer rests on opens larger, summoned where the pointer is, and it is the same drawing at a larger extent rather than a second kind of thing.
+Everything that names a brief carries only part of it. A cell in any drawing carries shape and nothing else. A door carries a face. A pane carries the holarchy but never a brief's relations, since a link may reach anywhere and a pane only ever descends.
 
-Summoned means attention pays for it and it goes when attention leaves. So it carries no border, no shadow, and the ground shows through it, since enclosure and standing shadow are the one class of ink the design language refuses outright.
+So the rest is told on asking, from wherever the brief is named: a cell in any of the four extents, a door, a name in the prose. Point at it and beside the pointer comes what that naming left out, the brief's face, what it and its level weigh, the drawing of the level beneath it, and what points at it. It goes when the pointer leaves.
 
-A click keeps it. Kept, it is no longer transient, so attention no longer pays for it, and the first cut let a kept overlay be acted in, offering the level beneath and the way out. That is worth trying before it is specified.
+Click and it stays, and what stands can be pointed at in turn, so every name in it is a way on. This is also where seeing a relation stops depending on following one, which matters while [a link is not a path move](reading.md#5-what-is-open).
 
-Where there is no pointer the summon is a press held. This is the one place the surface takes a platform's convention instead of deriving from the substrate, and the convention is established well enough that inventing another would cost the reader.
+So a descent can be looked at before it is taken. The mark beside a brief gives the sense of its level, the overlay gives that level's particulars, and a pointer moving inside a kept overlay reaches further still.
 
-*Seen in the first cut; what happens once it is kept is open.*
+Looking leaves no trace. Opening is the commit, and it adds what was chosen to the panes and to the path above them, however many levels the looking reached rather than only the first.
+
+It is summoned rather than placed, so it is drawn with no border and no shadow and the ground shows through it. Nothing on this surface meets the background with an edge.
+
+Where there is no pointer, the summon is a press held.
+
+*Seen in the first cut, which held these facts in a card and pinned it on a click. What pays for the ink once it stands is open, and whether it wants a moment's hold so a crossing pointer does not churn is for the tuning.*
 
 ## 11. What is open
 

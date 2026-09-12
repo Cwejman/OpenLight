@@ -24,6 +24,8 @@ So a brief's prose has one home on screen, the pane of its own level, and is sho
 
 A brief with nothing beneath it has no level to open, so it cannot be pressed. The difference shows before a reader tries it, and a level read straight down then says where its depth lies.
 
+A door is not the only way down. A descent is committed from a drawing as readily as from a pane, and it may carry several levels at once, since [the looking that precedes it](drawing.md#10-the-rest-of-a-brief-is-told-on-asking) can reach deeper than one.
+
 Where you came from is never lost, since a pane is added and none is taken away, and [the drawing above each pane](drawing.md#3-the-path-is-what-the-row-of-them-makes) marks which of its briefs the pane to the right stands beneath. No depth is worth losing that.
 
 *Reasoned, 2026-09-12.*
