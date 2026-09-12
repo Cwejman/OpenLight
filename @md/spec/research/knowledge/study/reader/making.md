@@ -7,7 +7,7 @@ note: one entry per move of the evening
 
 # The making of the reading surface
 
-The record of how the reader and the surface came to be, on the evening of 2026-09-11, in one sitting with the author directing and a session building. Newest first. It covers [the reader](README.md) and [the surface](../surface/README.md), which were built in the same hours and are one effort.
+The record of how the reader and the surface came to be, on the evening of 2026-09-11, in one sitting with the author directing and a session building. Newest first. It covers [the reader](README.md) and the surface, which were built in the same hours and are one effort.
 
 *Written after the fact, from the commits, at the author's asking. The code says a record is written as the work happens or never, and this one was not; what is here is recoverable because every step was committed with its reason, and what is lost is the timing and the cost. That loss is the point the study keeps making, met again by the people making it.*
 
@@ -35,7 +35,7 @@ The record of how the reader and the surface came to be, on the evening of 2026-
 
 **The reader itself.** The author asked for a frontend serving the substrate and nothing else, rooted at a path, topologically navigable, and gauging how much text sits at each level, since a total tells a reader nothing. The gauge, what stopping at each level costs, was the first thing built and is still the thing the code is judged by.
 
-**The surface, before it.** It began as a monitor over the harness's own transcripts, so a run could be watched without spending the directing session's context. It outgrew the word the same night: the step notes a session leaves became its spine, and the shape of the work its picture.
+**The surface, before it.** It was retired on 2026-09-12, and git keeps it; what follows is the record of the night it was made. It began as a monitor over the harness's own transcripts, so a run could be watched without spending the directing session's context. It outgrew the word the same night: the step notes a session leaves became its spine, and the shape of the work its picture.
 
 ## 2. What the making taught
 
