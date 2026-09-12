@@ -40,9 +40,9 @@ What that buys over a rectangle dividing into rectangles is shape, not room. A r
 
 So the figure lives or dies on how far out it can go before a droplet is too small to hit. Drawing it once against a real body and measuring its smallest cell is the test, and it has not been run.
 
-Where it goes on screen is not settled either. Room yielded by a pane behind the reader is a short wide notch and a plate wants a squarish region, so either the plate takes a pane's whole column or it is summoned over the reading rather than standing beside it.
+Where it goes is settled in the simplest way there is. It is toggled rather than standing, and when a reader calls for it, it takes the square region it needs from the leftmost pane, which is the pane already read. Nothing cleverer than that is chosen, because nothing here has been used yet and a rule designed now would only be judged later.
 
-*Reasoned, the author's, 2026-09-12. It was claimed here that the plate buys room as well as shape, and that was withdrawn the same day on the arithmetic above.*
+*Reasoned, the author's, 2026-09-12. It was claimed here that the plate buys room as well as shape, and that was withdrawn the same day on the arithmetic above. The toggle is the author's decision, in force for a first implementation and expected to change once enough of the surface has been used to judge it.*
 
 ## 4. It shows nothing a reader cannot trust or cannot see
 
@@ -70,8 +70,8 @@ No figure has to argue for its place, because nowhere one appears does it repeat
 
 What limits them is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
 
-Room goes the same way. The pane being read keeps its height, a pane behind it yields, and it takes its height back when a reader returns to it.
+Room goes the same way, and the leftmost pane is what yields it, being the one a reader has already read. That is where [the plate takes its square](#3-the-body-as-droplets-on-a-plate) when a reader calls for it, and the pane comes back when the plate is put away.
 
-How much of either, in numbers, is not settled. A drawing of the path, a drawing per pane, the prose and the plate all want vertical room, and the prose is spent first while the rest is what is left, which is a rule about priority and not yet a layout.
+How much of either, in numbers, is not settled. The drawing of the path, a drawing per pane and the prose all want vertical room, and the prose is spent first while the rest is what is left, which is a rule about priority and not yet a layout.
 
 *Reasoned, the author's, 2026-09-12; every quantity is open.*
