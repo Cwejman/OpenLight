@@ -6,13 +6,9 @@ status: in force
 
 # What the prose cannot say
 
-Prose says what a brief means. It cannot say how large it is, what rhythm its paragraphs have, where it sits, or how much hangs beneath it. Those are facts of shape, and shape is seen rather than read.
-
-So the surface draws them, and the code says why it must. A reader judges what a part will cost from its look before spending any reading on it, and that is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked. A rule never fixed it and a picture did.
-
 ## 1. One drawing, four extents
 
-There is one drawing. Its cells are briefs, and the smallest cell it draws is a paragraph. Every extent shows that same material and differs only in how much of the body it covers.
+There is one drawing. Its cells are briefs, and the smallest cell it draws is a paragraph. Every extent shows the same material and differs only in how much of the body it covers.
 
 Every cell carries one of two counts and never both at once: what a brief owns, which is its own prose, and what it totals, which is that plus everything beneath it.
 

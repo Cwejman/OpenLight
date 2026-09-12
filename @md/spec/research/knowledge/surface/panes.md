@@ -4,19 +4,15 @@ kind: brief
 status: in force
 ---
 
-# The panes
-
-Wherever you are reading, you are at a path in the holarchy. No brief is orphaned, since each is a part of the understanding above it, and that is what a surface can be built on: there is always somewhere you are, and always a way you came.
-
-So the reading is laid out the way the path is. Each level of the path takes a pane, and the panes stand side by side, left to right. Going deeper adds a pane on the right and takes nothing away.
+# A level to a pane
 
 ## 1. A pane is a level, not a brief
 
 A pane holds one level: its briefs, in the order they stand in, as prose read straight down. That order is a reading and not a menu, since each brief at a level stands on the ones before it, so the pane gives the level as it was composed.
 
-What a brief is, and what nests beneath it, is [the practice's answer](../poc.md#1-the-medium) and the surface only reads it. A brief is a file or a section in one, a folder is a holon whose brief is its entry, and a level is what stands beneath one brief. So a descent crosses from folder to file to section without the reader meeting a boundary they did not care about.
-
 What a pane shows of a brief is that brief's own prose and nothing under it. A brief that has a level of its own gives its prose here and leaves that level for the pane to the right.
+
+What a brief is, and what nests beneath it, is [the practice's answer](../poc.md#1-the-medium) and the surface only reads it. A brief is a file or a section in one, a folder is a holon whose brief is its entry, and a level is what stands beneath one brief. So a descent crosses from folder to file to section without a reader meeting a boundary they did not care about.
 
 *Reasoned, the author's, 2026-09-12.*
 

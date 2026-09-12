@@ -6,10 +6,6 @@ status: in force
 
 # Moving, and asking
 
-A reader does three things besides read. They go deeper, they go sideways, and they ask about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace.
-
-That division is what makes looking free. A reader can see what a descent would give before spending it, and nothing they merely looked at follows them.
-
 ## 1. A descent is committed, and may carry several levels
 
 A descent is committed from a door in a pane or from a cell in any drawing, and either one adds the level beneath to the panes and to the drawing of the path.

@@ -6,12 +6,6 @@ status: in force
 
 # What was tried and refused
 
-A first cut of this surface was built in one sitting on 2026-09-11 and retired the next day. The shapes it reached for are kept here, each with the reason it is not wanted, so that none of them is proposed again as though it were new.
-
-Nothing here directs the build except by exclusion. Where a reason is that the code or the design language forbids the shape, the brief that holds the rule is named beside it.
-
-*Seen, in the first cut and in the author's reading of it; each reason is reasoned.*
-
 ## 1. A pane holding one brief, with its siblings in a picker
 
 The first model gave a pane to a single brief and put the rest of its level in a list to choose from.

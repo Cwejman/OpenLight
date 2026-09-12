@@ -22,23 +22,29 @@ So the surface needs no knowledge of harnesses. It is handed a path in a working
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 2. A level to a pane
+## 2. [A level to a pane](panes.md)
 
-The reading is laid out the way a path is. Each level of the path takes a pane, the panes stand side by side, and going deeper adds one on the right without taking any away, so where a reader came from stays present while they read.
+Wherever you are reading you are at a path in the holarchy, and no brief is orphaned, since each is a part of the understanding above it. That is what a surface can be built on: there is always somewhere you are, and always a way you came.
 
-That is the whole of the arrangement. [The panes](panes.md) hold what follows from it: why a pane carries a level rather than a single brief, which briefs can be pressed at all, and why a pane stays short.
+So the reading is laid out the way a path is. Each level of the path takes a pane, the panes stand side by side, and going deeper adds one on the right without taking any away, so where a reader came from stays present while they read.
 
-## 3. What the prose cannot say
+*Reasoned, the author's, 2026-09-12.*
 
-Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and a reader judges what a part will cost from its shape before spending any reading on it.
+## 3. [What the prose cannot say](drawings.md)
 
-So the surface draws them. [The drawing](drawings.md) is one thing at four extents, down to the paragraph, and it carries what governs how much room and ink any of it may take.
+Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and shape is seen rather than read.
 
-## 4. Moving, and asking
+So the surface draws them, and the code says why it must. A reader judges what a part will cost from its look before spending any reading on it, and that is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked. A rule never fixed it and a picture did.
 
-A reader goes deeper, goes sideways, and asks about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace, which is what makes looking free.
+*Reasoned, the author's, 2026-09-12.*
 
-[Moving, and asking](moving.md) gives each of the three, and the rule that keeps three meanings from landing on one gesture.
+## 4. [Moving, and asking](moving.md)
+
+A reader does three things besides read. They go deeper, they go sideways, and they ask about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace.
+
+That division is what makes looking free. A reader can see what a descent would give before spending it, and nothing they merely looked at follows them.
+
+*Reasoned, the author's, 2026-09-12.*
 
 ## 5. What is open
 
@@ -56,10 +62,10 @@ That is deliberate. These briefs say what the surface is to be, and the ground b
 
 *In force as a boundary on this holon, 2026-09-12.*
 
-## 7. How it came to this
+## 7. [What was tried and refused](refused.md)
 
 A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and no program has yet been written against them.
 
-What that first cut reached for is kept in [what was tried and refused](refused.md), so that none of its shapes is put forward again as though it were new.
+What that first cut reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. Nothing there directs the build except by exclusion.
 
-*Seen, and the reason [the study names running ahead](../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
+*Seen, in the first cut and in the author's reading of it; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*

@@ -17,7 +17,9 @@ Headings carry numbers, and a brief is named by its number and its file: `readin
 
 ## 3. Check the pointers after every move
 
-Inserting or moving a brief renumbers every heading after it, and every pointer written by number goes stale without any link breaking. So after every round a script lists every `§` reference in the tree and checks that the number it names still heads the brief it meant, by the heading's words and not only its number. Links are checked the same way, that each resolves to a file and an anchor that exist. A round is not done until both lists are empty.
+Inserting or moving a brief renumbers every heading after it, and every pointer written by number goes stale without any link breaking. So after every round a script lists every `§` reference in the tree and checks that the number it names still heads the brief it meant, by the heading's words and not only its number. Links are checked the same way, that each resolves to a file and an anchor that exist.
+
+Two more lists come from the mounts. Every file and folder in a space appears in exactly one of its entry's headings, and every mounted file's title matches the words of the heading that mounts it. Both go stale the moment a part is renamed or moved, and both are a few lines of script. A round is not done until all four lists are empty.
 
 ## 4. Count one way
 
