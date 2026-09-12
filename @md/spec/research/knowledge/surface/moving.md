@@ -32,13 +32,15 @@ So the rest is told on asking, from wherever the brief is named: a cell in any o
 
 The card leaves when the pointer does, unless a reader keeps it. A card that stands can be pointed at in turn, so every name in it is a way on, and this is where seeing a relation stops depending on following one.
 
-It is summoned rather than placed, so it carries no border and no shadow and the background shows through it. Enclosure and standing shadow are the one class of mark [the design language](../../../design.md#the-graduated-scale--one-mark-per-live-fact) refuses outright, since nothing here should meet the background with an edge.
+A card needs a ground of its own or it cannot be read, and that is where [the design language](../../../design.md#why-flat--the-newspaper-precedent) stops being a guide. It settles the flat layout, where an area at rest carries no background and no border and spacing does all the work, and it never considers what sits over that.
 
-*Seen in the program retired on 2026-09-12, which held these facts in a card and pinned it on a click. What pays for the ink once a card stands, attention having left, is open.*
+What it does settle nearby is the hover: the ground under a pointer is altered a little, with rounded edges. A card is that register raised, so for now it takes the same ground rather than a colour of its own, with a slight blur of what lies behind and at most a faint border, since the same colour blurred and with no edge at all would not read.
+
+*Seen in the program retired on 2026-09-12, which held these facts in a card and pinned it on a click. The card's own look is the author's preference for a first implementation, since the design language has not reached overlays and nothing here is settled beyond it. What pays for the ink once a card stands, attention having left, is open.*
 
 ## 4. One gesture, one meaning
 
-Three things can happen on a cell, so they are held apart. Pointing [lights it everywhere](drawings.md#5-one-brief-lit-wherever-it-is-drawn) and tells the rest. Dragging scrubs. Pressing commits a descent, which may carry every level a reader looked through before choosing.
+Every figure is a control as well as a view, so one cell can be looked at, dragged and entered. Three meanings on one target collide unless each gesture carries exactly one: pointing [lights it everywhere](drawings.md#5-one-brief-lit-wherever-it-is-drawn) and tells the rest, dragging scrubs, and pressing commits a descent, which may carry every level a reader looked through before choosing.
 
 So keeping a card is a press inside the card and never on the cell that raised it, since a press on the cell already means descend.
 
