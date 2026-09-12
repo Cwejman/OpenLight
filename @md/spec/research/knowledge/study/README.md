@@ -43,9 +43,9 @@ Provenance recovered late survives only by luck, and the loss is invisible: the 
 
 ## 3. Where the search stands
 
-The labs are laid newest first, from ten down.
+The baseline pair comes first, since every later reading is judged against it, and the rest are laid newest first, from ten down.
 
-Eight labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
+Ten labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
 
 - **Labs 01–02 are the baseline pair.** The same corpus cut categorically ([`findings/`](01-categorical/output/README.md)) and as a narrative walk ([`encounters.md`](02-encounters/output.md)). The first informed but did not engage; the second engaged. Every later reading is judged against these two.
 
