@@ -52,9 +52,11 @@ A reader judges what a part will cost from its look before spending any reading 
 
 So the surface draws them, and what it draws is a minimap: the small picture an editor puts beside a long file, showing the shape of something too big to see at once and where in it you are. Ours maps not lines of text but briefs and the prose in them, down to a paragraph, which is the finest thing it ever shows.
 
-Wherever shape is wanted it is the same drawing, and only its size changes. So a reader learns one picture rather than a new one at every place it turns up.
+There are several such figures and there will be more, because drawing the shape is what makes the structure associative: more ways in, and more of the body reachable from wherever a reader stands.
 
-Size means two things, and the drawing keeps them apart. A brief's own prose is what stopping to read it costs. That prose with everything beneath it is what the branch holds. One says what a reader spends here and the other says what waits below, so a mark that mixed them would answer neither.
+What holds them together is one material and one behaviour rather than one form. Each is computed from the same counts, each says where the reader is, and each can be pointed at and entered, so pointing at a brief in one lights it in every other.
+
+Size means two things, and every figure keeps them apart. A brief's own prose is what stopping to read it costs. That prose with everything beneath it is what the branch holds. One says what a reader spends here and the other says what waits below, so a mark that mixed them would answer neither.
 
 *Reasoned, the author's, 2026-09-12.*
 

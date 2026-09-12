@@ -48,25 +48,25 @@ Where it goes on screen is not settled either. Room yielded by a pane behind the
 
 Every shape is computed from the substrate and none is invented, because a picture a reader cannot trust is worse than no picture at all.
 
-Nor is anything drawn too small to read. The drawing has a floor, the smallest cell a pointer can hit and an eye can place, and rather than shrink through it the drawing shows less: it steps down a ladder from paragraphs to briefs to levels to branches, drawing the finest of them the room allows and marking that it holds more.
+Nor is anything drawn too small to read. Every figure has a floor, the smallest cell a pointer can hit and an eye can place, and rather than shrink through it a figure shows less: it steps down a ladder from paragraphs to briefs to levels to branches, drawing the finest of them the room allows and marking that it holds more.
 
-That is the gradient turned on the drawing, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
+That is the gradient turned on a picture, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
 
 *Reasoned, 2026-09-12.*
 
 ## 5. One brief, lit wherever it is drawn
 
-Pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen at several sizes, and a drawing whose lighting does not follow has left the reading.
+Pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen in several figures, and a figure whose lighting does not follow has left the reading.
 
-Where the drawing has stepped down past the brief being pointed at, the cell holding it is lit instead, so the lighting always resolves to something on screen.
+Where a figure has stepped down past the brief being pointed at, the cell holding it is lit instead, so the lighting always resolves to something on screen.
 
 *Reasoned, 2026-09-12; resolving to a holding cell was built once, after the floor left deep briefs unanswerable.*
 
-## 6. It earns its place, and ink is what limits it
+## 6. Each earns its place, and ink is what limits it
 
-The drawing never has to argue for its place, because nowhere it appears repeats what is in view. Beside a brief it shows a level not in view at all. Above a pane it shows a level whole where the prose gives only the part in reach. The path and the body are not in view either. So there is one drawing for each gap the reading leaves and not one more, since a drawing that is merely available competes with the prose.
+No figure has to argue for its place, because nowhere one appears does it repeat what is in view. Beside a brief it shows a level not in view at all. Above a pane it shows a level whole where the prose gives only the part in reach. The path and the body are not in view either. So there is one figure for each gap the reading leaves and not one more, since a figure that is merely available competes with the prose.
 
-What limits it is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
+What limits them is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
 
 Room goes the same way. The pane being read keeps its height, a pane behind it yields, and it takes its height back when a reader returns to it.
 

@@ -34,7 +34,7 @@ Sideways is [a scrub](moving.md#1-sideways-is-a-scrub-never-a-second-scroll) ins
 
 The retired program built the gauge as six drawings, each asking for room the reading wanted. With the frame above, it was one of the two faults the author named at the close.
 
-[One drawing whose size changes](drawings.md#6-it-earns-its-place-and-ink-is-what-limits-it) costs a reader one thing to learn rather than six.
+Several figures are not the fault; six that shared nothing were. [Each figure now fills a gap the reading leaves](drawings.md#6-each-earns-its-place-and-ink-is-what-limits-it) and they draw one material and behave alike, so a reader learns a family rather than six strangers.
 
 ## 6. A rectangle dividing into rectangles
 
