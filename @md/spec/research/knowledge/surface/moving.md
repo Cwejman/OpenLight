@@ -36,7 +36,7 @@ What the browser's back retraces is the commitments. Opening a level enters the 
 
 Everything that names a brief carries only part of it. A cell in a drawing carries shape and nothing else. A door carries the brief's face. A pane carries the level but never a brief's relations, since a link may reach anywhere and a pane only ever descends.
 
-So the rest is told on asking, from wherever the brief is named: a cell in any extent, a door, a name in the prose. What comes is what that naming left out, which is the face, what the brief and its level weigh, the drawing of the level beneath it, and what points at it.
+So the rest is told on asking, from wherever the brief is named: a cell in any of the drawings, a door, a name in the prose. What comes is what that naming left out, which is the face, what the brief and its level weigh, the drawing of the level beneath it, and what points at it.
 
 It leaves when the pointer does, unless a reader keeps it. What stands can be pointed at in turn, so every name in it is a way on, and this is where seeing a relation stops depending on following one.
 

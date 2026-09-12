@@ -34,7 +34,7 @@ Two axes in one region are two regions pretending to be one. Sideways movement i
 
 The first cut built the gauge as six drawings, each asking for room the reading wanted, which was the second of the two faults the author named.
 
-One drawing at several extents costs a reader one thing to learn rather than six.
+One drawing whose size changes costs a reader one thing to learn rather than six.
 
 ## 6. A rectangle dividing into rectangles
 
@@ -46,7 +46,7 @@ Its cells degenerate into slivers, which a pointer cannot hit and an eye cannot 
 
 The first cut's radial: bands of even thickness, names and weights set beside the figure rather than in it, and an empty centre.
 
-The author judged it failed, and the figure that replaces it is [droplets](drawings.md#4-the-body-as-droplets-on-a-plate) rather than rings or bars.
+The author judged it failed, and the figure that replaces it is [droplets](drawings.md#5-the-body-as-droplets-on-a-plate) rather than rings or bars.
 
 ## 8. A record of the work kept outside the tree
 

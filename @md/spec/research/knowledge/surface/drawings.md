@@ -6,17 +6,15 @@ status: in force
 
 # What the prose cannot say
 
-## 1. One drawing, four extents
+## 1. It is one drawing, not a family of them
 
-There is one drawing. Its cells are briefs, and the smallest cell it draws is a paragraph. Every extent shows the same material and differs only in how much of the body it covers.
+Wherever shape is wanted it is the same drawing, and only its size changes. So a reader learns one picture rather than a new one at every place it turns up, which is what the first cut got wrong when it built six figures that competed with the reading for room.
 
-Every cell carries one of two counts and never both at once: what a brief owns, which is its own prose, and what it totals, which is that plus everything beneath it.
+What it draws is briefs, and the prose inside them down to the paragraph, which is the finest thing it ever shows. A brief appears either as what it owns, its own prose, or as what it totals, that prose plus everything beneath it, and never as both in one mark.
 
-Four extents are in use. A brief's level, beside that brief's heading. A level, above the pane that holds it. The path, above the panes. And the body, whole. A reader who learns to read one has learned all four, since the cells and the counts are the same in each.
+Nothing in it is invented. Every shape is computed from the substrate, because a picture a reader cannot trust is worse than no picture at all.
 
-Every cell comes from the substrate and none is invented. A shape that may be made up will be, and a reader who cannot trust the picture cannot act on it.
-
-*Reasoned, the author's, 2026-09-12.*
+*Reasoned, the author's, 2026-09-12; the six figures are seen, in the first cut and in the author's reading of it.*
 
 ## 2. A level, above its pane
 
@@ -36,9 +34,19 @@ Two drawings of one path, and the second earns its place by showing what the fir
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 4. The body, as droplets on a plate
+## 4. A brief's level, beside its heading
 
-A brief's level, a level and a path are each a slice, so nothing yet draws the body whole. A reader cannot see how deep it runs beside them, or what branches stand next to the one they are in.
+Beside a brief's heading the drawing shows the level beneath that brief. It is the only place a reader learns what a descent would give before spending it, since that level is never in view from the brief's own prose.
+
+So it is what a preview pane would have been, at a fraction of the room.
+
+How much room it may take before it pulls at the reading is not settled. It belongs there if it is small enough not to take focus, and that is judged by eye against real prose rather than by a size.
+
+*Reasoned, the author's, 2026-09-12; the room it may take is open.*
+
+## 5. The body, as droplets on a plate
+
+A level, a path and a brief's level are each a slice, so nothing yet draws the body whole. A reader cannot see how deep it runs beside them, or what branches stand next to the one they are in.
 
 The body is drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each of those carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each of them holds.
 
@@ -48,35 +56,35 @@ It buys no extra room, and the claim here that it did was wrong. A ring's length
 
 *Reasoned, the author's, 2026-09-12, the geometry corrected the same day. Where the plate's floor actually falls is open below.*
 
-## 5. Where the room runs out, the drawing shows less rather than smaller
+## 6. Where the room runs out, it shows less rather than smaller
 
-A paragraph drawn a pixel wide says nothing. So every extent steps down the same ladder as its room runs out, from paragraphs to briefs to levels to branches, drawing the finest of them the room allows and marking that it holds more.
+A paragraph drawn a pixel wide says nothing. So the drawing steps down a ladder as its room runs out, from paragraphs to briefs to levels to branches, showing the finest of them the room allows and marking that it holds more.
 
-This is the gradient turned on the drawing: the biggest understanding the room can carry, and never more than it can carry legibly. It is the law that turns spacing into navigation when [rhythm hits its floor](../../../design.md#rhythm--depth-derived-never-stated-twice), met in a drawing instead of in a layout.
+This is the gradient turned on the drawing: the biggest understanding the room can carry, and never more than it can carry legibly. It is the law that turns spacing into navigation when [rhythm hits its floor](../../../design.md#rhythm--depth-derived-never-stated-twice), met in a picture instead of in a layout.
 
 *Reasoned, 2026-09-12.*
 
-## 6. One brief, lit wherever it is drawn
+## 7. One brief, lit wherever it is drawn
 
-Pointing at anything that names a brief lights that brief in every extent at once. One brief is one thing seen from four distances, and a drawing whose lighting does not follow has left the reading.
+Pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen at several sizes, and a drawing whose lighting does not follow has left the reading.
 
-Where an extent has stepped down past the brief pointed at, the cell holding it is lit instead. The lighting always resolves to something a reader can see, which is what keeps the rule true at every rung of the ladder.
+Where the drawing has stepped down past the brief being pointed at, the cell holding it is lit instead. The lighting always resolves to something a reader can see, which is what keeps the rule true at every rung of the ladder.
 
-Each extent also carries a cursor that follows where the reading is, without the reader placing it.
+It also carries a cursor that follows where the reading is, without the reader placing it.
 
 *Reasoned, 2026-09-12; resolving to a holding cell was built once, after the floor left deep briefs unanswerable.*
 
-## 7. Ink is the measure, and room is spent on the live reading
+## 8. Ink is the measure, and room is spent on the live reading
 
-No drawing has to argue for its place, since none of them repeats what is in view. A brief's level is not in view. A level is in view only as far as its pane reaches. The path and the body are not in view at all.
+The drawing never has to argue for its place, since nowhere it appears repeats what is in view. Beside a brief it shows a level that is not in view at all. Above a pane it shows a level whole where the prose gives only the part in reach. The path and the body are not in view either.
 
-What decides between aid and distraction is how much ink a drawing spends, and ink spent past what a reader needs is ink taken from the reading. That is [the design language's own measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact), where marks are spent in proportion to how alive the fact is.
+What decides between aid and distraction is how much ink it spends, and ink spent past what a reader needs is ink taken from the reading. That is [the design language's own measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact), where marks are spent in proportion to how alive the fact is.
 
 Room goes the same way. The pane being read keeps its height, a pane behind it yields, and it takes its height back when a reader returns to it.
 
 *Reasoned, the author's, 2026-09-12; every quantity in it is open below.*
 
-## 8. What is open
+## 9. What is open
 
 Where the body's plate goes. Room yielded by a pane behind you is a short wide notch, and a plate wants a squarish region, so the two do not fit. Either the plate takes a pane's whole column, or it is summoned over the reading rather than standing beside it. Neither is chosen.
 
