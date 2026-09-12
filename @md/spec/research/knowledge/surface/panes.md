@@ -14,15 +14,17 @@ The difference is visible before a reader tries it, since [a brief's level is dr
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 2. A pane is short, and scrolls one way
+## 2. A pane scrolls its own level, and nothing else
 
-A level's briefs carry their own prose only, so a pane is short because a brief is brief. Where a pane does not overflow it does not scroll, and nothing in the reading depends on a pane having scroll to give.
+What a pane scrolls is one level's own prose: not a file, not a branch, and not what hangs beneath the briefs it holds. Its length is set by that level and by nothing deeper, which is the whole of what bounds it.
 
-Where it does overflow it scrolls on one axis and never two, since two axes in one region are two regions pretending to be one.
+So it does scroll, and usually will, since a level of several briefs runs past a screen. It scrolls on one axis and never two. What keeps the length from being a wall is that [the drawing above it](drawings.md#1-above-the-panes-a-drawing-per-level-and-the-path-whole) can be scrubbed, so a reader crosses a level without dragging through it.
+
+Each pane keeps its own position, and scrolling one never moves another, because each pane is a reading of its own. Coupling them would make one small gesture change several readings at once.
 
 A level too big to read is the exception, and the surface does not soften it. A level of seventy-odd briefs makes a punishing pane, and that is the writing's fault rather than the surface's: hiding it would hide the one thing a reader most needs to know about that level.
 
-*Reasoned, 2026-09-12. The one-axis rule is [the design language's](../../../design.md#scroll-and-seams) and not this surface's own. That a real body carries a level that size is measured in [the study](../study/measured.md#1-the-study-against-the-gradient-2026-09-12), and carried here unchecked.*
+*Reasoned, 2026-09-12; measured against this holon, whose own levels run one to four screens. The one-axis rule is [the design language's](../../../design.md#scroll-and-seams) and not this surface's own, and that a real body carries a level of seventy-odd briefs is measured in [the study](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and carried here unchecked.*
 
 ## 3. A record is shown as the sequence it is
 

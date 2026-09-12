@@ -14,9 +14,9 @@ That makes a level a choice between peers, where [a level is read through](READM
 
 ## 2. Panes scrolling at graded speeds
 
-The one in front running freely and each behind it slower.
+The one in front running freely and each behind it slower, so the row would stay in step.
 
-It was solving a pane that held a whole file, and [a pane that holds a level is short](panes.md#2-a-pane-is-short-and-scrolls-one-way). There is nothing to grade.
+The row is not meant to be in step. [Each pane is a reading of its own](panes.md#2-a-pane-scrolls-its-own-level-and-nothing-else) and keeps its own position, and the author's verdict on the coupling was that one small scroll moved three panes at once.
 
 ## 3. A rightmost pane that only presents doors
 
