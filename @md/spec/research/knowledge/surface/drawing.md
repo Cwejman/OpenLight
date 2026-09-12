@@ -26,6 +26,8 @@ A pane scrolls down, and the drawing of its level runs left to right above it, w
 
 It shows the level whole: its briefs in order, their paragraphs sized as they are, so the rhythm of a level is visible before a word of it is read. A cursor follows the reading, moving rightward as the pane scrolls down.
 
+It is scrubbed as well as read. Dragging along it moves the reading beneath it, so a reader reaches a brief at the far end of a level without scrolling the whole way to it.
+
 *Reasoned, the author's, 2026-09-12.*
 
 ## 3. The path is what the row of them makes
@@ -40,19 +42,19 @@ In each of them, the brief whose level stands in the pane to the right is marked
 
 A viewport holds only a few panes, and how many depends on its width and on how far the prose is compressed, so most of a path is off screen. The drawing of the path whole is the only place all of it stands, which is why it runs the full width above everything else.
 
-It is also the one drawing that is a control rather than a view. Moving among panes is a scrub along it and never a second scroll, since two axes in one region are [two regions pretending to be one](../../../design.md#scroll-and-seams).
+It is scrubbed as a level's drawing is, and that is how a reader moves among panes. Never a second scroll, since two axes in one region are [two regions pretending to be one](../../../design.md#scroll-and-seams).
 
 *Reasoned, the author's, 2026-09-12, and the first cut's two-axis frame is the fault it answers.*
 
-## 5. A drawing earns its place where its prose is not
+## 5. Ink is what decides between aid and distraction
 
-Beside a brief whose prose is fully in view, a drawing of that brief says what the reader can already see, and it costs attention the reading wanted. So a drawing is never placed and then justified. It appears where what it describes is not visible, and withdraws where the thing itself has arrived.
+The mark beside a brief draws that brief's level, never the brief itself. That level is not in view, so the mark is never redundant, and it is what a preview pane would have been at a fraction of the estate. The drawing above a pane is not redundant either, since it shows a level whole where the prose shows only the part in reach.
 
-What hangs beneath a brief is never visible from that brief's prose. So the smallest grade always earns its place, a mark beside a heading drawing the level below it, and it is what a preview pane would have been at a fraction of the estate.
+So no drawing has to argue for its place. What decides is how much ink it spends, and ink spent past what the reader needs is ink taken from the reading. That is the design language's own measure, where every mark answers to one fact and marks are spent in proportion to how alive the fact is.
 
-How much room that mark may take before it competes with the reading is not settled. The measure is the author's: it belongs there if it is small enough not to pull focus, and that is judged by eye against real prose rather than by a size.
+The judgment is by eye against real prose and not by a size. The mark belongs beside a brief if it is small enough not to pull focus, and that is the one thing here that cannot be decided on paper.
 
-*Reasoned, the author's, 2026-09-12; the room it may take is open.*
+*Reasoned, the author's, 2026-09-12; the ink a mark may spend is open.*
 
 ## 6. Where the room runs out, the drawing shows less rather than smaller
 
@@ -72,8 +74,6 @@ Pointing at anything that names a brief lights that brief in every grade at once
 
 ## 8. What is open
 
-Whether a level's drawing is a control as well as a view, scrubbed to move its pane's reading the way the path's drawing is scrubbed to move among panes. Nothing decides it yet, and the cost of guessing wrong is a habit a reader has to unlearn.
-
-And which projections the drawing takes beyond the three extents in use. A radial with the root at its centre and a rectangle dividing into its parts were each tried once and neither was judged, so whether either is wanted waits on a use that asks for it.
+Which projections the drawing takes beyond the three extents in use. A radial with the root at its centre and a rectangle dividing into its parts were each tried once and neither was judged, so whether either is wanted waits on a use that asks for it.
 
 *Open, 2026-09-12.*
