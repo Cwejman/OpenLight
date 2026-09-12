@@ -31,7 +31,7 @@ The lab that rewrote the law with the author rather than around a writer, and th
 
 Its edition was written section by section in dialog on 2026-09-10 and 11: the prose principle first, the gradient lifted to be the thesis, the two laws dropped as a frame, a section on what the code is for, the making raised from a principle to a section of its own, and a last section on the medium beyond prose, with every principle closing with how strongly it holds.
 
-That edition is no longer here. It became the arc's standing law and lives at [the root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it, because they govern the whole arc and not this lab.
+That edition is no longer here. It became the arc's standing law and lives at [the root](../code.md), with [the practice](../poc/practice.md) and [the skill](../poc/skill.md) in the proof of concept beneath it, because they govern the whole arc and not this lab.
 
 The run is three prompts rather than one, and two stages. [The first](10-comprehension/prompt-1.md) compressed forty-five raw reports into [a corpus](10-comprehension/corpus/README.md) under the code, with fresh heads asked after each round only what the corpus had lost, four rounds in one session that held the raw throughout. [The second](10-comprehension/prompt-2.md) ran a fifth round in the lean shape, an orchestrator that never holds the raw and sends heads for what needs it. [The third](10-comprehension/prompt-3.md) wrote [the piece](10-comprehension/output/README.md) from the corpus. Its input differs from labs 08 and 09 by that corpus stage, and any comparison to the baseline pair must say so.
 
@@ -45,7 +45,7 @@ A rerun of lab 08 with one thing changed: the edition. Same prompt, same corpus,
 
 [The edition](09-gradient/code.md) carries the fixes. The order of a holarchy now names the level that was not broken down in both its costumes, the paragraph with bullets and the section that is not brief, pointed at the law and holding at every grain with no size attached. The ground gains the word for borrowed confidence. The practice cites sources known by number as links to their address, says the depth lean does not excuse a flat file, and no longer restates the code anywhere. And [the prompt](09-gradient/prompt.md) isolates the blank head from the repository's own bootstrap.
 
-[The piece](09-gradient/output/README.md) is the output and [the debrief](09-gradient/debrief.md) holds its rounds and cost. [The practice](09-gradient/poc.md) is this lab's cut of it; the standing one is at [the arc's root](../poc.md).
+[The piece](09-gradient/output/README.md) is the output and [the debrief](09-gradient/debrief.md) holds its rounds and cost. [The practice](09-gradient/poc.md) is this lab's cut of it; the standing one is in [the proof of concept](../poc/practice.md).
 
 ## 4. Lab 08 — the first run under the cycle
 
@@ -55,7 +55,7 @@ Its edition was written with the author in dialog through 2026-09-09: the why, w
 
 [The edition](08-win-driven/code.md) is that law and [the prompt](08-win-driven/prompt.md) is the run's mechanics. [The piece](08-win-driven/output/README.md) is what came out, written by one writer over three rounds with two blank heads until it converged; two earlier writers under the first wording of the cycle principle skipped it entirely, and their reports are in git.
 
-[The debrief](08-win-driven/debrief.md) holds the rounds and the run's cost. [What the run teaches](08-win-driven/feedback.md) holds the three things it asked for. [The markdown practice](08-win-driven/poc.md) began here as a first cut, and now stands at [the arc's root](../poc.md).
+[The debrief](08-win-driven/debrief.md) holds the rounds and the run's cost. [What the run teaches](08-win-driven/feedback.md) holds the three things it asked for. [The markdown practice](08-win-driven/poc.md) began here as a first cut, and now stands in [the proof of concept](../poc/practice.md).
 
 [The ontology](08-win-driven/08-01-ontology/README.md) was to fill the edition's fourth section and was set aside by the author on 2026-09-07. It stands whole with its evidence, to be rerun once the code is lived.
 

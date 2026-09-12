@@ -47,7 +47,7 @@ The grounds are the largest debt, and the only one that cannot wait. Every rule 
 
 ## 5. What the method has found
 
-The labs were run to learn how knowledge is best written, and they taught something else on the way: how to run the learning. These are the findings about the work itself, each settled by repetition rather than by one run. They feed [the practice](../poc.md) and [the grounds](#3-the-grounds).
+The labs were run to learn how knowledge is best written, and they taught something else on the way: how to run the learning. These are the findings about the work itself, each settled by repetition rather than by one run. They feed [the practice](../poc/practice.md) and [the grounds](#3-the-grounds).
 
 [the level beneath](findings.md)
 
@@ -61,9 +61,9 @@ It is machine work and needs nobody's judgment, which is why it is a record of i
 
 ## 7. Notes
 
-- **The law is not here.** It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md). A claim matures in the labs, enters an edition, and its row retires from the notebook. Git keeps everything that leaves.
+- **The law is not here.** [The code](../code.md) stands at the arc's root, with [the practice](../poc/practice.md) and [the skill](../poc/skill.md) in the proof of concept beneath it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md). A claim matures in the labs, enters an edition, and its row retires from the notebook. Git keeps everything that leaves.
 
-- **The surface left the study** on 2026-09-12 and stands at [the arc's root](../surface/README.md), since it serves the whole arc rather than these labs. The program built here on 2026-09-11 was retired with it, so that the understanding is built before the program is.
+- **The surface left the study** on 2026-09-12 and stands in [the proof of concept](../poc/surface/README.md), since it serves the whole arc rather than these labs. The program built here on 2026-09-11 was retired with it, so that the understanding is built before the program is.
 
 - **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation ([the edition of 2026-08-30](code-2026-08-30.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 

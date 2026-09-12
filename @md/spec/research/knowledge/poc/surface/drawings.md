@@ -52,7 +52,7 @@ Nor is anything drawn too small to read. Every figure has a floor, the smallest 
 
 Nor does any figure mix its two sizes. A brief's own prose is what stopping to read it costs; that prose with everything beneath it is what the branch holds. One says what a reader spends here and the other what waits below, so a mark carrying both at once would answer neither.
 
-That is the gradient turned on a picture, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
+That is the gradient turned on a picture, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
 
 *Reasoned, 2026-09-12.*
 
@@ -68,7 +68,7 @@ Where a figure has stepped down past the brief being pointed at, the cell holdin
 
 No figure has to argue for its place, because nowhere one appears does it repeat what is in view. Beside a brief it shows a level not in view at all. Above a pane it shows a level whole where the prose gives only the part in reach. The path and the body are not in view either. So there is one figure for each gap the reading leaves and not one more, since a figure that is merely available competes with the prose.
 
-What limits them is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
+What limits them is ink, because ink spent past what a reader needs is ink taken from the reading. That is [the design language's measure](../../../../design.md#the-graduated-scale--one-mark-per-live-fact) applied here: a mark is spent in proportion to how live the fact behind it is, so nothing is drawn at rest that a reader has not asked for.
 
 Room goes the same way, and the leftmost pane is what yields it, being the one a reader has already read. That is where [the plate takes its square](#3-the-body-as-droplets-on-a-plate) when a reader calls for it, and the pane comes back when the plate is put away.
 

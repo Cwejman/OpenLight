@@ -47,4 +47,4 @@ Knowledge divides into what has to be told and what can be shown. The code is to
 
 In that pair the human's role is the art direction. That is what a person does for a session in a sentence and cannot be computed, and the tools are what carry it. So the split is also a division of labour, and it says where a person's time is worth most as the work moves on.
 
-*Open, the author's, and the reason [the surface](../surface/README.md) was taken up before lab ten's piece was read.*
+*Open, the author's, and the reason [the surface](../poc/surface/README.md) was taken up before lab ten's piece was read.*

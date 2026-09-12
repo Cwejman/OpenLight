@@ -31,7 +31,7 @@ AI is what keeps the medium alive. It is inference without bound, and it perform
 
 ### 2.2 Beginning today
 
-The code is not something you move into. It compounds on prose, and prose is already everywhere, in every tool and every practice. The full experience needs technology that is not built: a medium open to everyone's technology and practices. But a harness opened on a folder, with full reach into everything in it, is the most open-ended way of using AI today, and with the code it practises most of the medium now. A [proof of concept](poc.md) runs it with git and the harnesses that exist today.
+The code is not something you move into. It compounds on prose, and prose is already everywhere, in every tool and every practice. The full experience needs technology that is not built: a medium open to everyone's technology and practices. But a harness opened on a folder, with full reach into everything in it, is the most open-ended way of using AI today, and with the code it practises most of the medium now. A [proof of concept](poc/README.md) runs it with git and the harnesses that exist today.
 
 ## 3. What knowledge is made of
 

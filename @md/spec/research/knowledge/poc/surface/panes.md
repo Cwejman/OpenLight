@@ -24,13 +24,13 @@ Each pane keeps its own position, and scrolling one never moves another, because
 
 A level too big to read is the exception, and the surface does not soften it. A level of seventy-odd briefs makes a punishing pane, and that is the writing's fault rather than the surface's: hiding it would hide the one thing a reader most needs to know about that level.
 
-*Reasoned, 2026-09-12; measured against this holon, whose own levels run one to four screens. The one-axis rule is [the design language's](../../../design.md#scroll-and-seams) and not this surface's own, and that a real body carries a level of seventy-odd briefs is measured in [the study](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and carried here unchecked.*
+*Reasoned, 2026-09-12; measured against this holon, whose own levels run one to four screens. The one-axis rule is [the design language's](../../../../design.md#scroll-and-seams) and not this surface's own, and that a real body carries a level of seventy-odd briefs is measured in [the study](../../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and carried here unchecked.*
 
 ## 3. A record is ordered by time, not by importance
 
 A pane lays a level out as a reading: the brief that gives the most understanding comes first, and each after it stands on those before. A record is not laid that way. Its order is when each entry happened, so its first entry is first in time and nothing more.
 
-[The practice's stamp](../poc.md#9-a-file-says-it-is-under-the-code) says which of the two a file is. A pane holding a record shows it in the order it declares and never implies that the order ranks anything, and the drawing above it says nothing about importance either.
+[The practice's stamp](../practice.md#9-a-file-says-it-is-under-the-code) says which of the two a file is. A pane holding a record shows it in the order it declares and never implies that the order ranks anything, and the drawing above it says nothing about importance either.
 
 *Reasoned, carried from the practice and not checked here.*
 

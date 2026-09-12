@@ -14,7 +14,7 @@ A level's drawing is scrubbed too, and there the drag moves the reading beneath 
 
 Neither discards anything. A scrub reaches a pane that has gone off screen rather than dropping it, which is what lets a path run deeper than a viewport is wide.
 
-*Reasoned, the author's, 2026-09-12; the one-axis rule is [the design language's](../../../design.md#scroll-and-seams).*
+*Reasoned, the author's, 2026-09-12; the one-axis rule is [the design language's](../../../../design.md#scroll-and-seams).*
 
 ## 2. The path is the address
 
@@ -26,7 +26,7 @@ What the browser's back retraces is the commitments. Opening a level enters the 
 
 ## 3. The rest of a brief is told on asking
 
-Everything that names a brief carries only part of it. A cell in a drawing carries shape and nothing else. A [door](panes.md#1-a-brief-with-nothing-beneath-it-is-not-a-door) carries the brief's [face](../poc.md#3-the-surface-is-declared-by-position), its heading and the paragraph under it. A link carries only the words the sentence gave it.
+Everything that names a brief carries only part of it. A cell in a drawing carries shape and nothing else. A [door](panes.md#1-a-brief-with-nothing-beneath-it-is-not-a-door) carries the brief's [face](../practice.md#3-the-surface-is-declared-by-position), its heading and the paragraph under it. A link carries only the words the sentence gave it.
 
 So the rest is told on pointing. An overlay appears beside whatever the pointer rests on, outside the bounds of the figure that raised it so its structure stays visible, and it carries the face, what the brief and its level weigh, the drawing of the level beneath, and what points at the brief.
 
@@ -34,11 +34,11 @@ It tells, and it is never acted in. A reader reads it and then presses the thing
 
 For that to hold, everything an overlay shows has a home a reader can reach. The face is in the brief and in its door, the weights are in the drawings, the level beneath is reached by pressing the cell, and [what points at a brief stands at its foot](panes.md#5-what-points-at-a-brief-stands-at-its-foot) in its own pane.
 
-An overlay needs a ground of its own or it cannot be read, and that is where [the design language](../../../design.md#why-flat--the-newspaper-precedent) stops being a guide. It settles the flat layout, where an area at rest carries no background and no border and spacing does all the work, and it never considers what sits over that.
+An overlay needs a ground of its own or it cannot be read, and that is where [the design language](../../../../design.md#why-flat--the-newspaper-precedent) stops being a guide. It settles the flat layout, where an area at rest carries no background and no border and spacing does all the work, and it never considers what sits over that.
 
 What it does settle nearby is the hover: the ground under a pointer is altered a little, with rounded edges. An overlay is that register raised, so for now it takes the same ground rather than a colour of its own, with a slight blur of what lies behind and at most a faint border, since the same colour blurred and with no edge at all would not read.
 
-*Seen in the program retired on 2026-09-12, which held these facts in a card beside the pointer. Its ink is paid for by [attention](../../../design.md#the-graduated-scale--one-mark-per-live-fact), the design language's own class for a mark delivered exactly when asked and gone when it is not, which is what an overlay that only tells can be. Its look is the author's preference for a first implementation, since the language has not reached overlays.*
+*Seen in the program retired on 2026-09-12, which held these facts in a card beside the pointer. Its ink is paid for by [attention](../../../../design.md#the-graduated-scale--one-mark-per-live-fact), the design language's own class for a mark delivered exactly when asked and gone when it is not, which is what an overlay that only tells can be. Its look is the author's preference for a first implementation, since the language has not reached overlays.*
 
 ## 4. One gesture, one meaning
 
