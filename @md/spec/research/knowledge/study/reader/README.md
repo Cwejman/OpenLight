@@ -23,7 +23,7 @@ So the filesystem's divisions and a document's own nesting are one structure, an
 
 ## 2. What is not a room
 
-A repository holds much that is not knowledge. A file declares itself at its head: whether it is under the code, and of what kind. This program obeys that. A record's parts are shown as the entries it declares, in the order it declares them, rather than as rooms to descend by importance, because reading a sequence by the gradient reads it wrongly. What the stamp is finally for is in [the path forward](forward.md#7-the-medium-beyond-the-page), and its form belongs to [the practice](../10-comprehension/poc.md) and is open. *Seen.*
+A repository holds much that is not knowledge. A file declares itself at its head: whether it is under the code, and of what kind. This program obeys that. A record's parts are shown as the entries it declares, in the order it declares them, rather than as rooms to descend by importance, because reading a sequence by the gradient reads it wrongly. What the stamp is finally for is in [the path forward](forward.md#7-the-medium-beyond-the-page), and its form belongs to [the practice](../../poc.md) and is open. *Seen.*
 
 ## 3. What it does with a room
 

@@ -5,7 +5,7 @@ kind: brief
 
 # What is being weighed
 
-Evidence is only useful against a claim, so this says what the claims are. They are drawn from [the code](../code.md) as it stood on 2026-09-11 and stated in its own terms, before any evidence arrives, so a reader can check whether they are fairly put and can tell what is being argued about. Nothing here is a finding; it is the position.
+Evidence is only useful against a claim, so this says what the claims are. They are drawn from [the code](../../../code.md) as it stood on 2026-09-11 and stated in its own terms, before any evidence arrives, so a reader can check whether they are fairly put and can tell what is being argued about. Nothing here is a finding; it is the position.
 
 One thing about the fit between the claims and the evidence belongs here rather than later. The sweep was commissioned against two earlier documents this project held — a ladder of knowledge-structure rules and a coverage chart of territories — not against the five claims below. So the evidence was gathered to answer a related question, and where a verdict lands squarely on a claim, that is partly luck.
 
