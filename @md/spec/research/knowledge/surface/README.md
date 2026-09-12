@@ -30,7 +30,7 @@ What it finds there it does not interpret. What counts as a brief, and what nest
 
 *Reasoned, 2026-09-12.*
 
-## 2. [A level to a pane](panes.md)
+## 2. A level to a pane
 
 Wherever you are reading you are at a path in the holarchy, and no brief is orphaned, since each is a part of the understanding above it. That is what a surface can be built on: there is always somewhere you are, and always a way you came.
 
@@ -42,7 +42,9 @@ Pressing a brief opens the level under it. You do not enter the brief, because y
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 3. [What the prose cannot say](drawings.md)
+[the level beneath](panes.md)
+
+## 3. What the prose cannot say
 
 Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and shape is seen rather than read.
 
@@ -54,7 +56,9 @@ Size means two things, and the drawing keeps them apart. A brief's own prose is 
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 4. [Moving, and asking](moving.md)
+[the level beneath](drawings.md)
+
+## 4. Moving, and asking
 
 A reader does three things besides read. They go deeper, they go sideways, and they ask about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace.
 
@@ -63,6 +67,8 @@ That division is what makes looking free. A reader can see what a descent would 
 A descent is committed from a door in a pane or from a cell in any drawing, and either one adds the level beneath to the panes and to the drawing of the path. From a drawing it may carry more than one level, since a reader can look several levels down before choosing.
 
 *Reasoned, the author's, 2026-09-12.*
+
+[the level beneath](moving.md)
 
 ## 5. What this does not answer
 
@@ -76,10 +82,13 @@ And the technical ground, which is not unsettled so much as not yet taken up. Ho
 
 *The first two are open, 2026-09-12. The technical ground is not open but out of scope for these briefs, and that boundary is in force. What each level leaves open stands at its own foot.*
 
-## 6. [What was tried and refused](refused.md)
+## 6. What was tried and refused
 
 A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and no program has yet been written against them.
 
 What that program reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, because a refusal is looked up when someone proposes it again and never read through.
 
 *Seen, in that program and in the author's reading of it; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
+
+[the level beneath](refused.md)
+
