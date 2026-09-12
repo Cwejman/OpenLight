@@ -6,33 +6,35 @@ status: in force
 
 # The surface
 
-A body of knowledge under the code is a holarchy: wholes that are also parts, the biggest understanding first and the detail beneath it. Nothing shows it as one. A file tree shows files, GitHub opens a directory listing, and a word count says nothing, since thirty-five thousand is neither large nor small until you know where the words sit.
+Knowledge under the code stands as a holarchy, and nothing shows it as one. A file tree shows files, GitHub opens a directory listing, and a total of words tells a reader nothing, since what a number of words is worth depends on where the words sit.
 
-So what was understood cannot be met. The code makes a substrate and leaves it as prose in folders, and there its own argument stops: a reader who cannot see the gradient cannot stop whole at a checkpoint, and cannot tell before reading whether what is ahead is too much.
+So the gradient the writing was laid by cannot be seen. A reader cannot tell what stopping here would cost, or whether what lies ahead is more than they want, and that is the judgment the code says a reader makes before spending any reading at all.
 
-This is the work of giving that substrate a surface. A body of knowledge is entered through it by understanding rather than by opening files, and a session's own work is part of what it serves.
+This work is the surface that answers it: what a body of knowledge is met through, entered by understanding rather than by opening files. A session's own work is part of what it serves.
 
 ## 1. One surface, on a machine and on the web
 
-The same program serves both, and only the moment of reading differs. Locally it reads a directory in a working tree and re-reads it as the files change. Published, it reads what the repository's own pipeline emitted from that same tree.
+The same program serves a body of knowledge on someone's machine and a body published from a repository, and only the moment of reading differs. Locally it reads a directory in a working tree, again as the files change. Published, it reads what that same tree's own pipeline emitted.
 
-So a repository's site is the repository, generated on every change, rather than a site built beside the knowledge and kept in step by hand. What it digests is declared rather than guessed, by [the stamp the practice gives a file](../poc.md#9-a-file-says-it-is-under-the-code), so a directory is onboarded a file at a time.
-
-*Decided, the author's, 2026-09-12.*
+So a repository's site is the repository, made on every change, rather than a site built beside the knowledge and kept in step by hand. What it takes in is declared rather than guessed, by [the stamp the practice gives a file](../poc.md#9-a-file-says-it-is-under-the-code), so a directory is onboarded a file at a time.
 
 ## 2. A session is part of what it serves
 
 A harness keeps its work in a transcript made for replay, outside the repository the work produced. So what a session did is lost to whoever comes next, and lost to the session itself, which is why a long sitting cannot look back at what it settled an hour ago.
 
-A session that writes its own work into the substrate is met by the same surface as everything else. That is where introspection comes from, and it serves both sides: a person watching a run, and a session reading its own record.
+A session that writes its own work into the substrate is met by the same surface as everything else. The introspection the harness withholds then comes from the substrate instead, and it serves both sides: a person watching a run reads it, and so does the session.
 
-So the surface reaches for no log and knows nothing of harnesses. Whatever wants to be read becomes substrate first. What a session writes, and how, stands in part in [the skill](../skill.md) and is [owed beyond it]().
+So the surface reaches for no log and knows nothing of harnesses. Whatever wants to be read becomes substrate first.
+
+What a session writes, and in what shape, stands in part in [the skill](../skill.md) and is [owed beyond it]().
 
 ## 3. What this is not
 
-This is a decided compromise, and naming it is what keeps the work from spreading. It does not build a substrate, and it does not build agent technology. The substrate stays markdown in git. The harness stays the one that exists, with its context appended rather than composed.
+This is a decided compromise, and naming it is what keeps the work from spreading. It does not build the typed medium [the code's sixth section](../code.md#6-how-far-this-goes) reaches for, and it does not build agent technology.
 
-The medium [the code's sixth section](../code.md#6-how-far-this-goes) reaches for is not this, and is not built from this. What is taken here is what compounds today, on what already stands.
+The substrate stays prose, in markdown, in git, and the holarchy is read out of it rather than stored beside it. The harness stays the one that exists, its context appended rather than composed.
+
+What is taken here is what compounds today, on what already stands. The medium is built later, and on more than this.
 
 *Decided, the author's, 2026-09-12.*
 
@@ -40,6 +42,8 @@ The medium [the code's sixth section](../code.md#6-how-far-this-goes) reaches fo
 
 Whether the harness can be modified at all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and whether it is affordable turns on whether the SDK bills against a subscription or per use. Unanswered, and cheap to answer.
 
-And everything beneath this brief. How a body is read, what a reader is told about what stopping costs, what a session keeps and in what shape: none of it is settled, and this entry will order those briefs when they exist.
+And what a surface actually does. How a body is read, what a reader is told about what stopping costs, what a session keeps: none of it is settled, and this entry orders those briefs when they exist.
 
-*Open, 2026-09-12. The reader built on 2026-09-11 and its nine briefs were retired to git the next day, so that the understanding is built before the program is, rather than after.*
+A reader and its nine briefs were built in one sitting on 2026-09-11 and retired to git the next day, so that the understanding stands before the program does. That is why this entry has nothing beneath it yet.
+
+*Open, 2026-09-12.*
