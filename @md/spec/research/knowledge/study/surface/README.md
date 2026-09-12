@@ -47,7 +47,7 @@ What grounds it: this surface, which showed that the transcripts hold a session'
 
 ### 3.5 The context, drawn and written to
 
-The context itself is the next thing to draw, and to write to at its root; what a harness should give, and at what price, is the author's position in [giving as a business](../gaab.md). A harness's transcript is append-only, and no plugin can plant knowledge beside what a session already holds; but the model is stateless, so a thin harness over the SDK can assemble each turn's context from the field by depth, the root stable and cached, the rim changing. That is learning inside a session, a new understanding placed beside the ground it stands on, and it is the code applied to a context: a holarchy read by depth, one home per fact, coherence from a stable root. Its drawing is the same drawing as the corpus's, of what a session holds rather than of files on disk.
+The context itself is the next thing to draw, and to write to at its root; what a harness should give, and at what price, is the author's position in [giving as a business](../../gaab.md). A harness's transcript is append-only, and no plugin can plant knowledge beside what a session already holds; but the model is stateless, so a thin harness over the SDK can assemble each turn's context from the field by depth, the root stable and cached, the rim changing. That is learning inside a session, a new understanding placed beside the ground it stands on, and it is the code applied to a context: a holarchy read by depth, one home per fact, coherence from a stable root. Its drawing is the same drawing as the corpus's, of what a session holds rather than of files on disk.
 
 ### 3.6 The page, and the ways in
 

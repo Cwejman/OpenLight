@@ -5,9 +5,9 @@ kind: brief
 
 # The study
 
-The study is the search for how knowledge is best structured, for people and AI alike, run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. Ten labs in, this file holds what the labs have settled and what they still owe.
+The study is the search for how knowledge is best structured, for people and AI alike, run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. This file is its notebook. It holds where the search stands and what it still owes.
 
-The law is not here. It lives in the code, whose latest edition is [`10-comprehension/code.md`](../code.md); each lab ships its own, and the ratified ancestor stands at [`../code.md`](code-ratified.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
+The law is not here. It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the code as ratified](code-ratified.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
 
 ## 1. The finish line
 
@@ -19,73 +19,31 @@ The search ends when the proof is lived, not argued. Three marks:
 
 3. **The proof is the experience**: a senior reader finishes with no unanswerable questions, a fresh session bootstraps and can be trusted, and the author reads without fatigue.
 
-## 2. What the study ships
+## 2. Where the search stands
 
-Three artifacts come out of this search, and it is not finished until all three stand. **The code** is the law. **The markdown practice** is the code worked in files and folders. **The grounds** are the receipts: for every rule the code carries, where it came from and what it rests on. The code exists, and the markdown practice stands at [`10-comprehension/poc.md`](../poc.md), grown from lab 08's first cut; the grounds stand as an empty link in the code's closing section, written after the labs settle.
+Ten labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03 to 07 are owed, and most open claims wait on them. Each lab's own entry says what it did and what it holds; this section holds the verdict on it, which is why a lab's writer never reads this file. [How a lab runs](method.md) says why that matters.
 
-The grounds are the one that cannot wait. The code and the practice can be composed at the end from what the labs settled, but provenance is only available while the work is happening. So the grounds accumulate now, lab by lab, or they are not written at all.
+The baseline pair comes first, since every later reading is judged against it. The rest are laid newest first, from ten down.
 
-### 2.1 What an entry in the grounds owes
+- **Labs 01 and 02 are the baseline pair.** The same corpus [cut by subject](01-categorical/README.md) and [walked as a narrative](02-encounters/README.md). The first informed but did not engage; the second engaged.
 
-Every rule in the code gets one entry, and the entry answers four questions in this order: what the rule says, where it came from, what it rests on, and how strongly.
+- **[Lab 10](10-comprehension/README.md) rewrote the code with the author** and ran it in two stages, a corpus from the raw and a piece from the corpus. Its input differs from labs 08 and 09 by that corpus stage, and any comparison to the baseline pair must say so. The piece stands finished and unjudged, which was the whole point of running the lab.
 
-The fourth is the one that gets skipped. Its vocabulary is the code's own, measured, seen, reasoned or preferred, defined in [the code](../code.md); the grounds add nothing to it. A rule carrying no mark is not settled; it is unexamined.
+- **[Lab 09](09-gradient/README.md) carries the fixes lab 08 asked for**, on the same prompt and one serial run. The author's cold read of its output against 08's is to follow.
 
-This is law 2 turned on the code itself. A reader a year from now must be able to ask of any rule — is this proven, is it settled, or is it a preference nobody has challenged — and get the answer from the writing rather than from a feeling. A rule that cannot answer is a rule that will be obeyed for the wrong reason.
+- **[Lab 08](08-win-driven/README.md) ran once under the cycle** and closes on its own feedback: the piece is flat and force-fed because the code never said nesting is how the gradient is made, the cost is the writer's context and the context is the judgment, and a word for borrowed confidence is owed. Those went into lab 09. The author's request, the engagement angle, returns in a later run there.
 
-### 2.2 The duty is per session
+- **[Lab 07](07-breakdown/README.md) tested the breakdown, and the structure paid.** One level deeper, with the content held fixed, reads 46% shorter at the level a reader stops while holding more. Awaiting the author's cold read; whether it becomes a principle is the open question.
 
-Every session that produces, changes or tests a rule writes its evidence before it ends: in the lab the work belongs to, in a file named for the rule it grounds. [`evidence-unit-of-change.md`](07-breakdown/evidence-unit-of-change.md) and [`evidence-breakdown.md`](07-breakdown/evidence-breakdown.md) are the pattern — one rule each, the numbers in the file, and a closing section on what the evidence does *not* reach.
+- **[Lab 06](06-principles/README.md) made the code itself the instruction.** Its output is the leanest reading yet.
 
-Provenance recovered late survives only by luck, and the loss is invisible: the rule still stands in the code, now unfalsifiable. That is the failure this section exists to prevent.
+- **[Labs 03](03-importance-first/README.md), [04](04-importance-first-nested/README.md) and [05](05-spine/README.md) tested structure without narrative.** The one verdict so far, partial, on 04: writing from the raw alone caps the depth a writer can give.
 
-**The arrears are real.** Labs 01 to 06 produced the findings the current principles rest on, and none of it was written as grounds — it lives scattered in session narratives, in this file's verdict lines, and inside the outputs themselves. Walking that record and turning it into entries is a cheap pass for a session pointed at this section, and it has to happen before the three artifacts can be generated.
+After the labs come the two artifacts of the finish line's second mark, and then the mark itself: [the grounds](grounds.md), then the spec tree.
 
-## 3. Where the search stands
+## 3. What is owed
 
-The baseline pair comes first, since every later reading is judged against it, and the rest are laid newest first, from ten down.
-
-Ten labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03–07 are owed, and most open claims wait on them.
-
-- **Labs 01–02 are the baseline pair.** The same corpus cut categorically ([`findings/`](01-categorical/output/README.md)) and as a narrative walk ([`encounters.md`](02-encounters/output.md)). The first informed but did not engage; the second engaged. Every later reading is judged against these two.
-
-- **Labs 03–05 tested structure without narrative.** Importance-first alone (03), nesting added (04), the full spine rules (05). The one verdict so far, partial, on 04: writing from the raw alone caps the depth a writer can give — see *incomplete grounds* below.
-
-- **Lab 06 changed the delivery.** The prompt went bare, and a full edition of the code — grown with principles, the unit renamed brief — became the writer's primary instruction. The output, [`The ground others hold`](06-principles/output.md) (~5,200 words), is the leanest reading yet.
-
-- **Lab 07 tested the breakdown**, and the structure paid. The team's read of 06 found one shape recurring: a slim surface followed by bold-led bullets, the only place bullets appear at all, at every heading level. That shape is a brief whose nested briefs never got their headings, so every win arrives at one depth in one serving. The lab reworked the 06 output one level deeper with the content held fixed, and [the result](07-breakdown/output.md) reads 46% shorter at the level a reader stops while holding more — the full measurement, and the four things it does not reach, are in [`evidence-breakdown.md`](07-breakdown/evidence-breakdown.md). The instruction lived in [its prompt](07-breakdown/prompt.md), not in the edition, because a rule a lab may reject must not enter the law first. Awaiting the author's cold read; whether it becomes a principle is the open question.
-
-- **Lab 10 rewrites the code with the author, and runs in stages.** The edition ([`10-comprehension/code.md`](../code.md)) was rewritten section by section in dialog on 2026-09-10 and 11: the prose principle first and 4.1, the gradient as the thesis in §3, the laws dropped, §2 as what the code is for, the making lifted from a principle to §5, §6 as the medium beyond prose, each principle closing with its strength set apart. The practice followed, and a skill in prose ([`skill.md`](../skill.md)) replaces the tool. The run is three prompts, not one: [`prompt-1`](10-comprehension/prompt-1.md) compressed the raw into a corpus under the code with fresh heads asked what was lost, four rounds in one Opus session holding the raw, at a cost recorded in [`debrief.md`](10-comprehension/debrief.md); [`prompt-2`](10-comprehension/prompt-2.md) ran a fifth round in the lean shape, an orchestrator that never holds the raw; prompt 3, the piece from the corpus, is next. The corpus grew every round, 79k to 91k tokens against the raw's 169k, and the losses that mattered ran 12, 15, 3, 6: converging, not converged. Its input differs from labs 08 and 09 by the corpus stage, and the comparison to the baseline pair must say so. The rounds and their cost are in [`debrief.md`](10-comprehension/debrief.md); a [surface](surface/README.md) reads them as a story while a run is live.
-
-- **Lab 09 opens on lab 08's feedback** ([`09-gradient/`](09-gradient/code.md)). Its edition carries the fixes the run asked for: the order of a holarchy names the level not broken down in both costumes, the paragraph with bullets and the section that is not brief, pointed at the law and holding at every grain with no size; the ground gains the word for borrowed confidence; the practice cites sources known by number as links to their address, says the depth lean does not excuse a flat file, and no longer restates the code anywhere; the prompt isolates the blank head from the repository's bootstrap. Same prompt as 08, one serial run, the author's cold read of its output against 08's to follow.
-
-- **Lab 08 ran once under the cycle, and closes on its feedback.** Its edition ([`08-win-driven/code.md`](08-win-driven/code.md)) was written in dialog through 2026-09-09: the why, what it changes, then what knowledge is made of under two laws named in its own brief, the brief holding the contract against the win, the two forces as the code's thesis, why-first, and within it the holarchy and the link, then the ground; five principles as concepts, the order of a holarchy, the prose of a brief, work in progress, a story carries the causes, the iteration of inference, each closing with its strength; how far it goes at the end, and what is open. The markdown practice exists as [`poc.md`](08-win-driven/poc.md), a first cut. The run: two writers under the first edition of the cycle principle skipped it, and their reports are in git; under the rewritten principle one writer ran three rounds with two blank heads and converged, its piece in [`output/`](08-win-driven/output/README.md), its rounds and the run's cost in [`debrief.md`](08-win-driven/debrief.md), and what the run teaches in [`feedback.md`](08-win-driven/feedback.md): the piece is flat and force-fed because the code never says nesting is how the gradient is made, the cost is the writer's context and the context is the judgment, and a word for borrowed confidence is owed. Those go into lab 09's edition; the author's request, the engagement angle, returns in a later run there. The ontology that was to fill the edition's fourth section was **set aside by the author (2026-09-07)** and stands whole with its evidence in [`08-01-ontology/`](08-win-driven/08-01-ontology/README.md), to be rerun once the code is lived.
-
-After the labs come the two unwritten artifacts of [§2](#2-what-the-study-ships) — the markdown practice first, since the labs' recurring choices are what it harvests, then the grounds — and then mark 2: the spec tree itself.
-
-## 4. How a lab runs
-
-A lab is one directory beside this file, `<nn>-<name>/`, and since lab 06 it ships three things:
-
-- **Its code edition** (`code.md`) — the full law the writer follows, extended as if the lab's claims were always its own. The code carries everything; the prompt carries nothing but mechanics. The exception is a lab that *tests* a candidate rule rather than adopting one: there the candidate stays in the prompt, so a rule the lab may reject never enters the law (lab 07).
-
-- **Its prompt** (`prompt.md`) — bootstrap, the author's request, constraints. Both files are written before the run, so together they are the method record by construction.
-
-- **The output** — the writer's piece.
-
-**From lab 11 the reset ends (2026-09-11).** Until now each lab began from nothing: a fresh writer, the raw, and a code edition, with the previous output left behind. That was right while the code was moving under us and a piece written against an old edition could not be trusted. It is no longer worth its cost. The code and the piece now evolve together: a lab takes the standing output and the standing edition, changes what the last read found wanting, and rewrites only the briefs the change reaches. What the reset bought, a writer uncontaminated by earlier verdicts, is bought more cheaply by the fresh head, which holds only the code and the draft. What it cost was everything already learned in the prose.
-
-Three rules keep a lab honest:
-
-- **Ratify before launch.** The author reads the edition and the prompt whole; the run starts on their word.
-
-- **The writer runs pure.** A fresh session reads the prompt and only what it names — never this notebook, which holds the verdicts a clean arm must not see. Purity is about this file, not about the work: from lab 11 a writer inherits the standing output and edition, and still never reads the verdicts on them.
-
-- **The author reads cold**, against the baseline pair, and the verdict lands here.
-
-## 5. The queue
-
-What the search believes lives in the latest edition, nowhere else. What it waits on lives here:
+[The grounds](grounds.md) are the largest debt and the only one that cannot wait, since provenance exists only while the work is happening. Every rule the night's editions gained has no entry, and labs 01 to 06 are in arrears entirely.
 
 - **The cold reads of 03–07** — the deciding evidence for the editions' engagement and language principles. Each verdict lands as a refinement in the next edition, with its evidence recorded beside it, as [07's first](07-breakdown/evidence-unit-of-change.md) was.
 
@@ -95,35 +53,15 @@ What the search believes lives in the latest edition, nowhere else. What it wait
 
 - **Team opens** ([issue #1](https://github.com/Cwejman/OpenLight/issues/1) — Eric, Emelie, Sanna): what the second level of a document is; whether an intro carries a short guide to how the text is read; how running-text source references are handled; expand/collapse folding — blocked for now, since GitHub does not guarantee an anchor reaches into a collapsed section.
 
-## 6. Method findings that hold
+## 4. Beside the labs
 
-Settled by repetition; they feed the markdown practice and the grounds:
+[What the method has found](findings.md) holds what the labs taught about the work itself rather than about the writing, settled by repetition.
 
-- **Heaviness is seen before it is read.** A reader judges a brief's difficulty from its shape, the size of its paragraphs and the density of the page, before spending any reading on it, and under the code that judgment is the verdict: a part that looks like too much is harder to understand, because comprehension follows confidence. So a piece can be failed at a glance, and it should be looked at blurred before it is read. This is the judgment the labs have failed most often, lab 10 included, and a rule has never fixed it: the writer cannot feel the weight of prose it is inside of, and a character count is a threshold rather than a feel. What serves it is a picture. [The reader](reader/README.md) draws every brief as the lines it actually is, so the heavy blocks show before a word is read. Seen, across the labs; the count of paragraphs past five hundred characters is measured.
+Three records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), and [what was asked](asked-2026-09-11.md) on the day most of this was written.
 
-- **A fresh head finds what the writer cannot.** The writer's closure is invisible from inside — three times evidenced. The cold read is part of shipping, not an aspiration.
+And two programs, built while the labs ran. [The reader](reader/README.md) serves a body of knowledge as the holarchy it is, so a reader descends by understanding rather than by opening files. [The surface](surface/README.md) watches a run while it happens, reading only what the work leaves behind. Its [path forward](reader/forward.md) is the worklist for both, and it opens with the author's verdict that the reader is hard to use.
 
-- **The compression of a brief sets the writer's freedom.** A tightly compressed inventory *is* prose; blind writers reproduce its sentences (the blind-variant experiment, 2026-08-23).
-
-- **A bootstrapped session becomes what it reads.** What its ground does not carry does not reach the work.
-
-- **Surveying a tree costs more than reading it.** A session told to bootstrap here listed the whole tree and weighed every file before opening one, and spent a twentieth of its context on an inventory it then threw away. Reading by depth buys the code, the notebook and the lab for that same spend, and buys the understanding rather than the menu. What an entry owes a fresh session is the first step down, not the shape of everything. Seen, once, 2026-09-12.
-
-- **A matrix of amnesias finds what one fresh head cannot.** Several fresh sessions reading one file, each with a different ground and nothing else, disagree in what they find and agree in what they measure; eight grounds on the ontology found four hundred faults in one evening and two independent measures of its order agreed against it ([`08-win-driven/08-01-ontology/evidence-clean-room.md`](08-win-driven/08-01-ontology/evidence-clean-room.md)). The technique is the fresh head, multiplied and pointed.
-
-- **Building runs ahead more easily than writing does.** A brief that is written can be read cold before the next is written; a program can be changed twenty times in an evening and used none, and nothing in the making protests. The reader was built through a dozen shapes in three hours, each on an ask that arrived before the last change had been used, and the fault was invisible from inside it. What made it visible afterwards was the record: the asks kept in order, the commits carrying their reasons, the distance between what was asked and what stands written down. Seen, once, and it is the code's own concept of running ahead met in the work rather than in the text.
-
-- **Turns are the cost, not reading.** Lab 10's stage two ran 1,187 API messages over 84 minutes, carrying about 425,000 tokens of context and re-sending it every message: half a billion tokens read from cache, near 52M input-equivalent, against 147,000 tokens actually written. Stage one's writer, doing comparable work in 75 messages, cost 6.9M. Reading by depth and moving by script cut what each step reads, and multiplied the steps; what the context costs is the number of times it is sent. Measured, from the transcripts.
-
-- **The orchestrator never holds the raw.** A session that reads the material whole grows to the size of the material and pays for it on every turn; a session that holds only the code, the practice and the corpus, and sends fresh heads for what needs the raw, costs a third and keeps its judgment. Lab 10's fifth round against its first four. And a subagent's cache lives five minutes by default; a silence past that rewrites its whole context, which lab 08 paid once and lab 10 paid throughout. What that says about how a service gives is the author's, in [`gaab.md`](gaab.md).
-
-- **Record the method at the moment of the work.** Three times now the evidence for a rule existed only in a session that was about to end. This is the finding that [§2.2](#22-the-duty-is-per-session) makes a standing duty.
-
-## 7. Beside the labs
-
-Four briefs sit beside the labs and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered, written from the labs' own cost accounts. [Tenants beyond prose](tenants.md) holds the domains that have occurred since, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks a question of synthesis and brings back what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing. Beside them, [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), [what was asked](asked-2026-09-11.md) on the day most of this was written, and two programs, [the surface](surface/README.md) and [the reader](reader/README.md).
-
-## 8. Notes
+## 5. Notes
 
 - **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation (the ratified [`code-ratified.md`](code-ratified.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 

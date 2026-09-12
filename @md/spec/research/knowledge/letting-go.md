@@ -11,4 +11,4 @@ To debrief is to let go: the detail stays beneath, the conclusion goes to the su
 
 The visual side is the same act felt from the other direction. A drawing is relaxation through contraction: the shape stands and the detail withdraws, and the eye rests on what was kept. Letting go by contract, the author's name for it, is what gives space to other depths, so that where one thing withdraws another can come forward. An interface that works this way is not in front of the user but around them, a surround user interface: whatever is contracted recedes into the surround, still there, one step away, and the depth in focus has the room.
 
-*Reasoned, the author's, in passing; the contract is [the code's sixth section](../code.md#6-how-far-this-goes) and the project's substrate, and the rest is what a surface built on them would feel like.*
+*Reasoned, the author's, in passing; the contract is [the code's sixth section](code.md#6-how-far-this-goes) and the project's substrate, and the rest is what a surface built on them would feel like.*

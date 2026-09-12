@@ -15,7 +15,7 @@ The model is stateless; every call is a whole context sent fresh. A harness that
 
 ## 2. The cache is where the giving shows
 
-The labs' accounts put it in numbers: a session's cost is mostly its context re-sent, and the cache is what makes that bearable, a tenth of a fresh read. Lab 08 paid a whole context rewrite once when a five-minute cache lapsed in a silence; lab 10's writer and heads ran on five-minute caches throughout, and read from cache many times what they wrote, which [the lab's record](10-comprehension/debrief.md) counts exactly. A short default cache, and a cache that costs to keep, is a trait of a service that gives narrowly. The argument for it, that a free cache invites unsanctioned use, protects the product; but the product is worth what it lets people comprehend, and staking that comprehension for an edge is a monopoly slowing the very progression it sells.
+The labs' accounts put it in numbers: a session's cost is mostly its context re-sent, and the cache is what makes that bearable, a tenth of a fresh read. Lab 08 paid a whole context rewrite once when a five-minute cache lapsed in a silence; lab 10's writer and heads ran on five-minute caches throughout, and read from cache many times what they wrote, which [the lab's record](study/10-comprehension/debrief.md) counts exactly. A short default cache, and a cache that costs to keep, is a trait of a service that gives narrowly. The argument for it, that a free cache invites unsanctioned use, protects the product; but the product is worth what it lets people comprehend, and staking that comprehension for an edge is a monopoly slowing the very progression it sells.
 
 *Measured, in the labs' accounts; the reading of the motive is the author's.*
 
@@ -61,7 +61,7 @@ Steering a model at use, taken to its end, is a model that evolves in the open. 
 
 The record of how work was done lives in the harness, in a format made for replay rather than for reading, and outside the repository the work produced. That separation is the reason a long sitting loses what was said in it. Kept in git beside the knowledge, and stamped so a surface knows what kind of thing it is, the history becomes introspectable by the harness that made it, readable by the frontend that serves the knowledge, and ground that whoever comes next can stand on.
 
-This is the general case of what this study did by hand: [the asks of a sitting](asked-2026-09-11.md) kept as a record and made the ground of a plan. A service that gives its users their own history does more for them than one that keeps it, which is this file's stance applied to a service's own exhaust.
+This is the general case of what this study did by hand: [the asks of a sitting](study/asked-2026-09-11.md) kept as a record and made the ground of a plan. A service that gives its users their own history does more for them than one that keeps it, which is this file's stance applied to a service's own exhaust.
 
 *Reasoned, the author's.*
 

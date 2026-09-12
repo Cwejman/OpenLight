@@ -13,4 +13,6 @@ How knowledge should be structured, so that what one person understands reaches 
 
 [The skill](skill.md) is the smallest of the three, and the last one you need. It says what a session does with those files, in prose rather than in code, so that it writes the script it needs at the moment it needs it.
 
-[The study](study/README.md) is where all of this is being found, and where it is still owed. Ten labs so far on one shared corpus, each rewriting the same material under an edition of the code and reading the result cold. It holds what the labs settled, what they have not, and everything authored beside them.
+[The study](study/README.md) is where all of this is being found, and where it is still owed. Ten labs so far on one shared corpus, each rewriting the same material under an edition of the code and reading the result cold. It holds where the search stands, what it owes, and what the running of it has taught.
+
+Four briefs stand beside the search rather than under it, and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered. [Tenants beyond prose](tenants.md) holds the domains this shape reaches into, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing.
