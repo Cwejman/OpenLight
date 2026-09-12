@@ -65,6 +65,8 @@ A repository holds more than knowledge, so a file declares itself: frontmatter a
 
 The stamp also says what kind of file it is, because not everything under the code is a brief. A record is an array of entries in time, newest first or oldest first, and reading it by the gradient is reading it wrongly: its order is chronology, not importance, and its sections are occurrences rather than rooms. A reader that knows the kind can show a record as the sequence it is and a brief as the holarchy it is, instead of conflating them.
 
+The stamped region is also the boundary of the substrate, and knowledge does not leave it. A piece of the knowledge moved into an unstamped file is moved out of what any reader digests, so it stops being substrate whatever its content. Where the code has not yet reached, the knowledge waits for it rather than being filed there. Reasoned, from moving a brief out of the stamped tree and back, 2026-09-12.
+
 The stamp's form is not settled. Open, and wanted before anything publishes a tree.
 
 ## 10. Open

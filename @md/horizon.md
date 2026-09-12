@@ -103,12 +103,6 @@ Tabs are one lens. A zoomable canvas — workspaces as nested regions, navigatio
 
 In the canvas lens the drawable outruns the window: the canvas extends beyond the viewport and the viewport becomes a **camera** over it. Fixed strips lose their claim to edges — a sidebar becomes a floating, minimizable overlay widget among a launcher of overlays (Figma's pattern), spawned rather than always-mounted. The overlay archetype already carries the shape; what changes is that anchoring goes spatial.
 
-## Projection as a view mode
-
-A view mode need not end at a screen. Projected on a wall, level of detail becomes physical. Several projectors, aimed from different positions at one surface, lay holons over each other at different densities: the piece in focus fine and close, its neighbours coarser behind it, so depth is made of resolution rather than of pages. Overlapping from several angles also removes the shadow, since a hand or a pen writing on the wall blocks only one of the beams, which is what makes the surface writable rather than only readable.
-
-It is the same gradient the reading surface draws, given room and a body: what is let go recedes in resolution rather than onto another page. Nothing here is designed and no view demands it; it is kept because it names a form the composition types do not forbid. *Reasoned, the author's, 2026-09-11.*
-
 ## WebGPU-capable views
 
 Pilot components render DOM. Some will want GPU surfaces — WebGL/WebGPU canvases for visualization and simulation. DOM streaming doesn't help (you can't stream pixels as DOM ops); the shape is pixel-level passthrough, which under uniform containment needs virtio-gpu (2D today on Apple Virtualization.framework; 3D via libkrun/Venus). The type system already accommodates it (a `wgpu` surface kind — view.md). Deferred until a view demands it.

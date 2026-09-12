@@ -5,7 +5,7 @@ kind: brief
 
 # Tenants beyond prose
 
-A tenant is a domain that lives in the substrate the way knowledge does. Knowledge is the first, and the code's sixth section says the shape reaches further. This file holds the cases as they occur, between the study and the project's vision: each a domain named as it would look as entries in the substrate, held open and marked so. Begun 2026-09-11.
+A tenant is a domain that lives in the substrate the way knowledge does. Knowledge is the first, and the code's sixth section says the shape reaches further. This file holds the cases as they occur, between the study and the project's vision: each named as it would look as entries in the substrate, held open and marked so. Most are domains; two are not, and say so where they stand. Begun 2026-09-11.
 
 ## 1. Sound
 
@@ -59,7 +59,15 @@ A digital commodity provider, in the author's naming: it holds the royalty, the 
 
 A job market holds the same way, an exchange as a market hub: the offers and the people are entries, the matching is the connection, and the market is whoever hosts the connecting rather than whoever owns the listing.
 
-## 4. The live edge
+## 4. The surface, off the screen
+
+Not a domain but a form the reading of any of them could take. Projected on a wall, level of detail becomes physical. Several projectors, aimed from different positions at one surface, lay holons over each other at different densities: the piece in focus fine and close, its neighbours coarser behind it, so depth is made of resolution rather than of pages. Overlapping from several angles also removes the shadow, since a hand or a pen writing on the wall blocks only one of the beams, which is what makes the surface writable rather than only readable.
+
+It is the same gradient the reader draws, given room and a body: what is let go recedes in resolution rather than onto another page, and the wall is written on as well as read.
+
+*Reasoned, the author's, 2026-09-11; nothing built, and no domain depends on it.*
+
+## 5. The live edge
 
 Every case above has an edge where the world comes in: a stream, a sensor, a market feed, a message from another host. The substrate holds those too, as connections to external sources kept live rather than as data copied in. Compute runs on demand of the event: an external event arrives carrying its data, and the substrate progresses by it, a program matched to what the event gives runs, and what it produces lands back as entries with the event as their ground. Nothing polls and nothing is scheduled; the world advances the substrate, and the record shows what advanced it and when. This is how the drawing stays live, how a shared channel updates, and how a piece of sound or image responds while it is played.
 
