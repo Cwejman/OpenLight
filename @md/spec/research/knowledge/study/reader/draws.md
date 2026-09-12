@@ -56,7 +56,15 @@ Its material is one state per round, which the snapshots already keep.
 
 *Reasoned, the author's; nothing of this form is built.*
 
-## 8. What a model may choose
+## 8. The same drawing serves a context
+
+What a session holds is a selection from the field, so it has the same geometry as the field does. Drawn, it is this drawing with a different subject: what is held rather than what is on disk.
+
+That is why the drawing is not a feature of a reading surface alone. Whatever the substrate is projected into, a page or a context, the projection has a shape and this is how the shape is shown.
+
+*Reasoned, the author's; nothing of it is built, and what a harness should give to make it possible is [the author's position elsewhere](../../gaab.md#3-the-context-as-a-projection-of-the-substrate).*
+
+## 9. What a model may choose
 
 A small local model has one job here and it is not drawing. It chooses: which projection, centred where, at what depth, and a caption for a group of events.
 

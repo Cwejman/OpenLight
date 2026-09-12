@@ -55,4 +55,4 @@ python3 transcript.py <session.jsonl> <record.md> --asks    the record, refreshe
 
 ## 5. How it came to be
 
-[The making](making.md) keeps the record of how this and [the surface](../surface/README.md) were built, since they were one evening's work and one effort. [What was asked](../asked-2026-09-11.md) is the ground these briefs were derived from, in the author's own words, in the order they were said.
+[The making](making.md) keeps the record of how this was built, and of the surface built beside it that night, since they were one evening's work and one effort. [What was asked](../asked-2026-09-11.md) is the ground these briefs were derived from, in the author's own words, in the order they were said.

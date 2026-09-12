@@ -59,7 +59,7 @@ After the labs come the two artifacts of the finish line's second mark, and then
 
 Three records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), and [what was asked](asked-2026-09-11.md) on the day most of this was written.
 
-And two programs, built while the labs ran. [The reader](reader/README.md) serves a body of knowledge as the holarchy it is, so a reader descends by understanding rather than by opening files. [The surface](surface/README.md) watches a run while it happens, reading only what the work leaves behind. Its [path forward](reader/forward.md) is the worklist for both, and it opens with the author's verdict that the reader is hard to use.
+And one program, [the reader](reader/README.md), which serves a body of knowledge as the holarchy it is, so a reader descends it by understanding rather than by opening files. Its briefs are its specification and [the order of work](reader/forward.md) is the distance between that and what runs, opening with the author's verdict that it is hard to use.
 
 ## 5. Notes
 

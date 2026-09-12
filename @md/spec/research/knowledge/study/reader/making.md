@@ -7,7 +7,7 @@ note: one entry per move of the evening
 
 # The making of the reading surface
 
-The record of how these two programs came to be, on the evening of 2026-09-11, in one sitting with the author directing and a session building. Newest first. It covers [the reader](README.md) and [the surface](../surface/README.md), which were built in the same hours and are one effort.
+The record of how the reader and the surface came to be, on the evening of 2026-09-11, in one sitting with the author directing and a session building. Newest first. It covers [the reader](README.md) and [the surface](../surface/README.md), which were built in the same hours and are one effort.
 
 *Written after the fact, from the commits, at the author's asking. The code says a record is written as the work happens or never, and this one was not; what is here is recoverable because every step was committed with its reason, and what is lost is the timing and the cost. That loss is the point the study keeps making, met again by the people making it.*
 

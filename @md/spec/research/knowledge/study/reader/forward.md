@@ -64,7 +64,7 @@ Not every hover syncs. Colour does not run into the prose. Subscription does not
 
 A harness's history belongs in git beside the knowledge it produced and stamped for what it is, so the harness can introspect its own work, the frontend can serve it, and whoever comes next can stand on it. Kept as a record refreshed to the end of a sitting, as [the asks](../asked-2026-09-11.md) now are, rather than exported once and left behind.
 
-The sitting should be integrated rather than exported: the harness's own files belong in the substrate, so the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Today it is a separate folder read by a second copy of the program.
+The sitting should be integrated rather than exported: the harness's own files belong in the substrate, so the top of a bloated context is visible and can be reasoned about, and what was said hours ago is readily available. Until this holds, nothing watches a live sitting: the surface that did was retired on 2026-09-12 as a workaround for a record that is now specified to live in the tree, and the record does not yet reliably get written.
 
 And the records should become organic, kept as the work happens rather than recovered at the end. This file and [the making](making.md) were both written after the fact, which is the failure the study keeps naming, met again by the people who named it.
 

@@ -23,19 +23,23 @@ The labs' accounts put it in numbers: a session's cost is mostly its context re-
 
 A context assembled for the occasion belongs to nobody and lands nowhere. Drawn instead as a view of the substrate, for one task, it changes four things, each below. *Reasoned, the author's, and the thesis of the project this study belongs to.*
 
-### 4.1 Authoring a context is authoring in the substrate
+### 3.1 Authoring a context is authoring in the substrate
 
 When a context is not a thing of its own but a projection, the structure a person gives it is structure in the field. What is learned in a session lands where it belongs instead of in a trail, and a service that offers that offers a place to think in, where the giving is no longer measured in tokens.
 
-### 4.2 A context can be composed again at any point
+### 3.2 The context is assembled, not appended
+
+A harness's transcript is append-only, and no plugin can plant knowledge beside what a session already holds. But the model is stateless, so a thin harness over the SDK can assemble each turn's context from the field by depth, the root stable and cached, the rim changing. That is learning inside a session, a new understanding placed beside the ground it stands on, and it is the code applied to a context: a holarchy read by depth, one home per fact, coherence from a stable root.
+
+### 3.3 A context can be composed again at any point
 
 A projection can be drawn twice. A session's context kept ready at each step of its holarchy lets anyone, a person or a fresh session, drop in at that point in the knowledge or at that point in the session's course, standing where it stood then.
 
-### 4.3 Cognition can be left in a place
+### 3.4 Cognition can be left in a place
 
 The same unloading of address space lets an instruction sit beside a holon, absorbed as a skill when that holon is entered and retracted when it is left. Cognition then comes and goes with the place rather than with the session, so the author can add to their own profile's substrate without tainting the session they are working in, and whoever enters it later absorbs it there.
 
-### 4.4 A session stops being a boundary, and stops being owned
+### 3.5 A session stops being a boundary, and stops being owned
 
 Once a thread of iterative inference is something you post a prompt to, addressable like anything else, the parent-and-child tree of subagents is superseded. A thread is an entry: startable by anyone who can reach it, resumable, and joined to the place it works on rather than to the session that spawned it.
 
@@ -65,7 +69,13 @@ This is the general case of what this study did by hand: [the asks of a sitting]
 
 *Reasoned, the author's.*
 
-## 8. The open-source social medium
+## 8. Branching, and where a repository stops being a home
+
+Over a substrate a single directory can be branched on its own, so a change's surface of possible conflict is only the holon it touches, which git does not allow, since a branch there is always the whole tree. And a branch with effects of its own, a direction the knowledge could take, is naturally an entry point: a reader can arrive at the question a branch holds open as readily as at a category or a date. This is also where a repository breaks down as a home. The author wants the thoughts of tonight on their own profile, as theirs, without severing them from the studies they came out of, and the studies shared with others who carry them on; a repository can do none of that at once, since it is one tree with one owner and a fork is a copy that drifts. Under the substrate a holon is remoted and connected rather than copied: the note lives with its author, the study lives where it is worked, and the connection between them is the branch, kept live in both directions.
+
+*Reasoned, the author's; nothing here is built, and git's inability to branch a directory alone is the one part of it that is simply true today.*
+
+## 9. The open-source social medium
 
 Open source has no social medium of its own. Its work happens in repositories and its talk in issues and chat, and the surface that joins the people to the work is the same dry root as everything else. The author's question is where that medium is, and the answer under this stance is that a business would thrive by hosting it: the social environment of open source as the service, the connecting between contributors and the work as the glue a host carries. The choice at the centre of it is to not take money for a certain gain, so that the gain compounds among everyone, and the business earns on the compounding. Which market does not want that: a market where the work is shared by design, so that every wall on it is a loss to all and every connection a gain to all. What the author wants for such a community is that it spread like wildfire, and the reason it could is the code's first section turned outward: joining others is where value comes from, and a medium that unbinds the expressive side of joining, building on another's work as easily as reading it, gives that value nowhere to be stopped.
 
