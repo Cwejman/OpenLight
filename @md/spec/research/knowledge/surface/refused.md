@@ -53,3 +53,12 @@ The author judged it failed, and [droplets](drawings.md#3-the-body-as-droplets-o
 The retired program read a harness's transcripts directly and drew them, which made the surface a monitor of one tool rather than a reader of a substrate.
 
 The surface is [handed a directory and reads only that](README.md#11-what-it-is-handed), so whatever wants to be read writes itself into the substrate first.
+
+## 9. Raising a card on hover
+
+The retired program raised its card when the pointer arrived, and the author's verdict was that a pointer crossing a list churned a whole column.
+
+Hover already carries the light work, [lighting a brief wherever it is drawn](drawings.md#5-one-brief-lit-wherever-it-is-drawn) at no cost to the reader. A card is the heavy work, and putting heavy work on a passing pointer is the fault itself.
+
+Keeping it there needs the card held off from the pointer, a forgiving gap to cross, dismissal when the pointer leaves, another gap for a card raised inside a card, and a delay so a sweep does not raise one per cell. That is apparatus around the fault rather than a fix for it, and none of it exists on a touch screen.
+

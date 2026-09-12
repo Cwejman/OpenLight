@@ -28,34 +28,24 @@ What the browser's back retraces is the commitments. Opening a level enters the 
 
 Everything that names a brief carries only part of it. A cell in a drawing carries shape and nothing else. A [door](panes.md#1-a-brief-with-nothing-beneath-it-is-not-a-door) carries the brief's [face](../poc.md#3-the-surface-is-declared-by-position), its heading and the paragraph under it. A pane carries the level but never a brief's relations, since a link may reach anywhere and a pane only ever descends.
 
-So the rest is told on asking, from wherever the brief is named: a cell in any of the drawings, a door, a name in the prose. Pointing at it raises a card beside the pointer, carrying what that naming left out, which is the face, what the brief and its level weigh, the drawing of the level beneath it, and what points at it.
+So the rest is told on asking, and asking is a press. Pressing a cell in a drawing, or a name in the prose, raises a card carrying what that naming left out: the face, what the brief and its level weigh, the drawing of the level beneath it, and what points at it.
 
-The card leaves when the pointer does, unless a reader keeps it. A card that stands can be pointed at in turn, so every name in it is a way on, and this is where seeing a relation stops depending on following one.
+A card stands until it is dismissed, because a reader asked for it rather than passed over it. Every name in it is a way on, so the card is where a reader goes down as well, and where seeing a relation stops depending on following one.
 
 A card needs a ground of its own or it cannot be read, and that is where [the design language](../../../design.md#why-flat--the-newspaper-precedent) stops being a guide. It settles the flat layout, where an area at rest carries no background and no border and spacing does all the work, and it never considers what sits over that.
 
 What it does settle nearby is the hover: the ground under a pointer is altered a little, with rounded edges. A card is that register raised, so for now it takes the same ground rather than a colour of its own, with a slight blur of what lies behind and at most a faint border, since the same colour blurred and with no edge at all would not read.
 
-*Seen in the program retired on 2026-09-12, which held these facts in a card and pinned it on a click. The card's own look is the author's preference for a first implementation, since the design language has not reached overlays and nothing here is settled beyond it. What pays for the ink once a card stands, attention having left, is open.*
+*Seen in the program retired on 2026-09-12, which held these facts in a card. That a reader asked for it is what pays for its ink, which settles a question the design language's classes had left open. Its look is the author's preference for a first implementation, since the language has not reached overlays and nothing there is settled beyond it.*
 
 ## 4. One gesture, one meaning
 
-Every figure is a control as well as a view, so one cell can be looked at, dragged and entered. Three meanings on one target collide unless each gesture carries exactly one: pointing [lights it everywhere](drawings.md#5-one-brief-lit-wherever-it-is-drawn) and tells the rest, dragging scrubs, and pressing commits a descent, which may carry every level a reader looked through before choosing.
+Every figure is a control as well as a view, so one cell can be looked at, dragged and entered. Three meanings on one target collide unless each gesture carries exactly one.
 
-So keeping a card is a press inside the card and never on the cell that raised it, since a press on the cell already means descend. That assignment holds while a card comes on pointing, and [the other way of raising one](#5-which-gesture-raises-a-card-and-what-each-way-costs) would redraw it.
+Pointing lights and nothing more. A brief lights [wherever it is drawn](drawings.md#5-one-brief-lit-wherever-it-is-drawn) and the cursor follows, which costs a reader nothing and can be swept across a whole drawing. Dragging scrubs. Pressing either asks or enters, and which of the two depends on what is pressed.
 
-*Reasoned, 2026-09-12, from the collision three separate rules made on one gesture.*
+A door in a pane is entered on a press, since the reader has just read that brief and the drawing beside its heading already said what lies beneath. A cell in a drawing raises a card instead, since a cell carries only shape and whoever presses it does not yet know what they would be entering. From a card, a press on any name in it enters, and a reader who already knows where they are going presses the cell with a modifier and goes straight there.
 
-## 5. Which gesture raises a card, and what each way costs
+One scheme serves a pointer and a finger, which is the whole reason it is this one. A press is a press either way, so nothing here is designed twice and nothing waits on a touch device to be thought about separately.
 
-A card comes on pointing in the briefs above, and whether it should is the largest thing unsettled here, because the two ways differ in more than their trigger.
-
-Raising it by pointing costs the apparatus a cascading menu needs. The card cannot sit under the pointer, so it stands off at a distance. The gap between them must then be forgiving enough to cross without the card collapsing, leaving that zone must dismiss it, and a card raised from inside another needs its own gap for the same reason.
-
-It probably wants a moment's hold as well, so that a pointer crossing a level's drawing does not raise one for every cell it passes. None of that is hard and all of it is fiddly, and none of it exists on a touch screen.
-
-Raising it by pressing costs a gesture instead. One press raises the card and a second opens the level, or one press raises it and a modified press opens directly. That works the same under a finger as under a pointer, and it takes pressing away from descent, so the assignment above is redrawn.
-
-Neither is chosen. Pointing is what the retired program did and what these briefs assume; pressing is the only one of the two that reaches a touch screen without a second design being invented for it.
-
-*Open, 2026-09-12.*
+*Reasoned, the author's, 2026-09-12; [raising a card on hover](refused.md#9-raising-a-card-on-hover) is refused rather than left open.*

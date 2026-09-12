@@ -8,7 +8,7 @@ status: in force
 
 ## 1. A brief with nothing beneath it is not a door
 
-A door is a brief with a level under it, and it is the only kind a reader can press. A brief with nothing beneath has no level to open, so it does not offer to be pressed.
+A door is a brief with a level under it, and in a pane it is the only kind a reader can press. A brief with nothing beneath has no level to open, so it does not offer to be pressed.
 
 The difference is visible before a reader tries it, since [a brief's level is drawn beside its heading](drawings.md#2-a-briefs-level-beside-its-heading) and a leaf has nothing to draw. So a level read straight down says where its depth lies.
 
