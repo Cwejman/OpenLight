@@ -25,4 +25,4 @@ Every session that produces, changes or tests a rule writes its evidence before 
 
 Provenance recovered late survives only by luck, and the loss is invisible: the rule still stands in the code, now unfalsifiable. That is the failure this section exists to prevent.
 
-**The arrears are real.** Labs 01 to 06 produced the findings the current principles rest on, and none of it was written as grounds — it lives scattered in session narratives, in this file's verdict lines, and inside the outputs themselves. Walking that record and turning it into entries is a cheap pass for a session pointed at this section, and it has to happen before the three artifacts can be generated.
+**The arrears are real.** Labs 01 to 06 produced the findings the current principles rest on, and none of it was written as grounds — it lives scattered in session narratives, in the notebook's verdict lines, and inside the outputs themselves. Walking that record and turning it into entries is a cheap pass for a session pointed at this section, and it has to happen before the three artifacts can be generated.

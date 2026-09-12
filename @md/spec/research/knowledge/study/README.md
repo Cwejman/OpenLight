@@ -21,7 +21,7 @@ The search ends when the proof is lived, not argued. Three marks:
 
 ## 2. Where the search stands
 
-Ten labs run, and the reading queue is the bottleneck: the author's cold reads of labs 03 to 07 are owed, and most open claims wait on them. Each lab's own entry says what it did and what it holds; this section holds the verdict on it, which is why a lab's writer never reads this file. [How a lab runs](method.md) says why that matters.
+Ten labs run. What labs 03 to 07 had to teach reached the editions and stands in the law today, so their cold reads are no longer owed; what they owe instead is [their provenance](grounds.md). Each lab's own entry says what it did and what it holds; this section holds the verdict on it, which is why a lab's writer never reads this file. [How a lab runs](method.md) says why that matters.
 
 The baseline pair comes first, since every later reading is judged against it. The rest are laid newest first, from ten down.
 
@@ -33,7 +33,7 @@ The baseline pair comes first, since every later reading is judged against it. T
 
 - **[Lab 08](08-win-driven/README.md) ran once under the cycle** and closes on its own feedback: the piece is flat and force-fed because the code never said nesting is how the gradient is made, the cost is the writer's context and the context is the judgment, and a word for borrowed confidence is owed. Those went into lab 09. The author's request, the engagement angle, returns in a later run there.
 
-- **[Lab 07](07-breakdown/README.md) tested the breakdown, and the structure paid.** One level deeper, with the content held fixed, reads 46% shorter at the level a reader stops while holding more. Awaiting the author's cold read; whether it becomes a principle is the open question.
+- **[Lab 07](07-breakdown/README.md) tested the breakdown, and the structure paid.** One level deeper, with the content held fixed, reads 46% shorter at the level a reader stops while holding more. The rule it tested is the code's order principle now, and carries that measurement as its strength.
 
 - **[Lab 06](06-principles/README.md) made the code itself the instruction.** Its output is the leanest reading yet.
 
@@ -45,7 +45,7 @@ After the labs come the two artifacts of the finish line's second mark, and then
 
 [The grounds](grounds.md) are the largest debt and the only one that cannot wait, since provenance exists only while the work is happening. Every rule the night's editions gained has no entry, and labs 01 to 06 are in arrears entirely.
 
-- **The cold reads of 03–07** — the deciding evidence for the editions' engagement and language principles. Each verdict lands as a refinement in the next edition, with its evidence recorded beside it, as [07's first](07-breakdown/evidence-unit-of-change.md) was.
+- **The author's cold read of lab 10's piece**, which was the whole point of running the lab. It stands finished and unjudged. The verdict lands here, and its evidence beside it, as [07's first](07-breakdown/evidence-unit-of-change.md) was.
 
 - **Owed to the edition**: the step, named as the holon viewed by its change, which the drawings want and the code does not yet carry.
 
