@@ -10,7 +10,9 @@ status: in force
 
 Wherever shape is wanted it is the same drawing, and only its size changes. So a reader learns one picture rather than a new one at every place it turns up, which is what the first cut got wrong when it built six figures that competed with the reading for room.
 
-What it draws is briefs, and the prose inside them down to the paragraph, which is the finest thing it ever shows. A brief appears either as what it owns, its own prose, or as what it totals, that prose plus everything beneath it, and never as both in one mark.
+What it draws is briefs, and the prose inside them down to the paragraph, which is the finest thing it ever shows.
+
+Size means two things, and the drawing keeps them apart. A brief's own prose is what stopping to read it costs. That prose with everything beneath it is what the branch holds. One says what a reader spends here and the other says what waits below, so a mark that mixed them would answer neither.
 
 Nothing in it is invented. Every shape is computed from the substrate, because a picture a reader cannot trust is worse than no picture at all.
 
