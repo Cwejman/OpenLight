@@ -104,7 +104,7 @@ Everything that names a brief carries only part of it. A cell in any drawing car
 
 So the rest is told on asking, from wherever the brief is named: a cell in any of the four extents, a door, a name in the prose. Point at it and beside the pointer comes what that naming left out, the brief's face, what it and its level weigh, the drawing of the level beneath it, and what points at it. It goes when the pointer leaves.
 
-Click and it stays, and what stands can be pointed at in turn, so every name in it is a way on. This is also where seeing a relation stops depending on following one, which matters while [a link is not a path move](reading.md#5-what-is-open).
+Click and it stays, and what stands can be pointed at in turn, so every name in it is a way on. This is also where seeing a relation stops depending on following one, which matters while [a link is not a path move](reading.md#6-what-is-open).
 
 So a descent can be looked at before it is taken. The mark beside a brief gives the sense of its level, the overlay gives that level's particulars, and a pointer moving inside a kept overlay reaches further still.
 

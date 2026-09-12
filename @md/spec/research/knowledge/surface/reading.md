@@ -30,7 +30,15 @@ Where you came from is never lost, since a pane is added and none is taken away,
 
 *Reasoned, 2026-09-12.*
 
-## 3. A pane is short, and scrolls on one axis
+## 3. The path is the address
+
+A path is where a reader is, so it is also what a reader can be handed. The surface is one page that never reloads, and the path is what its address carries, so any place in the body can be sent to someone and opened directly.
+
+What the browser's back retraces is the commitments. Opening a level enters the history and looking at one never does, since looking leaves no trace. So back and forward walk the descents a reader chose rather than everywhere the pointer went.
+
+*Reasoned, the author's, 2026-09-12.*
+
+## 4. A pane is short, and scrolls on one axis
 
 A pane scrolls when its content exceeds it and on one axis only, which is [the design language's rule](../../../design.md#scroll-and-seams) and not this surface's own. Two axes in one region are two regions pretending to be one.
 
@@ -42,13 +50,13 @@ A level too big to read is the exception, and the surface does not hide it. Lab 
 
 *Reasoned, 2026-09-12; the count is measured, and carried from the study without being checked here.*
 
-## 4. Where only one pane fits
+## 5. Where only one pane fits
 
 On a narrow screen the panes are a stack and one is seen at a time. The path is then the only thing holding placement, so it is drawn rather than implied.
 
 *Preferred, the author's, 2026-09-12.*
 
-## 5. What is open
+## 6. What is open
 
 A link is not a path move, and that is the sharpest thing unsettled. Following one lands you at a brief whose own path from the root differs from the path you stand in. Rebuild the panes to the target's path and where you came from is lost. Keep them and the path lies about where you are. Neither can simply be chosen.
 
