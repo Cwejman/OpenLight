@@ -14,6 +14,8 @@ So the surface draws them, and the code says why it must. A reader judges what a
 
 There is one drawing. Its cells are briefs, and the smallest cell it draws is a paragraph. Every extent shows that same material and differs only in how much of the body it covers.
 
+Every cell carries one of two counts and never both at once: what a brief owns, which is its own prose, and what it totals, which is that plus everything beneath it.
+
 Four extents are in use. A brief's level, beside that brief's heading. A level, above the pane that holds it. The path, above the panes. And the body, whole. A reader who learns to read one has learned all four, since the cells and the counts are the same in each.
 
 Every cell comes from the substrate and none is invented. A shape that may be made up will be, and a reader who cannot trust the picture cannot act on it.

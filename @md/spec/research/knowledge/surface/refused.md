@@ -58,4 +58,4 @@ The author judged it failed, and the figure that replaces it is [droplets](drawi
 
 The first cut read a harness's transcripts directly and drew them, which made the surface a monitor of one tool rather than a reader of a substrate.
 
-Whatever wants to be read [writes itself into the substrate first](substrate.md), so the surface reaches for no log.
+The surface is [handed a directory and reads only that](README.md#1-what-is-refused-and-what-that-buys), so whatever wants to be read writes itself into the substrate first.

@@ -8,7 +8,7 @@ status: in force
 
 Knowledge under the code stands in a shape, and nothing it is written in lets a reader move by that shape. A document makes you scroll past whatever you meant to skip. A directory listing gives you names and nothing of the shape they stand in.
 
-The surface is the interface those two are missing. It reads a body of knowledge by its own shape (its topology), standing on the markdown and the directories rather than replacing them. A session's own work is read the same way.
+The surface is the interface those two are missing. It reads a body of knowledge by its own shape (its topology), standing on the markdown and the directories rather than replacing them. A session's own work is read the same way once the session has written it down.
 
 ## 1. What is refused, and what that buys
 
@@ -18,40 +18,48 @@ Refusing both is what makes the rest cheap, because one interface then serves tw
 
 It also supplies what the harness does not. A harness shows very little of what a session is doing, and keeps what it does show in a transcript outside the repository the work produced. A session that writes its own work into the substrate is read like everything else.
 
-That costs the surface no knowledge of harnesses at all. It is handed a directory and reads only that, so whatever wants to be read writes itself into the substrate first.
+So the surface needs no knowledge of harnesses. It is handed a path in a working tree, never reads above it, and digests only what [the stamp](../poc.md#9-a-file-says-it-is-under-the-code) declares to be knowledge, so a directory is onboarded a file at a time and whatever wants to be read writes itself into the substrate first.
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 2. What it is made of
+## 2. A level to a pane
 
-[What it reads](substrate.md) gives the material: the root and what bounds it, what counts as a brief and a level, what a weight is counted in, and what a link gives.
+The reading is laid out the way a path is. Each level of the path takes a pane, the panes stand side by side, and going deeper adds one on the right without taking any away, so where a reader came from stays present while they read.
 
-[The panes](panes.md) give the prose, a level to a pane, standing side by side.
+That is the whole of the arrangement. [The panes](panes.md) hold what follows from it: why a pane carries a level rather than a single brief, which briefs can be pressed at all, and why a pane stays short.
 
-[What the prose cannot say](drawings.md) gives the shape, as one drawing at four extents down to the paragraph.
+## 3. What the prose cannot say
 
-[Moving, and asking](moving.md) gives the rest: how a reader descends, how they go sideways, what the address carries, and what is told on asking.
+Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and a reader judges what a part will cost from its shape before spending any reading on it.
 
-[What was tried and refused](refused.md) keeps the shapes the first cut reached for, each with the reason it is not wanted.
+So the surface draws them. [The drawing](drawings.md) is one thing at four extents, down to the paragraph, and it carries what governs how much room and ink any of it may take.
 
-## 3. What is not decided
+## 4. Moving, and asking
+
+A reader goes deeper, goes sideways, and asks about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace, which is what makes looking free.
+
+[Moving, and asking](moving.md) gives each of the three, and the rule that keeps three meanings from landing on one gesture.
+
+## 5. What is open
 
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here. Unanswered.
 
-What a session keeps. The panes and the drawings read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.
+What a session keeps. The panes and the drawing read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.
 
 *Open, 2026-09-12. What each brief leaves open stands at its own foot; these two belong to no one of them.*
 
-## 4. What is not yet taken up
+## 6. What is not yet taken up
 
-The technical ground is not covered here and is not owed by these briefs. How the markdown is parsed into the structure the practice defines, what happens as files change, what a reader without a pointer is given, what a published build emits and how it is hosted: none of it is written, and none of it is decided by what is.
+The technical ground is not covered here and is not owed by these briefs. How the markdown is parsed into the structure the practice defines, in what unit a weight is counted, what happens as files change, what a reader without a pointer is given, what a published build emits and how it is hosted: none of it is written, and none of it is decided by what is.
 
 That is deliberate. These briefs say what the surface is to be, and the ground beneath them is settled next, against them.
 
 *In force as a boundary on this holon, 2026-09-12.*
 
-## 5. How it came to this
+## 7. How it came to this
 
 A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and no program has yet been written against them.
+
+What that first cut reached for is kept in [what was tried and refused](refused.md), so that none of its shapes is put forward again as though it were new.
 
 *Seen, and the reason [the study names running ahead](../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
