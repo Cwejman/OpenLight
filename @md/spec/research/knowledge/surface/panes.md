@@ -44,7 +44,15 @@ That is a way back rather than a good one, and it asks a reader to press before 
 
 *Reasoned, the author's, 2026-09-12. A reader's own history is the one thing nothing here draws, and [that drawing is owed](drawings.md#1-above-the-panes-a-drawing-per-level-and-the-path-whole).*
 
-## 5. Where only one pane fits
+## 5. What points at a brief stands at its foot
+
+A brief's relations reach anywhere and a pane only ever descends, so nesting cannot show them. They are listed at the foot of the brief instead, where a reader who has just read it can press one and go.
+
+That is also what lets [an overlay only tell](moving.md#3-the-rest-of-a-brief-is-told-on-asking) rather than be entered. The one thing an overlay shows that had no other home now has one.
+
+*Reasoned, the author's, 2026-09-12.*
+
+## 6. Where only one pane fits
 
 On a narrow screen the panes become a stack and one is seen at a time. That much is decided and nothing else about it is: not how the path is held when the row of drawings cannot stand, not how a reader moves along a stack, and not what replaces a pointer.
 

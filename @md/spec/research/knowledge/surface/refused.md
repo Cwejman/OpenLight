@@ -54,11 +54,8 @@ The retired program read a harness's transcripts directly and drew them, which m
 
 The surface is [handed a directory and reads only that](README.md#11-what-it-is-handed), so whatever wants to be read writes itself into the substrate first.
 
-## 9. Raising a card on hover
+## 9. An overlay a reader has to move into
 
-The retired program raised its card when the pointer arrived, and the author's verdict was that a pointer crossing a list churned a whole column.
+The retired program's card was a place to act: it could be pinned and its rooms pressed from inside.
 
-Hover already carries the light work, [lighting a brief wherever it is drawn](drawings.md#5-one-brief-lit-wherever-it-is-drawn) at no cost to the reader. A card is the heavy work, and putting heavy work on a passing pointer is the fault itself.
-
-Keeping it there needs the card held off from the pointer, a forgiving gap to cross, dismissal when the pointer leaves, another gap for a card raised inside a card, and a delay so a sweep does not raise one per cell. That is apparatus around the fault rather than a fix for it, and none of it exists on a touch screen.
-
+Reaching it is the problem. On a crowded figure the pointer cannot get from a cell to an overlay without crossing other cells, and crossing them retargets it. Every fix for that is apparatus, a forgiving corridor or a hold delay or a fixed place away from where the reader is looking, and each costs more than it returns. [An overlay that only tells](moving.md#3-the-rest-of-a-brief-is-told-on-asking) needs none of them.
