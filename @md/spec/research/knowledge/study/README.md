@@ -57,7 +57,7 @@ After the labs come the two artifacts of the finish line's second mark, and then
 
 [What the method has found](findings.md) holds what the labs taught about the work itself rather than about the writing, settled by repetition.
 
-Three records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), and [what was asked](asked-2026-09-11.md) on the day most of this was written.
+Four records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md) and [the sitting of 2026-09-12](debrief-2026-09-12.md) after it, [what the study measures of itself](measured.md), and [what was asked](asked-2026-09-11.md) on the day most of this was written.
 
 The surface a body of knowledge is read through left the study on 2026-09-12 and stands at [the arc's root](../surface/README.md), since it serves the whole arc rather than these labs. The program built here on 2026-09-11 was retired with it, so that the understanding is built before the program is.
 
