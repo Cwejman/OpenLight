@@ -22,12 +22,18 @@ None of that joins the surface to the harness. It reaches for no log and knows n
 
 *Decided, the author's, 2026-09-12.*
 
-## 2. What is not decided
+## 2. How it works
+
+[How a body is read](reading.md) gives the reading. You are always at a path, each level of it takes a pane standing side by side, and pressing a brief opens the level beneath it while taking nothing away.
+
+[What the prose cannot say](drawing.md) gives what that reading cannot show. The size of a brief, the rhythm of its paragraphs, and what hangs beneath it are facts of shape, drawn as one thing at whatever fidelity the room it is given can carry.
+
+## 3. What is not decided
 
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and whether it is affordable turns on whether the SDK bills against a subscription or per use. Unanswered, and cheap to answer.
 
-And what the surface actually does. How a body is read, how a reader is shown what stopping costs, what a session keeps: none of it is settled, and this entry orders those briefs when they exist.
+And what a session keeps, which the reading and the drawing both stand to serve and neither yet names. The shape of that record, and how a session is made to keep it while it works rather than at its close, is the piece of this still missing.
 
-A reader and its nine briefs were built in one sitting on 2026-09-11 and retired to git the next day, so the understanding stands before the program does. That is why there is nothing beneath this entry yet.
+A reader and its nine briefs were built in one sitting on 2026-09-11 and retired to git the next day, so the understanding stands before the program does. The two briefs above are the beginning of it, and no program has been written against them.
 
 *Open, 2026-09-12.*
