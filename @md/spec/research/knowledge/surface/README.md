@@ -26,7 +26,7 @@ None of that joins the surface to the harness. It reaches for no log and knows n
 
 [How a body is read](reading.md) gives the reading. You are always at a path, each level of it takes a pane standing side by side, and pressing a brief opens the level beneath it while taking nothing away.
 
-[What the prose cannot say](drawing.md) gives what that reading cannot show. The size of a brief, the rhythm of its paragraphs, and what hangs beneath it are facts of shape, drawn as one thing at whatever fidelity the room it is given can carry.
+[What the prose cannot say](drawing.md) gives what that reading cannot show. The size of a brief, the rhythm of its paragraphs and what hangs beneath it are facts of shape, drawn as one thing at three extents, down to the paragraph. It also owns how the path is shown and how a reader moves along it.
 
 ## 3. What is not decided
 
