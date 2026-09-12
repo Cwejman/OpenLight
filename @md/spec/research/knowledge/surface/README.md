@@ -8,7 +8,7 @@ status: in force
 
 Knowledge under the code stands in a shape, and nothing it is written in lets a reader either move by that shape or see it. A document makes you scroll past whatever you meant to skip. A directory listing gives you names and nothing of the shape they stand in. Neither tells you what a part will cost before you have spent the reading on it.
 
-The surface is the interface those two are missing. It lays a body of knowledge out by its own shape so a reader moves through it rather than scrolling, and it draws that shape so a reader can weigh a part before entering it. Both stand on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
+The surface is the interface those two are missing. It lays a body out by its own shape so a reader descends it rather than scrolling, and it plots that shape so a reader can see the body whole and reach any part of it from wherever they stand. Both stand on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
 
 ## 1. One interface, and what refusing more buys
 
@@ -46,15 +46,15 @@ Pressing a brief opens the level under it. You do not enter the brief, because y
 
 ## 3. What the prose cannot say
 
-A brief says what it means. It cannot say what it is, and it can say nothing at all about the body it sits in, because no brief can see the whole.
+A brief says what it means. It cannot say what it is, and it can say nothing about the body it sits in, because no brief can see the whole.
 
-Drawn, that body is a second reading rather than a convenience. Seen as shape it says where its mass actually sits, which regions have been worked and which are thin, and whether the gradient it was written by holds at all. That last turns the code's own promise into something a reader can check: if the biggest understanding really comes first then the top is short and each level below it heavier, and a picture shows that failing where it fails.
+Plotted out, that body becomes reachable from anywhere. A holarchy gives one route to each of its parts, down from the root, and one route is not enough for a reader who arrives with a question rather than at the beginning. With the structure laid out in front of them they go straight to what bears on it, and they move by what sits near what rather than along a path they have to walk. That is the half of navigating a body the descent cannot give, and it is what plotting the shape is for.
 
-Closer in, the same drawing answers a reader's immediate question, which is the price. Reading is a spend and prose never quotes it, so a reader weighs a part before entering. That is the job a minimap does beside a long file, and it is the least of what these do.
+Seen as shape, the body also says what no brief says: where its mass sits, which regions have been worked and which are thin, and whether the gradient it was written by holds at all. That last turns the code's own promise into something a reader can check, since a short top with heavier levels beneath is visible, and so is its failure.
 
-A picture is also a way in. Pointing at any part of any of them reaches that part, so the body becomes something a reader moves around in by association and not only by descending a level at a time.
+Closer in, the same drawing quotes the price. Reading is a spend and prose never names it, so a reader weighs a part before entering. That is the job a minimap does beside a long file, and it is the least of what these do.
 
-*Reasoned, the author's, 2026-09-12. Two halves of it are measured: [the study counted its own tree as shape](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and found both that the gradient holds and where heaviness does not, and judging a part by its look before reading it is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read). Both carried here unchecked.*
+*Reasoned, the author's, 2026-09-12. Two parts of it are measured: [the study counted its own tree as shape](../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and found both that the gradient holds and where heaviness does not, and judging a part by its look before reading it is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read). Both carried here unchecked.*
 
 [the level beneath](drawings.md)
 
