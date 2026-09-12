@@ -8,13 +8,13 @@ status: in force
 
 ## 1. Above the panes, a drawing per level and the path whole
 
-Above each pane its level is drawn whole: the briefs in order with their paragraphs sized as they are. So a reader can weigh a level before reading a word of it, and see which part of it they are in.
+Above each pane its level is drawn whole, the briefs in order with their paragraphs sized as they are. So a reader can weigh a level before reading a word of it, see which part of it they are in, and drag along it to reach a brief at the far end.
 
 It runs left to right, wide and short rather than tall and narrow. Turned that way it costs height instead of width, so it stands over the prose without taking width from the line.
 
-Every level's drawing is the same height, so the row of them reads as the path, level by level, left to right, and in each the brief whose level stands in the pane to the right is marked. A selection is shown where it was made.
+Every level's drawing is the same height, so the row of them reads as the path: level by level, left to right, with the brief whose level stands in the pane to the right marked in each. A reader sees how deep they have gone and which brief of each level they came through.
 
-But a viewport holds only a few panes, so that row reaches only the part of a path in view. The path is therefore drawn whole as well, full width above everything, compressed to fit rather than scrolled, since a drawing that must be scrolled has stopped being one.
+But a viewport holds only a few panes, so that row reaches only the part of a path in view. The path is therefore drawn whole as well, full width above everything, compressed to fit rather than scrolled, since a picture that must be scrolled has stopped being one.
 
 Two drawings of one path, then, and the second earns its place by reaching what the first cannot.
 
@@ -50,13 +50,15 @@ Every shape is computed from the substrate and none is invented, because a pictu
 
 Nor is anything drawn too small to read. Every figure has a floor, the smallest cell a pointer can hit and an eye can place, and rather than shrink through it a figure shows less: it steps down a ladder from paragraphs to briefs to levels to branches, drawing the finest of them the room allows and marking that it holds more.
 
+Nor does any figure mix its two sizes. A brief's own prose is what stopping to read it costs; that prose with everything beneath it is what the branch holds. One says what a reader spends here and the other what waits below, so a mark carrying both at once would answer neither.
+
 That is the gradient turned on a picture, the biggest understanding the room can carry and never more than it can carry legibly. It is the same law that makes depth become navigation when spacing can no longer step down and stay legible, which is [the design language's rhythm floor](../../../design.md#rhythm--depth-derived-never-stated-twice) met in a picture instead of in a layout.
 
 *Reasoned, 2026-09-12.*
 
 ## 5. One brief, lit wherever it is drawn
 
-Pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen in several figures, and a figure whose lighting does not follow has left the reading.
+Every figure draws the same material from the same counts, so pointing at anything that names a brief lights that brief everywhere it is drawn at once. One brief is one thing seen in several figures, and a figure whose lighting does not follow has left the reading.
 
 Where a figure has stepped down past the brief being pointed at, the cell holding it is lit instead, so the lighting always resolves to something on screen.
 

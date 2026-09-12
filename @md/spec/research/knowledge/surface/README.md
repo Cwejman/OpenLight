@@ -46,19 +46,13 @@ Pressing a brief opens the level under it. You do not enter the brief, because y
 
 ## 3. What the prose cannot say
 
-Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and shape is seen rather than read.
+Reading is a spend, and prose never tells a reader the price. How long a brief is, how dense, how much hangs beneath it: none of that is in the words, so a reader either spends blind or hesitates.
 
-A reader judges what a part will cost from its look before spending any reading on it, and a reader who expects it to be hard reads it worse. That judgment is the one [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked: a rule never fixed it and a picture did.
+So the surface draws it. What it draws is a minimap, the small picture an editor puts beside a long file, except that these map briefs and the prose in them rather than lines of text. A reader weighs a part before entering it, which matters because a reader who expects difficulty reads worse.
 
-So the surface draws them, and what it draws is a minimap: the small picture an editor puts beside a long file, showing the shape of something too big to see at once and where in it you are. Ours maps not lines of text but briefs and the prose in them, down to a paragraph, which is the finest thing it ever shows.
+A picture is also a way in. Pointing at any part of any of them reaches that part, so the body becomes something a reader moves around in by association and not only by descending a level at a time.
 
-There are several such figures and there will be more, because drawing the shape is what makes the structure associative: more ways in, and more of the body reachable from wherever a reader stands.
-
-What holds them together is one material and one behaviour rather than one form. Each is computed from the same counts, each says where the reader is, and each can be pointed at and entered, so pointing at a brief in one lights it in every other.
-
-Size means two things, and every figure keeps them apart. A brief's own prose is what stopping to read it costs. That prose with everything beneath it is what the branch holds. One says what a reader spends here and the other says what waits below, so a mark that mixed them would answer neither.
-
-*Reasoned, the author's, 2026-09-12.*
+*Reasoned, the author's, 2026-09-12. That a reader judges a part by its look before reading it is the judgment [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked: a rule never fixed it and a picture did.*
 
 [the level beneath](drawings.md)
 
