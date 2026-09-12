@@ -66,6 +66,14 @@ The page renders those tokens with its own small functions, the same ones that g
 
 *In force, the author's decision, 2026-09-12. That marked carries no dependencies of its own is from memory and not checked.*
 
+### 3.5 A size is the visible text
+
+Every size the page counts or draws is characters of the text a reader sees: no markdown syntax, no link targets, only what reads on the screen. It answers both questions a size is asked, what a brief costs to read and how long a paragraph looks, since a drawing lays text out in length.
+
+The page counts it by walking a brief's tokens and adding up the text they hold, a few lines of its own, so it needs nothing from marked in the browser. A brief's own size is its prose; its branch is that with everything beneath it. Where a session's cost matters, a count of model tokens is shown as the characters divided by four and marked as an estimate.
+
+*In force, the author's decision, 2026-09-12. That marked offers no plain-text rendering of its own is from memory and not checked.*
+
 ## 4. Live and published differ only in where the body comes from
 
 Live, a process runs against a path in a working tree and answers three requests. The page itself, the body as JSON, and a stream that says when a file under the path has changed, so the client asks for the body again and draws it. The body is assembled again whole on any change, which a body this size allows.
@@ -112,6 +120,6 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 ## 8. What is not settled yet
 
-In what unit a size is counted. What a brief whose own subsections sit beside a mount should do, which the trace can warn of and nothing yet decides. Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the address sits in the page's URL, and what a reader who arrives without one is shown. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
+What a brief whose own subsections sit beside a mount should do, which the trace can warn of and nothing yet decides. Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the address sits in the page's URL, and what a reader who arrives without one is shown. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
 
 *Open, 2026-09-12, and taken up in that order.*
