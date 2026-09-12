@@ -42,8 +42,20 @@ What it does settle nearby is the hover: the ground under a pointer is altered a
 
 Every figure is a control as well as a view, so one cell can be looked at, dragged and entered. Three meanings on one target collide unless each gesture carries exactly one: pointing [lights it everywhere](drawings.md#5-one-brief-lit-wherever-it-is-drawn) and tells the rest, dragging scrubs, and pressing commits a descent, which may carry every level a reader looked through before choosing.
 
-So keeping a card is a press inside the card and never on the cell that raised it, since a press on the cell already means descend.
+So keeping a card is a press inside the card and never on the cell that raised it, since a press on the cell already means descend. That assignment holds while a card comes on pointing, and [the other way of raising one](#5-which-gesture-raises-a-card-and-what-each-way-costs) would redraw it.
 
-Whether the card wants a moment's hold before it comes, so a pointer crossing a level's drawing does not raise one for every cell it passes, is for the tuning. Where there is no pointer at all the summon is a press held, which leaves the drag that scrubs and the drag that scrolls the page to be told apart by something not yet decided.
+*Reasoned, 2026-09-12, from the collision three separate rules made on one gesture.*
 
-*Reasoned, 2026-09-12, from the collision three separate rules made on one gesture; the touch case is open.*
+## 5. Which gesture raises a card, and what each way costs
+
+A card comes on pointing in the briefs above, and whether it should is the largest thing unsettled here, because the two ways differ in more than their trigger.
+
+Raising it by pointing costs the apparatus a cascading menu needs. The card cannot sit under the pointer, so it stands off at a distance. The gap between them must then be forgiving enough to cross without the card collapsing, leaving that zone must dismiss it, and a card raised from inside another needs its own gap for the same reason.
+
+It probably wants a moment's hold as well, so that a pointer crossing a level's drawing does not raise one for every cell it passes. None of that is hard and all of it is fiddly, and none of it exists on a touch screen.
+
+Raising it by pressing costs a gesture instead. One press raises the card and a second opens the level, or one press raises it and a modified press opens directly. That works the same under a finger as under a pointer, and it takes pressing away from descent, so the assignment above is redrawn.
+
+Neither is chosen. Pointing is what the retired program did and what these briefs assume; pressing is the only one of the two that reaches a touch screen without a second design being invented for it.
+
+*Open, 2026-09-12.*

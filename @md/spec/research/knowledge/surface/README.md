@@ -91,4 +91,3 @@ What that program reached for is kept beneath, each shape with the reason it is 
 *Seen, in that program and in the author's reading of it; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
 
 [the level beneath](refused.md)
-
