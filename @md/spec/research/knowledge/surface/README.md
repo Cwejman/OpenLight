@@ -36,7 +36,7 @@ Wherever you are reading you are at a path in the holarchy, and no brief is orph
 
 So each level of the path takes a pane, and the panes stand side by side, left to right. Going deeper adds one on the right, and nothing a reader has passed through is ever taken off the row.
 
-A pane holds a level and never a single brief. The briefs of that level stand in it in the order they stand in, as prose read straight down, each giving its own prose and leaving what is beneath it for the pane to the right. That order is a reading and not a menu, since each brief at a level stands on the ones before it.
+A pane holds a level and never a single brief. The briefs of that level stand in it in the order they stand in, as prose read straight down, each giving its own prose and leaving what is beneath it for the pane to the right. That order is a reading and not a menu, since [the briefs at a level stand on the ones before them](../code.md#42-the-order-of-a-holarchy) and never on the ones after.
 
 Pressing a brief opens the level under it. You do not enter the brief, because you have just read it.
 
