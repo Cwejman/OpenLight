@@ -32,7 +32,7 @@ The body is traced from a root and handed over as a flat list of briefs in readi
 
 The process is pointed at a `README.md` that carries [the stamp](../practice.md#9-a-file-says-it-is-under-the-code), and it does not run on anything else. From there it follows the mounts: every brief that ends with a lone link names a file or a folder's entry, and a stamped file named that way is parsed and traced in turn, until nothing new is reached.
 
-So the body is whatever the root connects, and nothing is scanned. A file no mount reaches is simply not in it. A mount that names a missing or unstamped file is skipped, and the process says so rather than failing silently.
+So the body is whatever the root connects, and nothing is scanned. A file no mount reaches is simply not in it. A mount that names a missing or unstamped file is skipped, and the process says so rather than failing silently. So is a brief that mounts a part and holds subsections of its own, which [the practice forbids](../practice.md#1-the-medium), so every brief the page receives has exactly one level.
 
 *In force, the author's decision, 2026-09-12.*
 
@@ -120,6 +120,6 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 ## 8. What is not settled yet
 
-What a brief whose own subsections sit beside a mount should do, which the trace can warn of and nothing yet decides. Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the address sits in the page's URL, and what a reader who arrives without one is shown. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
+Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the address sits in the page's URL, and what a reader who arrives without one is shown. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
 
 *Open, 2026-09-12, and taken up in that order.*
