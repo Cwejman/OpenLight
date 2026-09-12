@@ -28,7 +28,7 @@ A level too big to read is the exception, and the surface does not soften it. A 
 
 ## 3. A record is ordered by time, not by importance
 
-A pane lays a level out as a reading, where the first brief is the biggest and each after it stands on those before. A record is not laid that way. Its order is when each entry happened, so its first entry is first in time and nothing more.
+A pane lays a level out as a reading: the brief that gives the most understanding comes first, and each after it stands on those before. A record is not laid that way. Its order is when each entry happened, so its first entry is first in time and nothing more.
 
 [The practice's stamp](../poc.md#9-a-file-says-it-is-under-the-code) says which of the two a file is. A pane holding a record shows it in the order it declares and never implies that the order ranks anything, and the drawing above it says nothing about importance either.
 
