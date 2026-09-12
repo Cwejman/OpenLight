@@ -29,11 +29,15 @@ A link points at a state, not only at a path. In a versioned substrate the hones
 
 This binds whoever edits a brief that others stand on. Changing it is allowed, and is the point of a living substrate; changing it silently is not, and the mark of a moved ground is the least a reader is owed.
 
-How a link should hold its state is not settled, and two shapes stand against each other. A link pinned to a commit keeps one home for the fact and trusts git to serve the old state on request. A copy of the ground written into the brief that stands on it, stamped as a copy at a commit, gives up one home and gains a brief that travels whole, needing no history to be read. The first is cheaper and the second is sturdier, and which a substrate wants may differ between a tree read in place and a tree published elsewhere. *Open, raised 2026-09-11 and not resolved; wanted before a tree is published.*
+How a link should hold its state is not settled, and two shapes stand against each other. A link pinned to a commit keeps one home for the fact and trusts git to serve the old state on request. A copy of the ground written into the brief that stands on it, stamped as a copy at a commit, gives up one home and gains a brief that travels whole, needing no history to be read. A third shape was raised 2026-09-12, and it puts the stamp on the target rather than the pin on the link. A brief removed while others still stand on it comes back at the path they name, carrying in its frontmatter the commit it is taken from, so it reads as a past state and not as a living brief. It is the cheapest of the three, since nothing is written until something actually breaks, and the weakest, since it rests on whoever removes a file noticing that anything pointed at it.
+
+The first is cheaper than the second and the second is sturdier, and which a substrate wants may differ between a tree read in place and a tree published elsewhere. *Open, raised 2026-09-11 and not resolved; wanted before a tree is published.*
 
 ## 5. Files
 
 A file has one root brief. When a brief is central to two regions it lives in one file and the other links to it, never split, by the code's one home. The file is cut around the brief the most stands on in that region. Records are events: a ratification, a review's findings, a feedback note each amends the state, is folded, and retires from the tree; git keeps it.
+
+What may be removed is what nothing stands on. A brief one other brief stands on moves into that brief's holon; a brief many stand on moves to the level that covers them all, and never above it, since a ground held above its own readers is a ground they cannot keep. Removal is for what no link reaches, and git keeps it. This is one home read from the other side: a tree that moves its ground silently breaks briefs nobody edited. Reasoned, 2026-09-12.
 
 ## 6. Visuals
 
