@@ -6,15 +6,7 @@ status: in force
 
 # Moving, and asking
 
-## 1. A descent is committed, and may carry several levels
-
-A descent is committed from a door in a pane or from a cell in any drawing, and either one adds the level beneath to the panes and to the drawing of the path.
-
-From a drawing it may carry more than one level, since a reader can look several levels down before choosing. Pressing a cell three levels down commits all three.
-
-*Reasoned, the author's, 2026-09-12.*
-
-## 2. Sideways is scrubbing, never a second scroll
+## 1. Sideways is scrubbing, never a second scroll
 
 Moving among panes is a scrub along the drawing of the path. Never a second scroll, since two axes in one region are [two regions pretending to be one](../../../design.md#scroll-and-seams).
 
@@ -24,7 +16,7 @@ Nothing falls away. A scrub reaches a pane that is off screen rather than discar
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 3. The path is the address
+## 2. The path is the address
 
 A path is where a reader is, so it is also what a reader can be handed. The surface is one page that never reloads, and the path is what its address carries, so any place in the body can be sent to someone and opened directly.
 
@@ -32,7 +24,7 @@ What the browser's back retraces is the commitments. Opening a level enters the 
 
 *Reasoned, the author's, 2026-09-12.*
 
-## 4. The rest of a brief is told on asking
+## 3. The rest of a brief is told on asking
 
 Everything that names a brief carries only part of it. A cell in a drawing carries shape and nothing else. A door carries the brief's face. A pane carries the level but never a brief's relations, since a link may reach anywhere and a pane only ever descends.
 
@@ -44,7 +36,7 @@ It is drawn with no border and no shadow, and the background shows through it, b
 
 *Seen in the first cut, which held these facts in a card. What pays for the ink once it stands is open.*
 
-## 5. One gesture, one meaning
+## 4. One gesture, one meaning
 
 Three things can happen on a cell, so they are held apart. Pointing lights it and tells the rest. Dragging scrubs. Pressing commits a descent.
 
@@ -52,7 +44,7 @@ Keeping what was told is therefore a press inside it, never on the cell that sum
 
 *Reasoned, 2026-09-12, from the collision three separate rules made on one gesture.*
 
-## 6. What is open
+## 5. What is open
 
 Whether the summon wants a moment's hold, so that a pointer crossing a level's drawing does not churn a card for every cell it passes.
 
