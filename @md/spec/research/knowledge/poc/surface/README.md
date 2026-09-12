@@ -66,7 +66,17 @@ A descent is committed from a door in a pane or from a cell in any drawing, and 
 
 [the level beneath](moving.md)
 
-## 5. What this does not answer
+## 5. How it is built
+
+The surface is one page the browser manages, and one TypeScript file run with Bun makes it. Run against a path in a working tree, the file serves the page live and tells it when a file changes. Run once with a flag, it writes the page with the body inside, and that is all the pipeline does on each commit.
+
+Either way the file reads the stamped markdown and hands the page the substrate already typed, so the page draws structure it receives and never parses prose to find it. It is kept to one file because this is the proof of concept.
+
+*In force, the author's decision, 2026-09-12.*
+
+[the level beneath](implementation.md)
+
+## 6. What this does not answer
 
 How a reader sees where they have been. Following a link rebuilds the panes, and the history carries the way back, but nothing draws that history and the drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
 
@@ -74,11 +84,9 @@ Whether the harness can be modified after all. Its SDK could assemble a context 
 
 What a session keeps. The panes and the drawing read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.
 
-And the technical ground, which is not unsettled so much as not yet taken up. How the markdown is parsed, in what unit a size is counted, what happens as files change, what a reader without a pointer is given, what a published build emits: none of it is written, and none of it is decided by what is. These briefs say what the surface is to be, and that ground is settled next, against them.
+*Open, 2026-09-12. What each level leaves open stands at its own foot, the technical ground included.*
 
-*The first two are open, 2026-09-12. The technical ground is not open but out of scope for these briefs, and that boundary is in force. What each level leaves open stands at its own foot.*
-
-## 6. What was tried and refused
+## 7. What was tried and refused
 
 A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and no program has yet been written against them.
 
