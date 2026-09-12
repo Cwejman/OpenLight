@@ -15,4 +15,6 @@ How knowledge should be structured, so that what one person understands reaches 
 
 [The study](study/README.md) is where all of this is being found, and where it is still owed. Ten labs so far on one shared corpus, each rewriting the same material under an edition of the code and reading the result cold. It holds where the search stands, what it owes, and what the running of it has taught.
 
+[The surface](surface/README.md) is what a body written this way is read through, and what a session's own work reaches when it writes itself into the substrate. It is being specified before it is built a second time.
+
 Four briefs stand beside the search rather than under it, and none of them is law. [Giving as a business](gaab.md) holds the author's positions on how a model and a harness should be offered. [Tenants beyond prose](tenants.md) holds the domains this shape reaches into, sound and image and what happens between them. [How two holons drive each other](resonance.md) asks what mutual driving costs. [Letting go by contract](letting-go.md) is the author's note on contraction and directing.

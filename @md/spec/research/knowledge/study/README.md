@@ -59,7 +59,7 @@ After the labs come the two artifacts of the finish line's second mark, and then
 
 Three records stand beside them: [the sitting of 2026-09-11 debriefed](debrief-2026-09-11.md), [what the study measures of itself](measured.md), and [what was asked](asked-2026-09-11.md) on the day most of this was written.
 
-And one program, [the reader](reader/README.md), which serves a body of knowledge as the holarchy it is, so a reader descends it by understanding rather than by opening files. Its briefs are its specification and [the order of work](reader/forward.md) is the distance between that and what runs, opening with the author's verdict that it is hard to use.
+The surface a body of knowledge is read through left the study on 2026-09-12 and stands at [the arc's root](../surface/README.md), since it serves the whole arc rather than these labs. The program built here on 2026-09-11 was retired with it, so that the understanding is built before the program is.
 
 ## 5. Notes
 
