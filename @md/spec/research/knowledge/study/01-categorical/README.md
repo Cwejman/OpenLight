@@ -11,4 +11,4 @@ Its shape is itself an experiment, since nothing had been written under the code
 
 [The findings](output/README.md) are the piece: one brief per territory, each opening with what it settles and closing with what it does not establish. [The method](method.md) is how it was made, including the compression it achieved and what was deliberately left in the raw.
 
-It ran under [the code as it was ratified](../code-ratified.md), which is why its links point there rather than at the law as it stands now.
+It ran under [the edition of 2026-08-30](../code-2026-08-30.md), which is why its links point there rather than at the law as it stands now.

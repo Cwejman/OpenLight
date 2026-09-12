@@ -9,7 +9,7 @@ You are a fresh session with no prior context, deliberately. Bootstrap from name
 
 Read, in order — paths relative to this prompt file:
 
-1. `../code-ratified.md` — the working law your writing follows (folds, links, the two laws).
+1. `../code-2026-08-30.md` — the working law your writing follows (folds, links, the two laws).
 
 2. `../../../sweep-2026-08/README.md` — what the raw material is; its named-runs table orients you.
 

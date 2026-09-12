@@ -7,7 +7,7 @@ kind: brief
 
 The study is the search for how knowledge is best structured, for people and AI alike, run as a series of labs on one shared corpus: a bounded set of research reports from an August web sweep. This file is its notebook. It holds where the search stands and what it still owes.
 
-The law is not here. It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the code as ratified](code-ratified.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
+The law is not here. It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md) of 2026-08-30. A claim matures in the labs, enters an edition, and its row retires from this file. Git keeps everything that leaves.
 
 ## 1. The finish line
 
@@ -63,7 +63,7 @@ And two programs, built while the labs ran. [The reader](reader/README.md) serve
 
 ## 5. Notes
 
-- **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation (the ratified [`code-ratified.md`](code-ratified.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
+- **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation ([the edition of 2026-08-30](code-2026-08-30.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 
 - **The corpus** is the August sweep ([`sweep-2026-08/`](../../sweep-2026-08/)) — bounded, free of engineering load, holding the baseline pair. Its artifacts still await the author's read; [`landscape.md`](../../landscape.md) is kept as ore, to be re-read critically rather than trusted.
 

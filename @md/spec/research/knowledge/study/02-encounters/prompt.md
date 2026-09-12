@@ -13,7 +13,7 @@ tree, nothing beyond what is named here.
 
 Read, in order:
 
-1. `/Users/jcwejman/git/@x/night/@md/spec/research/knowledge/study/code-ratified.md` — the working law
+1. `/Users/jcwejman/git/@x/night/@md/spec/research/knowledge/study/code-2026-08-30.md` — the working law
    your writing follows (folds, links, the two laws).
 2. `/Users/jcwejman/git/@x/night/@md/spec/research/sweep-2026-08/README.md` — what the
    raw material is; its named-runs table orients you.
