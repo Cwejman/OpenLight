@@ -34,15 +34,15 @@ A pane lays a level out as a reading: the brief that gives the most understandin
 
 *Reasoned, carried from the practice and not checked here.*
 
-## 4. A link is not a path move, and that is unsettled
+## 4. Following a link moves you, and the history is the way back
 
-A brief's relations reach anywhere, while a pane only ever descends. So following a link lands a reader at a brief whose own path from the root differs from the path they stand in, and the two cannot both be honoured.
+A brief's relations reach anywhere, while a pane only ever descends. So following a link lands a reader at a brief whose own path from the root differs from the path they stand in, and the panes rebuild to the target's path. Standing somewhere means the path says so, and that is worth more than holding a row the reader has left.
 
-Rebuild the panes to the target's path and where the reader came from is lost, which is the one thing this reading exists to keep. Keep them and the drawing of the path lies about where the reader is. Neither can simply be chosen, and nothing here chooses it.
+What they left is not lost. Opening a level and following a link are both commitments, so both enter the history, and back returns a reader to the path they came from.
 
-It is the sharpest thing open in this holon, and whatever is built will meet it on the first day, because a body of prose is dense with links.
+That is a way back rather than a good one, and it asks a reader to press before knowing where they will land. What answers that is looking first: [the rest of a brief is told on asking](moving.md#3-the-rest-of-a-brief-is-told-on-asking), so a link is read about before it is taken.
 
-*Open, 2026-09-12.*
+*Reasoned, the author's, 2026-09-12. A reader's own history is the one thing nothing here draws, and [that drawing is owed](drawings.md#1-above-the-panes-a-drawing-per-level-and-the-path-whole).*
 
 ## 5. Where only one pane fits
 

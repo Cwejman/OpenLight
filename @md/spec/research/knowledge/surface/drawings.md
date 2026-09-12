@@ -18,7 +18,9 @@ But a viewport holds only a few panes, so that row reaches only the part of a pa
 
 Two drawings of one path, then, and the second earns its place by reaching what the first cannot.
 
-*Reasoned, the author's, 2026-09-12. That the row alone was the path, needing no second drawing, was claimed here and withdrawn the same day: a row of visible panes cannot show a path that runs off screen.*
+Both show where a reader is and neither shows where they have been. A reader's history is a gap nothing here fills, and the drawing that would fill it is owed rather than designed. It is not a line: a history runs along a path as increments and jumps between paths as well, so it stands as a second dimension on the path rather than a figure beside it. Scrubbing it would light the places it names, here and on the plate, as any pointing does.
+
+*Reasoned, the author's, 2026-09-12; the history drawing is owed. That the row alone was the path, needing no second drawing, was claimed here and withdrawn the same day: a row of visible panes cannot show a path that runs off screen.*
 
 ## 2. A brief's level, beside its heading
 

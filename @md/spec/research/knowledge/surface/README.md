@@ -66,6 +66,8 @@ A descent is committed from a door in a pane or from a cell in any drawing, and 
 
 ## 5. What this does not answer
 
+How a reader sees where they have been. Following a link rebuilds the panes, and the history carries the way back, but nothing draws that history and the drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
+
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and it is unanswered.
 
 What a session keeps. The panes and the drawing read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.

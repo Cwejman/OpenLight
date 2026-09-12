@@ -20,7 +20,7 @@ Neither discards anything. A scrub reaches a pane that has gone off screen rathe
 
 A path is where a reader is, so it is also what a reader can be handed. The surface is one page that never reloads, and the path is what its address carries, so any place in the body can be sent to someone and opened directly.
 
-What the browser's back retraces is the commitments. Opening a level enters the history and looking at one never does, so back and forward walk the descents a reader chose rather than everywhere the pointer went.
+What the browser's back retraces is the commitments. Opening a level enters the history and so does [following a link](panes.md#4-following-a-link-moves-you-and-the-history-is-the-way-back), since both put a reader somewhere new; looking at either never does. So back and forward walk the moves a reader chose rather than everywhere the pointer went.
 
 *Reasoned, the author's, 2026-09-12.*
 
