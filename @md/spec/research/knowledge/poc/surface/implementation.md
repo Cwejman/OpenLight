@@ -102,7 +102,35 @@ So the pipeline's whole job is to run the build on each commit and put the one p
 
 *In force, the author's decision, 2026-09-12. That parsing a JSON string is faster than an equally large object literal is carried from V8's guidance and not checked here.*
 
-## 6. One file, laid by the gradient
+## 6. How it is drawn
+
+The page draws from three things and nothing else: the address a reader opened, which lives in the URL; the address the pointer rests on, which lives nowhere and leaves no trace; and whether the plate is shown. Every change to one of them draws again.
+
+*In force, the author's decision, 2026-09-12.*
+
+### 6.1 Panes are HTML, and the row steps
+
+The panes are HTML, side by side in a row, and each scrolls its own level up and down. The row itself never scrolls sideways. Scrubbing the drawing of the path moves it instead, and it moves by whole panes, one level at a time, never a part of one.
+
+Every opened level keeps its own pane, kept by its address even while it is off screen, and the row is shifted by a whole number of panes with a short transition. So each pane keeps its scroll position without anything saving it, and the eye sees which way the levels went rather than text jumping in place.
+
+*In force, the author's decision, 2026-09-12.*
+
+### 6.2 Figures are SVG
+
+A level's drawing, the level beside a brief's heading, the path and the plate are SVG. It stays sharp at any size, and every cell is an element of its own, so pointing at one needs nothing more. Should the plate ever hold more cells than that bears, it alone moves to a canvas.
+
+*In force, the author's decision, 2026-09-12.*
+
+### 6.3 One brief lit, and one overlay
+
+Everything drawn carries its brief's address. When the pointer rests on one, the page marks that address, and everything carrying it lights at once, wherever it is drawn.
+
+The overlay is one element, used again for every telling. It moves beside whatever raised it, outside the bounds of that figure.
+
+*In force, the author's decision, 2026-09-12.*
+
+## 7. One file, laid by the gradient
 
 The server, the build, the client and the talk between them are one TypeScript file, run with Bun. A flag chooses between serving live and writing the page. This is the proof of concept, and nothing in it should grow larger than reading a body needs.
 
@@ -114,7 +142,7 @@ It stands beside its specification, as `surface.ts` in this holon.
 
 *In force, the author's decision, 2026-09-12.*
 
-## 7. Plain functions before a framework
+## 8. Plain functions before a framework
 
 The drawings and the panes start as plain functions that return SVG and HTML, written to one style so they read as a family. A framework such as Solid would render in the browser like anything else, but it needs its own compile step for its markup, and that step is exactly what one file run with Bun avoids.
 
@@ -122,7 +150,7 @@ Whether the functions grow into components is decided once the figures exist and
 
 *Preferred, the author's, 2026-09-12.*
 
-## 8. Git waits for history
+## 9. Git waits for history
 
 Git could carry the files, and it is not used for that. A JavaScript client such as isomorphic-git speaks git's smart HTTP protocol, and three things make it the harder road here. It carries commits and not the working tree, so a live reading would lag behind a session's writing until the next commit. A static host serves no smart HTTP, and the client cannot read a `.git` folder served as plain files. And it brings a library, a filesystem in the browser, and a clone of the whole repository where the surface wants only the stamped files under one path.
 
@@ -130,8 +158,8 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 *Reasoned, 2026-09-12. The protocol and the client's limits are from [git's documentation](https://git-scm.com/docs/http-protocol) and [isomorphic-git's](https://isomorphic-git.org/docs/en/next/faq), read that day.*
 
-## 9. What is not settled yet
+## 10. What is not settled yet
 
-Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
+Whether a file's kind and status travel with its briefs, which waits until a pane needs them. And where the published page stands beside the wiki the repository already publishes.
 
 *Open, 2026-09-12, and taken up in that order.*
