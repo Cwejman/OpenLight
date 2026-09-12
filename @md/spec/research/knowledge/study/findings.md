@@ -39,7 +39,7 @@ Lab 10's stage two ran 1,187 API messages over 84 minutes, carrying about 425,00
 
 ## 9. The orchestrator never holds the raw
 
-A session that reads the material whole grows to the size of the material and pays for it on every turn; a session that holds only the code, the practice and the corpus, and sends fresh heads for what needs the raw, costs a third and keeps its judgment. Lab 10's fifth round against its first four. And a subagent's cache lives five minutes by default; a silence past that rewrites its whole context, which lab 08 paid once and lab 10 paid throughout. What that says about how a service gives is the author's, in [`gaab.md`](../gaab.md).
+A session that reads the material whole grows to the size of the material and pays for it on every turn; a session that holds only the code, the practice and the corpus, and sends fresh heads for what needs the raw, costs a third and keeps its judgment. Lab 10's fifth round against its first four. And a subagent's cache lives five minutes by default; a silence past that rewrites its whole context, which lab 08 paid once and lab 10 paid throughout. What that says about how a service gives is the author's, in [`gaab.md`](../ideas/gaab.md).
 
 ## 10. Record the method at the moment of the work
 

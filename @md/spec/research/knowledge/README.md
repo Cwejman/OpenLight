@@ -45,40 +45,8 @@ It is being specified before it is built a second time.
 
 [the level beneath](surface/README.md)
 
-## 6. Beside the search
+## 6. The ideas
 
-Four briefs stand beside the search rather than under it. None of them is law, and nothing in the code depends on them.
+Beside the code stand the author's ideas: positions on how a model and a harness should be offered, the domains the shape reaches into, and questions it raises on the way. They are held open. None of them is law, and nothing in the code depends on them.
 
-### 6.1 Giving as a business
-
-The author's positions on how a model and a harness should be offered, written down 2026-09-11 from the labs' cost accounts so they stand beside the numbers that provoked them. They are the author's, marked so, and open.
-
-The word for the stance is giving as a business: a service earns by what it lets its users compound, not by what it withholds from them. The author gives the name a second reading, glue as a business: what the walls of today's products sell as integrations, the glue between them, is under the substrate the one honest service, the connecting itself, and a host that offers it is offering glue as a service. The two readings are one stance seen from the user's side and from the host's.
-
-[the level beneath](gaab.md)
-
-### 6.2 Tenants beyond prose
-
-A tenant is a domain that lives in the substrate the way knowledge does. Knowledge is the first, and [the code's sixth section](code.md#6-how-far-this-goes) says the shape reaches further.
-
-These are the cases as they occur, between the study and the project's vision: each named as it would look as entries in the substrate, held open and marked so. Most are domains; two are not, and say so where they stand. Begun 2026-09-11.
-
-[the level beneath](tenants.md)
-
-### 6.3 How two holons drive each other
-
-The code gives two joins: a brief holds smaller briefs beneath it, and a link reaches what lies elsewhere. Neither is two wholes driving each other at once.
-
-This asks how that is done, by asking it of the one field that has answered it in working machines, and brings back what the answer requires. Derived 2026-09-11, from the author's question about resonance between the operators of a synthesizer.
-
-[the level beneath](resonance.md)
-
-### 6.4 Letting go by contract
-
-The author's thought of 2026-09-11 on how a substrate is let go of gracefully, for a context or for anything else, and why that is the same act as directing a program. Held open, the author's, the names kept as coined.
-
-To debrief is to let go: the detail stays beneath, the conclusion goes to the surface, and what the surface keeps is a contraction of what was there. The author's point is that the contraction can be made contractual. What is kept is typed, or at least categorised, and then it is what a program can take: substrate as argument data. That is the whole of how programs are directed under the medium, a program says what it takes, and a contracted piece of the substrate is handed to it because it matches. So letting go is not loss; it is the making of an interface. Whoever cannot let go cannot direct, because what they hold is not yet in a shape anything can take.
-
-The visual side is the same act felt from the other direction. A drawing is relaxation through contraction: the shape stands and the detail withdraws, and the eye rests on what was kept. Letting go by contract, the author's name for it, is what gives space to other depths, so that where one thing withdraws another can come forward. An interface that works this way is not in front of the user but around them, a surround user interface: whatever is contracted recedes into the surround, still there, one step away, and the depth in focus has the room.
-
-*Reasoned, the author's, in passing; the contract is [the code's sixth section](code.md#6-how-far-this-goes) and the project's substrate, and the rest is what a surface built on them would feel like.*
+[the level beneath](ideas/README.md)

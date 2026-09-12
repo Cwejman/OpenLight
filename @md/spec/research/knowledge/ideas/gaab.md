@@ -13,7 +13,7 @@ The model is stateless; every call is a whole context sent fresh. A harness that
 
 ## 2. The cache is where the giving shows
 
-The labs' accounts put it in numbers: a session's cost is mostly its context re-sent, and the cache is what makes that bearable, a tenth of a fresh read. Lab 08 paid a whole context rewrite once when a five-minute cache lapsed in a silence; lab 10's writer and heads ran on five-minute caches throughout, and read from cache many times what they wrote, which [the lab's record](study/10-comprehension/debrief.md) counts exactly. A short default cache, and a cache that costs to keep, is a trait of a service that gives narrowly. The argument for it, that a free cache invites unsanctioned use, protects the product; but the product is worth what it lets people comprehend, and staking that comprehension for an edge is a monopoly slowing the very progression it sells.
+The labs' accounts put it in numbers: a session's cost is mostly its context re-sent, and the cache is what makes that bearable, a tenth of a fresh read. Lab 08 paid a whole context rewrite once when a five-minute cache lapsed in a silence; lab 10's writer and heads ran on five-minute caches throughout, and read from cache many times what they wrote, which [the lab's record](../study/10-comprehension/debrief.md) counts exactly. A short default cache, and a cache that costs to keep, is a trait of a service that gives narrowly. The argument for it, that a free cache invites unsanctioned use, protects the product; but the product is worth what it lets people comprehend, and staking that comprehension for an edge is a monopoly slowing the very progression it sells.
 
 *Measured, in the labs' accounts; the reading of the motive is the author's.*
 
