@@ -125,7 +125,7 @@ Four briefs sit beside the labs and none of them is law. [Giving as a business](
 
 ## 8. Notes
 
-- **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation (the ratified [`../code.md`](../code.md), [`naming.md`](../naming.md)) rides the study's maturation; those files still say fold.
+- **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation (the ratified [`../code.md`](../code.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 
 - **The corpus** is the August sweep ([`sweep-2026-08/`](../../sweep-2026-08/)) — bounded, free of engineering load, holding the baseline pair. Its artifacts still await the author's read; [`landscape.md`](../../landscape.md) is kept as ore, to be re-read critically rather than trusted.
 
