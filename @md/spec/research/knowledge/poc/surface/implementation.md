@@ -74,7 +74,19 @@ The page counts it by walking a brief's tokens and adding up the text they hold,
 
 *In force, the author's decision, 2026-09-12. That marked offers no plain-text rendering of its own is from memory and not checked.*
 
-## 4. Live and published differ only in where the body comes from
+## 4. The address sits after a hash
+
+The page's URL holds the address of the last brief a reader opened, and that is enough to rebuild every pane, since each pane is the level of one brief along it:
+
+```
+surface.html#/the-proof-of-concept/the-surface/a-level-to-a-pane
+```
+
+It sits after a `#` because that works on any static host and inside one file, where a path of its own would need the host to serve the page for every URL. A reader who arrives without an address is shown the root's level with nothing opened.
+
+*In force, the author's decision, 2026-09-12.*
+
+## 5. Live and published differ only in where the body comes from
 
 Live, a process runs against a path in a working tree and answers three requests. The page itself, the body as JSON, and a stream that says when a file under the path has changed, so the client asks for the body again and draws it. The body is assembled again whole on any change, which a body this size allows.
 
@@ -90,7 +102,7 @@ So the pipeline's whole job is to run the build on each commit and put the one p
 
 *In force, the author's decision, 2026-09-12. That parsing a JSON string is faster than an equally large object literal is carried from V8's guidance and not checked here.*
 
-## 5. One file, laid by the gradient
+## 6. One file, laid by the gradient
 
 The server, the build, the client and the talk between them are one TypeScript file, run with Bun. A flag chooses between serving live and writing the page. This is the proof of concept, and nothing in it should grow larger than reading a body needs.
 
@@ -102,7 +114,7 @@ It stands beside its specification, as `surface.ts` in this holon.
 
 *In force, the author's decision, 2026-09-12.*
 
-## 6. Plain functions before a framework
+## 7. Plain functions before a framework
 
 The drawings and the panes start as plain functions that return SVG and HTML, written to one style so they read as a family. A framework such as Solid would render in the browser like anything else, but it needs its own compile step for its markup, and that step is exactly what one file run with Bun avoids.
 
@@ -110,7 +122,7 @@ Whether the functions grow into components is decided once the figures exist and
 
 *Preferred, the author's, 2026-09-12.*
 
-## 7. Git waits for history
+## 8. Git waits for history
 
 Git could carry the files, and it is not used for that. A JavaScript client such as isomorphic-git speaks git's smart HTTP protocol, and three things make it the harder road here. It carries commits and not the working tree, so a live reading would lag behind a session's writing until the next commit. A static host serves no smart HTTP, and the client cannot read a `.git` folder served as plain files. And it brings a library, a filesystem in the browser, and a clone of the whole repository where the surface wants only the stamped files under one path.
 
@@ -118,8 +130,8 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 *Reasoned, 2026-09-12. The protocol and the client's limits are from [git's documentation](https://git-scm.com/docs/http-protocol) and [isomorphic-git's](https://isomorphic-git.org/docs/en/next/faq), read that day.*
 
-## 8. What is not settled yet
+## 9. What is not settled yet
 
-Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the address sits in the page's URL, and what a reader who arrives without one is shown. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
+Whether a file's kind and status travel with its briefs, which waits until a pane needs them. How the panes, the figures and the overlay are drawn. And where the published page stands beside the wiki the repository already publishes.
 
 *Open, 2026-09-12, and taken up in that order.*
