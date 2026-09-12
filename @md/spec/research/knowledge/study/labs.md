@@ -65,7 +65,7 @@ The one lab that tests a candidate rule rather than adopting one, and the only o
 
 A read of lab 06's output found one shape recurring: a slim surface followed by bold-led bullets, at every heading level. That is a brief whose nested briefs never got their headings, so every win arrives at one depth in one serving. This lab reworked that output one level deeper with the content held fixed, so the only variable is the breakdown.
 
-Because the rule was under test rather than adopted, it lived in [the prompt](07-breakdown/prompt.md) and not in [the edition](07-breakdown/code.md). A rule a lab may reject must not enter the law first, and that is the exception [the method](method.md#1-what-a-lab-ships) names.
+Because the rule was under test rather than adopted, it lived in [the prompt](07-breakdown/prompt.md) and not in [the edition](07-breakdown/code.md). A rule a lab may reject must not enter the law first.
 
 [The reworked piece](07-breakdown/output.md) is the output. The measurement, and the four things it does not reach, are in [`evidence-breakdown.md`](07-breakdown/evidence-breakdown.md); [`evidence-unit-of-change.md`](07-breakdown/evidence-unit-of-change.md) grounds the rule beside it. The two are the pattern every later lab's evidence is meant to follow.
 

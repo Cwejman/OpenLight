@@ -15,15 +15,9 @@ The search ends when the proof is lived, not argued. Three marks:
 
 3. **The proof is the experience**: a senior reader finishes with no unanswerable questions, a fresh session bootstraps and can be trusted, and the author reads without fatigue.
 
-## 2. How a lab runs
+## 2. Where the search stands
 
-A lab is one run of the search: a writer, a corpus, and an edition of the code, arranged so that what the run teaches can be told apart from what the writer happened to be good at. What it ships, and the rules that keep it honest, are read before running one.
-
-[the level beneath](method.md)
-
-## 3. Where the search stands
-
-Ten labs run. What labs 03 to 07 had to teach reached the editions and stands in the law today, so their cold reads are no longer owed; what they owe instead is their provenance, [the grounds](#4-the-grounds). Each lab is given with what it did and the verdict on it.
+Ten labs run. What labs 03 to 07 had to teach reached the editions and stands in the law today, so their cold reads are no longer owed; what they owe instead is their provenance, [the grounds](#3-the-grounds). Each lab is given with what it did and the verdict on it.
 
 The baseline pair comes first, since every later reading is judged against it. The rest are laid newest first, from ten down.
 
@@ -31,15 +25,15 @@ After the labs come the two artifacts of the finish line's second mark, and then
 
 [the level beneath](labs.md)
 
-## 4. The grounds
+## 3. The grounds
 
-Every rule the code carries came from somewhere, and a reader a year from now must be able to ask of any of them whether it is proven, settled, or a preference nobody has challenged. The grounds are that answer, one entry per rule.
+Every rule the code carries came from somewhere, and the grounds are where that is kept: one entry per rule, saying what it rests on and how strongly it holds. They are the artifact the code is to stand beside once the study is complete, so that a reader a year from now can ask of any rule whether it is proven, settled, or a preference nobody has challenged.
 
-They are the one thing this search ships that cannot be composed at the end. The code and the practice can be assembled from what the labs settled; provenance exists only while the work is happening. So the grounds accumulate now, lab by lab, or they are not written at all.
+They are also the one part of that artifact that cannot be composed at the end. The code can be assembled from what the labs settled, but provenance exists only while the work is happening, so the grounds accumulate lab by lab or are not written at all.
 
 [the level beneath](grounds.md)
 
-## 5. What is owed
+## 4. What is owed
 
 The grounds are the largest debt, and the only one that cannot wait. Every rule the night's editions gained has no entry, and labs 01 to 06 are in arrears entirely.
 
@@ -51,13 +45,13 @@ The grounds are the largest debt, and the only one that cannot wait. Every rule 
 
 - **Team opens** ([issue #1](https://github.com/Cwejman/OpenLight/issues/1) — Eric, Emelie, Sanna): what the second level of a document is; whether an intro carries a short guide to how the text is read; how running-text source references are handled; expand/collapse folding — blocked for now, since GitHub does not guarantee an anchor reaches into a collapsed section.
 
-## 6. What the method has found
+## 5. What the method has found
 
-The labs were run to learn how knowledge is best written, and they taught something else on the way: how to run the learning. These are the findings about the work itself, each settled by repetition rather than by one run. They feed [the practice](../poc.md) and [the grounds](#4-the-grounds), and they are why a lab is shaped [the way it is](#2-how-a-lab-runs).
+The labs were run to learn how knowledge is best written, and they taught something else on the way: how to run the learning. These are the findings about the work itself, each settled by repetition rather than by one run. They feed [the practice](../poc.md) and [the grounds](#3-the-grounds).
 
 [the level beneath](findings.md)
 
-## 7. What the study measures of itself
+## 6. What the study measures of itself
 
 The code makes two promises that can be counted rather than argued: that the biggest understanding comes first, so each level down holds more prose than the one above it, and that a brief stays as brief as its understanding allows. This record holds what counting finds.
 
@@ -65,7 +59,7 @@ It is machine work and needs nobody's judgment, which is why it is a record of i
 
 [the level beneath](measured.md)
 
-## 8. Notes
+## 7. Notes
 
 - **The law is not here.** It stands at [the arc's root](../code.md), with [the practice](../poc.md) and [the skill](../skill.md) beside it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md). A claim matures in the labs, enters an edition, and its row retires from the notebook. Git keeps everything that leaves.
 
