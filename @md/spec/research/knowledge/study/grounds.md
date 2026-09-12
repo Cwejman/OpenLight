@@ -5,12 +5,6 @@ kind: brief
 
 # The grounds
 
-Every rule the code carries came from somewhere, and a reader a year from now must be able to ask of any of them whether it is proven, settled, or a preference nobody has challenged. The grounds are that answer, one entry per rule.
-
-They are the one thing this search ships that cannot be composed at the end. The code and the practice can be assembled from what the labs settled; provenance exists only while the work is happening. So the grounds accumulate now, lab by lab, or they are not written at all. This file holds what an entry owes, whose duty it is, and what is already in arrears, and the entries follow beneath it as the labs settle.
-
-The grounds are the one that cannot wait. The code and the practice can be composed at the end from what the labs settled, but provenance is only available while the work is happening. So the grounds accumulate now, lab by lab, or they are not written at all.
-
 ## 1. What an entry owes
 
 Every rule in the code gets one entry, and the entry answers four questions in this order: what the rule says, where it came from, what it rests on, and how strongly.

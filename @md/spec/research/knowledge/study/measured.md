@@ -7,8 +7,6 @@ note: one entry per measurement of the study against its own law
 
 # What the study measures of itself
 
-The code makes two promises that can be counted rather than argued: that the biggest understanding comes first, so each level down holds more prose than the one above it, and that a brief stays as brief as its understanding allows. This record holds what counting finds. It is machine work and needs nobody's judgment, which is why it is here and not in the notebook.
-
 ## 1. The study against the gradient, 2026-09-12
 
 Every markdown file in the study, read as the practice defines a holarchy, its own prose counted per level in tokens.

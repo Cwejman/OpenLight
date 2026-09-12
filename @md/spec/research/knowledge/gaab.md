@@ -63,7 +63,7 @@ Steering a model at use, taken to its end, is a model that evolves in the open. 
 
 The record of how work was done lives in the harness, in a format made for replay rather than for reading, and outside the repository the work produced. That separation is the reason a long sitting loses what was said in it. Kept in git beside the knowledge, and stamped so a surface knows what kind of thing it is, the history becomes introspectable by the harness that made it, readable by the frontend that serves the knowledge, and ground that whoever comes next can stand on.
 
-This is the general case of what this study did by hand: [the asks of a sitting](study/asked-2026-09-11.md) kept as a record and made the ground of a plan. A service that gives its users their own history does more for them than one that keeps it, which is this file's stance applied to a service's own exhaust.
+This is the general case of what this study did by hand on 2026-09-11: the asks of a sitting kept as a record and made the ground of a plan, a record since retired to git. A service that gives its users their own history does more for them than one that keeps it, which is this file's stance applied to a service's own exhaust.
 
 *Reasoned, the author's.*
 
