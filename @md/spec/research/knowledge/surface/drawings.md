@@ -8,9 +8,9 @@ status: in force
 
 ## 1. Above the panes, a drawing per level and the path whole
 
-A pane scrolls down, and the drawing of its level runs left to right above it, wide and short rather than tall and narrow. Turned that way it costs height instead of width, so it stands over the prose without taking width from the line.
+Above each pane its level is drawn whole: the briefs in order with their paragraphs sized as they are. So a reader can weigh a level before reading a word of it, and see which part of it they are in.
 
-It shows the level whole, its briefs in order with their paragraphs sized as they are, so the rhythm of a level can be judged before a word of it is read.
+It runs left to right, wide and short rather than tall and narrow. Turned that way it costs height instead of width, so it stands over the prose without taking width from the line.
 
 Every level's drawing is the same height, so the row of them reads as the path, level by level, left to right, and in each the brief whose level stands in the pane to the right is marked. A selection is shown where it was made.
 

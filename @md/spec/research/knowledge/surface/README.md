@@ -48,9 +48,11 @@ Pressing a brief opens the level under it. You do not enter the brief, because y
 
 Prose says what a brief means and cannot say what it is: how large, what rhythm its paragraphs have, where it sits, how much hangs beneath it. Those are facts of shape, and shape is seen rather than read.
 
-So the surface draws them, because a reader judges what a part will cost from its look before spending any reading on it, and a reader who expects it to be hard reads it worse. That judgment is the one [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked: a rule never fixed it and a picture did.
+A reader judges what a part will cost from its look before spending any reading on it, and a reader who expects it to be hard reads it worse. That judgment is the one [the labs failed most often](../study/findings.md#1-heaviness-is-seen-before-it-is-read), seen there and carried here unchecked: a rule never fixed it and a picture did.
 
-Wherever shape is wanted it is the same drawing and only its size changes, so a reader learns one picture rather than a new one at every place it turns up. What it draws is briefs, and the prose inside them down to the paragraph, which is the finest thing it ever shows.
+So the surface draws them, and what it draws is a minimap: the small picture an editor puts beside a long file, showing the shape of something too big to see at once and where in it you are. Ours maps not lines of text but briefs and the prose in them, down to a paragraph, which is the finest thing it ever shows.
+
+Wherever shape is wanted it is the same drawing, and only its size changes. So a reader learns one picture rather than a new one at every place it turns up.
 
 Size means two things, and the drawing keeps them apart. A brief's own prose is what stopping to read it costs. That prose with everything beneath it is what the branch holds. One says what a reader spends here and the other says what waits below, so a mark that mixed them would answer neither.
 
