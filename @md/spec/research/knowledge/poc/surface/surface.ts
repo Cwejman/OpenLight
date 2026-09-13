@@ -817,64 +817,91 @@ function treeHtml(): string {
 // not in the lane, and only as large as the subtree needs.
 
 let aheadRoot: string | null = null;
-/** The brief the ahead answers for: the pointed brief when its level is out of view, otherwise the focus; a cell inside the figure never re-roots it. */
+
+/** What a brief hides at its grade: paragraphs beyond its face, and its level beneath, when either is out of the lane. */
+const hides = (a: string): boolean => {
+  const b = brief(a);
+  return b !== undefined && gradeOf(a) !== "whole" && (blocksOf(b).length > 1 || (level(a).length > 0 && !level(a).some((k) => inLane(k.address))));
+};
+
+/** The brief the ahead answers for: the pointed brief when it hides something, otherwise the focus; a cell inside the figure never re-roots it. */
 function aheadTarget(): string | null {
-  const hidden = (a: string) => level(a).length > 0 && !level(a).some((k) => inLane(k.address));
-  const base = hidden(state.focus) ? state.focus : null;
+  const base = hides(state.focus) ? state.focus : null;
   const p = state.pointed;
   const within = (root: string | null) => root !== null && p !== null && p.startsWith(root + "/");
   // the figure keeps its root while the pointer moves within it, so pointing at a cell never redraws the figure from under the pointer
-  aheadRoot = p !== null && brief(p) && hidden(p) && !within(base) ? p : within(aheadRoot) ? aheadRoot : base;
+  aheadRoot = p !== null && hides(p) && !within(base) ? p : within(aheadRoot) ? aheadRoot : base;
   return aheadRoot;
 }
 
 /** A block's height in lines of the lane, from its text: a heading, or a paragraph of `n` characters. */
 const linesOf = (n: number): number => (n < 0 ? 1.5 : 0.6 + n / 72);
 
+type ARow = { a: string; depth: number; blocks: number[]; hidden: number };
+
 function aheadSvg(W: number, H: number): string {
   const target = aheadTarget();
   if (target === null) return "";
-  type Row = { a: string; depth: number; blocks: number[] };
-  const rows: Row[] = [];
+  const ix = state.index!;
+  const t = brief(target)!;
+  // the rows: the brief itself with the paragraphs its face hides, then everything beneath it, in reading order
+  const own = blocksOf(t).slice(1).map((tok) => textOf([tok]).length);
+  const rows: ARow[] = [{ a: target, depth: 0, blocks: [-1, ...own], hidden: 0 }];
   const walk = (parent: string, d: number): void =>
     level(parent).forEach((k) => {
-      rows.push({ a: k.address, depth: d, blocks: [-1, ...blocksOf(k).map((t) => textOf([t]).length)] });
+      rows.push({ a: k.address, depth: d, blocks: [-1, ...blocksOf(k).map((tok) => textOf([tok]).length)], hidden: 0 });
       walk(k.address, d + 1);
     });
-  walk(target, 0);
+  walk(target, 1);
   const GAP = { block: 0.35, brief: 1.2 };
-  const totalOf = (rs: Row[]) => rs.reduce((sum, r) => sum + r.blocks.reduce((x, n) => x + linesOf(n) + GAP.block, 0) + GAP.brief, 0);
+  const totalOf = (rs: ARow[]) => rs.reduce((sum, r) => sum + r.blocks.reduce((x, n) => x + linesOf(n) + GAP.block, 0) + GAP.brief, 0);
   // a line of the lane is a couple of pixels here, as in the shape, and the whole must fit the wing
-  const scale = (rs: Row[]) => Math.min(2.4, (H - 8) / Math.max(1, totalOf(rs)));
-  // the ladder: paragraphs while they stay legible; else one block per brief; else one block per level beneath, each as heavy as its branch
-  const body = (n: number[]) => n.slice(1).reduce((x, c) => x + Math.max(0, linesOf(c) - 0.6) * 72, 0);
-  const byBrief = rows.map((r) => ({ ...r, blocks: [-1, body(r.blocks)] }));
-  const byLevel = level(target).map((k) => ({ a: k.address, depth: 0, blocks: [-1, Math.max(1, state.index!.branch.get(k.address)! - 40)] }));
-  const [grain, drawn]: [string, Row[]] = scale(rows) >= 1.8 ? ["by paragraph", rows] : scale(byBrief) >= 1.2 ? ["by brief", byBrief] : ["by level", byLevel];
+  const scale = (rs: ARow[]) => Math.min(2.4, (H - 8) / Math.max(1, totalOf(rs)));
+  // the ladder keeps the structure: paragraphs while legible, else one block per brief, else the deepest level dropped
+  // and its weight shown as a tail on the brief that holds it, until what is left fits
+  const asBrief = (r: ARow): ARow => ({ ...r, blocks: [-1, r.blocks.slice(1).reduce((x, n) => x + n, 0)] });
+  const deepest = Math.max(0, ...rows.map((r) => r.depth));
+  const toDepth = (d: number): ARow[] =>
+    rows
+      .filter((r) => r.depth <= d)
+      .map((r) => ({ ...asBrief(r), hidden: r.depth === d && level(r.a).length > 0 ? ix.branch.get(r.a)! - ix.own.get(r.a)! : 0 }));
+  let grain = "";
+  let drawn: ARow[] = rows;
+  if (scale(rows) < 1.8) {
+    grain = "by brief";
+    drawn = rows.map(asBrief);
+    for (let d = deepest; scale(drawn) < 1.2 && d > 0; d--) {
+      drawn = toDepth(d - 1);
+      grain = `by brief, ${d - 1 === 0 ? "the first level" : `to depth ${d - 1}`}`;
+    }
+  }
   const k = scale(drawn);
   const total = totalOf(drawn);
-  const deepest = Math.max(0, ...drawn.map((r) => r.depth));
-  const w = Math.min(W, SHAPE.pad * 2 + deepest * SHAPE.indent + SHAPE.bar);
+  const w = Math.min(W, SHAPE.pad * 2 + Math.max(0, ...drawn.map((r) => r.depth)) * SHAPE.indent + SHAPE.bar + 4 + SHAPE.tail);
   const h = Math.ceil(total * k + 8);
   let y = 4;
   const cells = drawn.map((r) => {
     const x = SHAPE.pad + r.depth * SHAPE.indent;
     const top = y;
+    let lastY = y;
+    let lastH = 1;
     const bars = r.blocks
       .map((n) => {
-        const bh = Math.max(grain === "by level" ? 5 : 1.2, linesOf(n) * k - 0.6);
+        const bh = Math.max(1.2, linesOf(n) * k - 0.6);
         const rect = `<rect class="${n < 0 ? "head" : "para"}" x="${x}" y="${y.toFixed(1)}" width="${n < 0 ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${bh.toFixed(1)}" rx="1"/>`;
+        lastY = y;
+        lastH = bh;
         y += linesOf(n) * k + GAP.block * k;
         return rect;
       })
       .join("");
+    const tail = r.hidden > 0 ? `<rect class="hidden" x="${x + SHAPE.bar + 4}" y="${lastY.toFixed(1)}" width="${clamp(3 + Math.sqrt(r.hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${Math.max(1.2, lastH).toFixed(1)}" rx="1"/>` : "";
     y += GAP.brief * k;
-    return `<g class="cell" data-a="${esc(r.a)}" ${hued(r.a)}><rect class="hit" x="0" y="${top.toFixed(1)}" width="${w}" height="${(y - top).toFixed(1)}"/>${bars}</g>`;
+    return `<g class="cell" data-a="${esc(r.a)}" ${hued(r.a)}><rect class="hit" x="0" y="${top.toFixed(1)}" width="${w}" height="${(y - top).toFixed(1)}"/>${bars}${tail}</g>`;
   });
-  const t = brief(target)!;
   // the cells carry no names; the one under the pointer is named beneath the figure
-  const named = state.pointed !== null && state.pointed.startsWith(target + "/") ? brief(state.pointed) : null;
-  return `<div class="ahead-box"><div class="chrome dim">beneath ${esc(t.address === "" ? state.body!.title : t.title)}${grain === "by paragraph" ? "" : ` · ${grain}`}</div><svg class="fig ahead" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${cells.join("")}</svg><div class="chrome ahead-name">${named ? esc(named.title) : "&nbsp;"}</div></div>`;
+  const named = state.pointed !== null && state.pointed !== target && state.pointed.startsWith(target + "/") ? brief(state.pointed) : null;
+  return `<div class="ahead-box"><div class="chrome dim">hidden in ${esc(t.address === "" ? state.body!.title : t.title)}${grain ? ` · ${grain}` : ""}</div><svg class="fig ahead" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${cells.join("")}</svg><div class="chrome ahead-name">${named ? esc(named.title) : "&nbsp;"}</div></div>`;
 }
 
 // ## 3.7 Links: beside each link, its target; at the foot, what points here
@@ -1258,7 +1285,7 @@ function drawWing(area: "wingL" | "wingR"): void {
   const el = ui.parts[area];
   const widget = widgetOf(area);
   const box = el.querySelector<HTMLElement>(".box")!;
-  box.innerHTML = fits()[area] && isOpen(area) && widget.kind === "figure" ? widget.draw(Math.floor(el.clientWidth - 2 * 20), Math.floor(el.clientHeight - 2 * 20 - 34)) : "";
+  box.innerHTML = fits()[area] && isOpen(area) && widget.kind === "figure" ? widget.draw(Math.floor(el.clientWidth - 2 * 20), Math.floor(el.clientHeight - 24 - 72 - 44)) : "";
 }
 
 function drawWings(only?: "focus" | "point"): void {
@@ -1412,7 +1439,8 @@ function refold(change: () => void, anchor: string = state.focus): void {
 
 /** The fold mark toggles one brief between its face and whole. Opening a brief not in the lane opens what leads to it. */
 function cycle(a: string): void {
-  if (a === "") return;
+  const b = brief(a);
+  if (a === "" || !b || (blocksOf(b).length <= 1 && level(a).length === 0)) return;
   refold(() => {
     if (!inLane(a)) prefixesOf(a).forEach((p) => p !== a && gradeOf(p) !== "whole" && setGrade(p, "whole"));
     setGrade(a, inLane(a) ? nextGrade(gradeOf(a)) : "whole");
@@ -1683,7 +1711,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #header .notice { color: var(--lit); }
 
 #areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; }
-.wing { position: relative; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 54px; scrollbar-width: none; display: flex; align-items: center; justify-content: center; }
+.wing { position: relative; overflow: hidden; padding: 24px 20px 72px; scrollbar-width: none; display: flex; align-items: center; justify-content: center; }
 .wing::-webkit-scrollbar { display: none; }
 .wing .box { max-width: 100%; max-height: 100%; display: flex; justify-content: center; }
 .wing .box > * { max-width: 100%; }
@@ -1711,7 +1739,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 .brief { position: relative; margin: 0; padding-bottom: var(--after, 36px); opacity: calc(1 - var(--dim)); transition: opacity .3s; }
 .brief.here { opacity: 1; }
-.brief.face .head { margin-bottom: 8px; }
 .surface p { margin-bottom: 12px; }
 .act { display: flex; align-items: center; gap: 10px; color: var(--dim); cursor: pointer; margin: -4px -8px 0; padding: 4px 8px; border-radius: 6px; transition: color .15s; }
 .act:hover { color: var(--on); }
@@ -1783,6 +1810,7 @@ svg.fig .cell { cursor: pointer; }
 svg.ahead .hit { fill: transparent; }
 svg.ahead .para { fill: var(--rest); }
 svg.ahead .head { fill: var(--door); }
+svg.ahead .hidden { fill: var(--grey); }
 svg.ahead .cell.lit .para, svg.ahead .cell.lit .head { fill: var(--lit); }
 .ahead-name { min-height: 1.2em; text-align: center; color: var(--ink); }
 
