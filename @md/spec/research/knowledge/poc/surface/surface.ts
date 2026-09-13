@@ -1146,11 +1146,13 @@ function shapeSvg(W: number, H: number): string {
         ? anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}><rect class="hit" x="${SHAPE.pad + i * 8 - 1}" y="${(4 + first.top * k - 4).toFixed(1)}" width="8" height="${(Math.max(10, first.height * k) + 8).toFixed(1)}"/><rect class="head" x="${SHAPE.pad + i * 8}" y="${(4 + first.top * k).toFixed(1)}" width="6" height="${Math.max(10, first.height * k - 1).toFixed(1)}" rx="1.5"/></g>`).join("")
         : "";
     // two presses: the blocks go to the brief; the room to their right, where what is hidden stands, folds or opens it,
-    // with forgiving room around it since a brief may be a sliver here; the levels above are drawn last, so they take the press
+    // the levels above are drawn last, so they take the press
     const top = (4 + l.top * k).toFixed(1);
     const height = Math.max(1, l.height * k).toFixed(1);
-    const fy = Math.max(0, 4 + l.top * k - 3).toFixed(1);
-    const fh = (Math.max(1, l.height * k) + 6).toFixed(1);
+    // rows touch, so the room keeps to its own row; only a row thinner than a pointer can find is given height, to six pixels
+    const grow = Math.max(0, (6 - l.height * k) / 2);
+    const fy = Math.max(0, 4 + l.top * k - grow).toFixed(1);
+    const fh = (Math.max(1, l.height * k) + 2 * grow).toFixed(1);
     return (
       `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}>` +
       `<rect class="hit" data-press="go" x="${x - 3}" y="${top}" width="${SHAPE.bar + 5}" height="${height}"/>` +
@@ -1809,9 +1811,13 @@ function scrollToFocus(smooth: boolean): void {
 }
 
 /** Scrolling moves the focus and nothing else; the address follows without entering the history. */
+/** Where the pointer last moved, and whether a scroll has come under it since. */
+const pointer = { x: -1, y: -1, still: false };
+
 function onScroll(): void {
   drawShapeCursor();
   drawFade();
+  pointer.still = true;
   // scrolling swings the highlight back to the centre: what the pointer rested on is let go
   if (state.pointed !== null) {
     state.pointed = null;
@@ -1920,12 +1926,14 @@ function step(delta: number): void {
 function wire(): void {
   const named = (e: Event) => (e.target as HTMLElement | null)?.closest<HTMLElement>("[data-a]") ?? null;
 
-  // a pointer lights a brief only once it has travelled a little: a scroll that comes to rest under a still pointer makes
-  // the browser send a move of its own, which would light whatever brief the scroll left beneath it
-  let rest = { x: -1, y: -1 };
   document.addEventListener("pointermove", (e) => {
-    if (Math.hypot(e.clientX - rest.x, e.clientY - rest.y) < 4) return;
-    rest = { x: e.clientX, y: e.clientY };
+    // after a scroll, a pointer lights a brief only once it has travelled a little: a scroll that comes to rest under a
+    // still pointer makes the browser send a move of its own, which would light whatever the scroll left beneath it.
+    // Otherwise every move counts, so the highlight never lags behind the region the pointer is in
+    if (pointer.still && Math.hypot(e.clientX - pointer.x, e.clientY - pointer.y) < 4) return;
+    pointer.still = false;
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
     // the room right of a brief's blocks in the shape points at the brief like its blocks do, so the ahead shows what a fold there would open
     const el = named(e);
     all<HTMLElement>(".keep").forEach((k) => k.classList.remove("keep"));
