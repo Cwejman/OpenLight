@@ -887,8 +887,9 @@ let ui: UI;
 
 const all = <T extends Element>(sel: string, root: ParentNode = document): T[] => Array.from(root.querySelectorAll<T>(sel));
 const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
-/** Panes share the estate: as many as fit at the minimum width, each grown to fill it, up to the maximum. */
-const PANE = { min: 592, max: 720 };
+/** Panes share the estate: as many as fit at the minimum width, each grown to fill it, up to the maximum.
+ * The text fills the pane between its gutters, so the measure runs from 544 to 592 pixels and never wider. */
+const PANE = { min: 592, max: 640 };
 const estate = (): number => ui.viewport.getBoundingClientRect().width;
 const fit = (): number => Math.max(1, Math.floor(estate() / PANE.min));
 const paneWidth = (): number => Math.min(PANE.max, estate() / Math.max(1, Math.min(fit(), panesOf(state.opened).length)));
@@ -1254,7 +1255,6 @@ const CSS = `
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --s1: 1.75rem; --s2: 1.375rem; --s3: 1.0625rem; --s4: .9375rem; --s5: .8125rem; --s6: .6875rem;
-  --measure: 34rem;
   /* One rhythm: the gap stands between the header and the path, the path and the bands, a band and its text, and
      a pane and its edge, so two panes stand two gaps apart. */
   --gap: 24px; --gutter: var(--gap);
@@ -1294,12 +1294,12 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .pane .scroll::-webkit-scrollbar { display: none; }
 /* The seam is summoned only while text has passed beneath the band. It fills the gap between the band and the
    text, spills a little past the measure on either side, and fades out there, so the text enters a threshold. */
-.pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: var(--gap); margin: 0 0 calc(-1 * var(--gap)) calc(-1 * var(--gap)); width: calc(var(--measure) + 2 * var(--gap)); max-width: calc(100% + 2 * var(--gap));
+.pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: var(--gap); margin: 0 0 calc(-1 * var(--gap)) calc(-1 * var(--gap)); width: calc(100% + 2 * var(--gap));
   background: linear-gradient(rgba(0,0,0,.07), rgba(0,0,0,0));
   -webkit-mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent); mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent);
   opacity: 0; transition: opacity .2s; pointer-events: none; }
 .pane.scrolled .scroll::before { opacity: 1; }
-.prose { max-width: var(--measure); }
+.prose { width: 100%; }
 .opening { margin-bottom: 40px; }
 .opening h1 { font-size: var(--s1); font-weight: 600; line-height: 1.15; letter-spacing: -.012em; margin: 8px 0 16px; }
 .record { margin: 4px 0 24px; }
