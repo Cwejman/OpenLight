@@ -535,6 +535,16 @@ const trim = (s: string, n: number): string => (n <= 0 ? "" : s.length <= n ? s 
 /** Where each of a row of widths starts, laid end to end with a gap between. */
 const offsets = (widths: number[], gap: number): number[] => widths.map((_, i) => widths.slice(0, i).reduce((x, w) => x + w + gap, 0));
 
+/**
+ * The hue of a branch: every brief carries the hue of the root-level brief it stands under, so colour says
+ * where in the body a thing sits and nothing else. Hues step by the golden angle, so neighbours differ.
+ */
+const hueOf = (address: string): number => {
+  const i = level("").findIndex((b) => b.address === address.split("/")[0]);
+  return i < 0 ? 0 : Math.round((30 + i * 137.508) % 360);
+};
+const hued = (address: string): string => `style="--h:${hueOf(address)}"`;
+
 // ## 3.2 Prose is drawn from tokens
 //
 // Each kind of token has one renderer, and the two tables are the whole of the
@@ -596,7 +606,10 @@ const BLOCK: Record<string, (t: Tok) => string> = {
 // heading small, and in the path compressed, and it steps down a ladder rather
 // than shrink through its floor.
 
-const BAND = { gap: 3, seg: 1, floorPara: 2, floorBrief: 4 };
+const BAND = { floorPara: 2, floorBrief: 4 };
+
+/** The gaps of a band: between briefs four times what lies between paragraphs, so the groups read; smaller in a small band. */
+const gapsOf = (w: number) => (w >= 300 ? { brief: 8, para: 2 } : { brief: 4, para: 1 });
 
 type Cell = { a: string; x: number; w: number; door: boolean; paras: { x: number; w: number }[] | null; more: boolean; on: boolean };
 
@@ -604,22 +617,23 @@ type Cell = { a: string; x: number; w: number; door: boolean; paras: { x: number
 function layoutBand(levelAddress: string, w: number, on: string | null): Cell[] {
   const briefs = level(levelAddress);
   const ix = state.index!;
+  const gap = gapsOf(w);
   if (briefs.length === 0) return [];
   const sizes = briefs.map((b) => Math.max(1, ix.own.get(b.address)!));
-  const scale = Math.max(0, w - BAND.gap * (briefs.length - 1)) / sizes.reduce((a, b) => a + b, 0);
+  const scale = Math.max(0, w - gap.brief * (briefs.length - 1)) / sizes.reduce((a, b) => a + b, 0);
   if (Math.min(...sizes) * scale < BAND.floorBrief) {
     // The level as one cell, marked that it holds more than the room can show.
     return [{ a: levelAddress, x: 0, w, door: true, paras: null, more: true, on: on !== null }];
   }
   const widths = sizes.map((s) => s * scale);
-  const xs = offsets(widths, BAND.gap);
+  const xs = offsets(widths, gap.brief);
   const paraSizes = briefs.map((b) => blocksOf(b).map((t) => Math.max(1, textOf([t]).length)));
   const parasFit = paraSizes.every((ps) => ps.every((p) => p * scale >= BAND.floorPara));
   const parasOf = (i: number) => {
     const ps = paraSizes[i];
-    const s = (widths[i] - BAND.seg * (ps.length - 1)) / ps.reduce((a, c) => a + c, 0);
+    const s = (widths[i] - gap.para * (ps.length - 1)) / ps.reduce((a, c) => a + c, 0);
     const pw = ps.map((p) => p * s);
-    return offsets(pw, BAND.seg).map((x, k) => ({ x: xs[i] + x, w: pw[k] }));
+    return offsets(pw, gap.para).map((x, k) => ({ x: xs[i] + x, w: pw[k] }));
   };
   return briefs.map((b, i) => ({
     a: b.address,
@@ -632,21 +646,38 @@ function layoutBand(levelAddress: string, w: number, on: string | null): Cell[] 
   }));
 }
 
-/** The cells of a band as SVG elements; `h` is the full height, the ink sits in its middle. */
+/** The cells of a band as SVG elements, every segment a pill; `h` is the full height, the ink sits in its middle. */
 function bandCells(levelAddress: string, w: number, h: number, on: string | null): string {
   const inkH = Math.max(3, Math.round(h * 0.3));
   const y = Math.round((h - inkH) / 2) - 1;
-  const rect = (cls: string, x: number, yy: number, ww: number, hh: number, rx: number) => `<rect class="${cls}" x="${x.toFixed(1)}" y="${yy}" width="${Math.max(0.5, ww).toFixed(1)}" height="${hh}" rx="${rx}"/>`;
+  const gap = gapsOf(w);
+  const rect = (cls: string, x: number, yy: number, ww: number, hh: number) => `<rect class="${cls}" x="${x.toFixed(1)}" y="${yy}" width="${Math.max(1, ww).toFixed(1)}" height="${hh}" rx="${hh / 2}"/>`;
   return layoutBand(levelAddress, w, on)
     .map(
       (c) =>
-        `<g class="cell${c.on ? " on" : ""}" data-a="${esc(c.a)}">` +
-        rect("hit", c.x - BAND.gap / 2, 0, c.w + BAND.gap, h, 0) +
-        (c.paras ? c.paras.map((p) => rect("seg", p.x, y, p.w, inkH, 1)).join("") : rect("seg", c.x, y, c.w, inkH, 1.5)) +
-        (c.door ? rect(`door${c.more ? " more" : ""}`, c.x, y + inkH + 2, c.w, 1.5, 0) : "") +
+        `<g class="cell${c.on ? " on" : ""}" data-a="${esc(c.a)}" ${hued(c.a)}>` +
+        rect("hit", c.x - gap.brief / 2, 0, c.w + gap.brief, h) +
+        (c.paras ? c.paras.map((p) => rect("seg", p.x, y, p.w, inkH)).join("") : rect("seg", c.x, y, c.w, inkH)) +
+        (c.door ? rect(`door${c.more ? " more" : ""}`, c.x, y + inkH + 3, c.w, 2) : "") +
         `</g>`,
     )
     .join("");
+}
+
+/** The reading cursor: where the pane's scroll box stands, mapped onto its band. */
+function cursorOf(levelAddress: string, w: number, top: number, bottom: number, briefs: { a: string; top: number; height: number }[]): { x: number; w: number } | null {
+  const cells = layoutBand(levelAddress, w, null);
+  if (cells.length === 0 || cells[0].more) return null;
+  const at = (y: number): number => {
+    const i = briefs.findIndex((b) => y < b.top + b.height);
+    if (i < 0) return w;
+    const cell = cells.find((c) => c.a === briefs[i].a);
+    if (!cell) return 0;
+    return cell.x + cell.w * Math.max(0, Math.min(1, (y - briefs[i].top) / Math.max(1, briefs[i].height)));
+  };
+  const x0 = at(top);
+  const x1 = at(bottom);
+  return { x: x0, w: Math.max(6, x1 - x0) };
 }
 
 const bandSvg = (levelAddress: string, w: number, h: number, on: string | null, cls: string): string =>
@@ -668,7 +699,10 @@ function pathSvg(w: number, h: number): string {
 
 // ## 3.5 The body, as droplets on a plate
 
-const PLATE = { centre: 0.11, gap: 2.2, floor: 7, round: 9 };
+const PLATE = { centre: 0.11, gap: 2.6, floor: 7, round: 9 };
+
+/** The room between siblings at a depth, along the arc: wide between the root's branches, narrowing outward. */
+const sideGap = (d: number): number => [0, 14, 6, 3][d] ?? 2;
 
 type Drop = { a: string; r0: number; r1: number; a0: number; a1: number; more: boolean; label: string | null };
 
@@ -680,16 +714,21 @@ function layoutPlate(S: number): { drops: Drop[]; smallest: number; rc: number }
   const D = Math.max(1, ix.depth);
   const t = (R - rc) / D;
   const ring = (d: number) => ({ r0: rc + (d - 1) * t + PLATE.gap / 2, r1: rc + d * t - PLATE.gap / 2 });
-  // A level fits when every cell keeps at least the floor along its inner arc; otherwise it is not drawn.
+  // A cell keeps at least the floor along its inner arc, and the floor grows with the ring's thickness so a
+  // small cell stays a droplet rather than a sliver. A level fits when every cell keeps it, with the room
+  // between siblings taken out first; otherwise it is not drawn.
+  const floorAt = (d: number) => Math.max(PLATE.floor, (ring(d).r1 - ring(d).r0) * 0.35);
+  const usable = (n: number, d: number, span: number) => span - ((n - 1) * sideGap(d)) / ring(d).r0;
   const fits = (kids: Brief[], d: number, span: number) => {
     const { r0, r1 } = ring(d);
-    return kids.length > 0 && d <= D && r1 - r0 >= PLATE.floor && (kids.length * (PLATE.floor + PLATE.gap)) / r0 <= span;
+    return kids.length > 0 && d <= D && r1 - r0 >= PLATE.floor && (kids.length * floorAt(d)) / r0 <= usable(kids.length, d, span);
   };
   /** Angles by weight, with the small ones lifted to the floor and the large ones yielding the difference. */
-  const anglesFor = (kids: Brief[], r0: number, span: number) => {
+  const anglesFor = (kids: Brief[], d: number, span: number) => {
+    const { r0 } = ring(d);
     const weights = kids.map((k) => Math.max(1, ix.branch.get(k.address)!));
     const total = weights.reduce((x, y) => x + y, 0);
-    const floor = (PLATE.floor + PLATE.gap) / r0;
+    const floor = floorAt(d) / r0;
     const raw = weights.map((w) => (w / total) * span);
     const owed = raw.reduce((s, x) => s + (x < floor ? floor - x : 0), 0);
     const large = raw.reduce((s, x) => s + (x < floor ? 0 : x), 0);
@@ -699,8 +738,8 @@ function layoutPlate(S: number): { drops: Drop[]; smallest: number; rc: number }
     const kids = level(parent);
     if (!fits(kids, d, span)) return [];
     const { r0, r1 } = ring(d);
-    const angles = anglesFor(kids, r0, span);
-    const starts = offsets(angles, 0);
+    const angles = anglesFor(kids, d, usable(kids.length, d, span));
+    const starts = offsets(angles, sideGap(d) / r0);
     return kids.flatMap((k, i) => {
       const chord = 2 * r0 * Math.sin(Math.min(Math.PI, angles[i]) / 2);
       const drop: Drop = {
@@ -751,7 +790,7 @@ function plateSvg(S: number): string {
   const c = S / 2;
   const onPath = new Set(prefixesOf(state.opened));
   const cls = (d: Drop) => `${d.more ? " more" : ""}${onPath.has(d.a) ? " on" : ""}`;
-  const cells = drops.map((d) => `<g class="cell${cls(d)}" data-a="${esc(d.a)}"><path d="${dropletPath(c, c, d.r0, d.r1, d.a0, d.a1, PLATE.round)}"/></g>`);
+  const cells = drops.map((d) => `<g class="cell${cls(d)}" data-a="${esc(d.a)}" ${hued(d.a)}><path d="${dropletPath(c, c, d.r0, d.r1, d.a0, d.a1, PLATE.round)}"/></g>`);
   // Labels are drawn after every cell, so no later droplet covers an earlier name; each carries its
   // brief's address so it lights with the cell it names.
   const labels = drops
@@ -781,13 +820,14 @@ function paneHtml(levelAddress: string): string {
   const cls = (b: Brief) => `brief${b.door ? " door" : ""}${onPath.has(b.address) ? " on" : ""}${b.address === state.opened ? " here" : ""}`;
   const articles = briefs.map(
     (b) =>
-      `<article class="${cls(b)}" data-a="${esc(b.address)}">` +
+      `<article class="${cls(b)}" data-a="${esc(b.address)}" ${hued(b.address)}>` +
       `<h2 class="face"><span class="num">${esc(shownNumber(b))}</span><span class="title">${esc(b.title)}</span>${b.door ? bandSvg(b.address, 96, 12, null, "beside") : ""}</h2>` +
       blocks(b.body) +
       foot(refsOf(b)) +
       `</article>`,
   );
-  return `<div class="strip"></div><div class="prose">${opening}${record}${articles.join("")}</div>`;
+  // The band stands above the scroll box and never scrolls with it.
+  return `<div class="strip"></div><div class="scroll"><div class="prose">${opening}${record}${articles.join("")}</div></div>`;
 }
 
 /** The rest of a brief, as the overlay tells it. */
@@ -822,8 +862,9 @@ const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
 const paneWidth = (): number => ui.row.querySelector<HTMLElement>(".pane")?.getBoundingClientRect().width ?? 592;
 const fit = (): number => Math.max(1, Math.floor(ui.viewport.getBoundingClientRect().width / paneWidth() + 0.01));
 
-/** The room the pinned strip takes at the top of a pane, which a brief scrolled to must clear. */
-const stripHeight = (pane: HTMLElement): number => (pane.querySelector<HTMLElement>(".strip")?.offsetHeight ?? 34) + 6;
+/** A pane's scroll box, and the room above a brief scrolled to, so its heading breathes. */
+const scrollBox = (pane: HTMLElement): HTMLElement => pane.querySelector<HTMLElement>(".scroll")!;
+const ABOVE = 12;
 
 /** Panes are kept by address: those on the path stay, with their scroll, and the rest go. */
 function drawPanes(): void {
@@ -839,7 +880,15 @@ function drawPanes(): void {
       el.className = "pane";
       el.dataset.level = a;
       el.innerHTML = paneHtml(a);
-      el.addEventListener("scroll", () => el.classList.toggle("scrolled", el.scrollTop > 2), { passive: true });
+      const box = scrollBox(el);
+      box.addEventListener(
+        "scroll",
+        () => {
+          el.classList.toggle("scrolled", box.scrollTop > 2);
+          drawCursor(el);
+        },
+        { passive: true },
+      );
       ui.row.appendChild(el);
     });
   // The path marks move with the opened address, so every pane's marks are refreshed.
@@ -851,16 +900,29 @@ function drawPanes(): void {
   drawStrips();
 }
 
-/** The band above every pane, at the pane's width. */
+/** The band above every pane, as wide as the prose beneath it, with the reading cursor on it. */
 function drawStrips(): void {
   const panes = panesOf(state.opened);
   all<HTMLElement>(".pane", ui.row).forEach((el) => {
     const a = el.dataset.level!;
     const deeper = state.opened !== a && state.opened.startsWith(a === "" ? "" : a + "/") ? state.opened : null;
     const next = panes[panes.indexOf(a) + 1] ?? deeper;
-    const w = Math.max(40, Math.floor(el.getBoundingClientRect().width - 48));
-    el.querySelector<HTMLElement>(".strip")!.innerHTML = bandSvg(a, w, 26, next, "above");
+    const w = Math.max(40, Math.floor(el.querySelector<HTMLElement>(".prose")!.getBoundingClientRect().width));
+    el.querySelector<HTMLElement>(".strip")!.innerHTML = bandSvg(a, w, 28, next, "above").replace("</svg>", `<rect class="cursor" x="0" y="1" width="0" height="26" rx="6"/></svg>`);
+    drawCursor(el);
   });
+}
+
+/** Moves a pane's reading cursor to where its scroll box stands. */
+function drawCursor(pane: HTMLElement): void {
+  const svg = pane.querySelector<SVGSVGElement>("svg.above");
+  const cursor = svg?.querySelector<SVGRectElement>(".cursor");
+  if (!svg || !cursor) return;
+  const box = scrollBox(pane);
+  const briefs = all<HTMLElement>(".brief", box).map((b) => ({ a: b.dataset.a!, top: b.offsetTop, height: b.offsetHeight }));
+  const c = cursorOf(pane.dataset.level!, Number(svg.getAttribute("width")), box.scrollTop, box.scrollTop + box.clientHeight, briefs);
+  cursor.setAttribute("x", c ? c.x.toFixed(1) : "0");
+  cursor.setAttribute("width", c ? c.w.toFixed(1) : "0");
 }
 
 function drawPath(): void {
@@ -965,27 +1027,29 @@ function opened(a: string): void {
   notice(state.opened === a ? "" : `No brief at ${a}; showing ${state.opened || "the root"} instead.`);
   drawAll();
   const art = ui.row.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.opened)}"]`);
-  const pane = art?.closest<HTMLElement>(".pane");
-  if (!art || !pane) return;
-  const pr = pane.getBoundingClientRect();
+  const box = art?.closest<HTMLElement>(".scroll");
+  if (!art || !box) return;
+  const br = box.getBoundingClientRect();
   const ar = art.getBoundingClientRect();
-  const under = stripHeight(pane);
-  if (ar.top < pr.top + under || ar.top > pr.bottom - 80) pane.scrollTo({ top: art.offsetTop - under, behavior: "smooth" });
+  if (ar.top < br.top || ar.top > br.bottom - 80) box.scrollTo({ top: art.offsetTop - ABOVE, behavior: "smooth" });
 }
 
 /** Scrubbing a level's band moves the reading beneath it to the brief under the pointer, and lights it. */
 function scrubBand(svg: SVGSVGElement, clientX: number): void {
   const pane = svg.closest<HTMLElement>(".pane");
   if (!pane) return;
+  const box = scrollBox(pane);
   const r = svg.getBoundingClientRect();
   const w = Number(svg.getAttribute("width"));
   const x = ((clientX - r.left) / r.width) * w;
+  const half = gapsOf(w).brief / 2;
   const cells = layoutBand(svg.dataset.level!, w, null);
-  const cell = cells.find((c) => x >= c.x - BAND.gap / 2 && x <= c.x + c.w + BAND.gap / 2) ?? (x < 0 ? cells[0] : cells[cells.length - 1]);
-  const art = cell && !cell.more ? pane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(cell.a)}"]`) : null;
+  const cell = cells.find((c) => x >= c.x - half && x <= c.x + c.w + half) ?? (x < 0 ? cells[0] : cells[cells.length - 1]);
+  const art = cell && !cell.more ? box.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(cell.a)}"]`) : null;
   if (!cell || !art) return;
   const within = Math.max(0, Math.min(1, (x - cell.x) / Math.max(1, cell.w)));
-  pane.scrollTop = art.offsetTop - stripHeight(pane) + within * Math.max(0, art.offsetHeight - pane.clientHeight * 0.5);
+  box.scrollTop = art.offsetTop - ABOVE + within * Math.max(0, art.offsetHeight - box.clientHeight * 0.5);
+  drawCursor(pane);
   state.pointed = cell.a;
   light();
 }
@@ -1005,9 +1069,12 @@ function wire(): void {
   document.addEventListener("pointermove", (e) => {
     const t = e.target as HTMLElement;
     const el = named(e);
-    // a pane's own brief is pointed only from its face and figures, not from every word of its prose
-    const inProse = el?.classList.contains("brief") && !(t.closest(".face") || t.closest(".fig"));
-    point(el && !inProse ? el.dataset.a! : null, el ?? undefined, e.clientX, e.clientY);
+    // A brief in a pane is already in front of the reader: pointing at its face lights it in the figures
+    // and tells nothing; pointing at its prose does nothing at all. Cells and links tell.
+    const isBrief = el?.classList.contains("brief") ?? false;
+    const onFace = isBrief && !!t.closest(".face") && !t.closest(".fig");
+    const inProse = isBrief && !onFace;
+    point(el && !inProse ? el.dataset.a! : null, isBrief ? undefined : (el ?? undefined), e.clientX, e.clientY);
   });
   document.documentElement.addEventListener("pointerleave", () => point(null));
 
@@ -1087,10 +1154,10 @@ function setBody(body: Body): void {
   w.title = body.warnings.join("\n");
   body.warnings.forEach((x) => console.warn(x));
   // every pane is drawn again from the new body, keeping its scroll
-  const scrolls = new Map(all<HTMLElement>(".pane", ui.row).map((el) => [el.dataset.level!, el.scrollTop]));
+  const scrolls = new Map(all<HTMLElement>(".pane", ui.row).map((el) => [el.dataset.level!, scrollBox(el).scrollTop]));
   ui.row.innerHTML = "";
   opened(readHash());
-  all<HTMLElement>(".pane", ui.row).forEach((el) => (el.scrollTop = scrolls.get(el.dataset.level!) ?? 0));
+  all<HTMLElement>(".pane", ui.row).forEach((el) => (scrollBox(el).scrollTop = scrolls.get(el.dataset.level!) ?? 0));
 }
 
 async function start(): Promise<void> {
@@ -1120,16 +1187,21 @@ if (typeof document !== "undefined") start();
 const CSS = `
 :root {
   --ink: #141414; --muted: #6b6b6b; --dim: #a3a3a3; --ground: #ffffff;
-  --rest: #d9d6cf; --door: #b9b5ac; --on: #141414; --lit: #b8791f; --tint: rgba(0,0,0,.045);
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  --s1: 1.5rem; --s2: 1.2rem; --s3: 1.0625rem; --s4: .9375rem; --s5: .8125rem; --s6: .6875rem;
-  --pane: 37rem; --gutter: 1.5rem;
+  --s1: 1.75rem; --s2: 1.375rem; --s3: 1.0625rem; --s4: .9375rem; --s5: .8125rem; --s6: .6875rem;
+  --pane: 40rem; --gutter: 2.5rem; --measure: 34rem;
+  --h: 60;
+}
+/* Colour follows the branch: every element that names a brief carries its hue, and these derive from it. */
+*, ::before, ::after {
+  --rest: oklch(88% 0.045 var(--h)); --door: oklch(74% 0.085 var(--h)); --on: oklch(42% 0.09 var(--h));
+  --lit: oklch(58% 0.17 var(--h)); --tint: oklch(96.5% 0.02 var(--h));
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
-body { display: flex; flex-direction: column; background: var(--ground); color: var(--ink); font-family: var(--serif); font-size: var(--s3); line-height: 1.55; overflow: hidden; -webkit-font-smoothing: antialiased; }
-a { color: inherit; text-decoration: underline; text-decoration-color: var(--door); text-underline-offset: .15em; }
+body { display: flex; flex-direction: column; background: var(--ground); color: var(--ink); font-family: var(--serif); font-size: var(--s3); line-height: 1.6; overflow: hidden; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--door); text-decoration-thickness: 1px; text-underline-offset: .18em; }
 a:hover, a.lit { text-decoration-color: var(--lit); }
 a.web { text-decoration-style: dotted; }
 a.owed { text-decoration-style: dashed; color: var(--muted); cursor: help; }
@@ -1137,84 +1209,85 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .chrome { font-family: var(--sans); font-size: var(--s5); color: var(--muted); letter-spacing: .01em; }
 .dim { color: var(--dim); }
 
-#header { flex: 0 0 auto; padding: .55rem var(--gutter) .35rem; }
-#header .bar { display: flex; align-items: baseline; gap: 1rem; min-height: 1.4rem; }
+#header { flex: 0 0 auto; padding: 12px var(--gutter) 8px; }
+#header .bar { display: flex; align-items: baseline; gap: 16px; min-height: 1.4rem; }
 #header .root-title { color: var(--ink); font-weight: 600; }
 #header .warnings { cursor: help; }
 #header .notice { color: var(--lit); }
-.plate-toggle { margin-left: auto; background: none; border: 0; padding: .1rem .5rem; border-radius: 6px; cursor: pointer; color: var(--muted); font: inherit; }
-.plate-toggle:hover { background: var(--tint); }
+.plate-toggle { margin-left: auto; background: none; border: 0; padding: 2px 8px; border-radius: 6px; cursor: pointer; color: var(--muted); font: inherit; }
+.plate-toggle:hover { background: rgba(0,0,0,.05); }
 .plate-toggle.on { color: var(--ink); }
-#path { margin-top: .35rem; }
+#path { margin-top: 8px; }
 
 #viewport { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 #row { display: flex; height: 100%; transition: transform .28s cubic-bezier(.2,.7,.2,1); will-change: transform; }
-.pane { position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 var(--gutter) 4rem; scrollbar-gutter: stable; }
-.pane .strip { position: sticky; top: 0; z-index: 2; background: var(--ground); padding: .3rem 0 .35rem; transition: box-shadow .2s; }
-.pane.scrolled .strip { box-shadow: 0 10px 10px -10px rgba(0,0,0,.18); }
-.prose { max-width: 34rem; }
-.opening h1 { font-size: var(--s1); font-weight: 600; line-height: 1.2; margin: .6rem 0 .8rem; letter-spacing: -.005em; }
-.opening { margin-bottom: 1.6rem; }
-.record { margin: .5rem 0 1.2rem; }
+.pane { position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; display: flex; flex-direction: column; padding: 0 var(--gutter); }
+.pane .strip { flex: 0 0 auto; padding: 12px 0 8px; }
+.pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: 8px var(--gutter) 6rem; scrollbar-gutter: stable; transition: box-shadow .2s; }
+.pane.scrolled .scroll { box-shadow: inset 0 12px 10px -10px rgba(0,0,0,.14); }
+.prose { max-width: var(--measure); }
+.opening { margin-bottom: 40px; }
+.opening h1 { font-size: var(--s1); font-weight: 600; line-height: 1.15; letter-spacing: -.012em; margin: 8px 0 16px; }
+.record { margin: 4px 0 24px; }
 
-.brief { position: relative; margin: 0 -.75rem 1.5rem; padding: .35rem .75rem .25rem; border-radius: 10px; }
+.brief { position: relative; margin: 0 -16px 16px; padding: 20px 16px 12px; border-radius: 14px; }
 .brief.door { cursor: pointer; }
 .brief.door a, .brief.door pre { cursor: auto; }
 .brief.door:hover, .brief.lit { background: var(--tint); }
-.brief.on::before { content: ""; position: absolute; left: 0; top: .9rem; bottom: .7rem; width: 2px; background: var(--on); border-radius: 1px; }
-.brief.here::before { background: var(--lit); }
-.face { display: flex; align-items: baseline; gap: .55rem; font-size: var(--s2); font-weight: 600; line-height: 1.25; margin: 0 0 .55rem; }
-.face .num { font-family: var(--sans); font-size: var(--s5); font-weight: 500; color: var(--dim); min-width: 1.6rem; }
+.brief.on .num { color: var(--on); font-weight: 600; }
+.brief.here .num { color: var(--lit); }
+.face { display: flex; align-items: baseline; font-size: var(--s2); font-weight: 600; line-height: 1.2; letter-spacing: -.012em; margin: 0 0 12px; }
+.face .num { flex: 0 0 auto; width: 1.75rem; margin-left: -2.25rem; margin-right: .5rem; text-align: right; font-family: var(--sans); font-size: var(--s5); font-weight: 500; letter-spacing: 0; color: var(--dim); }
 .face .title { flex: 1 1 auto; }
-.face svg.beside { flex: 0 0 auto; align-self: center; margin-left: .5rem; }
-.brief p, .brief li { margin: 0 0 .85rem; }
-.brief li { margin-bottom: .5rem; }
-.brief ul, .brief ol { padding-left: 1.4rem; margin: 0 0 .85rem; }
-.brief blockquote { margin: 0 0 .85rem; padding-left: .9rem; border-left: 2px solid var(--rest); color: var(--muted); }
-.brief pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: var(--s5); line-height: 1.45; background: rgba(0,0,0,.035); border-radius: 8px; padding: .7rem .9rem; overflow-x: auto; margin: 0 0 .85rem; }
+.face svg.beside { flex: 0 0 auto; align-self: center; margin-left: 16px; }
+.brief p, .brief li { margin: 0 0 12px; }
+.brief li { margin-bottom: 8px; }
+.brief ul, .brief ol { padding-left: 1.4rem; margin: 0 0 12px; }
+.brief blockquote { margin: 0 0 12px; padding-left: 16px; border-left: 2px solid var(--rest); color: var(--muted); }
+.brief pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: var(--s5); line-height: 1.5; background: rgba(0,0,0,.035); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 0 0 12px; }
 .brief code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92em; }
-.brief .table { overflow-x: auto; margin: 0 0 .85rem; }
+.brief .table { overflow-x: auto; margin: 0 0 12px; }
 .brief table { border-collapse: collapse; font-family: var(--sans); font-size: var(--s5); line-height: 1.4; }
-.brief th { text-align: left; font-weight: 600; padding: .25rem .8rem .25rem 0; border-bottom: 1px solid var(--rest); }
-.brief td { padding: .3rem .8rem .3rem 0; vertical-align: top; }
+.brief th { text-align: left; font-weight: 600; padding: 4px 12px 4px 0; border-bottom: 1px solid var(--rest); }
+.brief td { padding: 4px 12px 4px 0; vertical-align: top; }
 .brief em { font-style: italic; }
-.brief hr { border: 0; border-top: 1px solid var(--rest); margin: 1rem 0; }
+.brief hr { border: 0; border-top: 1px solid var(--rest); margin: 16px 0; }
 .stray { color: var(--muted); }
-.foot { font-family: var(--sans); font-size: var(--s5); color: var(--muted); margin-top: -.2rem; }
+.foot { font-family: var(--sans); font-size: var(--s5); color: var(--muted); margin-top: -4px; }
 
 svg.fig { display: block; overflow: visible; touch-action: none; user-select: none; }
 svg.fig .hit { fill: transparent; }
 svg.fig .seg { fill: var(--rest); }
 svg.fig .door { fill: var(--door); }
 svg.fig .door.more { fill: none; stroke: var(--door); stroke-width: 1.5; stroke-dasharray: 2 2; }
-svg.fig .cell.on .seg { fill: var(--on); }
-svg.fig .cell.on .door { fill: var(--on); }
+svg.fig .cell.on .seg, svg.fig .cell.on .door { fill: var(--on); }
 svg.fig .cell.lit .seg, svg.fig .cell.lit .door { fill: var(--lit); }
 svg.fig .cell { cursor: pointer; }
-svg.path .step:not(.inview) .seg { opacity: .55; }
-svg.path .step:not(.inview) .door { opacity: .55; }
+svg.fig .cursor { fill: none; stroke: rgba(0,0,0,.45); stroke-width: 1.25; pointer-events: none; transition: x .08s, width .08s; }
+svg.path .step:not(.inview) .seg, svg.path .step:not(.inview) .door { opacity: .5; }
 
 .plate-box { position: absolute; left: 0; top: 0; background: var(--ground); z-index: 3; }
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
+svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
 svg.plate .cell.more path { stroke: var(--door); stroke-width: 1; stroke-dasharray: 3 2; }
-svg.plate .cell.on path, svg.plate .cell.on circle { fill: var(--door); }
+svg.plate .cell.on path { fill: var(--door); }
 svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
 svg.plate .label { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
-svg.plate .label.lit, svg.plate .label.on, svg.plate .cell.lit .label, svg.plate .cell.on .label { fill: var(--ground); }
+svg.plate .label.lit, svg.plate .cell.lit .label { fill: var(--ground); }
 svg.plate .note { font-family: var(--sans); font-size: 10px; fill: var(--dim); }
 
 #tell { position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none; width: 20rem; max-width: calc(100vw - 16px);
   background: rgba(255,255,255,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,.07); border-radius: 10px; padding: .6rem .85rem .55rem; font-size: var(--s4); line-height: 1.45; }
-#tell .tell-face { display: flex; gap: .5rem; align-items: baseline; font-weight: 600; font-size: var(--s3); margin-bottom: .25rem; }
+  border: 1px solid rgba(0,0,0,.07); border-radius: 12px; padding: 12px 16px 10px; font-size: var(--s4); line-height: 1.45; }
+#tell .tell-face { display: flex; gap: 8px; align-items: baseline; font-weight: 600; font-size: var(--s3); margin-bottom: 4px; }
 #tell .tell-face .num { font-family: var(--sans); font-size: var(--s5); font-weight: 500; color: var(--dim); }
-#tell p { margin: 0 0 .45rem; }
-#tell .chrome { margin-top: .2rem; }
-#tell .tell-level { margin: .35rem 0 .1rem; }
-#tell .tell-level svg { margin-bottom: .1rem; }
+#tell p { margin: 0 0 8px; }
+#tell .chrome { margin-top: 4px; }
+#tell .tell-level { margin: 8px 0 2px; }
+#tell .tell-level svg { margin-bottom: 2px; }
 
 @media (max-width: 720px) {
-  :root { --pane: 100vw; --gutter: 1rem; }
+  :root { --pane: 100vw; --gutter: 1.5rem; }
   #tell { width: calc(100vw - 16px); }
 }
 `;
