@@ -1257,6 +1257,20 @@ const GUTTER = 210;
 const RAIL = 30;
 /** The room beneath a wing's figures that its strip stands in, above the space every area keeps. */
 const STRIP = 34;
+/** Where the prose's fade lies at each edge of the lane: clear from the edge to here, then fading in over the fade setting. */
+const RIM = { top: 3, foot: 6 };
+
+/**
+ * The band a wing's figures stand in, as tall as the prose reads: from the middle of the fade at the top to the middle
+ * of the fade at the foot, where the prose stands half seen, so no figure reaches further up or down than the prose
+ * does. It keeps at least one gap at the top, and the strip's room and a gap at the foot.
+ */
+function band(h: number): { top: number; height: number } {
+  const s = state.settings;
+  const top = Math.max(s.gap, (h * (RIM.top + s.fade / 2)) / 100);
+  const foot = Math.max(s.gap + STRIP, (h * (RIM.foot + s.fade / 2)) / 100);
+  return { top: Math.round(top), height: Math.max(0, Math.round(h - top - foot)) };
+}
 
 /** How wide an area stands: a closed wing its rail, a closed gutter nothing, a gutter its column, a wing its widest figure, its strip free to reach a little past it into the space beside. */
 const takesRoom = (area: AreaName): boolean => isOpen(area) || area.startsWith("wing");
@@ -1304,6 +1318,8 @@ function drawLayout(): void {
   root.setProperty("--gap", `${s.gap}px`);
   root.setProperty("--dim", `${s.dim}`);
   root.setProperty("--edge", `${s.fade}%`);
+  root.setProperty("--rim-top", `${RIM.top}%`);
+  root.setProperty("--rim-foot", `${RIM.foot}%`);
   // the theme picks a side of every colour; the system setting leaves it to the browser, so nothing flashes
   if (s.theme === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = s.theme;
@@ -1375,7 +1391,7 @@ function alignEnds(): void {
   let B = h / 2;
   if (state.settings.line === "ends") {
     // the shape's own room, wherever in a wing it stands; with no shape drawn, the room a lone figure would have
-    const slot = slots.get("wingL:shape") ?? slots.get("wingR:shape") ?? { top: state.settings.gap, height: h - 2 * state.settings.gap - STRIP };
+    const slot = slots.get("wingL:shape") ?? slots.get("wingR:shape") ?? band(h);
     const first = slot.top + SHAPE.inset;
     for (let i = 0; i < 6; i++) {
       const k = (slot.height - 8) / (P + laneH + tail + B);
@@ -1510,7 +1526,7 @@ const slots = new Map<string, { top: number; height: number }>();
 /**
  * Lays one wing whole. One figure has the wing's height; two stand at its top and its foot, with one space between. A
  * figure that takes only what it needs is drawn first and measured, and a figure that grows takes what is left, shared
- * evenly when both grow. The wing keeps one space above its figures and one above its strip, as every area does.
+ * evenly when both grow. The figures stand in the band the prose reads in, between the middles of its fades.
  */
 function drawWing(area: "wingL" | "wingR"): void {
   const el = ui.parts[area];
@@ -1522,8 +1538,7 @@ function drawWing(area: "wingL" | "wingR"): void {
     .forEach((k) => slots.delete(k));
   if (figures.length === 0) return;
   const W = el.clientWidth;
-  const top = s.gap;
-  const room = el.clientHeight - 2 * s.gap - STRIP;
+  const { top, height: room } = band(el.clientHeight);
   const slotted = figures.map((f) => {
     const div = document.createElement("div");
     div.className = "slot";
@@ -1896,7 +1911,7 @@ function wire(): void {
     }
   });
   const release = () => {
-    if (drag?.kind === "knob" && drag.moved) (saveSettings(), drawStrips(), drawWings());
+    if (drag?.kind === "knob" && drag.moved) (saveSettings(), drawStrips(), drawWingsAligned());
     drag = null;
     setTimeout(() => (state.scrubbing = false), 0);
   };
@@ -2088,7 +2103,7 @@ const CSS = `
   --body: 17px; --t: 33px; --h1: 26.5px; --h2: 21px; --h3: 19px; --h4: 17px;
   --prose-face: var(--serif); --head-face: var(--serif); --head-tight: 1; --small: 13px;
   --leading: 27.2px;
-  --gap: 24px; --measure: 600px; --dim: .4; --edge: 8%;
+  --gap: 24px; --rim-top: 3%; --rim-foot: 6%; --measure: 600px; --dim: .4; --edge: 8%;
   --thin: 0;
   --h: 60;
 }
@@ -2131,7 +2146,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .slot::-webkit-scrollbar { display: none; }
 .slot > * { max-width: 100%; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); }
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--rim-top) * var(--lift, 1)), black calc((var(--rim-top) + var(--edge)) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent calc(var(--rim-top) * var(--lift, 1)), black calc((var(--rim-top) + var(--edge)) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); }
 #scroll::-webkit-scrollbar { display: none; }
 /* the room above and below the lane is set by the reading line's setting, each time the lane is laid */
 #content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
