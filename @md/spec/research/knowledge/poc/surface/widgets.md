@@ -24,7 +24,7 @@ No widget repeats what is in view, and ink limits it: a mark is spent in proport
 
 The tree is a wing widget: the lane as an outline, one row per brief in the lane, each nested under its parent, open where the brief is whole. It is not a second state: folding a row folds the brief in the lane and opening one opens it, so what the tree shows is exactly what the lane holds, and a reader folds a whole region from the tree without scrolling to it. The name goes.
 
-A line lies across the highlighted row, the focus or the brief under the pointer, and glides as it moves. The wing scrolls only to keep the focus in view, driven by the lane and never free.
+When the lane is scoped, the levels above stand as dim rows over the root, each a way out. A line lies across the highlighted row, the focus or the brief under the pointer, and glides as it moves. The wing scrolls only to keep the focus in view, driven by the lane and never free.
 
 *Reasoned, the author's, 2026-09-13. Built first as columns of siblings stacked one level under the next, which the author found strange, since a brief's children stood at the bottom rather than beneath it; then as a tree with an opening of its own, which the author found strange again, since opening there and opening in the text should be one thing.*
 
@@ -54,7 +54,7 @@ Settings is a wing widget: a row of meters, each a 270 degree arc with its icon 
 
 ## 6. The shape
 
-The shape is the left wing's first widget: the lane as laid, drawn small. Each brief in the lane stands as its blocks, a heading a short bar and a paragraph a block as tall as it is drawn, shifted right by the brief's depth, so the reader sees the shape of the prose and the nesting it stands in at once, and fold state shows as length. Every block a brief has is drawn, a list or a table as readily as a paragraph. A folded brief tells beside its face what it hides: a grey tick for every paragraph, then, where a level lies beneath, a grey tail as long as that level is heavy, so a reader sees at a glance where the lane is folded, whether paragraphs or levels wait there, and how much. The viewport is drawn over it; dragging it scrubs the lane, pressing a brief folds or opens it in place, and pressing with the modifier held goes there, since folding from the shape is what it is most for.
+The shape is the left wing's first widget: the lane as laid, drawn small. Each brief in the lane stands as its blocks, a heading a short bar and a paragraph a block as tall as it is drawn, shifted right by the brief's depth, so the reader sees the shape of the prose and the nesting it stands in at once, and fold state shows as length. Every block a brief has is drawn, a list or a table as readily as a paragraph. A folded brief tells beside its face what it hides: a grey tick for every paragraph, then, where a level lies beneath, a grey tail as long as that level is heavy, so a reader sees at a glance where the lane is folded, whether paragraphs or levels wait there, and how much. When the lane is scoped, the levels above the scope are drawn the same way on the other side: a grey heading bar per ancestor, stepping in from the left above the lane's own run. The viewport is drawn over it; dragging it scrubs the lane, pressing a brief folds or opens it in place, and pressing with the modifier held goes there, since folding from the shape is what it is most for.
 
 *Reasoned, the author's, 2026-09-13, from the wish for a minimap that moves the briefs and their paragraphs right and left by where they stand in the nesting.*
 

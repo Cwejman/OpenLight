@@ -54,7 +54,7 @@ Above the focus, then, lies what was taken whole and what was passed at its face
 
 Folding takes a brief to its face and opening takes it whole, and the face itself is what a reader presses to do either: a folded brief carries a line beneath its face that says open, with a small bar for every paragraph it hides and a count of the briefs beneath it, and a whole brief carries a line at its foot that says fold. The line is the press, and nothing else in the brief is: the text stays text, no mark stands beside the heading, and nothing tints under the pointer. What a press would give is known before it is pressed. A brief that hides nothing, one paragraph and no level, carries no line, and no key acts on it either, so nothing about it can ever change under the reader. Opening a brief lays its level at faces where nothing was set; folding one takes its level out of the lane.
 
-The same act is everywhere the brief is drawn. The tree is the lane's own outline, so folding a row there is folding the brief in the lane, one state and never two, and there the folder's triangle does it, since that is what a tree reader expects. In a figure, the shape or the plate, a press goes to the brief and a press with the modifier held folds or opens it in place. When the reader is only scrolling, the space bar does the same to the brief in focus, and with shift held it folds the brief above, the parent of the focus, which takes the reader up to it. The arrow keys move the focus and fold nothing: up and down to the brief before and after in the lane, left to the parent, right into the first brief beneath when it stands in the lane.
+The same act is everywhere the brief is drawn. The tree is the lane's own outline, so folding a row there is folding the brief in the lane, one state and never two, and there the folder's triangle does it, since that is what a tree reader expects. In a figure, the shape or the plate, a press goes to the brief and a press with the modifier held folds or opens it in place. When the reader is only scrolling, the space bar does the same to the brief in focus, and with shift held it folds the brief above, the parent of the focus, which takes the reader up to it. The arrow keys move the focus and fold nothing: up and down to the brief before and after in the lane, left to the parent, right into the first brief beneath when it stands in the lane. Enter, shift with enter and escape scope the lane, below.
 
 Whatever changes, the heading of the brief acted on keeps its place on the screen, so a press never moves what was pressed and the reader's place never scrolls away. The one exception is its inverse: a long brief folded from deep inside it, from its foot or by the space bar, takes the reader up with it, its heading returning to the reading line, since what stood under the reader is gone. When the brief in focus leaves the lane, because the brief above it was folded, the focus moves to that brief.
 
@@ -62,7 +62,17 @@ A flick is tried as well: a small reversal of the scroll, down then up then down
 
 *Reasoned, the author's, 2026-09-13; the flick is a trial, on by a setting. A small mark beside the heading was built first and refused by the author as not right; pressing the face is the author's lean, and the best gesture is not yet known.*
 
-## 7. A record is ordered by time
+## 7. Scoping the lane
+
+A reader can make any brief the root of the lane: its heading becomes the opening, its holon becomes the whole, and everything above it leaves the lane. Enter does it to the brief in focus, when that brief has a level beneath it, and the address carries the scope after the focus, so a scoped place can be handed to someone like any other.
+
+Scoping is what heading sizes can only do so far. The registers count from the scope root, so the level a reader has scoped into reads at the top register again, and nesting beneath it has the full range to step down through; without scoping, a deep level reads in the smallest registers whatever it holds.
+
+Shift with enter widens the scope by one level, to the parent of the scope root, and escape steps back along the way the reader scoped, one step at a time, so a reader who scoped in three times can leave the way they came. Going to a brief outside the scope, by a link or a row above, widens the scope to the whole body first, and that step is on the way back too. The levels above the scope stay visible in the figures, as the levels beneath a fold are: the shape draws them as grey bars leading in from the left, the tree as dim rows above the root, and the header names the way down.
+
+*Reasoned, the author's, 2026-09-13; the address form and what going outside the scope does are the builder's calls.*
+
+## 8. A record is ordered by time
 
 The lane lays a level as a reading: the brief that gives the most understanding comes first, and each after it stands on those before. A record is not laid that way. Its order is when each entry happened, so its first entry is first in time and nothing more.
 
@@ -70,7 +80,7 @@ The lane lays a level as a reading: the brief that gives the most understanding 
 
 *Reasoned, carried from the practice and not checked here.*
 
-## 8. Following a link moves you
+## 9. Following a link moves you
 
 A brief's relations reach anywhere, so a link's target lies at a path of its own, and following it lays the lane at that address. What the reader had opened is folded into the new lay, and the browser's history holds the way back.
 
@@ -78,7 +88,7 @@ That is a way back and not a good one, and it asks a reader to press before know
 
 *Reasoned, carried from the first model, 2026-09-13.*
 
-## 9. Where only the lane fits
+## 10. Where only the lane fits
 
 On a narrow screen the sides fold away and the lane stands alone, which it can, since orientation is help and never the reading. A reader may also close either side by hand, and the lane moves over into the room. Nothing about a touch reading is taken up here.
 
