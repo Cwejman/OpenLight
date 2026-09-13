@@ -696,16 +696,18 @@ const bandSvg = (levelAddress: string, w: number, h: number, on: string | null, 
 
 // ## 3.4 The path, drawn whole
 
+const PATH = { gap: 24 };
+
+/** The path: one step per level, parted by room, with a cursor over the panes in view drawn beneath the steps. */
 function pathSvg(w: number, h: number): string {
   const panes = panesOf(state.opened);
-  const gap = 10;
-  const cw = Math.max(8, Math.floor((w - gap * (panes.length - 1)) / panes.length));
+  const cw = Math.max(8, Math.floor((w - PATH.gap * (panes.length - 1)) / panes.length));
   const steps = panes.map((p, i) => {
     const next = panes[i + 1] ?? (state.opened !== p ? state.opened : null);
     const on = next !== null && next.startsWith(p === "" ? "" : p + "/") ? next : null;
-    return `<g class="step" data-pane="${i}" transform="translate(${i * (cw + gap)},0)">${bandCells(p, cw, h, on)}</g>`;
+    return `<g class="step" data-pane="${i}" transform="translate(${i * (cw + PATH.gap)},0)">${bandCells(p, cw, h, on)}</g>`;
   });
-  return `<svg class="fig path" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${steps.join("")}</svg>`;
+  return `<svg class="fig path" data-step="${cw + PATH.gap}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect class="cursor" x="0" y="0" width="0" height="${h}" rx="7"/>${steps.join("")}</svg>`;
 }
 
 // ## 3.5 The body, as droplets on a plate
@@ -963,7 +965,12 @@ function drawShift(): void {
   const max = Math.max(0, n - f);
   const s = state.shift < 0 ? max : Math.min(max, state.shift);
   ui.row.style.transform = `translateX(${-s * paneWidth()}px)`;
-  all<SVGGElement>(".step", ui.pathBox).forEach((g) => g.classList.toggle("inview", Number(g.dataset.pane) >= s && Number(g.dataset.pane) < s + f));
+  // The path's cursor spans the panes in view.
+  const svg = ui.pathBox.querySelector<SVGSVGElement>("svg.path");
+  const cursor = svg?.querySelector<SVGRectElement>(".cursor");
+  const step = Number(svg?.dataset.step ?? 0);
+  cursor?.setAttribute("x", `${s * step - 6}`);
+  cursor?.setAttribute("width", `${Math.min(n, f) * step - PATH.gap + 12}`);
 }
 
 /** The plate takes a free slot when the panes leave one, and otherwise the bottom-left of the pane already read. */
@@ -1082,11 +1089,12 @@ function scrubBand(svg: SVGSVGElement, clientX: number, grab: number): void {
   drawCursor(pane);
 }
 
-/** Scrubbing the path shifts the row so the level under the pointer is the leftmost in view. */
-function scrubPath(svg: SVGSVGElement, clientX: number): void {
-  const n = panesOf(state.opened).length;
+/** Scrubbing the path drags its cursor, and the row follows by whole panes. */
+function scrubPath(svg: SVGSVGElement, clientX: number, grab: number): void {
+  const max = Math.max(0, panesOf(state.opened).length - fit());
   const r = svg.getBoundingClientRect();
-  state.shift = Math.max(0, Math.min(n - 1, Math.floor(((clientX - r.left) / r.width) * n)));
+  const x = ((clientX - r.left) / r.width) * Number(svg.getAttribute("width")) - grab;
+  state.shift = Math.max(0, Math.min(max, Math.round(x / Number(svg.dataset.step))));
   drawShift();
 }
 
@@ -1130,7 +1138,7 @@ function wire(): void {
     down.moved = true;
     state.scrubbing = true;
     hideTell();
-    if (down.svg.classList.contains("path")) scrubPath(down.svg, e.clientX);
+    if (down.svg.classList.contains("path")) scrubPath(down.svg, e.clientX, down.grab);
     else if (down.svg.classList.contains("above")) scrubBand(down.svg, e.clientX, down.grab);
   });
   document.addEventListener("pointerup", (e) => {
@@ -1279,8 +1287,10 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 #row { display: flex; height: 100%; transition: transform .28s cubic-bezier(.2,.7,.2,1); will-change: transform; }
 .pane { position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; display: flex; flex-direction: column; padding: 0 var(--gutter); }
 .pane .strip { flex: 0 0 auto; padding: 12px 0 8px; }
-.pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: 8px var(--gutter) 6rem; scrollbar-gutter: stable; transition: box-shadow .2s; }
-.pane.scrolled .scroll { box-shadow: inset 0 12px 10px -10px rgba(0,0,0,.14); }
+.pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) 6rem; scrollbar-gutter: stable; }
+/* The seam is summoned only while text has passed beneath the band, and it is as wide as the text. */
+.pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: 12px; margin-bottom: -4px; width: var(--measure); max-width: 100%; background: linear-gradient(rgba(0,0,0,.075), rgba(0,0,0,0)); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.pane.scrolled .scroll::before { opacity: 1; }
 .prose { max-width: var(--measure); }
 .opening { margin-bottom: 40px; }
 .opening h1 { font-size: var(--s1); font-weight: 600; line-height: 1.15; letter-spacing: -.012em; margin: 8px 0 16px; }
@@ -1321,7 +1331,6 @@ svg.fig .cell.on .seg, svg.fig .cell.on .door { fill: var(--on); }
 svg.fig .cell.lit .seg, svg.fig .cell.lit .door { fill: var(--lit); }
 svg.fig .cell { cursor: pointer; }
 svg.fig .cursor { fill: rgba(0,0,0,.055); cursor: grab; }
-svg.path .step:not(.inview) .seg, svg.path .step:not(.inview) .door { opacity: .5; }
 
 .plate-box { position: absolute; left: 0; bottom: 0; background: var(--ground); z-index: 3; }
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
