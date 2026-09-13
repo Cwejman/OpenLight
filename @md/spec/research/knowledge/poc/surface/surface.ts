@@ -1304,7 +1304,7 @@ function plateSvg(W: number, H: number): string {
 // From here on the functions touch the document. Each draws one thing from the
 // state, and drawAll draws them all in order.
 
-type UI = { header: HTMLElement; areas: HTMLElement; scroll: HTMLElement; content: HTMLElement; lane: HTMLElement; notice: HTMLElement; parts: Record<AreaName, HTMLElement>; strips: HTMLElement };
+type UI = { header: HTMLElement; crumb: HTMLElement; areas: HTMLElement; scroll: HTMLElement; content: HTMLElement; lane: HTMLElement; notice: HTMLElement; parts: Record<AreaName, HTMLElement>; strips: HTMLElement };
 let ui: UI;
 
 const all = <T extends Element>(sel: string, root: ParentNode = document): T[] => Array.from(root.querySelectorAll<T>(sel));
@@ -1321,9 +1321,12 @@ const RIM = { top: 3, foot: 6 };
  * of the fade at the foot, where the prose stands half seen, so no figure reaches further up or down than the prose
  * does. It keeps at least one gap at the top, and the strip's room and a gap at the foot.
  */
+/** Where the prose is clear of the top edge: a share of the height, or below the way down to the scope when it stands. */
+const rimTop = (h: number): number => Math.max((h * RIM.top) / 100, ui.crumb.hidden ? 0 : ui.crumb.offsetTop + ui.crumb.offsetHeight + 8);
+
 function band(h: number): { top: number; height: number } {
   const s = state.settings;
-  const top = Math.max(s.gap, (h * (RIM.top + s.fade / 2)) / 100);
+  const top = Math.max(s.gap, rimTop(h) + (h * s.fade) / 2 / 100);
   const foot = Math.max(s.gap + STRIP, (h * (RIM.foot + s.fade / 2)) / 100);
   return { top: Math.round(top), height: Math.max(0, Math.round(h - top - foot)) };
 }
@@ -1418,8 +1421,7 @@ function drawLayout(): void {
 
 /** Draws the lane whole and lays the adjuncts beside it; the header says where the lane is scoped. */
 function drawLane(): void {
-  const crumb = ui.header.querySelector<HTMLElement>(".scope")!;
-  crumb.innerHTML = state.scope ? `in ${prefixesOf(state.scope).map((a) => `<span data-a="${esc(a)}" data-scope="${esc(a)}">${esc(brief(a)!.title)}</span>`).join(" › ")}` : "";
+  drawCrumb();
   ui.lane.innerHTML = laneHtml();
   alignEnds();
   drawAdjuncts();
@@ -1508,6 +1510,31 @@ function scrollFor(y: number): number {
     else hi = m;
   }
   return hi;
+}
+
+/**
+ * The way down to the scope, when the lane is scoped: the levels above as faint names, each a press that widens the
+ * scope to it, and the scope root a step darker, since the reader stands in it. It stands over the lane, level with the
+ * prose's edge, in the clear room above where the prose fades, and it names each level in its branch's colour when pointed at.
+ */
+function drawCrumb(): void {
+  const S = state.scope;
+  const steps = S ? prefixesOf(S) : [];
+  ui.crumb.hidden = steps.length === 0;
+  ui.crumb.innerHTML = steps
+    .map((a) => (a === S ? `<span class="step root" data-a="${esc(a)}" ${hued(a)}>${esc(brief(a)!.title)}</span>` : `<span class="step" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}>${esc(brief(a)!.title)}</span>`))
+    .join(CHEVRON);
+  placeCrumb();
+}
+
+/** The way down stands level with the lane's left edge and no wider than the lane. */
+function placeCrumb(): void {
+  const lane = ui.lane.getBoundingClientRect();
+  const a0 = ui.areas.getBoundingClientRect();
+  ui.crumb.style.left = `${Math.round(lane.left - a0.left)}px`;
+  ui.crumb.style.maxWidth = `${Math.round(lane.width)}px`;
+  // the prose is clear below the way down whatever the fade is doing, so no line reads under it
+  ui.scroll.style.setProperty("--rim-crumb", ui.crumb.hidden ? "0px" : `${ui.crumb.offsetTop + ui.crumb.offsetHeight + 8}px`);
 }
 
 /** Adjuncts stand in the gutter columns at the height of the line they belong to, pushed down where two would meet. */
@@ -2227,6 +2254,7 @@ function wire(): void {
   });
   window.addEventListener("resize", () => {
     drawLayout();
+    placeCrumb();
     alignEnds();
     drawAdjuncts();
     drawStrips();
@@ -2273,8 +2301,9 @@ function setBody(body: Body): void {
 async function start(): Promise<void> {
   loadSettings();
   document.body.innerHTML = `
-    <header id="header"><span class="scope chrome"></span><span class="warnings chrome dim"></span><span class="notice chrome"></span></header>
+    <header id="header"><span class="warnings chrome dim"></span><span class="notice chrome"></span></header>
     <main id="areas">
+      <nav id="crumb" class="chrome" hidden></nav>
       <section class="wing" data-area="wingL"></section>
       <section id="scroll"><div id="content"><div class="gutter" data-area="gutterL"></div><div id="lane"></div><div class="gutter" data-area="gutterR"></div></div></section>
       <section class="wing" data-area="wingR"></section>
@@ -2283,6 +2312,7 @@ async function start(): Promise<void> {
   const $ = (sel: string) => document.querySelector<HTMLElement>(sel)!;
   ui = {
     header: $("#header"),
+    crumb: $("#crumb"),
     areas: $("#areas"),
     scroll: $("#scroll"),
     content: $("#content"),
@@ -2373,8 +2403,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #header { position: absolute; top: 8px; left: 0; right: 0; z-index: 4; display: flex; justify-content: center; gap: 16px; pointer-events: none; }
 #header > * { pointer-events: auto; }
 #header .warnings { cursor: help; }
-#header .scope span { cursor: pointer; }
-#header .scope span:hover, #header .scope span.lit { color: var(--on); }
+#crumb { position: absolute; top: 12px; z-index: 5; display: flex; align-items: center; gap: 7px; white-space: nowrap; overflow: hidden; color: var(--faint); }
+#crumb .step { cursor: pointer; overflow: hidden; text-overflow: ellipsis; transition: color .15s; }
+#crumb .step:hover, #crumb .step.lit { color: var(--on); }
+#crumb .step.root { flex: none; color: var(--muted); cursor: default; }
+#crumb .step.root.lit { color: var(--on); }
+#crumb svg { flex: none; width: 7px; height: 7px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .8; }
 #header .notice { color: var(--lit); }
 
 #areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; }
@@ -2385,7 +2419,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .slot::-webkit-scrollbar { display: none; }
 .slot > * { max-width: 100%; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--rim-top) * var(--lift, 1)), black calc((var(--rim-top) + var(--edge)) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent calc(var(--rim-top) * var(--lift, 1)), black calc((var(--rim-top) + var(--edge)) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); }
+  -webkit-mask-image: linear-gradient(to bottom, transparent max(var(--rim-crumb, 0px), calc(var(--rim-top) * var(--lift, 1))), black calc(max(var(--rim-crumb, 0px), calc(var(--rim-top) * var(--lift, 1))) + var(--edge) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent max(var(--rim-crumb, 0px), calc(var(--rim-top) * var(--lift, 1))), black calc(max(var(--rim-crumb, 0px), calc(var(--rim-top) * var(--lift, 1))) + var(--edge) * var(--lift, 1)), black calc(100% - (var(--rim-foot) + var(--edge)) * var(--drop, 1)), transparent calc(100% - var(--rim-foot) * var(--drop, 1))); }
 #scroll::-webkit-scrollbar { display: none; }
 /* the room above and below the lane is set by the reading line's setting, each time the lane is laid */
 #content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
