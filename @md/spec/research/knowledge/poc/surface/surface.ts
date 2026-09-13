@@ -887,12 +887,12 @@ let ui: UI;
 
 const all = <T extends Element>(sel: string, root: ParentNode = document): T[] => Array.from(root.querySelectorAll<T>(sel));
 const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
-/** Panes share the estate: as many as fit at the minimum width, each grown to fill it, up to the maximum.
- * The text fills the pane between its gutters, so the measure runs from 544 to 592 pixels and never wider. */
-const PANE = { min: 592, max: 640 };
+/** Panes always fill the width: it is cut into the number of slots nearest an ideal pane, and a pane is one slot,
+ * so no pane is ever seen cut. The text keeps its measure, and a slot wider than that gives the rest to its gutters. */
+const PANE = { ideal: 640 };
 const estate = (): number => ui.viewport.getBoundingClientRect().width;
-const fit = (): number => Math.max(1, Math.floor(estate() / PANE.min));
-const paneWidth = (): number => Math.min(PANE.max, estate() / Math.max(1, Math.min(fit(), panesOf(state.opened).length)));
+const fit = (): number => Math.max(1, Math.round(estate() / PANE.ideal));
+const paneWidth = (): number => estate() / fit();
 const drawWidth = (): void => ui.row.style.setProperty("--pane", `${paneWidth()}px`);
 
 /** A pane's scroll box, and the room above a brief scrolled to, so its heading breathes. */
@@ -1257,7 +1257,7 @@ const CSS = `
   --s1: 1.75rem; --s2: 1.375rem; --s3: 1.0625rem; --s4: .9375rem; --s5: .8125rem; --s6: .6875rem;
   /* One rhythm: the gap stands between the header and the path, the path and the bands, a band and its text, and
      a pane and its edge, so two panes stand two gaps apart. */
-  --gap: 24px; --gutter: var(--gap);
+  --gap: 24px; --gutter: var(--gap); --measure: 592px;
   --h: 60;
 }
 /* Colour follows the branch: every element that names a brief carries its hue, and these derive from it. */
@@ -1288,7 +1288,7 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 
 #viewport { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 #row { display: flex; height: 100%; transition: transform .28s cubic-bezier(.2,.7,.2,1); will-change: transform; }
-.pane { position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; display: flex; flex-direction: column; padding: 0 var(--gutter); }
+.pane { --gutter: max(var(--gap), (var(--pane) - var(--measure)) / 2); position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; display: flex; flex-direction: column; padding: 0 var(--gutter); }
 .pane .strip { flex: 0 0 auto; padding: var(--gap) 0 0; }
 .pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: var(--gap) var(--gutter) 6rem; scrollbar-width: none; }
 .pane .scroll::-webkit-scrollbar { display: none; }
