@@ -1050,55 +1050,38 @@ const sideGap = (d: number): number => [0, 14, 6, 3][d] ?? 2;
 
 type Drop = { a: string; r0: number; r1: number; a0: number; a1: number; more: boolean; label: string | null };
 
-/** Lays the body out radially inside a square of side `S`: sector by branch weight, ring by depth. */
+/** Lays the body out radially inside a square of side `S`: sector by branch weight, ring by depth, every level to the rim. */
 function layoutPlate(S: number): { drops: Drop[]; rc: number } {
-  const deepest = (drops: Drop[]) => Math.max(1, ...drops.map((d) => depthOf(d.a)));
-  const first = layoutRings(S, Math.max(1, state.index!.depth));
-  const again = deepest(first.drops) < first.D ? layoutRings(S, deepest(first.drops)) : first;
-  return { drops: again.drops, rc: again.rc };
-}
-
-/** The plate with `D` rings outside a centre one ring thick. */
-function layoutRings(S: number, D: number): { drops: Drop[]; rc: number; D: number } {
   const ix = state.index!;
+  const D = Math.max(1, ix.depth);
   const R = (S / 2) * 0.97;
   const t = R / (D + 1);
   const rc = t;
   const ring = (d: number) => ({ r0: rc + (d - 1) * t + PLATE.gap / 2, r1: rc + d * t - PLATE.gap / 2 });
-  const floorAt = (d: number) => Math.max(PLATE.floor, (ring(d).r1 - ring(d).r0) * 0.2);
   const full = (span: number) => span >= 2 * Math.PI - 1e-6;
-  const gapsIn = (n: number, span: number) => (full(span) ? n : n - 1);
-  const usable = (n: number, d: number, span: number) => span - (gapsIn(n, span) * sideGap(d)) / ring(d).r0;
-  const fits = (kids: Brief[], d: number, span: number) => {
-    const { r0, r1 } = ring(d);
-    return kids.length > 0 && d <= D && r1 - r0 >= PLATE.floor && (kids.length * floorAt(d)) / r0 <= usable(kids.length, d, span);
-  };
+  // the plate shows the whole topology: no level is left undrawn, so the room between siblings and the floor a cell keeps
+  // both yield when a level is crowded, and cells go to slivers rather than away
   const lay = (parent: string, a0: number, span: number, d: number): Drop[] => {
     const kids = level(parent);
-    if (!fits(kids, d, span)) return [];
+    if (kids.length === 0 || d > D) return [];
     const { r0, r1 } = ring(d);
+    const n = kids.length;
+    const gap = Math.min(sideGap(d) / r0, span / (3 * n));
+    const usable = span - (full(span) ? n : n - 1) * gap;
+    const floor = Math.min(Math.max(PLATE.floor, (r1 - r0) * 0.2) / r0, usable / n);
     const angles = spread(
       kids.map((k) => Math.max(1, ix.branch.get(k.address)!)),
-      usable(kids.length, d, span),
-      floorAt(d) / r0,
+      usable,
+      floor,
     );
-    const gap = sideGap(d) / r0;
     const starts = offsets(angles, gap).map((x) => x + (full(span) ? gap / 2 : 0));
     return kids.flatMap((k, i) => {
       const chord = 2 * r0 * Math.sin(Math.min(Math.PI, angles[i]) / 2);
-      const drop: Drop = {
-        a: k.address,
-        r0,
-        r1,
-        a0: a0 + starts[i],
-        a1: a0 + starts[i] + angles[i],
-        more: level(k.address).length > 0 && !fits(level(k.address), d + 1, angles[i]),
-        label: chord > 40 && r1 - r0 > 15 ? k.title : null,
-      };
+      const drop: Drop = { a: k.address, r0, r1, a0: a0 + starts[i], a1: a0 + starts[i] + angles[i], more: false, label: chord > 40 && r1 - r0 > 15 ? k.title : null };
       return [drop, ...lay(k.address, drop.a0, angles[i], d + 1)];
     });
   };
-  return { drops: lay("", -Math.PI / 2, 2 * Math.PI, 1), rc, D };
+  return { drops: lay("", -Math.PI / 2, 2 * Math.PI, 1), rc };
 }
 
 /** A droplet: an annular sector with rounded corners, or a full ring when the sector is whole. */
@@ -1132,7 +1115,7 @@ function plateSvg(S: number): string {
   const { drops, rc } = layoutPlate(S);
   const c = S / 2;
   const onPath = new Set(prefixesOf(state.focus));
-  const cls = (d: Drop) => `${d.more ? " more" : ""}${onPath.has(d.a) ? " on" : ""}${inLane(d.a) ? "" : " away"}`;
+  const cls = (d: Drop) => `${onPath.has(d.a) ? " on" : ""}${d.a === state.focus ? " here" : ""}${inLane(d.a) ? "" : " away"}`;
   const cells = drops.map((d) => `<g class="cell${cls(d)}" data-a="${esc(d.a)}" ${hued(d.a)}><path d="${dropletPath(c, c, d.r0, d.r1, d.a0, d.a1, PLATE.round)}"/></g>`);
   const labels = drops
     .filter((d) => d.label)
@@ -1257,7 +1240,10 @@ function drawFocusMarks(): void {
     el.classList.toggle("on", onPath.has(el.dataset.a!));
     el.classList.toggle("here", el.dataset.a === state.focus);
   });
-  all<HTMLElement>("svg.shape .cell", ui.areas).forEach((el) => el.classList.toggle("here", el.dataset.a === state.focus));
+  all<HTMLElement>("svg.fig [data-a]", ui.areas).forEach((el) => {
+    el.classList.toggle("on", onPath.has(el.dataset.a!));
+    el.classList.toggle("here", el.dataset.a === state.focus);
+  });
   drawLaser();
 }
 
@@ -1829,8 +1815,8 @@ svg.shape { cursor: grab; }
 
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
 svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
-svg.plate .cell.more path { fill: oklch(83% 0.06 var(--h)); }
 svg.plate .cell.on path { fill: var(--door); }
+svg.plate .cell.here path { fill: var(--on); }
 /* grey for anything not in the lane wins over the marks above, at every depth */
 svg.plate .cell.away path { fill: var(--grey); }
 svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
