@@ -1039,32 +1039,37 @@ function shapeSvg(W: number, H: number): string {
     const bars = l.blocks
       .map((b) => `<rect class="${b.head ? "head" : "para"}" x="${x}" y="${(4 + b.top * k).toFixed(1)}" width="${b.head ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${Math.max(1.2, b.height * k - 1).toFixed(1)}" rx="1"/>`)
       .join("");
-    // a folded brief tells beside its face what it hides: a tick per paragraph, then a grey tail as long as the levels beneath are heavy
+    // beside the face a brief tells what it hides, or would hide: a tick per paragraph, then a grey tail as long as the
+    // levels beneath are heavy; drawn when folded, and as a ghost that shows under the pointer when open
     const b = brief(l.a);
     const folded = b !== undefined && gradeOf(l.a) === "face";
-    const paras = folded ? Math.max(0, blocksOf(b!).length - 1) : 0;
-    const hidden = folded && level(l.a).length > 0 ? ix.branch.get(l.a)! - ix.own.get(l.a)! : 0;
-    const last = l.blocks.at(-1);
-    const y = last ? (4 + last.top * k).toFixed(1) : "0";
-    const h = last ? Math.max(1.2, last.height * k - 1).toFixed(1) : "1";
-    const ticks = last ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
+    const ghost = folded ? "" : " ghost";
+    const paras = b ? Math.max(0, blocksOf(b).length - 1) : 0;
+    const hidden = b && level(l.a).length > 0 ? ix.branch.get(l.a)! - ix.own.get(l.a)! : 0;
+    const face = l.blocks[1] ?? l.blocks[0];
+    const y = face ? (4 + face.top * k).toFixed(1) : "0";
+    const h = face ? Math.max(1.2, face.height * k - 1).toFixed(1) : "1";
+    const ticks = face && b ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick${ghost}" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
     const tx = x + SHAPE.bar + 4 + Math.min(paras, 8) * 3 + (paras ? 2 : 0);
-    const tail = hidden > 0 && last ? `<rect class="hidden" x="${tx}" y="${y}" width="${clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${h}" rx="1"/>` : "";
+    const tail = hidden > 0 && face ? `<rect class="hidden${ghost}" x="${tx}" y="${y}" width="${clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${h}" rx="1"/>` : "";
     // the opening's row carries the levels above to its left, each a press that scopes out to it
     const first = l.blocks[0];
     const above =
       l.a === state.scope && first
         ? anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}><rect class="hit" x="${SHAPE.pad + i * 5 - 1}" y="${(4 + first.top * k - 2).toFixed(1)}" width="5" height="${(Math.max(4, first.height * k) + 4).toFixed(1)}"/><rect class="head" x="${SHAPE.pad + i * 5}" y="${(4 + first.top * k).toFixed(1)}" width="3" height="${Math.max(3, first.height * k - 1).toFixed(1)}" rx="1"/></g>`).join("")
         : "";
-    // two presses: the blocks go to the brief; the room to their right, where what is hidden stands, folds or opens it
+    // two presses: the blocks go to the brief; the room to their right, where what is hidden stands, folds or opens it,
+    // with forgiving room around it since a brief may be a sliver here; the levels above are drawn last, so they take the press
     const top = (4 + l.top * k).toFixed(1);
     const height = Math.max(1, l.height * k).toFixed(1);
+    const fy = Math.max(0, 4 + l.top * k - 3).toFixed(1);
+    const fh = (Math.max(1, l.height * k) + 6).toFixed(1);
     return (
-      above +
       `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}>` +
-      `<rect class="hit" data-press="go" x="0" y="${top}" width="${x + SHAPE.bar + 2}" height="${height}"/>` +
-      `<rect class="hit" data-press="fold" x="${x + SHAPE.bar + 2}" y="${top}" width="${Math.max(0, w - x - SHAPE.bar - 2)}" height="${height}"/>` +
-      `${bars}${ticks}${tail}</g>`
+      `<rect class="hit" data-press="go" x="${x - 3}" y="${top}" width="${SHAPE.bar + 5}" height="${height}"/>` +
+      `<rect class="hit" data-press="fold" x="${x + SHAPE.bar + 2}" y="${fy}" width="${Math.max(0, w - x - SHAPE.bar - 2)}" height="${fh}"/>` +
+      `${bars}${ticks}${tail}</g>` +
+      above
     );
   });
   return `<svg class="fig shape" data-k="${k}" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">${cells.join("")}<rect class="cursor" x="0" y="${(4 + box.scrollTop * k).toFixed(1)}" width="${w}" height="${(box.clientHeight * k).toFixed(1)}" rx="4"/></svg>`;
@@ -1917,7 +1922,12 @@ svg.shape .cell.here .para { fill: var(--door); }
 svg.shape .cell.here .head { fill: var(--on); }
 svg.shape .cell.lit .para, svg.shape .cell.lit .head { fill: var(--lit); }
 svg.shape .above .head { fill: var(--grey); }
-svg.shape .above.lit .head { fill: var(--lit); }
+svg.shape .above.lit .head, svg.shape .above:hover .head { fill: var(--lit); }
+/* only the two regions take the pointer; the marks drawn over them never do */
+svg.shape .head, svg.shape .para, svg.shape .tick, svg.shape .hidden { pointer-events: none; }
+svg.shape .ghost { opacity: 0; transition: opacity .12s; }
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .ghost { opacity: 1; }
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick:not(.ghost), svg.shape .cell:has(.hit[data-press="fold"]:hover) .hidden:not(.ghost) { fill: var(--lit); }
 svg.shape .hit[data-press="fold"] { cursor: default; }
 svg.shape .tick { fill: var(--grey); }
 svg.shape .hidden { fill: var(--grey); }
