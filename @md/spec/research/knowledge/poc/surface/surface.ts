@@ -1293,9 +1293,10 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: var(--gap) var(--gutter) 6rem; scrollbar-width: none; }
 .pane .scroll::-webkit-scrollbar { display: none; }
 /* The seam is summoned only while text has passed beneath the band. It fills the gap between the band and the
-   text, spills a little past the measure on either side, and fades out there, so the text enters a threshold. */
+   text with the ground fading out under a faint tint, so the text dissolves as it enters the gap; it spills a
+   little past the measure on either side and fades out there. */
 .pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: var(--gap); margin: 0 0 calc(-1 * var(--gap)) calc(-1 * var(--gap)); width: calc(100% + 2 * var(--gap));
-  background: linear-gradient(rgba(0,0,0,.07), rgba(0,0,0,0));
+  background: linear-gradient(rgba(0,0,0,.06), rgba(0,0,0,0)), linear-gradient(var(--ground) 0%, var(--ground) 20%, rgba(255,255,255,0) 100%);
   -webkit-mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent); mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent);
   opacity: 0; transition: opacity .2s; pointer-events: none; }
 .pane.scrolled .scroll::before { opacity: 1; }
