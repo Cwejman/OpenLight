@@ -44,7 +44,7 @@ Going to an address, by a press, by a link or by the browser's history, lays the
 
 Scrolling afterwards moves the focus and changes no grade, so nothing reflows under a reader who is only reading. The page's address follows the focus without entering the history, and the history holds only the moves a reader chose: arrivals, goings from the tree or a figure, and changes of scope. Escape steps back through them and shift with escape forward again, as the browser's own back and forward do, and escape stops at the place the reader came in on, never stepping off the page.
 
-Going to a brief from the tree or a figure is not an arrival: it keeps every fold the reader has made, opens only what stands between and the target, and scrolls there. A link, a sent address and the browser's history lay afresh, since they come from outside what the reader has laid.
+Going to a brief from the tree or a figure is not an arrival: it keeps every fold the reader has made, opens only what stands between and the target, and scrolls there. A link, a sent address and the browser's history lay afresh, since they come from outside what the reader has laid. A reload of the place the reader stood is not an arrival: the lane as laid, its scope and every fold, is kept in the browser's storage as it changes, and a reload at the same address lays it again as it was left.
 
 Above the focus, then, lies what was taken whole and what was passed at its face, so the way up is short. Up is a press on the parent, in the lane or in the tree, or a key.
 

@@ -1423,6 +1423,7 @@ function drawLane(): void {
   ui.lane.innerHTML = laneHtml();
   alignEnds();
   drawAdjuncts();
+  rememberLane();
 }
 
 /** How far the lane scrolls, as a share of its height, while the reading line eases between an end and the middle. */
@@ -1764,7 +1765,7 @@ let depth = 0;
 /** Enters a step into the history at an address. */
 const enterHistory = (hash: string): void => history.pushState({ depth: ++depth }, "", hash);
 /** Replaces the address of the step the reader stands on, keeping its depth. */
-const followHistory = (hash: string): void => history.replaceState({ depth }, "", hash);
+const followHistory = (hash: string): void => (history.replaceState({ depth }, "", hash), rememberLane());
 
 /** Goes to an address from the tree or a figure: enters the history, then settles there, keeping what the reader folded. */
 function goTo(a: string): void {
@@ -1789,6 +1790,53 @@ function settle(a: string): void {
 }
 
 /** Arrives at an address: lays the lane afresh and scrolls the brief under the reading line. */
+/** Where the lane as laid is kept for this page and this body, in the browser's own storage. */
+const laneKey = (): string => `surface.lane:${location.pathname}:${state.body?.root ?? ""}:${state.body?.title ?? ""}`;
+let laneTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Keeps the lane as laid, its scope and every fold, with the address the reader stands at; written a moment after it settles. */
+function rememberLane(): void {
+  clearTimeout(laneTimer);
+  laneTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(laneKey(), JSON.stringify({ hash: location.hash, scope: state.scope, grades: Array.from(state.grades) }));
+    } catch {}
+  }, 150);
+}
+
+/** The lane as the reader left it, when they left it at the address the page now stands at. */
+function recalledLane(): { scope: string; grades: [string, Grade][] } | null {
+  try {
+    const kept = JSON.parse(localStorage.getItem(laneKey()) ?? "null");
+    return kept && kept.hash === location.hash && Array.isArray(kept.grades) ? kept : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lays the lane again as the reader left it: a reload of the same place is not an arrival, so its scope and every fold
+ * come back. What no longer resolves is dropped, a brief whose parent is not open leaves with it, and the way to the
+ * focus stands open.
+ */
+function resume(a: string, kept: { scope: string; grades: [string, Grade][] }): void {
+  arriving = true;
+  const target = brief(a) ? a : nearest(a);
+  state.scope = brief(kept.scope) && within(target, kept.scope) ? kept.scope : "";
+  const S = state.scope;
+  state.grades = new Map(kept.grades.filter(([x, g]) => brief(x) && within(x, S) && (g === "face" || g === "whole")));
+  state.grades.set(S, "whole");
+  state.body!.briefs.forEach((b) => b.address !== S && state.grades.has(b.address) && gradeOf(parentOf(b.address)) !== "whole" && state.grades.delete(b.address));
+  prefixesOf(target)
+    .filter((p) => within(p, S) && p !== target)
+    .forEach((p) => gradeOf(p) !== "whole" && setGrade(p, "whole"));
+  closeLay();
+  state.focus = target;
+  drawAll();
+  scrollToFocus(false);
+  arriving = false;
+}
+
 function arrive(a: string): void {
   arriving = true;
   const target = brief(a) ? a : nearest(a);
@@ -2167,9 +2215,11 @@ function setBody(body: Body): void {
   body.warnings.forEach((x) => console.warn(x));
   if (first) {
     depth = typeof history.state?.depth === "number" ? history.state.depth : 0;
-    followHistory(location.hash || "#/");
+    // read before the address is written back, since writing it keeps the lane as it stands, which is not yet laid
+    const kept = recalledLane();
+    history.replaceState({ depth }, "", location.hash || "#/");
     state.scope = brief(readScope()) ? readScope() : "";
-    return arrive(readHash());
+    return kept ? resume(readHash(), kept) : arrive(readHash());
   }
   // the lane is drawn again from the new body, keeping the grades that still resolve and the scroll
   const kept = new Map(Array.from(state.grades).filter(([a]) => state.index!.by.has(a)));
