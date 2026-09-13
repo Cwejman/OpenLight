@@ -128,6 +128,16 @@ Everything drawn carries its brief's address. When the pointer rests on one, the
 
 *In force, the author's decision, 2026-09-12.*
 
+### 6.4 One palette, two sides
+
+A dark theme made by inverting the light one reads wrong, because the eye does not treat dark and light alike. So there is one palette, and every colour in it names its role once, with a light value and a dark value side by side. The theme only chooses the side. Left to the system, the browser chooses, so nothing flashes before the script runs.
+
+The light side stands on white. The dark side matches each role's contrast against its own ground rather than its lightness, and bends in three places where perception does. The ground is a warm near-black and the ink a soft white, since pure white on pure black glares and a neutral grey reads cold. Fills close to the ground step further from it, since small differences are harder to see in the dark. And light type on dark reads heavier, so the weights thin a step.
+
+Colour stays even across branches by chroma. How much chroma a hue can hold depends on its lightness: the most in the middle, less towards white and towards black, and least for cyan and blue. A role asking more than a hue can hold is clipped on that hue alone, so that branch reads duller than its neighbours. So every role's chroma sits under what the weakest hue holds at the role's lightness, and it falls as the role nears the ground or the ink. On dark the accents lose a little more, since a saturated colour on dark looks brighter than it is.
+
+*Measured, 2026-09-13: the gamut by hue and APCA contrast were computed for every role. The highlight had asked 0.17 chroma where cyan holds 0.10, and now asks 0.12. The dark values were then set by eye against the numbers, since APCA overstates what a large fill needs near a dark ground. The perceptual claims are established colour science, carried and not tested here.*
+
 ## 7. One file, laid by the gradient
 
 The server, the build, the client and the talk between them are one TypeScript file, run with Bun. A flag chooses between serving live and writing the page. This is the proof of concept, and nothing in it should grow larger than reading a body needs.

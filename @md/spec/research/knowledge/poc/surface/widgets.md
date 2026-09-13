@@ -48,9 +48,11 @@ This is what lets looking be free without an overlay. Everything an overlay told
 
 ## 5. Settings
 
-Settings is a wing widget: a row of meters, each a 270 degree arc with its icon in the middle, the name and value told on pointing. Dragging a meter up or down turns it and the wheel steps it, and the page redraws as it turns, so the zoom, the heading ratio, the measure, the gap, the dim and the edge fade are set by eye against real prose. A drag turns a meter in place and never redraws the wing under the pointer. The flick is a switch in the same row.
+Settings is a wing widget: meters in two rows, each a 270 degree arc with its icon in the middle, the name and value told on pointing. The first row sets the type: the zoom, the heading ratio, the line height and the measure. The second sets the page: the gap, the dim and the edge fade. Dragging a meter up or down turns it and the wheel steps it, and the page redraws as it turns, so each is set by eye against real prose. The space beneath a heading grows with the heading, so a larger ratio opens the room between a heading and its prose as well. A drag turns a meter in place and never redraws the wing under the pointer.
 
-*Reasoned, the author's, 2026-09-13; the meter replaced a dial the author found ugly the same day.*
+Beneath the meters stand the switches, a row apiece, each a setting's name and its few values. The first is the theme: light, dark, or whatever the system is set to, which is where a reader starts. How the two themes are composed is [one palette with two sides](implementation.md#64-one-palette-two-sides). Then a face for the headings and one for the prose, each serif, sans or mono, so a reader who wants the prose quieter can keep the serif on the headings alone. A face is sized to the serif's x-height, the height of its small letters, and the sans a step past it, since its narrower, lighter letters still read smaller; the lines keep the serif's spacing whichever face is set. So changing a face never changes how large the text reads or how far apart its lines stand. The flick is the last row.
+
+*Reasoned, the author's, 2026-09-13. The meter replaced a dial the author found ugly the same day; the theme and the faces were the author's asks the same evening. The x-heights were measured in the browser, sans and mono standing about seven percent taller than the serif at one size; the sans read small at that match, on the author's reading, and was lifted four percent by eye.*
 
 ## 6. The shape
 

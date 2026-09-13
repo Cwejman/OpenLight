@@ -88,7 +88,7 @@ function page(body: Body | null, script: string): string {
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Source+Sans+3:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Source+Sans+3:ital,wght@0,300..700;1,300..700&family=Source+Code+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
 <style>${CSS}</style>
 </head>
 <body>
@@ -493,6 +493,23 @@ type Index = {
 type Grade = "face" | "whole";
 
 type AreaName = "wingL" | "gutterL" | "gutterR" | "wingR";
+type Theme = "light" | "dark" | "system";
+const THEMES: Theme[] = ["light", "dark", "system"];
+/** The three faces a heading or the prose can be set in. */
+type Face = "serif" | "sans" | "mono";
+const FACES: Face[] = ["serif", "sans", "mono"];
+/**
+ * Each face by the family it names, its x-height as measured in the browser, and a lift. A face is sized to the
+ * serif's x-height, so all three read at one size; the sans is lifted a step past that, since its letters are
+ * narrower and lighter than the serif's and read smaller at the same x-height.
+ */
+const FACE: Record<Face, { family: string; x: number; lift: number }> = {
+  serif: { family: "var(--serif)", x: 0.452, lift: 1 },
+  sans: { family: "var(--sans)", x: 0.486, lift: 1.04 },
+  mono: { family: "var(--mono)", x: 0.486, lift: 1 },
+};
+/** How much a face is scaled against the serif. */
+const sizeOf = (f: Face): number => (FACE.serif.x / FACE[f].x) * FACE[f].lift;
 type Settings = {
   zoom: number;
   ratio: number;
@@ -502,7 +519,14 @@ type Settings = {
   dim: number;
   /** the run of the fade at the top and the bottom of the lane, in hundredths of its height */
   fade: number;
+  /** the spacing of the prose's lines, as a multiple of the serif's size */
+  leading: number;
   flick: number;
+  /** light, dark, or whichever the system is set to */
+  theme: Theme;
+  /** the face of the headings, and of the prose */
+  headings: Face;
+  prose: Face;
   areas: Record<AreaName, string>;
 };
 
@@ -513,7 +537,11 @@ const DEFAULTS: Settings = {
   gap: 24,
   dim: 0.4,
   fade: 8,
+  leading: 1.6,
   flick: 1,
+  theme: "system",
+  headings: "serif",
+  prose: "serif",
   areas: { wingL: "shape", gutterL: "none", gutterR: "links", wingR: "ahead" },
 };
 
@@ -947,14 +975,15 @@ function linkAdjuncts(b: Brief, article: HTMLElement): { at: HTMLElement | null;
 
 // ## 3.8 Settings: a row of meters
 
-type Knob = { key: "zoom" | "ratio" | "measure" | "gap" | "dim" | "fade"; name: string; min: number; max: number; step: number; glyph: string };
+type Knob = { key: "zoom" | "ratio" | "leading" | "measure" | "gap" | "dim" | "fade"; row: "type" | "page"; name: string; min: number; max: number; step: number; glyph: string };
 const KNOBS: Knob[] = [
-  { key: "zoom", name: "zoom", min: 0.75, max: 1.6, step: 0.05, glyph: `<path d="M8 4v8M4 8h8"/>` },
-  { key: "ratio", name: "heading ratio", min: 1, max: 1.6, step: 0.02, glyph: `<path d="M3 12h10M4.5 8.5h7M6 5h4"/>` },
-  { key: "measure", name: "measure", min: 440, max: 900, step: 10, glyph: `<path d="M3 8h10M5 6v4M11 6v4"/>` },
-  { key: "gap", name: "gap between areas", min: 8, max: 64, step: 2, glyph: `<path d="M3 4v8M13 4v8M6 8h4"/>` },
-  { key: "dim", name: "dim the rest", min: 0, max: 0.8, step: 0.05, glyph: `<circle cx="8" cy="8" r="5"/><path d="M8 3a5 5 0 0 1 0 10z" fill="currentColor"/>` },
-  { key: "fade", name: "fade at the edges", min: 0, max: 20, step: 1, glyph: `<path d="M8 3v10M4.5 6a4.5 4.5 0 0 0 0 4M11.5 6a4.5 4.5 0 0 1 0 4"/>` },
+  { key: "zoom", row: "type", name: "zoom", min: 0.75, max: 1.6, step: 0.05, glyph: `<path d="M8 4v8M4 8h8"/>` },
+  { key: "ratio", row: "type", name: "heading ratio", min: 1, max: 1.6, step: 0.02, glyph: `<path d="M3 12h10M4.5 8.5h7M6 5h4"/>` },
+  { key: "leading", row: "type", name: "line height", min: 1.2, max: 2.2, step: 0.05, glyph: `<path d="M6 4h7M6 8h7M6 12h7M3 4v8"/>` },
+  { key: "measure", row: "type", name: "measure", min: 440, max: 900, step: 10, glyph: `<path d="M3 8h10M5 6v4M11 6v4"/>` },
+  { key: "gap", row: "page", name: "gap between areas", min: 8, max: 64, step: 2, glyph: `<path d="M3 4v8M13 4v8M6 8h4"/>` },
+  { key: "dim", row: "page", name: "dim the rest", min: 0, max: 0.8, step: 0.05, glyph: `<circle cx="8" cy="8" r="5"/><path d="M8 3a5 5 0 0 1 0 10z" fill="currentColor"/>` },
+  { key: "fade", row: "page", name: "fade at the edges", min: 0, max: 20, step: 1, glyph: `<path d="M8 3v10M4.5 6a4.5 4.5 0 0 0 0 4M11.5 6a4.5 4.5 0 0 1 0 4"/>` },
 ];
 
 /** An arc of a meter: 270 degrees from the lower left, clockwise, a fraction `t` of the way. */
@@ -976,8 +1005,21 @@ function settingsHtml(): string {
       `<span class="hint chrome dim">${k.name} ${shown}</span></div>`
     );
   };
-  return `<div class="settings"><div class="knobs">${KNOBS.map(knob).join("")}</div><div class="switches chrome"><button class="pick${s.flick ? " on" : ""}" data-set="flick" data-value="${s.flick ? 0 : 1}">flick ${s.flick ? "on" : "off"}</button></div></div>`;
+  const row = (w: Switch) =>
+    `<span class="name">${w.name}</span><span class="values">${w.values
+      .map((v, i) => `<button class="pick${s[w.key] === v ? " on" : ""}" data-set="${w.key}" data-value="${v}">${w.labels?.[i] ?? v}</button>`)
+      .join("")}</span>`;
+  return `<div class="settings">${(["type", "page"] as const).map((r) => `<div class="knobs">${KNOBS.filter((k) => k.row === r).map(knob).join("")}</div>`).join("")}<div class="switches chrome">${SWITCHES.map(row).join("")}</div></div>`;
 }
+
+/** The switches beneath the meters: a setting with a few named values, a row apiece. */
+type Switch = { key: "flick" | "theme" | "headings" | "prose"; name: string; values: (string | number)[]; labels?: string[] };
+const SWITCHES: Switch[] = [
+  { key: "theme", name: "theme", values: THEMES },
+  { key: "headings", name: "headings", values: FACES },
+  { key: "prose", name: "prose", values: FACES },
+  { key: "flick", name: "flick", values: [1, 0], labels: ["on", "off"] },
+];
 
 /** Turns one meter to its setting's value in place, so a drag never redraws the wing under the pointer. */
 function drawMeter(el: HTMLElement): void {
@@ -999,6 +1041,9 @@ function loadSettings(): void {
     if (saved && typeof saved.fade === "number" && saved.fade <= 1 && saved.dim === undefined) (state.settings.dim = saved.fade), (state.settings.fade = DEFAULTS.fade);
   } catch {}
   AREAS.forEach(({ name }) => (state.settings.areas[name] in WIDGETS ? null : (state.settings.areas[name] = DEFAULTS.areas[name])));
+  if (!THEMES.includes(state.settings.theme)) state.settings.theme = DEFAULTS.theme;
+  if (!FACES.includes(state.settings.headings)) state.settings.headings = DEFAULTS.headings;
+  if (!FACES.includes(state.settings.prose)) state.settings.prose = DEFAULTS.prose;
 }
 const saveSettings = (): void => void localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
 
@@ -1166,7 +1211,7 @@ function plateSvg(S: number): string {
       const mid = (d.a0 + d.a1) / 2;
       const rm = (d.r0 + d.r1) / 2;
       const chord = 2 * d.r0 * Math.sin(Math.min(Math.PI, d.a1 - d.a0) / 2);
-      return `<text class="label${onPath.has(d.a) ? " on" : ""}" data-a="${esc(d.a)}" x="${(c + rm * Math.cos(mid)).toFixed(1)}" y="${(c + rm * Math.sin(mid)).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(trim(d.label!, Math.floor((chord - 8) / 5.6)))}</text>`;
+      return `<text class="label${onPath.has(d.a) ? " on" : ""}${d.a === state.focus ? " here" : ""}" data-a="${esc(d.a)}" x="${(c + rm * Math.cos(mid)).toFixed(1)}" y="${(c + rm * Math.sin(mid)).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(trim(d.label!, Math.floor((chord - 8) / 5.6)))}</text>`;
     });
   const centre = `<g class="cell centre${state.focus === "" ? " on" : ""}" data-a=""><circle cx="${c}" cy="${c}" r="${(rc - PLATE.gap / 2).toFixed(1)}"/><text class="label" x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle">${esc(trim(state.body!.title, Math.floor(rc / 3.4)))}</text></g>`;
   return `<svg class="fig plate" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${cells.join("")}${centre}${labels.join("")}</svg>`;
@@ -1199,15 +1244,28 @@ function fits(): Record<AreaName, boolean> {
 function drawLayout(): void {
   const s = state.settings;
   const root = document.documentElement.style;
-  const body = 17 * s.zoom;
+  const base = 17 * s.zoom;
+  // each face is sized to the serif's x-height, so changing the face never changes how large the text reads
+  const body = base * sizeOf(s.prose);
+  const head = base * sizeOf(s.headings);
+  // the lines are spaced from the serif's size, so changing the face never changes the spacing of the lines
+  root.setProperty("--leading", `${(base * s.leading).toFixed(2)}px`);
   root.setProperty("--body", `${body.toFixed(2)}px`);
-  root.setProperty("--t", `${(body * s.ratio ** 3).toFixed(2)}px`);
-  root.setProperty("--h1", `${(body * s.ratio ** 2).toFixed(2)}px`);
-  root.setProperty("--h2", `${(body * s.ratio).toFixed(2)}px`);
-  root.setProperty("--h3", `${(body * Math.sqrt(s.ratio)).toFixed(2)}px`);
+  root.setProperty("--t", `${(head * s.ratio ** 3).toFixed(2)}px`);
+  root.setProperty("--h1", `${(head * s.ratio ** 2).toFixed(2)}px`);
+  root.setProperty("--h2", `${(head * s.ratio).toFixed(2)}px`);
+  root.setProperty("--h3", `${(head * Math.sqrt(s.ratio)).toFixed(2)}px`);
+  root.setProperty("--h4", `${head.toFixed(2)}px`);
+  root.setProperty("--prose-face", FACE[s.prose].family);
+  root.setProperty("--head-face", FACE[s.headings].family);
+  // a monospace face is spaced by its grid, so the tightening a proportional heading takes is left out
+  root.setProperty("--head-tight", s.headings === "mono" ? "0" : "1");
   root.setProperty("--gap", `${s.gap}px`);
   root.setProperty("--dim", `${s.dim}`);
   root.setProperty("--edge", `${s.fade}%`);
+  // the theme picks a side of every colour; the system setting leaves it to the browser, so nothing flashes
+  if (s.theme === "system") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = s.theme;
   const on = fits();
   // a viewport narrower than the measure gives the lane what there is
   const measure = Math.min(s.measure, ui.areas.getBoundingClientRect().width - 32);
@@ -1577,7 +1635,9 @@ function wire(): void {
     }
     const set = t.closest<HTMLElement>("[data-set]");
     if (set) {
-      (state.settings as unknown as Record<string, unknown>)[set.dataset.set!] = Number(set.dataset.value);
+      const v = set.dataset.value!;
+      const key = set.dataset.set as keyof Settings;
+      (state.settings as unknown as Record<string, unknown>)[key] = typeof DEFAULTS[key] === "number" ? Number(v) : v;
       saveSettings();
       return void drawAll();
     }
@@ -1782,33 +1842,64 @@ if (typeof document !== "undefined") start();
 // ink only for a live fact. A serif for the prose and a sans for the chrome; the
 // heading registers grow over the body by the ratio a reader sets. The brief in
 // focus stands whole and the rest a step dimmer; the prose fades at the top and
-// the bottom edges. The page is white. This part stays with the server, which
+// the bottom edges. The page is white, or a warm near-black when the theme is
+// dark, one palette with both sides. This part stays with the server, which
 // writes it into the page's head.
 
 const CSS = `
+/*
+ * Two themes, one palette: every colour is a light and a dark value side by side, and the theme picks the side.
+ * Neither side is the other inverted. The light side is laid on a white ground; the dark side matches each role's
+ * contrast against its own ground, and bends where perception does:
+ *   the ground is a warm near-black and the ink a soft white, since pure black under pure white glares and a dead
+ *   neutral grey reads cold; light text on dark reads heavier, so the type thins a step (--thin);
+ *   fills near the ground step further from it in dark, since small differences in the dark are harder to see;
+ *   chroma follows what a hue can hold at a lightness, which peaks in the middle and falls towards both ends, so
+ *   every role's chroma sits under the weakest hue at its lightness and no branch shouts over another;
+ *   accents drop chroma on dark, where a saturated colour looks brighter than it is and vibrates.
+ */
 :root {
-  --ink: #141414; --muted: #6b6b6b; --dim: #a8a8a8; --ground: #ffffff;
+  color-scheme: light dark;
+  --ground: light-dark(#ffffff, oklch(18.5% 0.005 60));
+  --ink: light-dark(#141414, oklch(92% 0.005 60));
+  --muted: light-dark(#6b6b6b, oklch(74% 0.005 60));
+  --faint: light-dark(#a8a8a8, oklch(55% 0.005 60));
+  --wash: light-dark(rgb(0 0 0 / .035), rgb(255 255 255 / .05));
+  --veil: light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .07));
+  --track: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .13));
+  --meter: light-dark(oklch(62% 0.19 28), oklch(70% 0.14 28));
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  --body: 17px; --t: 33px; --h1: 26.5px; --h2: 21px; --h3: 19px; --small: 13px;
+  --mono: "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
+  --body: 17px; --t: 33px; --h1: 26.5px; --h2: 21px; --h3: 19px; --h4: 17px;
+  --prose-face: var(--serif); --head-face: var(--serif); --head-tight: 1; --small: 13px;
+  --leading: 27.2px;
   --gap: 24px; --measure: 600px; --dim: .4; --edge: 8%;
-  --meter: oklch(62% 0.19 28);
+  --thin: 0;
   --h: 60;
 }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; --thin: 30; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --thin: 30; } }
 *, ::before, ::after {
-  --rest: oklch(88% 0.045 var(--h)); --door: oklch(74% 0.085 var(--h)); --on: oklch(42% 0.09 var(--h));
-  --lit: oklch(58% 0.17 var(--h)); --grey: oklch(90% 0 0);
+  --rest: light-dark(oklch(88% 0.045 var(--h)), oklch(35% 0.04 var(--h)));
+  --door: light-dark(oklch(74% 0.085 var(--h)), oklch(54% 0.07 var(--h)));
+  --on: light-dark(oklch(42% 0.072 var(--h)), oklch(84% 0.055 var(--h)));
+  --lit: light-dark(oklch(60% 0.12 var(--h)), oklch(74% 0.1 var(--h)));
+  --glow: light-dark(oklch(80% 0.08 var(--h)), oklch(47% 0.06 var(--h)));
+  --grey: light-dark(oklch(90% 0 0), oklch(32% 0 0));
+  --hub: light-dark(oklch(92% 0.01 60), oklch(27% 0.01 60));
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
-body { display: flex; flex-direction: column; background: var(--ground); color: var(--ink); font-family: var(--serif); font-size: var(--body); line-height: 1.6; overflow: hidden; -webkit-font-smoothing: antialiased; }
+body { display: flex; flex-direction: column; background: var(--ground); color: var(--ink); font-family: var(--prose-face); font-size: var(--body); font-weight: calc(400 - var(--thin)); line-height: 1.6; overflow: hidden; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: underline; text-decoration-color: var(--door); text-decoration-thickness: 1px; text-underline-offset: .18em; }
 a:hover, a.lit { text-decoration-color: var(--lit); }
 a.web { text-decoration-style: dotted; }
 a.owed { text-decoration-style: dashed; color: var(--muted); cursor: help; }
 a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .chrome { font-family: var(--sans); font-size: var(--small); color: var(--muted); letter-spacing: .01em; line-height: 1.4; }
-.dim { color: var(--dim); }
+.dim { color: var(--faint); }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
 #header { position: absolute; top: 8px; left: 0; right: 0; z-index: 4; display: flex; justify-content: center; gap: 16px; pointer-events: none; }
@@ -1831,44 +1922,44 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
 .gutter { position: relative; }
 .gutter.closed { visibility: hidden; }
-#lane { min-width: 0; }
+#lane { min-width: 0; line-height: var(--leading); }
 
 #strips { position: absolute; left: 0; right: 0; bottom: 0; height: 0; z-index: 5; pointer-events: none; }
 .strip { position: absolute; bottom: 10px; display: flex; gap: 4px; justify-content: center; pointer-events: auto; }
 .strip.rail { flex-direction: column; align-items: center; }
-.strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--dim); opacity: .22; transition: opacity .15s, color .15s; }
+.strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--ink); opacity: .22; transition: opacity .15s, color .15s; }
 .strip .pick:hover { opacity: .7; }
 .strip .pick.on { opacity: 1; color: var(--muted); }
 .strip.rail .pick.on { opacity: .22; }
 .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
 .opening { margin-bottom: 40px; }
-.opening h1 { font-size: var(--t); font-weight: 600; line-height: 1.12; letter-spacing: -.014em; margin: 6px 0 18px; }
+.opening h1 { font-family: var(--head-face); font-size: var(--t); font-weight: calc(600 - var(--thin)); line-height: 1.12; letter-spacing: calc(-.014em * var(--head-tight)); margin: 6px 0 .56em; }
 .record { margin: 4px 0 24px; }
 
 .brief { position: relative; margin: 0; padding-bottom: var(--after, 36px); opacity: calc(1 - var(--dim)); transition: opacity .3s; }
 .brief.here { opacity: 1; }
 .surface p { margin-bottom: 12px; }
-.act { display: flex; align-items: center; gap: 10px; color: var(--dim); cursor: pointer; margin: -4px -8px 0; padding: 4px 8px; border-radius: 6px; transition: color .15s; }
+.act { display: flex; align-items: center; gap: 10px; color: var(--ink); cursor: pointer; margin: -4px -8px 0; padding: 4px 8px; border-radius: 6px; transition: color .15s; }
 .act:hover { color: var(--on); }
 .act svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .act.more svg { transform: rotate(90deg); }
 .act.less svg { transform: rotate(-90deg); }
 .act .bars { display: inline-flex; gap: 3px; align-items: center; }
 .act .bars i { display: block; width: 9px; height: 3px; border-radius: 1.5px; background: var(--rest); }
-.act .bars b { font-weight: 500; margin-left: 2px; }
+.act .bars b { font-weight: calc(500 - var(--thin)); margin-left: 2px; }
 .act.less { margin-top: -6px; }
 .pointing .brief.here:not(.lit):not(.keep) { opacity: calc(1 - var(--dim)); }
 .brief.lit, .brief.keep { opacity: 1; }
-.head { position: relative; display: flex; align-items: baseline; font-weight: 600; line-height: 1.2; letter-spacing: -.012em; margin: 0 0 12px; transition: color .12s; }
+.head { position: relative; font-family: var(--head-face); display: flex; align-items: baseline; font-weight: calc(600 - var(--thin)); line-height: 1.2; letter-spacing: calc(-.012em * var(--head-tight)); margin: 0 0 .56em; transition: color .12s; }
 .head.d1 { font-size: var(--h1); }
 .head.d2 { font-size: var(--h2); }
 .head.d3 { font-size: var(--h3); }
-.head.d4 { font-size: var(--body); }
-.head .num { flex: 0 0 auto; margin-right: .5rem; font-family: var(--sans); font-size: var(--small); font-weight: 500; letter-spacing: 0; color: var(--dim); }
+.head.d4 { font-size: var(--h4); }
+.head .num { flex: 0 0 auto; margin-right: .5rem; font-family: var(--sans); font-size: var(--small); font-weight: calc(500 - var(--thin)); letter-spacing: 0; color: var(--faint); }
 .head .title { flex: 1 1 auto; }
 .brief.lit .title { color: var(--on); }
-.brief.on .num { color: var(--on); font-weight: 600; }
+.brief.on .num { color: var(--on); font-weight: calc(600 - var(--thin)); }
 .brief.here .num { color: var(--lit); }
 .mark { position: absolute; width: 16px; height: 16px; display: grid; place-items: center; color: var(--door); opacity: .7; transition: opacity .15s; }
 .mark:hover { opacity: 1; color: var(--lit); }
@@ -1879,11 +1970,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .brief li { margin-bottom: 8px; }
 .brief ul, .brief ol { padding-left: 1.4rem; margin: 0 0 12px; }
 .brief blockquote { margin: 0 0 12px; padding-left: 16px; border-left: 2px solid var(--rest); color: var(--muted); }
-.brief pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: var(--small); line-height: 1.5; background: rgba(0,0,0,.035); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 0 0 12px; }
-.brief code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92em; }
+.brief pre { font-family: var(--mono); font-size: var(--small); line-height: 1.5; background: var(--wash); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 0 0 12px; }
+.brief code { font-family: var(--mono); font-size: .92em; }
 .brief .table { overflow-x: auto; margin: 0 0 12px; }
 .brief table { border-collapse: collapse; font-family: var(--sans); font-size: var(--small); line-height: 1.4; }
-.brief th { text-align: left; font-weight: 600; padding: 4px 12px 4px 0; border-bottom: 1px solid var(--rest); }
+.brief th { text-align: left; font-weight: calc(600 - var(--thin)); padding: 4px 12px 4px 0; border-bottom: 1px solid var(--rest); }
 .brief td { padding: 4px 12px 4px 0; vertical-align: top; }
 .brief em { font-style: italic; }
 .brief hr { border: 0; border-top: 1px solid var(--rest); margin: 16px 0; }
@@ -1897,7 +1988,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .adj .name { display: block; color: var(--ink); cursor: pointer; }
 .adj .name:hover, .adj .name.lit { color: var(--on); }
 .adj .gloss { display: block; color: var(--muted); }
-.adj.dim .gloss { color: var(--dim); }
+.adj.dim .gloss { color: var(--faint); }
 .adj.foot { border-left-color: transparent; border-right-color: transparent; }
 .adj.foot .name { display: inline; margin-right: 8px; }
 .adj.foot .gloss { margin-bottom: 2px; }
@@ -1905,13 +1996,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .tree { position: relative; font-family: var(--sans); font-size: var(--small); line-height: 1.35; color: var(--muted); width: 100%; max-width: 320px; }
 .tree .row { position: relative; display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px calc(20px + var(--d) * 14px); border-radius: 6px; }
 .tree .row .mark { position: absolute; left: calc(2px + var(--d) * 14px); top: 3px; }
-.tree .row.root { color: var(--ink); font-weight: 600; margin-bottom: 4px; }
-.tree .row.above .name { color: var(--dim); }
-.tree .row:hover, .tree .row.lit { background: rgba(0,0,0,.035); }
+.tree .row.root { color: var(--ink); font-weight: calc(600 - var(--thin)); margin-bottom: 4px; }
+.tree .row.above .name { color: var(--faint); }
+.tree .row:hover, .tree .row.lit { background: var(--wash); }
 .tree .name { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tree .row.on .name { color: var(--ink); }
-.tree .row.here .name, .tree .row.lit .name { color: var(--on); font-weight: 600; }
-.pointing .tree .row.here:not(.lit) .name { color: var(--ink); font-weight: 500; }
+.tree .row.here .name, .tree .row.lit .name { color: var(--on); font-weight: calc(600 - var(--thin)); }
+.pointing .tree .row.here:not(.lit) .name { color: var(--ink); font-weight: calc(500 - var(--thin)); }
 .tree .laser { position: absolute; height: 1.5px; background: var(--on); border-radius: 1px; transition: top .28s cubic-bezier(.2,.7,.2,1), left .28s, width .28s; pointer-events: none; }
 
 svg.fig { display: block; overflow: visible; touch-action: none; user-select: none; }
@@ -1940,33 +2031,35 @@ svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick:not(.ghost), svg.shape 
 svg.shape .hit[data-press="fold"] { cursor: pointer; }
 svg.shape .tick { fill: var(--grey); }
 svg.shape .hidden { fill: var(--grey); }
-svg.shape .cell.lit .hidden { fill: oklch(80% 0.08 var(--h)); }
-svg.shape .cursor { fill: rgba(0,0,0,.05); pointer-events: none; }
+svg.shape .cell.lit .hidden { fill: var(--glow); }
+svg.shape .cursor { fill: var(--veil); pointer-events: none; }
 svg.shape { cursor: grab; }
 
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
-svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
+svg.plate .cell.centre circle { fill: var(--hub); }
 svg.plate .cell.on path { fill: var(--door); }
 svg.plate .cell.here path { fill: var(--on); }
 /* grey for anything not in the lane wins over the marks above, at every depth */
 svg.plate .cell.away path { fill: var(--grey); }
 svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
 svg.plate .label { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
-svg.plate .label.lit, svg.plate .cell.lit .label { fill: var(--ground); }
+svg.plate .label.lit, svg.plate .cell.lit .label, svg.plate .label.here { fill: var(--ground); }
 
-.settings { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-.knobs { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.knob { position: relative; width: 48px; height: 48px; cursor: ns-resize; touch-action: none; user-select: none; color: var(--dim); }
+.settings { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.knobs { display: flex; gap: 14px; justify-content: center; }
+.knob { position: relative; width: 48px; height: 48px; cursor: ns-resize; touch-action: none; user-select: none; color: var(--faint); }
 .knob svg { width: 48px; height: 48px; display: block; }
-.knob .track { fill: none; stroke: rgba(0,0,0,.08); stroke-width: 3; stroke-linecap: round; }
+.knob .track { fill: none; stroke: var(--track); stroke-width: 3; stroke-linecap: round; }
 .knob .value { fill: none; stroke: var(--meter); stroke-width: 3; stroke-linecap: round; }
 .knob .glyph { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 .knob .hint { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; opacity: 0; transition: opacity .15s; pointer-events: none; }
 .knob:hover .hint { opacity: 1; }
-.switches { display: flex; gap: 4px; }
-.switches .pick { padding: 2px 8px; border-radius: 6px; color: var(--dim); }
+.switches { display: grid; grid-template-columns: auto auto; gap: 2px 10px; align-items: center; }
+.switches .name { justify-self: end; color: var(--faint); }
+.switches .values { display: flex; gap: 2px; }
+.switches .pick { padding: 2px 8px; border-radius: 6px; color: var(--muted); }
 .switches .pick.on { color: var(--ink); }
-.switches .pick:hover { background: rgba(0,0,0,.04); }
+.switches .pick:hover { background: var(--wash); }
 `;
 
 // The run, last, so that everything it calls stands above it.
