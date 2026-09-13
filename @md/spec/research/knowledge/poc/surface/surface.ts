@@ -1426,11 +1426,12 @@ function refold(change: () => void, anchor: string = state.focus): void {
   const after = at(held);
   if (before !== undefined && after !== undefined) ui.scroll.scrollTop += after - before;
   // a brief folded from deep inside it takes the reader up with it: its heading returns to the reading line
+  // the jump is instant, since a smooth scroll is cancelled by any scroll that follows the press, as trackpad inertia does
   const top = at(held);
   const box = ui.scroll.getBoundingClientRect();
   if (top !== undefined && (top < box.top + 8 || top > box.bottom - 40)) {
     state.focus = held;
-    scrollToFocus(true);
+    scrollToFocus(false);
   }
   history.replaceState(null, "", `#/${state.focus}`);
   drawWings();
