@@ -489,9 +489,8 @@ type Index = {
   depth: number;
 };
 
-/** A brief in the lane stands at one of three grades; a brief not in the lane has none. */
-type Grade = "heading" | "face" | "whole";
-const GRADES: Grade[] = ["heading", "face", "whole"];
+/** A brief in the lane stands at its face or whole; a brief not in the lane has no grade. */
+type Grade = "face" | "whole";
 
 type AreaName = "wingL" | "gutterL" | "gutterR" | "wingR";
 type Settings = {
@@ -499,6 +498,9 @@ type Settings = {
   ratio: number;
   measure: number;
   gap: number;
+  /** the step every brief but the highlighted one is dimmed by */
+  dim: number;
+  /** the run of the fade at the top and the bottom of the lane, in hundredths of its height */
   fade: number;
   flick: number;
   areas: Record<AreaName, string>;
@@ -509,7 +511,8 @@ const DEFAULTS: Settings = {
   ratio: 1.25,
   measure: 600,
   gap: 24,
-  fade: 0.4,
+  dim: 0.4,
+  fade: 8,
   flick: 1,
   areas: { wingL: "shape", gutterL: "none", gutterR: "links", wingR: "ahead" },
 };
@@ -522,8 +525,6 @@ const state = {
   pointed: null as string | null,
   /** every brief in the lane and its grade; a brief absent here is not drawn */
   grades: new Map<string, Grade>(),
-  /** the briefs opened in the tree, which is the tree's own state and not the lane's */
-  treeOpen: new Set<string>(),
   settings: { ...DEFAULTS, areas: { ...DEFAULTS.areas } } as Settings,
   /** set while a drag is in progress, so pointing does not fight it */
   scrubbing: false,
@@ -553,6 +554,9 @@ const level = (a: string): Brief[] => state.index?.children.get(a) ?? [];
 const brief = (a: string): Brief | undefined => state.index?.by.get(a);
 const gradeOf = (a: string): Grade | null => state.grades.get(a) ?? null;
 const inLane = (a: string): boolean => state.grades.has(a);
+
+/** The briefs in the lane, in reading order: a brief, then its level, then the next. */
+const laneOrder = (parent = ""): Brief[] => level(parent).flatMap((b) => (inLane(b.address) ? [b, ...(gradeOf(b.address) === "whole" ? laneOrder(b.address) : [])] : []));
 
 /** The nearest address that resolves, for a link or a hash that no longer does. */
 const nearest = (a: string): string => prefixesOf(a).findLast((p) => brief(p)) ?? "";
@@ -657,7 +661,6 @@ function lay(address: string): void {
   g.set("", "whole");
   path.forEach((p) => level(p).forEach((c) => g.set(c.address, path.includes(c.address) || p === parentOf(address) ? "whole" : "face")));
   closeLay();
-  path.forEach((p) => state.treeOpen.add(p));
 }
 
 /** Every whole brief shows its level: children with no grade yet take a face. */
@@ -676,26 +679,44 @@ function setGrade(a: string, grade: Grade): void {
   else closeLay();
 }
 
-const nextGrade = (grade: Grade | null): Grade => GRADES[(GRADES.indexOf(grade ?? "heading") + 1) % GRADES.length];
+const nextGrade = (grade: Grade | null): Grade => (grade === "whole" ? "face" : "whole");
 
 /** The grade a level stands at: that of its first brief in the lane, or none. */
 const levelGrade = (parent: string): Grade | null => level(parent).map((b) => gradeOf(b.address)).find((x) => x !== null) ?? null;
 
 const CHEVRON = `<svg viewBox="0 0 10 10"><path d="M3.2 1.8 6.6 5 3.2 8.2"/></svg>`;
 
-/** The fold mark beside a brief in the lane: a chevron that turns down when whole, points right at a face, and stands hollow at a heading. */
+/** The fold mark beside a brief: a chevron that turns down when whole and points right at a face. */
 const foldMark = (b: Brief): string =>
   `<button class="mark ${gradeOf(b.address) ?? "none"}${b.door ? "" : " leaf"}" data-fold="${esc(b.address)}" title="fold or open">${CHEVRON}</button>`;
 
-/** One brief in the lane at its grade. */
-function articleHtml(b: Brief, g: Grade): string {
+/** The gap after a brief, by the depth of the level the next brief begins: tighter the deeper, so what lies beneath a brief sits together and its siblings stand apart. */
+const gapAfter = (nextDepth: number): number => [56, 56, 40, 28, 20][Math.min(4, nextDepth)] ?? 16;
+
+/** One brief in the lane at its grade: its face, the heading and the first block, then the rest when whole; `after` is the gap beneath it. */
+function articleHtml(b: Brief, g: Grade, after: number): string {
   const d = Math.min(4, depthOf(b.address));
-  const face = g === "face" ? blocksOf(b).find((t) => t.type === "paragraph") : undefined;
+  const [first, ...rest] = blocksOf(b);
   const on = prefixesOf(state.focus).includes(b.address);
+  const beneath = beneathCount(b.address);
+  // a folded brief says beneath its face that it opens: a bar per paragraph it hides, and how many briefs lie beneath
+  const more =
+    g === "face" && (rest.length > 0 || beneath > 0)
+      ? `<div class="act more chrome" data-fold="${esc(b.address)}">${CHEVRON}<span>open</span>` +
+        (rest.length ? `<span class="bars">${rest.slice(0, 12).map(() => `<i></i>`).join("")}${rest.length > 12 ? `<b>+${rest.length - 12}</b>` : ""}</span>` : "") +
+        (beneath ? `<span class="beneath">${beneath} beneath</span>` : "") +
+        `</div>`
+      : "";
+  // a whole brief folds from a line at its foot
+  const less = g === "whole" && (rest.length > 0 || beneath > 0) ? `<div class="act less chrome" data-fold="${esc(b.address)}">${CHEVRON}<span>fold</span></div>` : "";
   return (
-    `<article class="brief ${g}${on ? " on" : ""}${b.address === state.focus ? " here" : ""}" data-a="${esc(b.address)}" ${hued(b.address)}>` +
-    `<h2 class="head d${d}">${foldMark(b)}<span class="num">${esc(shownNumber(b))}</span><span class="title" data-go="${esc(b.address)}">${esc(b.title)}</span></h2>` +
-    (g === "whole" ? blocks(b.body) : face ? `<p class="first">${inline(face.tokens)}</p>` : "") +
+    `<article class="brief ${g}${on ? " on" : ""}${b.address === state.focus ? " here" : ""}" data-a="${esc(b.address)}" style="--h:${hueOf(b.address)};--after:${after}px">` +
+    `<div class="surface">` +
+    `<h2 class="head d${d}"><span class="num">${esc(shownNumber(b))}</span><span class="title">${esc(b.title)}</span></h2>` +
+    (first ? blocks([first]) : "") +
+    more +
+    `</div>` +
+    (g === "whole" ? blocks(rest) + less : "") +
     `</article>`
   );
 }
@@ -705,15 +726,14 @@ function laneHtml(): string {
   const root = brief("")!;
   const opening = `<header class="opening brief${state.focus === "" ? " here" : ""}" data-a=""><h1>${esc(root.title)}</h1>${blocks(root.body)}</header>`;
   const recordNote = (parent: string) => (level(parent)[0]?.kind === "record" ? `<p class="chrome record">A record: its order is when each entry happened, and nothing ranks them.</p>` : "");
-  const drawLevel = (parent: string): string =>
-    recordNote(parent) +
-    level(parent)
-      .map((b) => {
-        const g = gradeOf(b.address);
-        return g === null ? "" : articleHtml(b, g) + (g === "whole" ? drawLevel(b.address) : "");
-      })
-      .join("");
-  return opening + drawLevel("");
+  const order = laneOrder();
+  const opensRecord = (b: Brief) => level(parentOf(b.address))[0] === b && b.kind === "record";
+  return (
+    opening +
+    order
+      .map((b, i) => (opensRecord(b) ? recordNote(parentOf(b.address)) : "") + articleHtml(b, gradeOf(b.address)!, gapAfter(order[i + 1] ? depthOf(order[i + 1].address) : 1)))
+      .join("")
+  );
 }
 
 // ## 3.4 The areas, the widgets, and the strip
@@ -760,26 +780,26 @@ const choicesFor = (kind: Widget["kind"]): string[] => Object.keys(WIDGETS).filt
 
 /** The strip of an area: one light icon per widget it can hold, the one in use a little darker; closed, it stands as a rail. */
 const stripHtml = (area: AreaName, kind: Widget["kind"]): string =>
-  `<div class="strip${isOpen(area) ? "" : " rail"}" data-strip="${area}">${choicesFor(kind)
+  `<div class="strip${!isOpen(area) && kind === "figure" ? " rail" : ""}" data-strip="${area}">${choicesFor(kind)
     .map((k) => `<button class="pick${state.settings.areas[area] === k ? " on" : ""}" data-area="${area}" data-widget="${k}" title="${esc(WIDGETS[k].name)}">${icon(WIDGETS[k].icon)}</button>`)
     .join("")}</div>`;
 
-// ## 3.5 The tree: where you came from
+// ## 3.5 The tree: the lane as an outline
 //
-// The body as a tree, opened along the path and further as the reader opens
-// it; the tree's own opening is not the lane's grade. The name goes; the mark
-// opens or closes the node; a line lies across the row of the focus.
+// The lane's briefs as a file tree: a row per brief in the lane, nested under
+// its parent, open where the brief is whole. Opening in the tree is opening in
+// the lane, one state. The name goes; a line lies across the row of the focus.
 
 function treeHtml(): string {
   const node = (b: Brief, d: number): string => {
-    const open = state.treeOpen.has(b.address);
-    const kids = level(b.address);
+    if (!inLane(b.address)) return "";
+    const open = gradeOf(b.address) === "whole";
     const on = prefixesOf(state.focus).includes(b.address);
     return (
       `<div class="node"><div class="row${on ? " on" : ""}${b.address === state.focus ? " here" : ""}" data-a="${esc(b.address)}" style="--h:${hueOf(b.address)};--d:${d}">` +
-      (kids.length ? `<button class="mark ${open ? "open" : "closed"}" data-toggle="${esc(b.address)}" title="open or close">${CHEVRON}</button>` : `<span class="mark leaf"></span>`) +
+      foldMark(b) +
       `<span class="name" data-go="${esc(b.address)}">${esc(b.title)}</span></div>` +
-      (open ? kids.map((k) => node(k, d + 1)).join("") : "") +
+      (open ? level(b.address).map((k) => node(k, d + 1)).join("") : "") +
       `</div>`
     );
   };
@@ -790,71 +810,71 @@ function treeHtml(): string {
 
 // ## 3.6 The ahead: what lies beneath, and is not in the lane
 //
-// For the pointed brief, or else the focus: its subtree as columns left to
-// right, one per depth, each brief a cell as tall as its branch is heavy. Drawn
-// only where the level beneath is not in the lane, and only as large as it
-// needs to be.
+// For the highlighted brief, when its level is out of view: the whole subtree
+// beneath it drawn as the shape draws the lane, heading bars and paragraph
+// blocks shifted right by nesting, everything expanded, sized from the text
+// since none of it is drawn in the lane. Drawn only where the level beneath is
+// not in the lane, and only as large as the subtree needs.
 
-const AHEAD = { floor: 14, gap: 3, col: 120, row: 21 };
-
-type Bar = { a: string; x: number; y: number; w: number; h: number; more: boolean; label: string | null };
-
-function layoutAhead(root: string, W: number, H: number): Bar[] {
-  const ix = state.index!;
-  const depthBeneath = (a: string): number => Math.max(0, ...level(a).map((k) => 1 + depthBeneath(k.address)));
-  const D = Math.max(1, Math.min(depthBeneath(root), Math.floor((W + AHEAD.gap) / (AHEAD.col + AHEAD.gap))));
-  const cw = (W - AHEAD.gap * (D - 1)) / D;
-  const col = (d: number) => d * (cw + AHEAD.gap);
-  const fits = (kids: Brief[], d: number, h: number) => kids.length > 0 && d < D && kids.length * AHEAD.floor + (kids.length - 1) * AHEAD.gap <= h;
-  const lay = (parent: string, y0: number, h: number, d: number): Bar[] => {
-    const kids = level(parent);
-    if (!fits(kids, d, h)) return [];
-    const heights = spread(
-      kids.map((k) => Math.max(1, ix.branch.get(k.address)!)),
-      h - AHEAD.gap * (kids.length - 1),
-      AHEAD.floor,
-    );
-    const ys = offsets(heights, AHEAD.gap);
-    return kids.flatMap((k, i) => {
-      const bar: Bar = {
-        a: k.address,
-        x: col(d),
-        y: y0 + ys[i],
-        w: cw,
-        h: heights[i],
-        more: level(k.address).length > 0 && !fits(level(k.address), d + 1, heights[i]),
-        label: heights[i] >= 13 ? trim(k.title, Math.floor((cw - 10) / 5.8)) : null,
-      };
-      return [bar, ...lay(k.address, bar.y, heights[i], d + 1)];
-    });
-  };
-  return lay(root, 0, H, 0);
-}
-
-/** The brief the ahead answers for: the pointed brief when its level is out of view, otherwise the focus. */
+let aheadRoot: string | null = null;
+/** The brief the ahead answers for: the pointed brief when its level is out of view, otherwise the focus; a cell inside the figure never re-roots it. */
 function aheadTarget(): string | null {
   const hidden = (a: string) => level(a).length > 0 && !level(a).some((k) => inLane(k.address));
-  if (state.pointed !== null && brief(state.pointed) && hidden(state.pointed)) return state.pointed;
-  return hidden(state.focus) ? state.focus : null;
+  const base = hidden(state.focus) ? state.focus : null;
+  const p = state.pointed;
+  const within = (root: string | null) => root !== null && p !== null && p.startsWith(root + "/");
+  // the figure keeps its root while the pointer moves within it, so pointing at a cell never redraws the figure from under the pointer
+  aheadRoot = p !== null && brief(p) && hidden(p) && !within(base) ? p : within(aheadRoot) ? aheadRoot : base;
+  return aheadRoot;
 }
+
+/** A block's height in lines of the lane, from its text: a heading, or a paragraph of `n` characters. */
+const linesOf = (n: number): number => (n < 0 ? 1.5 : 0.6 + n / 72);
 
 function aheadSvg(W: number, H: number): string {
   const target = aheadTarget();
   if (target === null) return "";
-  const depthBeneath = (a: string): number => Math.max(0, ...level(a).map((k) => 1 + depthBeneath(k.address)));
-  const w = Math.min(W, depthBeneath(target) * (AHEAD.col + AHEAD.gap));
-  const h = clamp(beneathCount(target) * AHEAD.row, 48, H - 24);
-  const bars = layoutAhead(target, w, h);
-  const cells = bars.map((b) => {
-    const cls = `cell${b.more ? " more" : ""}`;
-    return (
-      `<g class="${cls}" data-a="${esc(b.a)}" ${hued(b.a)}><rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" rx="4"/>` +
-      (b.label ? `<text x="${(b.x + 6).toFixed(1)}" y="${(b.y + Math.min(b.h / 2 + 4, 12)).toFixed(1)}">${esc(b.label)}</text>` : "") +
-      `</g>`
-    );
+  type Row = { a: string; depth: number; blocks: number[] };
+  const rows: Row[] = [];
+  const walk = (parent: string, d: number): void =>
+    level(parent).forEach((k) => {
+      rows.push({ a: k.address, depth: d, blocks: [-1, ...blocksOf(k).map((t) => textOf([t]).length)] });
+      walk(k.address, d + 1);
+    });
+  walk(target, 0);
+  const GAP = { block: 0.35, brief: 1.2 };
+  const totalOf = (rs: Row[]) => rs.reduce((sum, r) => sum + r.blocks.reduce((x, n) => x + linesOf(n) + GAP.block, 0) + GAP.brief, 0);
+  // a line of the lane is a couple of pixels here, as in the shape, and the whole must fit the wing
+  const scale = (rs: Row[]) => Math.min(2.4, (H - 8) / Math.max(1, totalOf(rs)));
+  // the ladder: paragraphs while they stay legible; else one block per brief; else one block per level beneath, each as heavy as its branch
+  const body = (n: number[]) => n.slice(1).reduce((x, c) => x + Math.max(0, linesOf(c) - 0.6) * 72, 0);
+  const byBrief = rows.map((r) => ({ ...r, blocks: [-1, body(r.blocks)] }));
+  const byLevel = level(target).map((k) => ({ a: k.address, depth: 0, blocks: [-1, Math.max(1, state.index!.branch.get(k.address)! - 40)] }));
+  const [grain, drawn]: [string, Row[]] = scale(rows) >= 1.8 ? ["by paragraph", rows] : scale(byBrief) >= 1.2 ? ["by brief", byBrief] : ["by level", byLevel];
+  const k = scale(drawn);
+  const total = totalOf(drawn);
+  const deepest = Math.max(0, ...drawn.map((r) => r.depth));
+  const w = Math.min(W, SHAPE.pad * 2 + deepest * SHAPE.indent + SHAPE.bar);
+  const h = Math.ceil(total * k + 8);
+  let y = 4;
+  const cells = drawn.map((r) => {
+    const x = SHAPE.pad + r.depth * SHAPE.indent;
+    const top = y;
+    const bars = r.blocks
+      .map((n) => {
+        const bh = Math.max(grain === "by level" ? 5 : 1.2, linesOf(n) * k - 0.6);
+        const rect = `<rect class="${n < 0 ? "head" : "para"}" x="${x}" y="${y.toFixed(1)}" width="${n < 0 ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${bh.toFixed(1)}" rx="1"/>`;
+        y += linesOf(n) * k + GAP.block * k;
+        return rect;
+      })
+      .join("");
+    y += GAP.brief * k;
+    return `<g class="cell" data-a="${esc(r.a)}" ${hued(r.a)}><rect class="hit" x="0" y="${top.toFixed(1)}" width="${w}" height="${(y - top).toFixed(1)}"/>${bars}</g>`;
   });
   const t = brief(target)!;
-  return `<div class="ahead-box"><div class="chrome dim">beneath ${esc(t.address === "" ? state.body!.title : t.title)}</div><svg class="fig ahead" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${cells.join("")}</svg></div>`;
+  // the cells carry no names; the one under the pointer is named beneath the figure
+  const named = state.pointed !== null && state.pointed.startsWith(target + "/") ? brief(state.pointed) : null;
+  return `<div class="ahead-box"><div class="chrome dim">beneath ${esc(t.address === "" ? state.body!.title : t.title)}${grain === "by paragraph" ? "" : ` · ${grain}`}</div><svg class="fig ahead" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${cells.join("")}</svg><div class="chrome ahead-name">${named ? esc(named.title) : "&nbsp;"}</div></div>`;
 }
 
 // ## 3.7 Links: beside each link, its target; at the foot, what points here
@@ -882,13 +902,14 @@ function linkAdjuncts(b: Brief, article: HTMLElement): { at: HTMLElement | null;
 
 // ## 3.8 Settings: a row of meters
 
-type Knob = { key: "zoom" | "ratio" | "measure" | "gap" | "fade"; name: string; min: number; max: number; step: number; glyph: string };
+type Knob = { key: "zoom" | "ratio" | "measure" | "gap" | "dim" | "fade"; name: string; min: number; max: number; step: number; glyph: string };
 const KNOBS: Knob[] = [
   { key: "zoom", name: "zoom", min: 0.75, max: 1.6, step: 0.05, glyph: `<path d="M8 4v8M4 8h8"/>` },
   { key: "ratio", name: "heading ratio", min: 1, max: 1.6, step: 0.02, glyph: `<path d="M3 12h10M4.5 8.5h7M6 5h4"/>` },
   { key: "measure", name: "measure", min: 440, max: 900, step: 10, glyph: `<path d="M3 8h10M5 6v4M11 6v4"/>` },
   { key: "gap", name: "gap between areas", min: 8, max: 64, step: 2, glyph: `<path d="M3 4v8M13 4v8M6 8h4"/>` },
-  { key: "fade", name: "fade", min: 0, max: 0.8, step: 0.05, glyph: `<path d="M8 3v10M4.5 6a4.5 4.5 0 0 0 0 4M11.5 6a4.5 4.5 0 0 1 0 4"/>` },
+  { key: "dim", name: "dim the rest", min: 0, max: 0.8, step: 0.05, glyph: `<circle cx="8" cy="8" r="5"/><path d="M8 3a5 5 0 0 1 0 10z" fill="currentColor"/>` },
+  { key: "fade", name: "fade at the edges", min: 0, max: 20, step: 1, glyph: `<path d="M8 3v10M4.5 6a4.5 4.5 0 0 0 0 4M11.5 6a4.5 4.5 0 0 1 0 4"/>` },
 ];
 
 /** An arc of a meter: 270 degrees from the lower left, clockwise, a fraction `t` of the way. */
@@ -903,7 +924,7 @@ function settingsHtml(): string {
   const s = state.settings;
   const knob = (k: Knob) => {
     const t = clamp((s[k.key] - k.min) / (k.max - k.min), 0, 1);
-    const shown = k.key === "measure" || k.key === "gap" ? `${Math.round(s[k.key])}px` : s[k.key].toFixed(2);
+    const shown = k.key === "measure" || k.key === "gap" ? `${Math.round(s[k.key])}px` : k.key === "fade" ? `${Math.round(s[k.key])}%` : s[k.key].toFixed(2);
     return (
       `<div class="knob" data-knob="${k.key}" title="${k.name}: ${shown}">` +
       `<svg viewBox="0 0 40 40"><path class="track" d="${meterArc(1, 15)}"/><path class="value" d="${meterArc(Math.max(t, 0.002), 15)}"/><g class="glyph" transform="translate(12 12)">${k.glyph}</g></svg>` +
@@ -913,11 +934,24 @@ function settingsHtml(): string {
   return `<div class="settings"><div class="knobs">${KNOBS.map(knob).join("")}</div><div class="switches chrome"><button class="pick${s.flick ? " on" : ""}" data-set="flick" data-value="${s.flick ? 0 : 1}">flick ${s.flick ? "on" : "off"}</button></div></div>`;
 }
 
+/** Turns one meter to its setting's value in place, so a drag never redraws the wing under the pointer. */
+function drawMeter(el: HTMLElement): void {
+  const k = KNOBS.find((k) => k.key === el.dataset.knob)!;
+  const v = state.settings[k.key];
+  const t = clamp((v - k.min) / (k.max - k.min), 0, 1);
+  const shown = k.key === "measure" || k.key === "gap" ? `${Math.round(v)}px` : k.key === "fade" ? `${Math.round(v)}%` : v.toFixed(2);
+  el.querySelector(".value")?.setAttribute("d", meterArc(Math.max(t, 0.002), 15));
+  el.title = `${k.name}: ${shown}`;
+  const hint = el.querySelector(".hint");
+  if (hint) hint.textContent = `${k.name} ${shown}`;
+}
+
 const SETTINGS_KEY = "surface.settings";
 function loadSettings(): void {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "null");
     if (saved) state.settings = { ...DEFAULTS, ...saved, areas: { ...DEFAULTS.areas, ...(saved.areas ?? {}) } };
+    if (saved && typeof saved.fade === "number" && saved.fade <= 1 && saved.dim === undefined) (state.settings.dim = saved.fade), (state.settings.fade = DEFAULTS.fade);
   } catch {}
   AREAS.forEach(({ name }) => (state.settings.areas[name] in WIDGETS ? null : (state.settings.areas[name] = DEFAULTS.areas[name])));
 }
@@ -929,14 +963,14 @@ const saveSettings = (): void => void localStorage.setItem(SETTINGS_KEY, JSON.st
 // drawn, shifted right by the brief's depth, with the viewport drawn over it.
 // Dragging scrubs; pressing goes.
 
-const SHAPE = { indent: 9, bar: 46, pad: 6 };
+const SHAPE = { indent: 9, bar: 46, pad: 6, tail: 30 };
 
 /** The lane's briefs and their blocks as laid, in the scroll box's own coordinates. */
 function laidBlocks(): { a: string; top: number; height: number; blocks: { top: number; height: number; head: boolean }[] }[] {
   const c = ui.content.getBoundingClientRect().top;
   return all<HTMLElement>(".brief", ui.lane).map((el) => {
     const r = el.getBoundingClientRect();
-    const blocks = all<HTMLElement>(":scope > h1, :scope > h2, :scope > p, :scope > ul, :scope > ol, :scope > pre, :scope > blockquote, :scope > .table", el).map((b) => {
+    const blocks = all<HTMLElement>(":scope > *:not(.surface):not(.act), :scope > .surface > *:not(.act)", el).map((b) => {
       const br = b.getBoundingClientRect();
       return { top: br.top - c, height: br.height, head: b.tagName === "H1" || b.tagName === "H2" };
     });
@@ -949,14 +983,26 @@ function shapeSvg(W: number, H: number): string {
   const laid = laidBlocks();
   const total = Math.max(1, box.scrollHeight);
   const k = (H - 8) / total;
+  const ix = state.index!;
   const deepest = Math.max(0, ...laid.map((l) => depthOf(l.a)));
-  const w = Math.min(W, SHAPE.pad * 2 + deepest * SHAPE.indent + SHAPE.bar);
+  const w = Math.min(W, SHAPE.pad * 2 + deepest * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail);
   const cells = laid.map((l) => {
     const x = SHAPE.pad + depthOf(l.a) * SHAPE.indent;
     const bars = l.blocks
       .map((b) => `<rect class="${b.head ? "head" : "para"}" x="${x}" y="${(4 + b.top * k).toFixed(1)}" width="${b.head ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${Math.max(1.2, b.height * k - 1).toFixed(1)}" rx="1"/>`)
       .join("");
-    return `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}><rect class="hit" x="0" y="${(4 + l.top * k).toFixed(1)}" width="${w}" height="${Math.max(1, l.height * k).toFixed(1)}"/>${bars}</g>`;
+    // a folded brief tells beside its face what it hides: a tick per paragraph, then a grey tail as long as the levels beneath are heavy
+    const b = brief(l.a);
+    const folded = b !== undefined && gradeOf(l.a) === "face";
+    const paras = folded ? Math.max(0, blocksOf(b!).length - 1) : 0;
+    const hidden = folded && level(l.a).length > 0 ? ix.branch.get(l.a)! - ix.own.get(l.a)! : 0;
+    const last = l.blocks.at(-1);
+    const y = last ? (4 + last.top * k).toFixed(1) : "0";
+    const h = last ? Math.max(1.2, last.height * k - 1).toFixed(1) : "1";
+    const ticks = last ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
+    const tx = x + SHAPE.bar + 4 + Math.min(paras, 8) * 3 + (paras ? 2 : 0);
+    const tail = hidden > 0 && last ? `<rect class="hidden" x="${tx}" y="${y}" width="${clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${h}" rx="1"/>` : "";
+    return `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}><rect class="hit" x="0" y="${(4 + l.top * k).toFixed(1)}" width="${w}" height="${Math.max(1, l.height * k).toFixed(1)}"/>${bars}${ticks}${tail}</g>`;
   });
   return `<svg class="fig shape" data-k="${k}" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">${cells.join("")}<rect class="cursor" x="0" y="${(4 + box.scrollTop * k).toFixed(1)}" width="${w}" height="${(box.clientHeight * k).toFixed(1)}" rx="4"/></svg>`;
 }
@@ -1107,7 +1153,8 @@ function drawLayout(): void {
   root.setProperty("--h2", `${(body * s.ratio).toFixed(2)}px`);
   root.setProperty("--h3", `${(body * Math.sqrt(s.ratio)).toFixed(2)}px`);
   root.setProperty("--gap", `${s.gap}px`);
-  root.setProperty("--fade", `${s.fade}`);
+  root.setProperty("--dim", `${s.dim}`);
+  root.setProperty("--edge", `${s.fade}%`);
   const on = fits();
   // a viewport narrower than the measure gives the lane what there is
   const measure = Math.min(s.measure, ui.areas.getBoundingClientRect().width - 32);
@@ -1184,19 +1231,26 @@ function drawFocusMarks(): void {
     el.classList.toggle("here", el.dataset.a === state.focus);
   });
   all<HTMLElement>("svg.shape .cell", ui.areas).forEach((el) => el.classList.toggle("here", el.dataset.a === state.focus));
+  drawLaser();
+}
+
+/** The tree's line lies under the highlighted row: the pointed brief while pointing, the focus otherwise. */
+function drawLaser(): void {
   const tree = ui.areas.querySelector<HTMLElement>(".tree");
-  const row = tree?.querySelector<HTMLElement>(`.row[data-a="${cssEsc(state.focus)}"]`);
   const laser = tree?.querySelector<HTMLElement>(".laser");
-  if (tree && laser) laser.hidden = !row;
-  if (tree && laser && row) {
-    laser.style.top = `${row.offsetTop + row.offsetHeight - 1}px`;
-    laser.style.left = `${row.offsetLeft}px`;
-    laser.style.width = `${row.offsetWidth}px`;
-    const wing = tree.closest<HTMLElement>(".wing")!;
-    const rr = row.getBoundingClientRect();
-    const wr = wing.getBoundingClientRect();
-    if (rr.top < wr.top + 24 || rr.bottom > wr.bottom - 48) wing.scrollTo({ top: row.offsetTop - wing.clientHeight / 2, behavior: "smooth" });
-  }
+  if (!tree || !laser) return;
+  const a = state.pointed !== null && tree.querySelector(`.row[data-a="${cssEsc(state.pointed)}"]`) ? state.pointed : state.focus;
+  const row = tree.querySelector<HTMLElement>(`.row[data-a="${cssEsc(a)}"]`);
+  laser.hidden = !row;
+  if (!row) return;
+  laser.style.top = `${row.offsetTop + row.offsetHeight - 1}px`;
+  laser.style.left = `${row.offsetLeft}px`;
+  laser.style.width = `${row.offsetWidth}px`;
+  if (a !== state.focus) return;
+  const wing = tree.closest<HTMLElement>(".wing")!;
+  const rr = row.getBoundingClientRect();
+  const wr = wing.getBoundingClientRect();
+  if (rr.top < wr.top + 24 || rr.bottom > wr.bottom - 48) wing.scrollTo({ top: row.offsetTop - wing.clientHeight / 2, behavior: "smooth" });
 }
 
 /** Draws one wing's figure whole, into the box that centres it. */
@@ -1244,7 +1298,9 @@ function drawAll(): void {
 
 function light(): void {
   const a = state.pointed;
+  document.body.classList.toggle("pointing", a !== null);
   all<HTMLElement>(".lit").forEach((el) => el.classList.remove("lit"));
+  drawLaser();
   if (a === null) return;
   const exact = all<HTMLElement>(`[data-a="${cssEsc(a)}"]`);
   exact.forEach((el) => el.classList.add("lit"));
@@ -1274,11 +1330,27 @@ const notice = (text: string): void => void (ui.notice.textContent = text);
 
 const readHash = (): string => decodeURIComponent(location.hash.replace(/^#\/?/, "")).replace(/\/+$/, "");
 let arriving = false;
+let going = false;
 
-/** Goes to an address: enters the history, then arrives. */
+/** Goes to an address from the tree or a figure: enters the history, then settles there, keeping what the reader folded. */
 function goTo(a: string): void {
-  if (readHash() === a) return arrive(a);
+  going = true;
+  if (readHash() === a) return settle(a);
   location.hash = `#/${a}`;
+}
+
+/** Settles on an address without laying the lane afresh: opens the way to it where it is folded, then scrolls. */
+function settle(a: string): void {
+  going = false;
+  const target = brief(a) ? a : nearest(a);
+  if (!inLane(target)) {
+    prefixesOf(target).forEach((p) => p !== target && gradeOf(p) !== "whole" && setGrade(p, "whole"));
+    drawLane();
+  }
+  state.focus = target;
+  drawWings();
+  light();
+  scrollToFocus(true);
 }
 
 /** Arrives at an address: lays the lane afresh and scrolls the brief under the reading line. */
@@ -1303,34 +1375,48 @@ function scrollToFocus(smooth: boolean): void {
 /** Scrolling moves the focus and nothing else; the address follows without entering the history. */
 function onScroll(): void {
   drawShapeCursor();
+  // scrolling swings the highlight back to the centre: what the pointer rested on is let go
+  if (state.pointed !== null) {
+    state.pointed = null;
+    light();
+    drawWings("point");
+  }
   const f = focusUnderLine();
   if (f === state.focus) return;
   state.focus = f;
-  prefixesOf(f).forEach((p) => state.treeOpen.add(p));
   if (!arriving) history.replaceState(null, "", `#/${f}`);
   drawWings("focus");
 }
 
-/** Changes grades under a function, keeping the focused heading where it stood on the screen. */
-function refold(change: () => void): void {
-  const before = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.focus)}"]`)?.getBoundingClientRect().top;
+/** Changes grades under a function, keeping the acted-on brief's heading where it stood on the screen. */
+function refold(change: () => void, anchor: string = state.focus): void {
+  const at = (a: string) => ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(a)}"]`)?.getBoundingClientRect().top;
+  const before = at(anchor) ?? at(state.focus);
+  const held = at(anchor) !== undefined ? anchor : state.focus;
   change();
   if (!inLane(state.focus)) state.focus = nearestInLane(state.focus);
   drawLane();
-  const after = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.focus)}"]`)?.getBoundingClientRect().top;
+  const after = at(held);
   if (before !== undefined && after !== undefined) ui.scroll.scrollTop += after - before;
+  // a brief folded from deep inside it takes the reader up with it: its heading returns to the reading line
+  const top = at(held);
+  const box = ui.scroll.getBoundingClientRect();
+  if (top !== undefined && (top < box.top + 8 || top > box.bottom - 40)) {
+    state.focus = held;
+    scrollToFocus(true);
+  }
   history.replaceState(null, "", `#/${state.focus}`);
   drawWings();
   light();
 }
 
-/** The fold mark cycles one brief: heading, face, whole, heading. Opening a brief not in the lane opens what leads to it. */
+/** The fold mark toggles one brief between its face and whole. Opening a brief not in the lane opens what leads to it. */
 function cycle(a: string): void {
   if (a === "") return;
   refold(() => {
     if (!inLane(a)) prefixesOf(a).forEach((p) => p !== a && gradeOf(p) !== "whole" && setGrade(p, "whole"));
     setGrade(a, inLane(a) ? nextGrade(gradeOf(a)) : "whole");
-  });
+  }, a);
 }
 
 /** Every brief of one level to the next grade together. */
@@ -1357,22 +1443,17 @@ function wire(): void {
 
   document.addEventListener("pointermove", (e) => {
     const el = named(e);
+    all<HTMLElement>(".keep").forEach((k) => k.classList.remove("keep"));
+    if (el?.tagName === "A" && el.closest("#lane")) el.closest("article.brief")?.classList.add("keep");
     point(el ? el.dataset.a! : null);
   });
   document.documentElement.addEventListener("pointerleave", () => point(null));
 
   document.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
+    if (t.closest("a[href]") || window.getSelection()?.toString()) return;
     const fold = t.closest<HTMLElement>("[data-fold]");
     if (fold) return void cycle(fold.dataset.fold!);
-    const toggle = t.closest<HTMLElement>("[data-toggle]");
-    if (toggle) {
-      const a = toggle.dataset.toggle!;
-      state.treeOpen.has(a) ? state.treeOpen.delete(a) : state.treeOpen.add(a);
-      const wing = toggle.closest<HTMLElement>(".wing")!.dataset.area as "wingL" | "wingR";
-      drawWing(wing);
-      return void drawFocusMarks();
-    }
     const pick = t.closest<HTMLElement>("[data-widget]");
     if (pick) {
       state.settings.areas[pick.dataset.area as AreaName] = pick.dataset.widget!;
@@ -1385,26 +1466,29 @@ function wire(): void {
       saveSettings();
       return void drawAll();
     }
-    if (t.closest("a[href]") || window.getSelection()?.toString()) return;
     const go = t.closest<HTMLElement>("[data-go]");
     if (go) return void goTo(go.dataset.go!);
     const cell = t.closest<HTMLElement>("svg.fig [data-a]");
-    if (cell && !state.scrubbing) return void goTo(cell.dataset.a!);
+    if (!cell || state.scrubbing) return;
+    // in the shape a press folds or opens and the modifier goes; in the other figures a press goes and the modifier folds
+    const folds = cell.closest("svg.shape") ? !(e.metaKey || e.ctrlKey) : e.metaKey || e.ctrlKey;
+    return void (folds ? cycle(cell.dataset.a!) : goTo(cell.dataset.a!));
   });
 
   // dragging: a knob turns, the shape scrubs
-  let drag: { kind: "knob" | "shape"; el: HTMLElement; y: number; start: number; moved: boolean } | null = null;
+  let drag: { kind: "knob" | "shape"; el: HTMLElement; x: number; y: number; start: number; moved: boolean } | null = null;
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
     const knob = (e.target as HTMLElement).closest<HTMLElement>("[data-knob]");
     const map = (e.target as HTMLElement).closest<HTMLElement>("svg.shape");
-    if (knob) drag = { kind: "knob", el: knob, y: e.clientY, start: state.settings[knob.dataset.knob as Knob["key"]], moved: false };
-    else if (map) drag = { kind: "shape", el: map, y: e.clientY, start: ui.scroll.scrollTop, moved: false };
+    if (knob) drag = { kind: "knob", el: knob, x: e.clientX, y: e.clientY, start: state.settings[knob.dataset.knob as Knob["key"]], moved: false };
+    else if (map) drag = { kind: "shape", el: map, x: e.clientX, y: e.clientY, start: ui.scroll.scrollTop, moved: false };
     if (drag) (e.target as Element).setPointerCapture?.(e.pointerId);
   });
   document.addEventListener("pointermove", (e) => {
     if (!drag) return;
-    const dy = e.clientY - drag.y;
+    // up or right turns a meter up; the shape scrubs by height alone
+    const dy = drag.kind === "knob" ? e.clientY - drag.y - (e.clientX - drag.x) : e.clientY - drag.y;
     if (!drag.moved && Math.abs(dy) < 3) return;
     drag.moved = true;
     state.scrubbing = true;
@@ -1414,15 +1498,14 @@ function wire(): void {
       state.settings[k.key] = Math.round(v / k.step) * k.step;
       drawLayout();
       drawAdjuncts();
-      const wing = drag.el.closest<HTMLElement>(".wing");
-      if (wing) drawWing(wing.dataset.area as "wingL" | "wingR");
+      drawMeter(drag.el);
     } else {
       const k = Number(drag.el.dataset.k);
       ui.scroll.scrollTop = drag.start + dy / k;
     }
   });
   const release = () => {
-    if (drag?.kind === "knob" && drag.moved) (saveSettings(), drawStrips());
+    if (drag?.kind === "knob" && drag.moved) (saveSettings(), drawStrips(), drawWings());
     drag = null;
     setTimeout(() => (state.scrubbing = false), 0);
   };
@@ -1442,12 +1525,23 @@ function wire(): void {
     { passive: false },
   );
 
+  // the wheel scrolls the lane wherever the pointer rests, except over a meter, which turns instead
+  document.addEventListener(
+    "wheel",
+    (e) => {
+      const t = e.target as HTMLElement;
+      if (t.closest("#scroll") || t.closest("[data-knob]")) return;
+      e.preventDefault();
+      ui.scroll.scrollTop += e.deltaY;
+      flick(e);
+    },
+    { passive: false },
+  );
+
   // the flick: a small reversal of the scroll, down then up then down within a moment, cycles the brief in focus
   const legs: { t: number; d: number }[] = [];
   let flicked = 0;
-  ui.scroll.addEventListener(
-    "wheel",
-    (e) => {
+  const flick = (e: WheelEvent): void => {
       if (!state.settings.flick || Math.abs(e.deltaY) < 2) return;
       const now = performance.now();
       const last = legs.at(-1);
@@ -1463,20 +1557,20 @@ function wire(): void {
           cycle(state.focus);
         }
       }
-    },
-    { passive: true },
-  );
+  };
+  ui.scroll.addEventListener("wheel", flick, { passive: true });
 
   document.addEventListener("keydown", (e) => {
     if ((e.target as HTMLElement).closest("input, textarea")) return;
-    if (e.key === "Tab" && !e.shiftKey) (e.preventDefault(), cycle(state.focus));
-    else if (e.key === "Tab" && e.shiftKey) (e.preventDefault(), cycleLevel(parentOf(state.focus)));
+    // the space bar folds or opens the brief in focus, so a reader who only scrolls never reaches for the pointer
+    if (e.key === " " && !e.shiftKey) (e.preventDefault(), cycle(state.focus));
+    else if (e.key === " " && e.shiftKey) (e.preventDefault(), cycleLevel(parentOf(state.focus)));
     else if (e.key === "ArrowLeft" || e.key === "u") up();
     else if (e.key === "Enter" && gradeOf(state.focus) !== "whole") cycle(state.focus);
   });
 
   ui.scroll.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
-  window.addEventListener("hashchange", () => arrive(readHash()));
+  window.addEventListener("hashchange", () => (going ? settle(readHash()) : arrive(readHash())));
   window.addEventListener("resize", () => {
     drawLayout();
     drawAdjuncts();
@@ -1563,7 +1657,7 @@ const CSS = `
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --body: 17px; --t: 33px; --h1: 26.5px; --h2: 21px; --h3: 19px; --small: 13px;
-  --gap: 24px; --measure: 600px; --fade: .4;
+  --gap: 24px; --measure: 600px; --dim: .4; --edge: 8%;
   --meter: oklch(62% 0.19 28);
   --h: 60;
 }
@@ -1595,7 +1689,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .wing .box > * { max-width: 100%; }
 .wing.closed .box { display: none; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 12%, black 82%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, black 12%, black 82%, transparent 100%); }
+  -webkit-mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); }
 #scroll::-webkit-scrollbar { display: none; }
 #content { position: relative; display: grid; margin: 0 auto; padding: 30vh 0 55vh; }
 .gutter { position: relative; }
@@ -1615,27 +1709,35 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .opening h1 { font-size: var(--t); font-weight: 600; line-height: 1.12; letter-spacing: -.014em; margin: 6px 0 18px; }
 .record { margin: 4px 0 24px; }
 
-.brief { position: relative; margin: 0 0 36px; opacity: calc(1 - var(--fade)); transition: opacity .3s; }
+.brief { position: relative; margin: 0; padding-bottom: var(--after, 36px); opacity: calc(1 - var(--dim)); transition: opacity .3s; }
 .brief.here { opacity: 1; }
-.brief.heading { margin-bottom: 14px; }
-.brief.face { margin-bottom: 26px; }
-.brief.face .first { color: var(--muted); }
-.brief.heading .head, .brief.face .head { margin-bottom: 8px; }
+.brief.face .head { margin-bottom: 8px; }
+.surface p { margin-bottom: 12px; }
+.act { display: flex; align-items: center; gap: 10px; color: var(--dim); cursor: pointer; margin: -4px -8px 0; padding: 4px 8px; border-radius: 6px; transition: color .15s; }
+.act:hover { color: var(--on); }
+.act svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.act.more svg { transform: rotate(90deg); }
+.act.less svg { transform: rotate(-90deg); }
+.act .bars { display: inline-flex; gap: 3px; align-items: center; }
+.act .bars i { display: block; width: 9px; height: 3px; border-radius: 1.5px; background: var(--rest); }
+.act .bars b { font-weight: 500; margin-left: 2px; }
+.act.less { margin-top: -6px; }
+.pointing .brief.here:not(.lit):not(.keep) { opacity: calc(1 - var(--dim)); }
+.brief.lit, .brief.keep { opacity: 1; }
 .head { position: relative; display: flex; align-items: baseline; font-weight: 600; line-height: 1.2; letter-spacing: -.012em; margin: 0 0 12px; transition: color .12s; }
 .head.d1 { font-size: var(--h1); }
 .head.d2 { font-size: var(--h2); }
 .head.d3 { font-size: var(--h3); }
 .head.d4 { font-size: var(--body); }
 .head .num { flex: 0 0 auto; margin-right: .5rem; font-family: var(--sans); font-size: var(--small); font-weight: 500; letter-spacing: 0; color: var(--dim); }
-.head .title { flex: 1 1 auto; cursor: pointer; }
-.head .title:hover, .brief.lit .title { color: var(--on); }
+.head .title { flex: 1 1 auto; }
+.brief.lit .title { color: var(--on); }
 .brief.on .num { color: var(--on); font-weight: 600; }
 .brief.here .num { color: var(--lit); }
-.mark { position: absolute; left: -22px; top: .1em; width: 16px; height: 16px; display: grid; place-items: center; color: var(--door); opacity: .7; transition: opacity .15s; }
+.mark { position: absolute; width: 16px; height: 16px; display: grid; place-items: center; color: var(--door); opacity: .7; transition: opacity .15s; }
 .mark:hover { opacity: 1; color: var(--lit); }
 .mark svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s; }
-.mark.whole svg, .mark.open svg { transform: rotate(90deg); }
-.mark.heading svg { stroke-dasharray: 1.6 1.6; }
+.mark.whole svg { transform: rotate(90deg); }
 .mark.leaf { visibility: hidden; }
 .brief p, .brief li { margin: 0 0 12px; }
 .brief li { margin-bottom: 8px; }
@@ -1671,17 +1773,18 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .tree .row:hover, .tree .row.lit { background: rgba(0,0,0,.035); }
 .tree .name { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tree .row.on .name { color: var(--ink); }
-.tree .row.here .name { color: var(--on); font-weight: 600; }
+.tree .row.here .name, .tree .row.lit .name { color: var(--on); font-weight: 600; }
+.pointing .tree .row.here:not(.lit) .name { color: var(--ink); font-weight: 500; }
 .tree .laser { position: absolute; height: 1.5px; background: var(--on); border-radius: 1px; transition: top .28s cubic-bezier(.2,.7,.2,1), left .28s, width .28s; pointer-events: none; }
 
 svg.fig { display: block; overflow: visible; touch-action: none; user-select: none; }
 svg.fig .cell { cursor: pointer; }
 .ahead-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-svg.ahead rect { fill: var(--rest); }
-svg.ahead .cell.more rect { stroke: var(--door); stroke-width: 1; stroke-dasharray: 3 3; }
-svg.ahead .cell.lit rect { fill: var(--lit); }
-svg.ahead text { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
-svg.ahead .cell.lit text { fill: var(--ground); }
+svg.ahead .hit { fill: transparent; }
+svg.ahead .para { fill: var(--rest); }
+svg.ahead .head { fill: var(--door); }
+svg.ahead .cell.lit .para, svg.ahead .cell.lit .head { fill: var(--lit); }
+.ahead-name { min-height: 1.2em; text-align: center; color: var(--ink); }
 
 svg.shape .hit { fill: transparent; }
 svg.shape .para { fill: var(--rest); }
@@ -1689,7 +1792,11 @@ svg.shape .head { fill: var(--door); }
 svg.shape .cell.here .para { fill: var(--door); }
 svg.shape .cell.here .head { fill: var(--on); }
 svg.shape .cell.lit .para, svg.shape .cell.lit .head { fill: var(--lit); }
-svg.shape .cursor { fill: rgba(0,0,0,.05); cursor: grab; }
+svg.shape .tick { fill: var(--grey); }
+svg.shape .hidden { fill: var(--grey); }
+svg.shape .cell.lit .hidden { fill: oklch(80% 0.08 var(--h)); }
+svg.shape .cursor { fill: rgba(0,0,0,.05); pointer-events: none; }
+svg.shape { cursor: grab; }
 
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
 svg.plate .cell.away path { fill: var(--grey); }

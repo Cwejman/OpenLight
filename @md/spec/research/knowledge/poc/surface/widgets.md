@@ -22,21 +22,19 @@ No widget repeats what is in view, and ink limits it: a mark is spent in proport
 
 ## 2. The tree
 
-The tree is a wing widget: the body as a file tree, one row per brief, each nested under its parent, opened along the path on arrival and further as the reader opens it. Opening in the tree is the tree's own state and never the lane's grade, so a reader looks down a branch without laying anything in the lane. The name goes; the mark beside it opens or closes the node.
+The tree is a wing widget: the lane as an outline, one row per brief in the lane, each nested under its parent, open where the brief is whole. It is not a second state: folding a row folds the brief in the lane and opening one opens it, so what the tree shows is exactly what the lane holds, and a reader folds a whole region from the tree without scrolling to it. The name goes.
 
-A line lies across the row of the focus and glides as the focus moves, and the row of the focus is always revealed. The wing scrolls only to keep that line in view, driven by the lane and never free.
+A line lies across the highlighted row, the focus or the brief under the pointer, and glides as it moves. The wing scrolls only to keep the focus in view, driven by the lane and never free.
 
-*Reasoned, the author's, 2026-09-13. Built first as columns of siblings stacked one level under the next, which the author found strange, since a brief's children stood at the bottom rather than beneath it; the nesting replaced it the same day.*
+*Reasoned, the author's, 2026-09-13. Built first as columns of siblings stacked one level under the next, which the author found strange, since a brief's children stood at the bottom rather than beneath it; then as a tree with an opening of its own, which the author found strange again, since opening there and opening in the text should be one thing.*
 
 ## 3. The ahead
 
-The ahead is the right wing's first widget: what lies beneath and is not in the lane. It answers for the brief under the pointer when that brief's level is out of view, and otherwise for the focus, and it draws nothing at all when the level beneath is already in the lane, since then the reader can simply read on. So it is empty while a whole brief is read, and appears when the reader rests on something folded.
+The ahead is the right wing's first widget: what lies beneath and is not in the lane. It answers for the highlighted brief, the focus or the brief under the pointer, when that brief's level is out of view, and it draws nothing at all when the level beneath is already in the lane, since then the reader can simply read on. So it is empty while a whole brief is read, and appears when the reader rests on something folded, without the pointer, by scrolling alone.
 
-It draws that brief's subtree as columns left to right, one per depth, each brief a cell as tall as its branch is heavy, its name inside when there is room, and only as large as the subtree needs, centred in the wing. Pressing a cell goes there, which opens it.
+It draws in the shape's own form, so a reader learns one figure and not two: the subtree beneath, everything expanded, each brief a heading bar and its paragraphs as blocks sized from their text, shifted right by nesting. No names in the cells; the cell under the pointer is named beneath the figure. It is only as large as the subtree needs, and the figure keeps its root while the pointer moves within it. Where a subtree is too large for its paragraphs to stay legible the figure steps down a ladder rather than draw slivers: one block per brief, then one block per level beneath, each as heavy as its branch, and the caption says which it is drawing. Pressing a cell goes there, which opens it.
 
-It is the rectangle [the refused level](refused.md#6-a-rectangle-dividing-into-rectangles) turned down, told apart: a treemap divides in two dimensions and slivers, where here one dimension is fixed and only the height divides. Where a level's cells would fall below the floor they merge into one cell marked that it holds more.
-
-*Reasoned, the author's, 2026-09-13. Built first as the whole subtree of the focus at the wing's full size, which showed what the reader was already in; the author's correction narrowed it to what is not in view.*
+*Reasoned, the author's, 2026-09-13. Built first as columns of cells by depth, an icicle, with names in the cells and at the wing's full size; the author narrowed it to what is not in view, took the names out, and then asked for the shape's form, since a second mode of presentation was superseded by the shape.*
 
 ## 4. Links
 
@@ -48,18 +46,18 @@ This is what lets looking be free without an overlay. Everything an overlay told
 
 ## 5. Settings
 
-Settings is a wing widget: a row of meters, each a 270 degree arc with its icon in the middle, the name and value told on pointing. Dragging a meter up or down turns it and the wheel steps it, and the page redraws as it turns, so the zoom, the heading ratio, the measure, the gap and the fade are set by eye against real prose. The flick is a switch in the same row.
+Settings is a wing widget: a row of meters, each a 270 degree arc with its icon in the middle, the name and value told on pointing. Dragging a meter up or down turns it and the wheel steps it, and the page redraws as it turns, so the zoom, the heading ratio, the measure, the gap, the dim and the edge fade are set by eye against real prose. A drag turns a meter in place and never redraws the wing under the pointer. The flick is a switch in the same row.
 
 *Reasoned, the author's, 2026-09-13; the meter replaced a dial the author found ugly the same day.*
 
 ## 6. The shape
 
-The shape is the left wing's first widget: the lane as laid, drawn small. Each brief in the lane stands as its blocks, a heading a short bar and a paragraph a block as tall as it is drawn, shifted right by the brief's depth, so the reader sees the shape of the prose and the nesting it stands in at once, and fold state shows as length. The viewport is drawn over it; dragging it scrubs the lane, and pressing a brief goes.
+The shape is the left wing's first widget: the lane as laid, drawn small. Each brief in the lane stands as its blocks, a heading a short bar and a paragraph a block as tall as it is drawn, shifted right by the brief's depth, so the reader sees the shape of the prose and the nesting it stands in at once, and fold state shows as length. Every block a brief has is drawn, a list or a table as readily as a paragraph. A folded brief tells beside its face what it hides: a grey tick for every paragraph, then, where a level lies beneath, a grey tail as long as that level is heavy, so a reader sees at a glance where the lane is folded, whether paragraphs or levels wait there, and how much. The viewport is drawn over it; dragging it scrubs the lane, pressing a brief folds or opens it in place, and pressing with the modifier held goes there, since folding from the shape is what it is most for.
 
 *Reasoned, the author's, 2026-09-13, from the wish for a minimap that moves the briefs and their paragraphs right and left by where they stand in the nesting.*
 
 ## 7. The plate
 
-The plate is a wing widget: the body whole, drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each holds, and a droplet stays compact however small it gets, where a rectangle's cells degenerate. The figure lives or dies on how far out it can go before a droplet is too small to hit, and that has not been measured.
+The plate is a wing widget: the body whole in one square, drawn as droplets on a round plate. The root sits at the centre, its briefs are droplets around it, and each carries its own smaller droplets further out, level by level to the rim. Droplets meet without merging and are cut where they meet, sharing the plate by what each holds, and a droplet stays compact however small it gets, where a rectangle's cells degenerate. Pressing a droplet goes there, and pressing with the modifier held folds or opens it in place. The figure lives or dies on how far out it can go before a droplet is too small to hit, and that has not been measured.
 
 *Reasoned, the author's, 2026-09-12, carried; the measurement is owed.*

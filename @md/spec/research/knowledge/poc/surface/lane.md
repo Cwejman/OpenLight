@@ -10,15 +10,17 @@ status: in force
 
 The lane holds the body depth first: a brief, then the level beneath it, then the next brief of its level. It is the order a document with headings already reads, and it is the order the code lays, since [a level's briefs stand on the ones before them](../../code.md#42-the-order-of-a-holarchy) and what a brief did not need stands beneath it. The root's title and opening stand first.
 
+The space between briefs steps down with depth, as [the design language's rhythm](../../../../design.md#rhythm--depth-derived-never-stated-twice) asks: what lies beneath a brief sits together, and the briefs of a level stand further apart the higher the level, so the gap before a brief says which level it begins.
+
 *Reasoned, the author's, 2026-09-13.*
 
-## 2. Three grades
+## 2. Two grades
 
-Every brief in the lane stands at one of three grades. Its heading alone. Its face: the heading and the first paragraph, which is what [the practice](../practice.md#3-the-surface-is-declared-by-position) says tells a reader whether to enter. Or whole.
+Every brief in the lane stands at one of two grades: its face, the heading and the first paragraph, which is what [the practice](../practice.md#3-the-surface-is-declared-by-position) says tells a reader whether to enter; or whole. A brief never folds past its face, so nothing in the lane is ever a bare name, and folding is one act with one inverse.
 
-Org-mode has cycled a heading between folded, children and whole for twenty years, so cycling is a gesture readers already hold. The face is the grade it lacks, and it is the code's own unit.
+Org-mode has cycled a heading between folded, children and whole for twenty years, so folding at a heading is a gesture readers already hold. The face is what it lacks, and it is the code's own unit; the bare heading is what this model leaves out.
 
-*Reasoned, the author's, 2026-09-13; the org-mode ground is from memory and not checked.*
+*Reasoned, the author's, 2026-09-13; the org-mode ground is from memory and not checked. A third grade, the heading alone, was built and refused the same day.*
 
 ## 3. One step ahead
 
@@ -28,11 +30,13 @@ A brief shown whole shows the level beneath it, at faces unless the reader has s
 
 ## 4. Where you are is the brief in focus
 
-The focus is the brief under the reading line, the middle of the viewport, and it moves as the lane scrolls. Its address is the page's address, so the place a reader stands can be handed to someone, and it is what a fold or a flick acts on, never the brief under the pointer.
+The focus is the brief under the reading line, the middle of the viewport, and it moves as the lane scrolls. The wheel scrolls the lane wherever the pointer rests, over a wing or a gutter as over the text, so the reader never has to aim at the prose to read on; only a meter takes the wheel for itself. Its address is the page's address, so the place a reader stands can be handed to someone, and it is what a fold or a flick acts on. So a reader who only scrolls never needs the pointer: the centremost brief is the one highlighted, in the lane and in every widget.
 
-The brief in focus stands whole and every other brief stands one step dimmer, so the reader sees what a fold will act on. The prose also fades out at the top and the bottom of the viewport, so the strip at the foot never reads as an edge of the text. The step is a setting.
+Pointing overrides it: while the pointer rests on a brief, in the lane or in a widget, that brief takes the highlight instead, and every widget answers for it. In the lane a brief reaches down to the next, so the highlight moves from brief to brief and never drops into a gap between them. Pointing at a link inside the brief being read lights the link's target wherever it is drawn and never dims the brief the link sits in. The moment the lane scrolls, the highlight swings back to the centre and what the pointer rested on is let go.
 
-*Reasoned, the author's, 2026-09-13. A fade by distance from the focus was built first and the author could not read it; the one step replaced it the same day.*
+The brief highlighted stands whole and every other brief stands one step dimmer, so the reader sees what a fold will act on. The prose also fades out a little in from the top and the bottom of the viewport, over a short run, so the strip at the foot never reads as an edge of the text. The step and the run of the edge fade are two settings, dim and fade, since the author turned one expecting the other.
+
+*Reasoned, the author's, 2026-09-13. A fade by distance from the focus was built first and the author could not read it; the one step replaced it the same day, and the edge fade was shortened and moved in on the author's second reading.*
 
 ## 5. Arriving lays the lane
 
@@ -40,21 +44,23 @@ Going to an address, by a press, by a link or by the browser's history, lays the
 
 Scrolling afterwards moves the focus and changes no grade, so nothing reflows under a reader who is only reading. The page's address follows the focus without entering the history, and the history holds arrivals only, so back and forward walk the moves a reader chose.
 
+Going to a brief from the tree or a figure is not an arrival: it keeps every fold the reader has made, opens only what stands between and the target, and scrolls there. A link, a sent address and the browser's history lay afresh, since they come from outside what the reader has laid.
+
 Above the focus, then, lies what was taken whole and what was passed at its face, so the way up is short. Up is a press on the parent, in the lane or in the tree, or a key.
 
 *Reasoned, the author's, 2026-09-13.*
 
 ## 6. Folding and opening
 
-A fold lowers a brief's grade and an opening raises it, and the mark beside a heading cycles it: heading to face to whole to heading, the way a folder's triangle does. The mark stands beside the brief in the lane and beside its row in the tree, and acts on that brief alone. Pressing a brief's heading opens it whole and makes it the focus, which enters the history.
+Folding takes a brief to its face and opening takes it whole, and the face itself is what a reader presses to do either: a folded brief carries a line beneath its face that says open, with a small bar for every paragraph it hides and a count of the briefs beneath it, and a whole brief carries a line at its foot that says fold. The line is the press, and nothing else in the brief is: the text stays text, no mark stands beside the heading, and nothing tints under the pointer. What a press would give is known before it is pressed. Opening a brief lays its level at faces where nothing was set; folding one takes its level out of the lane.
 
-A whole level folds together too: every brief beneath one parent to the same grade in one act, from the keyboard, so a reader who has read a level and wants past it needs one gesture. Opening a brief whole lays its level at faces where nothing was set; folding one past its face takes its level out of the lane.
+The same act is everywhere the brief is drawn. The tree is the lane's own outline, so folding a row there is folding the brief in the lane, one state and never two, and there the folder's triangle does it, since that is what a tree reader expects. In a figure, the shape or the plate, a press goes to the brief and a press with the modifier held folds or opens it in place. When the reader is only scrolling, the space bar does the same to the brief in focus, and with shift held it folds or opens the whole level the focus stands in.
 
-Whatever changes, the heading of the brief in focus keeps its place on the screen, so a fold never scrolls the reader's place away. When the brief in focus leaves the lane, because the brief above it was folded past its face, the focus moves to that brief.
+Whatever changes, the heading of the brief acted on keeps its place on the screen, so a press never moves what was pressed and the reader's place never scrolls away. The one exception is its inverse: a long brief folded from deep inside it, from its foot or by the space bar, takes the reader up with it, its heading returning to the reading line, since what stood under the reader is gone. When the brief in focus leaves the lane, because the brief above it was folded, the focus moves to that brief.
 
-A flick is tried as well: a small reversal of the scroll, down then up then down within a moment, cycles the brief in focus. It costs nothing to a reader who never does it, and whether it fires by accident is what the trial measures.
+A flick is tried as well: a small reversal of the scroll, down then up then down within a moment, folds or opens the brief in focus. It costs nothing to a reader who never does it, and whether it fires by accident is what the trial measures.
 
-*Reasoned, the author's, 2026-09-13; the flick is a trial, on by a setting.*
+*Reasoned, the author's, 2026-09-13; the flick is a trial, on by a setting. A small mark beside the heading was built first and refused by the author as not right; pressing the face is the author's lean, and the best gesture is not yet known.*
 
 ## 7. A record is ordered by time
 

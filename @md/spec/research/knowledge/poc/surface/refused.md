@@ -40,7 +40,7 @@ Several figures are not the fault; six that shared nothing were. [Every widget k
 
 A treemap, tried for the body whole.
 
-Refused on geometry: its cells divide in two dimensions and degenerate into slivers a pointer cannot hit, where [a droplet](widgets.md#7-the-plate) stays compact. Not refused for room, which neither figure buys. [The ahead](widgets.md#3-the-ahead) is not this: one dimension is fixed there and only the height divides.
+Refused on geometry: its cells divide in two dimensions and degenerate into slivers a pointer cannot hit, where [a droplet](widgets.md#7-the-plate) stays compact. Not refused for room, which neither figure buys.
 
 ## 7. Rigid rings with the text outside
 
@@ -101,3 +101,27 @@ The author found it strange: a brief's children stood at the bottom of the figur
 Every brief a little dimmer the further it stood from the reading line, continuously.
 
 The author could not read what it meant. [One step](lane.md#4-where-you-are-is-the-brief-in-focus) says it: the focus whole, the rest dimmer, and the prose fading only at the edges of the viewport.
+
+## 17. Folding to the heading alone
+
+A third grade beneath the face: the brief as a bare name.
+
+Refused by the author on the second reading as impractical and strange. A brief always keeps its face, [two grades](lane.md#2-two-grades) suffice, and folding becomes one act with one inverse.
+
+## 18. A fold mark beside the heading
+
+A small chevron at the left of every heading in the lane, turning down when the brief was whole.
+
+The author's verdict: going for a small, not so pretty icon up top is absolutely not right. [The face is the fold](lane.md#6-folding-and-opening), pressed where the reader is already looking; the tree alone keeps the triangle, as a tree does.
+
+## 19. The ahead as columns by depth
+
+An icicle: what lies beneath a brief as columns left to right, one per depth, each cell as tall as its branch is heavy.
+
+Superseded by [the shape's form](widgets.md#3-the-ahead) on the author's reading: a second mode of presentation beside the shape, where one figure drawn twice, once for the lane and once for what lies beneath it, teaches the reader one thing.
+
+## 20. A tinted surface as the fold
+
+The heading and the first paragraph tinted under the pointer, and a press anywhere on them folding or opening the brief.
+
+The author dropped the tint and made [the action line](lane.md#6-folding-and-opening) the press: open beneath a folded face, fold at the foot of a whole brief. The text stays text.
