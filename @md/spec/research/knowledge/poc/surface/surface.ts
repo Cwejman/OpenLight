@@ -606,7 +606,7 @@ const BLOCK: Record<string, (t: Tok) => string> = {
 // heading small, and in the path compressed, and it steps down a ladder rather
 // than shrink through its floor.
 
-const BAND = { floorPara: 2, floorBrief: 4 };
+const BAND = { floorPara: 2, floorBrief: 3 };
 
 /** The gaps of a band: between briefs four times what lies between paragraphs, so the groups read; smaller in a small band. */
 const gapsOf = (w: number) => (w >= 300 ? { brief: 8, para: 2 } : { brief: 4, para: 1 });
@@ -664,20 +664,31 @@ function bandCells(levelAddress: string, w: number, h: number, on: string | null
     .join("");
 }
 
-/** The reading cursor: where the pane's scroll box stands, mapped onto its band. */
-function cursorOf(levelAddress: string, w: number, top: number, bottom: number, briefs: { a: string; top: number; height: number }[]): { x: number; w: number } | null {
+/** A pane's briefs as laid on the page: where each starts and how tall it is, in the scroll box. */
+type Laid = { a: string; top: number; height: number }[];
+
+/** A scroll position mapped onto the band: the brief it falls in, at the same fraction of that brief's cell. */
+function bandX(levelAddress: string, w: number, y: number, briefs: Laid): number {
+  const cells = layoutBand(levelAddress, w, null);
+  const i = briefs.findIndex((b) => y < b.top + b.height);
+  const cell = i < 0 ? null : cells.find((c) => c.a === briefs[i].a);
+  return i < 0 ? w : !cell ? 0 : cell.x + cell.w * Math.max(0, Math.min(1, (y - briefs[i].top) / Math.max(1, briefs[i].height)));
+}
+
+/** The inverse: a place on the band mapped back to a scroll position, so a drag of the cursor is exact. */
+function scrollY(levelAddress: string, w: number, x: number, briefs: Laid): number {
+  const cells = layoutBand(levelAddress, w, null);
+  const cell = cells.find((c) => x >= c.x && x <= c.x + c.w) ?? cells.findLast((c) => c.x <= x) ?? cells[0];
+  const b = cell && briefs.find((l) => l.a === cell.a);
+  return !cell || !b ? 0 : b.top + b.height * Math.max(0, Math.min(1, (x - cell.x) / Math.max(1, cell.w)));
+}
+
+/** The reading cursor: the scroll window mapped onto the band. */
+function cursorOf(levelAddress: string, w: number, top: number, bottom: number, briefs: Laid): { x: number; w: number } | null {
   const cells = layoutBand(levelAddress, w, null);
   if (cells.length === 0 || cells[0].more) return null;
-  const at = (y: number): number => {
-    const i = briefs.findIndex((b) => y < b.top + b.height);
-    if (i < 0) return w;
-    const cell = cells.find((c) => c.a === briefs[i].a);
-    if (!cell) return 0;
-    return cell.x + cell.w * Math.max(0, Math.min(1, (y - briefs[i].top) / Math.max(1, briefs[i].height)));
-  };
-  const x0 = at(top);
-  const x1 = at(bottom);
-  return { x: x0, w: Math.max(6, x1 - x0) };
+  const x0 = bandX(levelAddress, w, top, briefs);
+  return { x: x0, w: Math.max(8, bandX(levelAddress, w, bottom, briefs) - x0) };
 }
 
 const bandSvg = (levelAddress: string, w: number, h: number, on: string | null, cls: string): string =>
@@ -699,7 +710,7 @@ function pathSvg(w: number, h: number): string {
 
 // ## 3.5 The body, as droplets on a plate
 
-const PLATE = { centre: 0.11, gap: 2.6, floor: 7, round: 9 };
+const PLATE = { gap: 2.6, floor: 7, round: 9 };
 
 /** The room between siblings at a depth, along the arc: wide between the root's branches, narrowing outward. */
 const sideGap = (d: number): number => [0, 14, 6, 3][d] ?? 2;
@@ -708,17 +719,31 @@ type Drop = { a: string; r0: number; r1: number; a0: number; a1: number; more: b
 
 /** Lays the body out radially inside a square of side `S`: sector by branch weight, ring by depth. */
 function layoutPlate(S: number): { drops: Drop[]; smallest: number; rc: number } {
+  // Rings are sized from the depth that actually draws, so the figure fills its square: the body's depth is
+  // tried first, and when the outer rings stay empty the layout is run again with the depth that was reached.
+  const deepest = (drops: Drop[]) => Math.max(1, ...drops.map((d) => depthOf(d.a)));
+  const first = layoutRings(S, Math.max(1, state.index!.depth));
+  const again = deepest(first.drops) < first.D ? layoutRings(S, deepest(first.drops)) : first;
+  const drops = again.drops;
+  const smallest = Math.min(Infinity, ...drops.map((d) => Math.min((d.a1 - d.a0) * d.r0, d.r1 - d.r0)));
+  return { drops, smallest: smallest === Infinity ? 0 : smallest, rc: again.rc };
+}
+
+/** The plate with `D` rings outside a centre one ring thick. */
+function layoutRings(S: number, D: number): { drops: Drop[]; rc: number; D: number } {
   const ix = state.index!;
   const R = (S / 2) * 0.97;
-  const rc = S * PLATE.centre;
-  const D = Math.max(1, ix.depth);
-  const t = (R - rc) / D;
+  const t = R / (D + 1);
+  const rc = t;
   const ring = (d: number) => ({ r0: rc + (d - 1) * t + PLATE.gap / 2, r1: rc + d * t - PLATE.gap / 2 });
   // A cell keeps at least the floor along its inner arc, and the floor grows with the ring's thickness so a
   // small cell stays a droplet rather than a sliver. A level fits when every cell keeps it, with the room
   // between siblings taken out first; otherwise it is not drawn.
-  const floorAt = (d: number) => Math.max(PLATE.floor, (ring(d).r1 - ring(d).r0) * 0.35);
-  const usable = (n: number, d: number, span: number) => span - ((n - 1) * sideGap(d)) / ring(d).r0;
+  const floorAt = (d: number) => Math.max(PLATE.floor, (ring(d).r1 - ring(d).r0) * 0.2);
+  // A full circle has as many gaps as cells, so the first and the last are parted at the top as well.
+  const full = (span: number) => span >= 2 * Math.PI - 1e-6;
+  const gapsIn = (n: number, span: number) => (full(span) ? n : n - 1);
+  const usable = (n: number, d: number, span: number) => span - (gapsIn(n, span) * sideGap(d)) / ring(d).r0;
   const fits = (kids: Brief[], d: number, span: number) => {
     const { r0, r1 } = ring(d);
     return kids.length > 0 && d <= D && r1 - r0 >= PLATE.floor && (kids.length * floorAt(d)) / r0 <= usable(kids.length, d, span);
@@ -739,7 +764,8 @@ function layoutPlate(S: number): { drops: Drop[]; smallest: number; rc: number }
     if (!fits(kids, d, span)) return [];
     const { r0, r1 } = ring(d);
     const angles = anglesFor(kids, d, usable(kids.length, d, span));
-    const starts = offsets(angles, sideGap(d) / r0);
+    const gap = sideGap(d) / r0;
+    const starts = offsets(angles, gap).map((x) => x + (full(span) ? gap / 2 : 0));
     return kids.flatMap((k, i) => {
       const chord = 2 * r0 * Math.sin(Math.min(Math.PI, angles[i]) / 2);
       const drop: Drop = {
@@ -754,9 +780,7 @@ function layoutPlate(S: number): { drops: Drop[]; smallest: number; rc: number }
       return [drop, ...lay(k.address, drop.a0, angles[i], d + 1)];
     });
   };
-  const drops = lay("", -Math.PI / 2, 2 * Math.PI, 1);
-  const smallest = Math.min(Infinity, ...drops.map((d) => Math.min((d.a1 - d.a0) * d.r0, d.r1 - d.r0)));
-  return { drops, smallest: smallest === Infinity ? 0 : smallest, rc };
+  return { drops: lay("", -Math.PI / 2, 2 * Math.PI, 1), rc, D };
 }
 
 /** A droplet: an annular sector with rounded corners, or a full ring when the sector is whole. */
@@ -802,8 +826,8 @@ function plateSvg(S: number): string {
       return `<text class="label${onPath.has(d.a) ? " on" : ""}" data-a="${esc(d.a)}" x="${(c + rm * Math.cos(mid)).toFixed(1)}" y="${(c + rm * Math.sin(mid)).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(trim(d.label!, Math.floor((chord - 8) / 5.6)))}</text>`;
     });
   const centre = `<g class="cell centre${state.opened === "" ? " on" : ""}" data-a=""><circle cx="${c}" cy="${c}" r="${(rc - PLATE.gap / 2).toFixed(1)}"/><text class="label" x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle">${esc(trim(state.body!.title, Math.floor(rc / 3.4)))}</text></g>`;
-  const note = `<text class="note" x="${S - 6}" y="${S - 6}" text-anchor="end">${drops.length} droplets · smallest ${smallest.toFixed(1)}px</text>`;
-  return `<svg class="fig plate" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${cells.join("")}${centre}${labels.join("")}${note}</svg>`;
+  console.debug(`plate: ${drops.length} droplets, smallest ${smallest.toFixed(1)}px`);
+  return `<svg class="fig plate" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${cells.join("")}${centre}${labels.join("")}</svg>`;
 }
 
 // ## 3.6 A level to a pane
@@ -912,7 +936,7 @@ function drawStrips(): void {
     const deeper = state.opened !== a && state.opened.startsWith(a === "" ? "" : a + "/") ? state.opened : null;
     const next = panes[panes.indexOf(a) + 1] ?? deeper;
     const w = Math.max(40, Math.floor(el.querySelector<HTMLElement>(".prose")!.getBoundingClientRect().width));
-    el.querySelector<HTMLElement>(".strip")!.innerHTML = bandSvg(a, w, 28, next, "above").replace("</svg>", `<rect class="cursor" x="0" y="1" width="0" height="26" rx="6"/></svg>`);
+    el.querySelector<HTMLElement>(".strip")!.innerHTML = bandSvg(a, w, 28, next, "above").replace(/^(<svg[^>]*>)/, `$1<rect class="cursor" x="0" y="0" width="0" height="28" rx="7"/>`);
     drawCursor(el);
   });
 }
@@ -923,8 +947,7 @@ function drawCursor(pane: HTMLElement): void {
   const cursor = svg?.querySelector<SVGRectElement>(".cursor");
   if (!svg || !cursor) return;
   const box = scrollBox(pane);
-  const briefs = all<HTMLElement>(".brief", box).map((b) => ({ a: b.dataset.a!, top: b.offsetTop, height: b.offsetHeight }));
-  const c = cursorOf(pane.dataset.level!, Number(svg.getAttribute("width")), box.scrollTop, box.scrollTop + box.clientHeight, briefs);
+  const c = cursorOf(pane.dataset.level!, Number(svg.getAttribute("width")), box.scrollTop, box.scrollTop + box.clientHeight, laidOf(box));
   cursor.setAttribute("x", c ? c.x.toFixed(1) : "0");
   cursor.setAttribute("width", c ? c.w.toFixed(1) : "0");
 }
@@ -1045,23 +1068,18 @@ function opened(a: string): void {
 }
 
 /** Scrubbing a level's band moves the reading beneath it to the brief under the pointer, and lights it. */
-function scrubBand(svg: SVGSVGElement, clientX: number): void {
+const laidOf = (box: HTMLElement): Laid => all<HTMLElement>(".brief", box).map((b) => ({ a: b.dataset.a!, top: b.offsetTop, height: b.offsetHeight }));
+
+/** Scrubbing a level's band drags its cursor: the pointer keeps its hold on the cursor, and the reading follows. */
+function scrubBand(svg: SVGSVGElement, clientX: number, grab: number): void {
   const pane = svg.closest<HTMLElement>(".pane");
   if (!pane) return;
   const box = scrollBox(pane);
   const r = svg.getBoundingClientRect();
   const w = Number(svg.getAttribute("width"));
-  const x = ((clientX - r.left) / r.width) * w;
-  const half = gapsOf(w).brief / 2;
-  const cells = layoutBand(svg.dataset.level!, w, null);
-  const cell = cells.find((c) => x >= c.x - half && x <= c.x + c.w + half) ?? (x < 0 ? cells[0] : cells[cells.length - 1]);
-  const art = cell && !cell.more ? box.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(cell.a)}"]`) : null;
-  if (!cell || !art) return;
-  const within = Math.max(0, Math.min(1, (x - cell.x) / Math.max(1, cell.w)));
-  box.scrollTop = art.offsetTop - ABOVE + within * Math.max(0, art.offsetHeight - box.clientHeight * 0.5);
+  const x = ((clientX - r.left) / r.width) * w - grab;
+  box.scrollTop = scrollY(svg.dataset.level!, w, Math.max(0, Math.min(w, x)), laidOf(box));
   drawCursor(pane);
-  state.pointed = cell.a;
-  light();
 }
 
 /** Scrubbing the path shifts the row so the level under the pointer is the leftmost in view. */
@@ -1089,7 +1107,7 @@ function wire(): void {
   document.documentElement.addEventListener("pointerleave", () => point(null));
 
   // press and drag on figures: a press goes, a drag scrubs
-  let down: { x: number; y: number; svg: SVGSVGElement; moved: boolean; a: string | null } | null = null;
+  let down: { x: number; y: number; svg: SVGSVGElement; moved: boolean; a: string | null; grab: number } | null = null;
   const release = () => {
     down = null;
     state.scrubbing = false;
@@ -1097,8 +1115,15 @@ function wire(): void {
   document.addEventListener("pointerdown", (e) => {
     const svg = (e.target as HTMLElement).closest<SVGSVGElement>("svg.fig");
     if (!svg || e.button !== 0) return;
-    down = { x: e.clientX, y: e.clientY, svg, moved: false, a: named(e)?.dataset.a ?? null };
-    svg.setPointerCapture(e.pointerId);
+    // Taking hold of the cursor keeps the offset under the pointer; taking hold elsewhere centres it there.
+    const cursor = svg.querySelector<SVGRectElement>(".cursor");
+    const r = svg.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * Number(svg.getAttribute("width"));
+    const cx = Number(cursor?.getAttribute("x") ?? 0);
+    const cw = Number(cursor?.getAttribute("width") ?? 0);
+    const onCursor = (e.target as Element).classList.contains("cursor");
+    down = { x: e.clientX, y: e.clientY, svg, moved: false, a: named(e)?.dataset.a ?? null, grab: onCursor ? x - cx : cw / 2 };
+    if (e.isPrimary) svg.setPointerCapture(e.pointerId);
   });
   document.addEventListener("pointermove", (e) => {
     if (!down || (!down.moved && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 4)) return;
@@ -1106,7 +1131,7 @@ function wire(): void {
     state.scrubbing = true;
     hideTell();
     if (down.svg.classList.contains("path")) scrubPath(down.svg, e.clientX);
-    else if (down.svg.classList.contains("above")) scrubBand(down.svg, e.clientX);
+    else if (down.svg.classList.contains("above")) scrubBand(down.svg, e.clientX, down.grab);
   });
   document.addEventListener("pointerup", (e) => {
     if (!down) return;
@@ -1114,12 +1139,32 @@ function wire(): void {
     release();
     if (d.moved) return;
     const step = (e.target as HTMLElement).closest<SVGGElement>(".step");
-    if (d.a !== null) goTo(d.a);
-    else if (step) {
-      state.shift = Number(step.dataset.pane);
-      drawShift();
-    }
+    const onPath = d.a !== null && (state.opened === d.a || state.opened.startsWith(d.a + "/"));
+    if (d.a !== null && !(onPath && d.svg.classList.contains("path"))) return void goTo(d.a);
+    // On the path, a press on what is already open moves the row to its pane rather than opening it again.
+    const panes = panesOf(state.opened);
+    const i = d.a !== null ? panes.indexOf(level(d.a).length ? d.a : parentOf(d.a)) : step ? Number(step.dataset.pane) : -1;
+    if (i < 0) return;
+    state.shift = i;
+    drawShift();
   });
+
+  // A sideways swipe over the panes steps the row, one pane at a time.
+  let swept = 0;
+  ui.viewport.addEventListener(
+    "wheel",
+    (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 24) return;
+      e.preventDefault();
+      if (performance.now() - swept < 450) return;
+      swept = performance.now();
+      const max = Math.max(0, panesOf(state.opened).length - fit());
+      const now = state.shift < 0 ? max : state.shift;
+      state.shift = Math.max(0, Math.min(max, now + Math.sign(e.deltaX)));
+      drawShift();
+    },
+    { passive: false },
+  );
   document.addEventListener("pointercancel", release);
   document.addEventListener("lostpointercapture", () => (down?.moved ? release() : undefined));
 
@@ -1241,14 +1286,15 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .opening h1 { font-size: var(--s1); font-weight: 600; line-height: 1.15; letter-spacing: -.012em; margin: 8px 0 16px; }
 .record { margin: 4px 0 24px; }
 
-.brief { position: relative; margin: 0 -16px 16px; padding: 20px 16px 12px; border-radius: 14px; }
+.brief { position: relative; margin: 0 0 40px; }
 .brief.door { cursor: pointer; }
 .brief.door a, .brief.door pre { cursor: auto; }
-.brief.door:hover, .brief.lit { background: var(--tint); }
+/* A door under the pointer, or lit from a figure, shows it in its heading and never over the prose. */
+.brief.door:hover .num, .brief.door:hover .title, .brief.lit .num, .brief.lit .title { color: var(--on); }
 .brief.on .num { color: var(--on); font-weight: 600; }
 .brief.here .num { color: var(--lit); }
-.face { display: flex; align-items: baseline; font-size: var(--s2); font-weight: 600; line-height: 1.2; letter-spacing: -.012em; margin: 0 0 12px; }
-.face .num { flex: 0 0 auto; width: 1.75rem; margin-left: -2.25rem; margin-right: .5rem; text-align: right; font-family: var(--sans); font-size: var(--s5); font-weight: 500; letter-spacing: 0; color: var(--dim); }
+.face { display: flex; align-items: baseline; font-size: var(--s2); font-weight: 600; line-height: 1.2; letter-spacing: -.012em; margin: 0 0 12px; transition: color .12s; }
+.face .num { flex: 0 0 auto; margin-right: .5rem; font-family: var(--sans); font-size: var(--s5); font-weight: 500; letter-spacing: 0; color: var(--dim); }
 .face .title { flex: 1 1 auto; }
 .face svg.beside { flex: 0 0 auto; align-self: center; margin-left: 16px; }
 .brief p, .brief li { margin: 0 0 12px; }
@@ -1270,22 +1316,21 @@ svg.fig { display: block; overflow: visible; touch-action: none; user-select: no
 svg.fig .hit { fill: transparent; }
 svg.fig .seg { fill: var(--rest); }
 svg.fig .door { fill: var(--door); }
-svg.fig .door.more { fill: none; stroke: var(--door); stroke-width: 1.5; stroke-dasharray: 2 2; }
+svg.fig .door.more { opacity: .55; }
 svg.fig .cell.on .seg, svg.fig .cell.on .door { fill: var(--on); }
 svg.fig .cell.lit .seg, svg.fig .cell.lit .door { fill: var(--lit); }
 svg.fig .cell { cursor: pointer; }
-svg.fig .cursor { fill: none; stroke: rgba(0,0,0,.45); stroke-width: 1.25; pointer-events: none; transition: x .08s, width .08s; }
+svg.fig .cursor { fill: rgba(0,0,0,.055); cursor: grab; }
 svg.path .step:not(.inview) .seg, svg.path .step:not(.inview) .door { opacity: .5; }
 
 .plate-box { position: absolute; left: 0; bottom: 0; background: var(--ground); z-index: 3; }
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
 svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
-svg.plate .cell.more path { stroke: var(--door); stroke-width: 1; stroke-dasharray: 3 2; }
+svg.plate .cell.more path { fill: oklch(83% 0.06 var(--h)); }
 svg.plate .cell.on path { fill: var(--door); }
 svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
 svg.plate .label { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
 svg.plate .label.lit, svg.plate .cell.lit .label { fill: var(--ground); }
-svg.plate .note { font-family: var(--sans); font-size: 10px; fill: var(--dim); }
 
 #tell { position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none; width: 20rem; max-width: calc(100vw - 16px);
   background: rgba(255,255,255,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
