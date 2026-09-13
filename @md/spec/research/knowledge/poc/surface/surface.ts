@@ -564,8 +564,6 @@ const state = {
   holding: null as string | null,
   /** the brief whose holon the lane shows: "" for the whole body */
   scope: "",
-  /** the scopes left behind, so a reader who scoped in several times can step back out along the same way */
-  scopes: [] as string[],
 };
 
 /** Everything derived from the body, computed once per body. */
@@ -1757,20 +1755,27 @@ const readHash = (): string => decodeURIComponent(location.hash.replace(/^#\/?/,
 const readScope = (): string => decodeURIComponent((location.hash.split("?in=")[1] ?? "")).replace(/\/+$/, "");
 const hashFor = (focus: string, scope = state.scope): string => `#/${focus}${scope ? `?in=${scope}` : ""}`;
 let arriving = false;
-let going = false;
+
+/**
+ * How many steps into the page's history the reader stands. Every entry the page makes carries its depth, so escape can
+ * step back along arrivals and scope changes alike, and never off the page onto what came before it.
+ */
+let depth = 0;
+/** Enters a step into the history at an address. */
+const enterHistory = (hash: string): void => history.pushState({ depth: ++depth }, "", hash);
+/** Replaces the address of the step the reader stands on, keeping its depth. */
+const followHistory = (hash: string): void => history.replaceState({ depth }, "", hash);
 
 /** Goes to an address from the tree or a figure: enters the history, then settles there, keeping what the reader folded. */
 function goTo(a: string): void {
-  going = true;
   // a target outside the scope widens the scope to the whole body first, laid afresh, and the step is on the way back
   if (!within(a, state.scope)) scopeTo("");
-  if (readHash() === a && readScope() === state.scope) return settle(a);
-  location.hash = hashFor(a);
+  if (readHash() !== a || readScope() !== state.scope) enterHistory(hashFor(a));
+  settle(a);
 }
 
 /** Settles on an address without laying the lane afresh: opens the way to it where it is folded, then scrolls. */
 function settle(a: string): void {
-  going = false;
   const target = brief(a) ? a : nearest(a);
   if (!inLane(target)) {
     if (!within(target, state.scope)) return arrive(target);
@@ -1835,7 +1840,7 @@ function onScroll(): void {
   const f = focusUnderLine();
   if (f === state.focus) return;
   state.focus = f;
-  if (!arriving) history.replaceState(null, "", hashFor(f));
+  if (!arriving) followHistory(hashFor(f));
   drawWings("focus");
 }
 
@@ -1857,7 +1862,7 @@ function refold(change: () => void, anchor: string = state.focus, jump = false):
     state.focus = held;
     scrollToFocus(false);
   }
-  history.replaceState(null, "", hashFor(state.focus));
+  followHistory(hashFor(state.focus));
   drawWings();
   light();
 }
@@ -1882,7 +1887,7 @@ function cycle(a: string): void {
 function moveTo(a: string): void {
   if (a === state.focus || !(a === "" || inLane(a))) return;
   state.focus = a;
-  history.replaceState(null, "", hashFor(a));
+  followHistory(hashFor(a));
   scrollToFocus(true);
   drawWings("focus");
 }
@@ -1894,15 +1899,15 @@ const up = (): void => moveTo(parentOf(state.focus));
 const down = (): void => moveTo(level(state.focus)[0]?.address ?? state.focus);
 
 /** Scopes the lane to a brief: its holon becomes the whole, its heading the opening, and the registers count from it. */
-function scopeTo(S: string, remember = true): void {
+function scopeTo(S: string): void {
   if (S === state.scope || !brief(S)) return;
-  if (remember) state.scopes.push(state.scope);
   state.scope = S;
   if (!within(state.focus, S)) state.focus = S;
   lay(state.focus);
   drawAll();
   scrollToFocus(false);
-  history.replaceState(null, "", hashFor(state.focus));
+  // a change of scope is a step of its own, so escape takes the reader back out of it
+  enterHistory(hashFor(state.focus));
 }
 
 /** Enter: the brief in focus becomes the scope, when it has a level beneath it. */
@@ -1911,8 +1916,26 @@ const enter = (): void => void (level(state.focus).length > 0 && scopeTo(state.f
 /** Shift and enter: the scope widens by one level, to the parent of the scope root. */
 const popUp = (): void => void (state.scope !== "" && scopeTo(parentOf(state.scope)));
 
-/** Escape: back along the way the reader scoped, one step at a time. */
-const back = (): void => void (state.scopes.length > 0 && scopeTo(state.scopes.pop()!, false));
+/** Escape: a step back in the page's history, arrivals and scope changes alike, never off the page. */
+const back = (): void => void (depth > 0 && history.back());
+
+/** Shift and escape: a step forward again. */
+const forward = (): void => history.forward();
+
+/** How long the space bar is held before it acts on the whole scope rather than the brief in focus. */
+const HOLD = 450;
+
+/** Space held: every brief in the scope opened whole, the heading in focus kept where it stands. */
+function openAll(): void {
+  refold(() =>
+    state.body!.briefs.forEach((b) => b.address !== state.scope && within(b.address, state.scope) && (blocksOf(b).length > 1 || level(b.address).length > 0) && setGrade(b.address, "whole")),
+  );
+}
+
+/** Shift and space held: every brief in the scope folded to its face, the reader taken up with what they stood in. */
+function foldAll(): void {
+  refold(() => level(state.scope).forEach((b) => setGrade(b.address, "face")), state.focus, true);
+}
 
 /** The previous or the next brief in the lane's order. */
 function step(delta: number): void {
@@ -1944,6 +1967,14 @@ function wire(): void {
 
   document.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
+    // a link within the body enters a step of the page's own, with its depth, and arrives; one held with a modifier is left to the browser
+    const inner = t.closest<HTMLAnchorElement>('a[href^="#/"]');
+    if (inner && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) {
+      e.preventDefault();
+      enterHistory(inner.getAttribute("href")!);
+      state.scope = brief(readScope()) ? readScope() : "";
+      return void arrive(readHash());
+    }
     if (t.closest("a[href]") || window.getSelection()?.toString()) return;
     const fold = t.closest<HTMLElement>("[data-fold]");
     if (fold) return void cycle(fold.dataset.fold!);
@@ -2061,27 +2092,50 @@ function wire(): void {
   };
   ui.scroll.addEventListener("wheel", flick, { passive: true });
 
+  // the space bar acts when it is let go, so a reader who only scrolls never reaches for the pointer: a tap folds or opens
+  // the brief in focus, and with shift the parent, which takes the reader up to it; held a moment, it opens everything in
+  // the scope, or with shift folds it all to faces, and letting go then does nothing more
+  let space: { shift: boolean; held: boolean; timer: ReturnType<typeof setTimeout> } | null = null;
+  const letGo = () => void (space && clearTimeout(space.timer), (space = null));
+  window.addEventListener("blur", letGo);
+  document.addEventListener("keyup", (e) => {
+    if (e.key !== " " || !space) return;
+    e.preventDefault();
+    const { shift, held } = space;
+    letGo();
+    if (!held) cycle(shift ? parentOf(state.focus) : state.focus);
+  });
+
   document.addEventListener("keydown", (e) => {
     if ((e.target as HTMLElement).closest("input, textarea")) return;
-    // the space bar folds or opens the brief in focus, so a reader who only scrolls never reaches for the pointer
-    if (e.key === " " && !e.shiftKey) (e.preventDefault(), cycle(state.focus));
-    // with shift held the parent folds, which takes the reader up to it
-    else if (e.key === " " && e.shiftKey) (e.preventDefault(), cycle(parentOf(state.focus)));
+    if (e.key === " ") {
+      e.preventDefault();
+      if (space) return;
+      const shift = e.shiftKey;
+      const hold: { shift: boolean; held: boolean; timer: ReturnType<typeof setTimeout> } = { shift, held: false, timer: setTimeout(() => ((hold.held = true), shift ? foldAll() : openAll()), HOLD) };
+      space = hold;
+      return;
+    }
     // the arrows move the focus and fold nothing: up and down along the lane, left to the parent, right into the level beneath
-    else if (e.key === "ArrowUp") (e.preventDefault(), step(-1));
+    if (e.key === "ArrowUp") (e.preventDefault(), step(-1));
     else if (e.key === "ArrowDown") (e.preventDefault(), step(1));
     else if (e.key === "ArrowLeft") (e.preventDefault(), up());
     else if (e.key === "ArrowRight") (e.preventDefault(), down());
-    // scoping: enter makes the focus the root of the lane, shift and enter widens by a level, escape steps back the way in
+    // scoping: enter makes the focus the root of the lane, shift and enter widens by a level
     else if (e.key === "Enter" && e.shiftKey) (e.preventDefault(), popUp());
     else if (e.key === "Enter") (e.preventDefault(), enter());
+    // escape steps back through the page's history, and with shift forward again
+    else if (e.key === "Escape" && e.shiftKey) forward();
     else if (e.key === "Escape") back();
   });
 
   ui.scroll.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
+  // a step back or forward carries its depth; a link followed by the browser enters a step with none, which is given one
   window.addEventListener("hashchange", () => {
-    if (!going) state.scope = brief(readScope()) ? readScope() : "";
-    going ? settle(readHash()) : arrive(readHash());
+    if (typeof history.state?.depth === "number") depth = history.state.depth;
+    else history.replaceState({ depth: ++depth }, "", location.href);
+    state.scope = brief(readScope()) ? readScope() : "";
+    arrive(readHash());
   });
   window.addEventListener("resize", () => {
     drawLayout();
@@ -2112,6 +2166,8 @@ function setBody(body: Body): void {
   w.title = body.warnings.join("\n");
   body.warnings.forEach((x) => console.warn(x));
   if (first) {
+    depth = typeof history.state?.depth === "number" ? history.state.depth : 0;
+    followHistory(location.hash || "#/");
     state.scope = brief(readScope()) ? readScope() : "";
     return arrive(readHash());
   }
