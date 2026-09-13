@@ -1704,10 +1704,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #strips { position: absolute; left: 0; right: 0; bottom: 0; height: 0; z-index: 5; pointer-events: none; }
 .strip { position: absolute; bottom: 10px; display: flex; gap: 4px; justify-content: center; pointer-events: auto; }
 .strip.rail { flex-direction: column; align-items: center; }
-.strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--dim); opacity: .45; transition: opacity .15s, color .15s; }
-.strip .pick:hover { opacity: 1; }
-.strip .pick.on { opacity: .9; color: var(--muted); }
-.strip.rail .pick.on { opacity: .45; }
+.strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--dim); opacity: .22; transition: opacity .15s, color .15s; }
+.strip .pick:hover { opacity: .7; }
+.strip .pick.on { opacity: 1; color: var(--muted); }
+.strip.rail .pick.on { opacity: .22; }
 .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
 .opening { margin-bottom: 40px; }
