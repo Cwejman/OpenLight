@@ -886,7 +886,7 @@ let ui: UI;
 const all = <T extends Element>(sel: string, root: ParentNode = document): T[] => Array.from(root.querySelectorAll<T>(sel));
 const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
 /** Panes share the estate: as many as fit at the minimum width, each grown to fill it, up to the maximum. */
-const PANE = { min: 512, max: 720 };
+const PANE = { min: 592, max: 720 };
 const estate = (): number => ui.viewport.getBoundingClientRect().width;
 const fit = (): number => Math.max(1, Math.floor(estate() / PANE.min));
 const paneWidth = (): number => Math.min(PANE.max, estate() / Math.max(1, Math.min(fit(), panesOf(state.opened).length)));
@@ -894,7 +894,7 @@ const drawWidth = (): void => ui.row.style.setProperty("--pane", `${paneWidth()}
 
 /** A pane's scroll box, and the room above a brief scrolled to, so its heading breathes. */
 const scrollBox = (pane: HTMLElement): HTMLElement => pane.querySelector<HTMLElement>(".scroll")!;
-const ABOVE = 12;
+const ABOVE = 24;
 
 /** Panes are kept by address: those on the path stay, with their scroll, and the rest go. */
 function drawPanes(): void {
@@ -1254,7 +1254,10 @@ const CSS = `
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --s1: 1.75rem; --s2: 1.375rem; --s3: 1.0625rem; --s4: .9375rem; --s5: .8125rem; --s6: .6875rem;
-  --pane: 40rem; --gutter: 2.5rem; --measure: 34rem;
+  --measure: 34rem;
+  /* One rhythm: the gap stands between the header and the path, the path and the bands, a band and its text, and
+     a pane and its edge, so two panes stand two gaps apart. */
+  --gap: 24px; --gutter: var(--gap);
   --h: 60;
 }
 /* Colour follows the branch: every element that names a brief carries its hue, and these derive from it. */
@@ -1273,7 +1276,7 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .chrome { font-family: var(--sans); font-size: var(--s5); color: var(--muted); letter-spacing: .01em; }
 .dim { color: var(--dim); }
 
-#header { flex: 0 0 auto; padding: 12px var(--gutter) 8px; }
+#header { flex: 0 0 auto; padding: var(--gap) var(--gutter) 0; }
 #header .bar { display: flex; align-items: baseline; gap: 16px; min-height: 1.4rem; }
 #header .root-title { color: var(--ink); font-weight: 600; }
 #header .warnings { cursor: help; }
@@ -1281,15 +1284,20 @@ a.outside { text-decoration-style: dotted; color: var(--muted); cursor: help; }
 .plate-toggle { margin-left: auto; background: none; border: 0; padding: 2px 8px; border-radius: 6px; cursor: pointer; color: var(--muted); font: inherit; }
 .plate-toggle:hover { background: rgba(0,0,0,.05); }
 .plate-toggle.on { color: var(--ink); }
-#path { margin-top: 8px; }
+#path { margin-top: var(--gap); }
 
 #viewport { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 #row { display: flex; height: 100%; transition: transform .28s cubic-bezier(.2,.7,.2,1); will-change: transform; }
 .pane { position: relative; flex: 0 0 var(--pane); width: var(--pane); height: 100%; display: flex; flex-direction: column; padding: 0 var(--gutter); }
-.pane .strip { flex: 0 0 auto; padding: 12px 0 8px; }
-.pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) 6rem; scrollbar-gutter: stable; }
-/* The seam is summoned only while text has passed beneath the band, and it is as wide as the text. */
-.pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: 12px; margin-bottom: -4px; width: var(--measure); max-width: 100%; background: linear-gradient(rgba(0,0,0,.075), rgba(0,0,0,0)); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.pane .strip { flex: 0 0 auto; padding: var(--gap) 0 0; }
+.pane .scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; margin: 0 calc(-1 * var(--gutter)); padding: var(--gap) var(--gutter) 6rem; scrollbar-width: none; }
+.pane .scroll::-webkit-scrollbar { display: none; }
+/* The seam is summoned only while text has passed beneath the band. It fills the gap between the band and the
+   text, spills a little past the measure on either side, and fades out there, so the text enters a threshold. */
+.pane .scroll::before { content: ""; position: sticky; top: 0; z-index: 1; display: block; height: var(--gap); margin: 0 0 calc(-1 * var(--gap)) calc(-1 * var(--gap)); width: calc(var(--measure) + 2 * var(--gap)); max-width: calc(100% + 2 * var(--gap));
+  background: linear-gradient(rgba(0,0,0,.07), rgba(0,0,0,0));
+  -webkit-mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent); mask-image: linear-gradient(to right, transparent, black var(--gap), black calc(100% - var(--gap)), transparent);
+  opacity: 0; transition: opacity .2s; pointer-events: none; }
 .pane.scrolled .scroll::before { opacity: 1; }
 .prose { max-width: var(--measure); }
 .opening { margin-bottom: 40px; }
@@ -1352,7 +1360,7 @@ svg.plate .label.lit, svg.plate .cell.lit .label { fill: var(--ground); }
 #tell .tell-level svg { margin-bottom: 2px; }
 
 @media (max-width: 720px) {
-  :root { --gutter: 1.5rem; }
+  :root { --gap: 16px; }
   #tell { width: calc(100vw - 16px); }
 }
 `;
