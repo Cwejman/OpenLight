@@ -1102,8 +1102,8 @@ function shapeSvg(W: number, H: number): string {
   // the levels above the scope stand to the left of the opening's row, a tick per ancestor, outermost leftmost
   const anc = prefixesOf(state.scope).slice(0, -1);
   const L = anc.length ? anc.length * 8 + 4 : 0;
-  const deepest = Math.max(0, ...laid.map((l) => depthIn(l.a)));
-  const w = Math.min(W, SHAPE.pad * 2 + L + deepest * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail);
+  // the shape stands in the whole width its wing gives it, so its ink starts at the wing's edge and no room is left unused
+  const w = W;
   const cells = laid.map((l) => {
     const x = SHAPE.pad + L + depthIn(l.a) * SHAPE.indent;
     const bars = l.blocks
@@ -1258,21 +1258,22 @@ const RAIL = 30;
 /** The room beneath a wing's figures that its strip stands in, above the space every area keeps. */
 const STRIP = 34;
 
-/** How wide an area stands: a closed one its rail, a gutter its column, a wing its widest widget or its strip. */
+/** How wide an area stands: a closed wing its rail, a closed gutter nothing, a gutter its column, a wing its widest figure, its strip free to reach a little past it into the space beside. */
+const takesRoom = (area: AreaName): boolean => isOpen(area) || area.startsWith("wing");
 const widthOf = (area: AreaName): number =>
-  !isOpen(area) ? RAIL : area.startsWith("gutter") ? GUTTER : Math.max(stripWidth("figure"), ...widgetsOf(area).map((w) => (w.kind === "figure" ? w.width() : 0)));
+  !takesRoom(area) ? 0 : !isOpen(area) ? RAIL : area.startsWith("gutter") ? GUTTER : Math.max(...widgetsOf(area).map((w) => (w.kind === "figure" ? w.width() : 0)));
 
 /**
  * Which areas the width allows, taken in the order they give way last: after the lane, the left wing, then the right
  * wing, then the gutters as a pair. So as the viewport narrows the gutters go first, then the right wing, then the
- * left, and the lane stands alone. Every area costs its own width and one space.
+ * left, and the lane stands alone. Every area costs its own width and one space, and a closed gutter costs nothing.
  */
 function fits(): Record<AreaName, boolean> {
   const s = state.settings;
   const on: Record<AreaName, boolean> = { wingL: false, gutterL: false, gutterR: false, wingR: false };
   let used = s.measure + 2 * s.gap;
   for (const group of [["wingL"], ["wingR"], ["gutterL", "gutterR"]] as AreaName[][]) {
-    const need = group.reduce((x, a) => x + widthOf(a) + s.gap, 0);
+    const need = group.reduce((x, a) => x + (takesRoom(a) ? widthOf(a) + s.gap : 0), 0);
     if (used + need > ui.areas.clientWidth) break;
     used += need;
     group.forEach((a) => (on[a] = true));
@@ -1312,7 +1313,7 @@ function drawLayout(): void {
   root.setProperty("--measure", `${measure}px`);
   // the gutters hug the lane at the gap, since what stands in them is aligned to its lines; only what the width allows
   // takes a column, since an absent element leaves the grid and would pull the lane into the empty track it left
-  const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : on[a] ? [widthOf(a)] : []));
+  const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : on[a] && takesRoom(a) ? [widthOf(a)] : []));
   const mid = inner.reduce((x, y) => x + y, 0) + s.gap * (inner.length - 1);
   // every area is as wide as what it holds, and the spaces beside them are one: at the two edges of the viewport as
   // between the wings and the lane. The gap is the least a space is given, and what the width leaves over is shared
@@ -1330,7 +1331,7 @@ function drawLayout(): void {
   ui.areas.style.columnGap = "0px";
   ui.content.style.gridTemplateColumns = inner.map((x) => `${x}px`).join(" ");
   ui.content.style.columnGap = `${s.gap}px`;
-  AREAS.forEach(({ name }) => (ui.parts[name].hidden = !on[name]));
+  AREAS.forEach(({ name }) => (ui.parts[name].hidden = !on[name] || !takesRoom(name)));
   (["gutterL", "gutterR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
   (["wingL", "wingR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
 }
@@ -1583,6 +1584,15 @@ function drawStrips(): void {
   AREAS.forEach(({ name }) => {
     const strip = ui.strips.querySelector<HTMLElement>(`[data-strip="${name}"]`);
     if (!strip) return;
+    // a closed gutter takes no room, so its row stands at the foot of the lane, at the edge the gutter would open on
+    if (!takesRoom(name)) {
+      const lane = ui.lane.getBoundingClientRect();
+      const width = stripWidth("adjunct");
+      strip.style.left = `${Math.round((name === "gutterL" ? lane.left : lane.right - width) - a0.left)}px`;
+      strip.style.width = `${width}px`;
+      strip.style.justifyContent = name === "gutterL" ? "flex-start" : "flex-end";
+      return;
+    }
     const r = ui.parts[name].getBoundingClientRect();
     // a rail stands at the outer edge of its side, however wide the side is
     const rail = strip.classList.contains("rail");
