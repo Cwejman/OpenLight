@@ -79,4 +79,4 @@ Subject lines under 72 characters. Use the body for details.
 
 ## Commits require approval
 
-Never run `git commit` without the user explicitly saying so. Stage, show what will be committed, wait for the word.
+Never run `git commit` without the user explicitly saying so. Stage, show what will be committed, wait for the word. The author may grant that word standing: on 2026-09-13 the author asked that each thing done be committed as it is done, with the report of it as the commit message, and that grant holds until withdrawn.
