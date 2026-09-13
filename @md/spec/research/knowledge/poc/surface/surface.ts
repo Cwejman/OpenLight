@@ -811,7 +811,7 @@ const WIDGETS: Record<string, Widget> = {
   shape: { kind: "figure", name: "the shape: the lane as laid", icon: "shape", draw: (w, h) => shapeSvg(w, h), width: () => shapeWidth(), grow: true },
   tree: { kind: "figure", name: "the tree", icon: "tree", draw: () => treeHtml(), width: () => 240, grow: true, onFocus: true },
   ahead: { kind: "figure", name: "the ahead: what lies beneath and is not in the lane", icon: "ahead", draw: (w, h) => aheadSvg(w, h), width: () => aheadWidth(), grow: true, onFocus: true, onPoint: true },
-  plate: { kind: "figure", name: "the plate: the body whole", icon: "plate", draw: (w, h) => plateSvg(Math.floor(Math.min(w, h))), width: () => 260, grow: false },
+  plate: { kind: "figure", name: "the plate: the body whole", icon: "plate", draw: (w, h) => plateSvg(w, h), width: () => plateWidth(), grow: false },
   settings: { kind: "figure", name: "settings", icon: "settings", draw: () => settingsHtml(), width: () => 216, grow: false },
   links: { kind: "adjunct", name: "links: what a brief points at, and what points at it", icon: "links", of: (b, el) => linkAdjuncts(b, el) },
 };
@@ -1117,8 +1117,8 @@ function shapeSvg(W: number, H: number): string {
   // the levels above the scope stand to the left of the opening's row, a tick per ancestor, outermost leftmost
   const anc = prefixesOf(state.scope).slice(0, -1);
   const L = anc.length ? anc.length * 8 + 4 : 0;
-  // the shape stands in the whole width its wing gives it, so its ink starts at the wing's edge and no room is left unused
-  const w = W;
+  // the shape stands in its own width, never a wider figure's beside it in the same wing
+  const w = Math.min(W, shapeWidth());
   const cells = laid.map((l) => {
     const x = SHAPE.pad + L + depthIn(l.a) * SHAPE.indent;
     const bars = l.blocks
@@ -1238,7 +1238,48 @@ function dropletPath(cx: number, cy: number, r0: number, r1: number, a0: number,
   ].join(" ");
 }
 
-function plateSvg(S: number): string {
+/** The largest extent the plate is drawn at, across or down. */
+const PLATE_SIDE = 260;
+
+/**
+ * The extent of the plate's ink in a square of side `S`: the centre and every droplet, sampled along its arcs. A plate
+ * is round only where the body is; a level that fills one side leaves the other empty, so the figure is cut to its ink.
+ */
+function plateInk(S: number): { x: number; y: number; w: number; h: number } {
+  const { drops, rc } = layoutPlate(S);
+  const c = S / 2;
+  const xs = [c - rc, c + rc];
+  const ys = [c - rc, c + rc];
+  drops.forEach((d) => {
+    for (let i = 0; i <= 8; i++) {
+      const a = d.a0 + ((d.a1 - d.a0) * i) / 8;
+      [d.r0, d.r1].forEach((r) => (xs.push(c + r * Math.cos(a)), ys.push(c + r * Math.sin(a))));
+    }
+  });
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+}
+
+/**
+ * The side of the square a plate is laid in for a room: its ink as large as the room and the plate's side allow. The
+ * gaps between droplets keep their size as the plate scales, so the ink does not scale evenly, and it is settled in a
+ * few steps at the size itself.
+ */
+const plateScale = (W: number, H: number): number => {
+  let S = 1000;
+  for (let i = 0; i < 5; i++) {
+    const ink = plateInk(S);
+    S *= Math.min(W / ink.w, H / ink.h, PLATE_SIDE / Math.max(ink.w, ink.h));
+  }
+  return Math.floor(S);
+};
+
+/** The width the plate stands in: its ink, drawn at the plate's side. */
+const plateWidth = (): number => (state.index ? Math.ceil(plateInk(plateScale(Infinity, Infinity)).w) : PLATE_SIDE);
+
+function plateSvg(W: number, H: number): string {
+  const S = plateScale(W, H);
   if (S < 80) return "";
   const { drops, rc } = layoutPlate(S);
   const c = S / 2;
@@ -1254,7 +1295,8 @@ function plateSvg(S: number): string {
       return `<text class="label${onPath.has(d.a) ? " on" : ""}${d.a === state.focus ? " here" : ""}" data-a="${esc(d.a)}" x="${(c + rm * Math.cos(mid)).toFixed(1)}" y="${(c + rm * Math.sin(mid)).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(trim(d.label!, Math.floor((chord - 8) / 5.6)))}</text>`;
     });
   const centre = `<g class="cell centre${state.focus === "" ? " on" : ""}" data-a=""><circle cx="${c}" cy="${c}" r="${(rc - PLATE.gap / 2).toFixed(1)}"/><text class="label" x="${c}" y="${c}" text-anchor="middle" dominant-baseline="middle">${esc(trim(state.body!.title, Math.floor(rc / 3.4)))}</text></g>`;
-  return `<svg class="fig plate" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${cells.join("")}${centre}${labels.join("")}</svg>`;
+  const ink = plateInk(S);
+  return `<svg class="fig plate" width="${Math.ceil(ink.w)}" height="${Math.ceil(ink.h)}" viewBox="${ink.x.toFixed(1)} ${ink.y.toFixed(1)} ${ink.w.toFixed(1)} ${ink.h.toFixed(1)}">${cells.join("")}${centre}${labels.join("")}</svg>`;
 }
 
 // ## 3.11 Drawing, and drawing again
@@ -1611,42 +1653,58 @@ function drawWingsAligned(): void {
   if (`${ui.content.style.paddingTop} ${ui.content.style.paddingBottom}` !== before) drawWings();
 }
 
-/** The strips stand at the foot of their areas, laid over the row by the areas' own geometry. */
+/**
+ * The strips stand at the foot of their areas, laid over the row by the areas' own geometry. Each side of the lane has a
+ * wing's row and a gutter's row. They stand apart when both fit where they belong without touching; where they would
+ * touch, the gutter's icons join the wing's row, nearest the lane, past a thin divider, so one row offers both.
+ */
 function drawStrips(): void {
   const on = fits();
   const a0 = ui.areas.getBoundingClientRect();
+  const gap = state.settings.gap;
+  const apart = 8;
   ui.strips.innerHTML = AREAS.filter(({ name }) => on[name])
     .map(({ name, kind }) => stripHtml(name, kind))
     .join("");
-  AREAS.forEach(({ name }) => {
-    const strip = ui.strips.querySelector<HTMLElement>(`[data-strip="${name}"]`);
-    if (!strip) return;
-    const width = strip.scrollWidth;
-    const at = (left: number) => void (strip.style.left = `${Math.round(left - a0.left)}px`);
+  const stripOf = (name: AreaName) => ui.strips.querySelector<HTMLElement>(`[data-strip="${name}"]`);
+  /** Where a row of a given width would stand on its own: its left edge on the screen. */
+  const anchor = (name: AreaName, width: number): number => {
     // an open area's row is centred under it
     if (takesRoom(name)) {
       const r = ui.parts[name].getBoundingClientRect();
-      return at(r.left + r.width / 2 - width / 2);
+      return r.left + r.width / 2 - width / 2;
     }
     // a closed gutter's row stands at the foot of the lane, at the edge the gutter would open on
     const lane = ui.lane.getBoundingClientRect();
-    if (name === "gutterL") return at(lane.left);
-    if (name === "gutterR") return at(lane.right - width);
-    // a closed wing's row stands centred in the space beside the lane where the wing would open, a gap from the edge
+    if (name === "gutterL") return lane.left;
+    if (name === "gutterR") return lane.right - width;
+    // a closed wing's row stands centred in the space beside the lane where the wing would open
     const block = ui.scroll.getBoundingClientRect();
     const [from, to] = name === "wingL" ? [a0.left, block.left] : [block.right, a0.right];
-    const gap = state.settings.gap;
-    at(clamp((from + to) / 2 - width / 2, a0.left + gap, a0.right - gap - width));
+    return clamp((from + to) / 2 - width / 2, a0.left + gap, a0.right - gap - width);
+  };
+  // a row keeps a gap from the edges of the screen
+  const place = (el: HTMLElement, left: number) => void (el.style.left = `${Math.round(clamp(left, a0.left + gap, a0.right - gap - el.offsetWidth) - a0.left)}px`);
+  (["L", "R"] as const).forEach((side) => {
+    const wingName = `wing${side}` as AreaName;
+    const gutterName = `gutter${side}` as AreaName;
+    const wing = stripOf(wingName);
+    const gutter = stripOf(gutterName);
+    const wingAt = wing ? anchor(wingName, wing.offsetWidth) : 0;
+    const gutterAt = gutter ? anchor(gutterName, gutter.offsetWidth) : 0;
+    const touch = !!wing && !!gutter && (side === "L" ? wingAt + wing.offsetWidth + apart > gutterAt : gutterAt + gutter.offsetWidth + apart > wingAt);
+    if (wing && gutter && touch) {
+      const divider = document.createElement("span");
+      divider.className = "divider";
+      const icons = Array.from(gutter.children);
+      if (side === "L") wing.append(divider, ...icons);
+      else wing.prepend(...icons, divider);
+      gutter.remove();
+      return place(wing, anchor(wingName, wing.offsetWidth));
+    }
+    if (wing) place(wing, wingAt);
+    if (gutter) place(gutter, gutterAt);
   });
-  // rows on one side never lie over each other: from each edge inward, a row starts where the one before it ended
-  const rows = all<HTMLElement>(".strip", ui.strips).map((el) => ({ el, left: el.offsetLeft, width: el.offsetWidth }));
-  const middle = ui.areas.clientWidth / 2;
-  const apart = 8;
-  const leftSide = rows.filter((r) => r.left + r.width / 2 < middle).sort((x, y) => x.left - y.left);
-  leftSide.forEach((r, i) => i > 0 && (r.left = Math.max(r.left, leftSide[i - 1].left + leftSide[i - 1].width + apart)));
-  const rightSide = rows.filter((r) => r.left + r.width / 2 >= middle).sort((x, y) => y.left - x.left);
-  rightSide.forEach((r, i) => i > 0 && (r.left = Math.min(r.left, rightSide[i - 1].left - r.width - apart)));
-  rows.forEach((r) => (r.el.style.left = `${Math.round(r.left)}px`));
 }
 
 function drawAll(): void {
@@ -2186,6 +2244,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .strip { position: absolute; bottom: 10px; display: flex; gap: 4px; justify-content: center; pointer-events: auto; }
 .strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--ink); opacity: .22; transition: opacity .15s, color .15s; }
 .strip .pick:hover { opacity: .7; }
+.strip .divider { width: 1px; height: 12px; align-self: center; margin: 0 4px; background: var(--track); }
 .strip .pick.on { opacity: 1; color: var(--muted); }
 .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
