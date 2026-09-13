@@ -681,9 +681,6 @@ function setGrade(a: string, grade: Grade): void {
 
 const nextGrade = (grade: Grade | null): Grade => (grade === "whole" ? "face" : "whole");
 
-/** The grade a level stands at: that of its first brief in the lane, or none. */
-const levelGrade = (parent: string): Grade | null => level(parent).map((b) => gradeOf(b.address)).find((x) => x !== null) ?? null;
-
 const CHEVRON = `<svg viewBox="0 0 10 10"><path d="M3.2 1.8 6.6 5 3.2 8.2"/></svg>`;
 
 /** The fold mark beside a brief: a chevron that turns down when whole and points right at a face. */
@@ -1434,14 +1431,6 @@ function cycle(a: string): void {
   }, a);
 }
 
-/** Every brief of one level to the next grade together. */
-function cycleLevel(parent: string): void {
-  refold(() => {
-    const next = nextGrade(levelGrade(parent));
-    level(parent).forEach((b) => setGrade(b.address, next));
-  });
-}
-
 /** Up: the parent of the focus becomes the focus, without relaying the lane. */
 function up(): void {
   const p = parentOf(state.focus);
@@ -1579,7 +1568,8 @@ function wire(): void {
     if ((e.target as HTMLElement).closest("input, textarea")) return;
     // the space bar folds or opens the brief in focus, so a reader who only scrolls never reaches for the pointer
     if (e.key === " " && !e.shiftKey) (e.preventDefault(), cycle(state.focus));
-    else if (e.key === " " && e.shiftKey) (e.preventDefault(), cycleLevel(parentOf(state.focus)));
+    // with shift held the parent folds, which takes the reader up to it
+    else if (e.key === " " && e.shiftKey) (e.preventDefault(), cycle(parentOf(state.focus)));
     else if (e.key === "ArrowLeft" || e.key === "u") up();
     else if (e.key === "Enter" && gradeOf(state.focus) !== "whole") cycle(state.focus);
   });
