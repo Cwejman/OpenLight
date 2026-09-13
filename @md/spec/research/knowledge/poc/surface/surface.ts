@@ -528,6 +528,8 @@ const state = {
   settings: { ...DEFAULTS, areas: { ...DEFAULTS.areas } } as Settings,
   /** set while a drag is in progress, so pointing does not fight it */
   scrubbing: false,
+  /** the focus a keyed move is scrolling to; held until the scroll settles, so the marks do not follow every brief passed */
+  holding: null as string | null,
 };
 
 /** Everything derived from the body, computed once per body. */
@@ -1375,11 +1377,18 @@ function arrive(a: string): void {
   arriving = false;
 }
 
+let holdTimer: ReturnType<typeof setTimeout> | undefined;
 function scrollToFocus(smooth: boolean): void {
   const art = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.focus)}"]`);
   if (!art) return;
   const top = art.getBoundingClientRect().top - ui.content.getBoundingClientRect().top;
-  ui.scroll.scrollTo({ top: Math.max(0, top - ui.scroll.clientHeight * 0.5 + 24), behavior: smooth ? "smooth" : "auto" });
+  const target = Math.max(0, Math.min(ui.scroll.scrollHeight - ui.scroll.clientHeight, top - ui.scroll.clientHeight * 0.5 + 24));
+  if (smooth) {
+    state.holding = state.focus;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => (state.holding = null), 1200);
+  }
+  ui.scroll.scrollTo({ top: target, behavior: smooth ? "smooth" : "auto" });
 }
 
 /** Scrolling moves the focus and nothing else; the address follows without entering the history. */
@@ -1390,6 +1399,14 @@ function onScroll(): void {
     state.pointed = null;
     light();
     drawWings("point");
+  }
+  // a keyed move holds its target until the scroll has brought it to the line
+  if (state.holding !== null) {
+    const held = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.holding)}"]`);
+    const at = held ? held.getBoundingClientRect().top - (ui.scroll.getBoundingClientRect().top + ui.scroll.clientHeight * 0.5 - 24) : 0;
+    if (Math.abs(at) > 2) return;
+    state.holding = null;
+    clearTimeout(holdTimer);
   }
   const f = focusUnderLine();
   if (f === state.focus) return;
@@ -1546,6 +1563,7 @@ function wire(): void {
   document.addEventListener(
     "wheel",
     (e) => {
+      state.holding = null;
       const t = e.target as HTMLElement;
       if (t.closest("#scroll") || t.closest("[data-knob]")) return;
       e.preventDefault();
