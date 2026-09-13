@@ -859,8 +859,12 @@ let ui: UI;
 
 const all = <T extends Element>(sel: string, root: ParentNode = document): T[] => Array.from(root.querySelectorAll<T>(sel));
 const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
-const paneWidth = (): number => ui.row.querySelector<HTMLElement>(".pane")?.getBoundingClientRect().width ?? 592;
-const fit = (): number => Math.max(1, Math.floor(ui.viewport.getBoundingClientRect().width / paneWidth() + 0.01));
+/** Panes share the estate: as many as fit at the minimum width, each grown to fill it, up to the maximum. */
+const PANE = { min: 512, max: 720 };
+const estate = (): number => ui.viewport.getBoundingClientRect().width;
+const fit = (): number => Math.max(1, Math.floor(estate() / PANE.min));
+const paneWidth = (): number => Math.min(PANE.max, estate() / Math.max(1, Math.min(fit(), panesOf(state.opened).length)));
+const drawWidth = (): void => ui.row.style.setProperty("--pane", `${paneWidth()}px`);
 
 /** A pane's scroll box, and the room above a brief scrolled to, so its heading breathes. */
 const scrollBox = (pane: HTMLElement): HTMLElement => pane.querySelector<HTMLElement>(".scroll")!;
@@ -939,10 +943,15 @@ function drawShift(): void {
   all<SVGGElement>(".step", ui.pathBox).forEach((g) => g.classList.toggle("inview", Number(g.dataset.pane) >= s && Number(g.dataset.pane) < s + f));
 }
 
+/** The plate takes a free slot when the panes leave one, and otherwise the bottom-left of the pane already read. */
 function drawPlate(): void {
   ui.plateBox.hidden = !state.plate;
   ui.header.querySelector(".plate-toggle")?.classList.toggle("on", state.plate);
-  const S = Math.floor(Math.min(paneWidth(), ui.viewport.getBoundingClientRect().height));
+  const n = panesOf(state.opened).length;
+  const free = n < fit();
+  const left = free ? n * paneWidth() : 0;
+  const S = Math.floor(Math.min(free ? estate() - left : paneWidth(), ui.viewport.getBoundingClientRect().height));
+  ui.plateBox.style.left = `${Math.round(left)}px`;
   ui.plateBox.style.width = `${S}px`;
   ui.plateBox.style.height = `${S}px`;
   ui.plateBox.innerHTML = state.plate && state.body ? plateSvg(S) : "";
@@ -950,6 +959,7 @@ function drawPlate(): void {
 
 function drawAll(): void {
   if (!state.body) return;
+  drawWidth();
   drawPanes();
   drawPath();
   drawShift();
@@ -1127,6 +1137,7 @@ function wire(): void {
   });
   window.addEventListener("hashchange", () => opened(readHash()));
   window.addEventListener("resize", () => {
+    drawWidth();
     drawStrips();
     drawPath();
     drawShift();
@@ -1266,7 +1277,7 @@ svg.fig .cell { cursor: pointer; }
 svg.fig .cursor { fill: none; stroke: rgba(0,0,0,.45); stroke-width: 1.25; pointer-events: none; transition: x .08s, width .08s; }
 svg.path .step:not(.inview) .seg, svg.path .step:not(.inview) .door { opacity: .5; }
 
-.plate-box { position: absolute; left: 0; top: 0; background: var(--ground); z-index: 3; }
+.plate-box { position: absolute; left: 0; bottom: 0; background: var(--ground); z-index: 3; }
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
 svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
 svg.plate .cell.more path { stroke: var(--door); stroke-width: 1; stroke-dasharray: 3 2; }
@@ -1287,7 +1298,7 @@ svg.plate .note { font-family: var(--sans); font-size: 10px; fill: var(--dim); }
 #tell .tell-level svg { margin-bottom: 2px; }
 
 @media (max-width: 720px) {
-  :root { --pane: 100vw; --gutter: 1.5rem; }
+  :root { --gutter: 1.5rem; }
   #tell { width: calc(100vw - 16px); }
 }
 `;
