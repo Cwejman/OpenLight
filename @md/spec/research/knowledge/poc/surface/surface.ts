@@ -1828,10 +1828,11 @@ svg.shape .cursor { fill: rgba(0,0,0,.05); pointer-events: none; }
 svg.shape { cursor: grab; }
 
 svg.plate .cell path, svg.plate .cell circle { fill: var(--rest); }
-svg.plate .cell.away path { fill: var(--grey); }
 svg.plate .cell.centre circle { --h: 60; fill: oklch(92% 0.01 var(--h)); }
 svg.plate .cell.more path { fill: oklch(83% 0.06 var(--h)); }
 svg.plate .cell.on path { fill: var(--door); }
+/* grey for anything not in the lane wins over the marks above, at every depth */
+svg.plate .cell.away path { fill: var(--grey); }
 svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
 svg.plate .label { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
 svg.plate .label.lit, svg.plate .cell.lit .label { fill: var(--ground); }
