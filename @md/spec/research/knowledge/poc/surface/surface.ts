@@ -1757,18 +1757,62 @@ const readScope = (): string => decodeURIComponent((location.hash.split("?in=")[
 const hashFor = (focus: string, scope = state.scope): string => `#/${focus}${scope ? `?in=${scope}` : ""}`;
 let arriving = false;
 
+/** Enters a step into the browser's history at an address, for its back and forward. */
+const enterHistory = (hash: string): void => history.pushState(null, "", hash);
+/** Replaces the address of the step the reader stands on. */
+const followHistory = (hash: string): void => (history.replaceState(null, "", hash), rememberLane());
+
+/** The lane as it stood: its scope, every fold, the focus and the scroll, which is all a reader's change moves. */
+type Snapshot = { scope: string; grades: [string, Grade][]; focus: string; scroll: number };
+const undos: Snapshot[] = [];
+const redos: Snapshot[] = [];
+const snapshot = (): Snapshot => ({ scope: state.scope, grades: Array.from(state.grades), focus: state.focus, scroll: ui.scroll.scrollTop });
+const sameSnapshot = (x: Snapshot, y: Snapshot): boolean => x.scope === y.scope && x.focus === y.focus && x.scroll === y.scroll && JSON.stringify(x.grades) === JSON.stringify(y.grades);
+
 /**
- * How many steps into the page's history the reader stands. Every entry the page makes carries its depth, so escape can
- * step back along arrivals and scope changes alike, and never off the page onto what came before it.
+ * Records the lane as it stands, before a change the reader makes: a fold or an opening, a change of scope, a going or
+ * an arrival. Scrolling alone records nothing. A change made of two, a going that widens the scope first, records once.
  */
-let depth = 0;
-/** Enters a step into the history at an address. */
-const enterHistory = (hash: string): void => history.pushState({ depth: ++depth }, "", hash);
-/** Replaces the address of the step the reader stands on, keeping its depth. */
-const followHistory = (hash: string): void => (history.replaceState({ depth }, "", hash), rememberLane());
+function record(): void {
+  const now = snapshot();
+  if (undos.length && sameSnapshot(undos[undos.length - 1], now)) return;
+  undos.push(now);
+  if (undos.length > 200) undos.shift();
+  redos.length = 0;
+}
+
+/** Lays the lane as a snapshot holds it and scrolls to where it stood, so the reader is exactly back. */
+function restore(s: Snapshot): void {
+  arriving = true;
+  state.holding = null;
+  state.scope = brief(s.scope) ? s.scope : "";
+  state.grades = new Map(s.grades.filter(([a]) => brief(a)));
+  state.focus = brief(s.focus) ? s.focus : state.scope;
+  drawAll();
+  ui.scroll.scrollTop = s.scroll;
+  followHistory(hashFor(state.focus));
+  arriving = false;
+}
+
+/** Escape: the lane back as it stood before the last change the reader made. */
+function undo(): void {
+  const s = undos.pop();
+  if (!s) return;
+  redos.push(snapshot());
+  restore(s);
+}
+
+/** Shift and escape: the change undone made again. */
+function redo(): void {
+  const s = redos.pop();
+  if (!s) return;
+  undos.push(snapshot());
+  restore(s);
+}
 
 /** Goes to an address from the tree or a figure: enters the history, then settles there, keeping what the reader folded. */
 function goTo(a: string): void {
+  record();
   // a target outside the scope widens the scope to the whole body first, laid afresh, and the step is on the way back
   if (!within(a, state.scope)) scopeTo("");
   if (readHash() !== a || readScope() !== state.scope) enterHistory(hashFor(a));
@@ -1894,6 +1938,7 @@ function onScroll(): void {
 
 /** Changes grades under a function, keeping the acted-on brief's heading where it stood on the screen. */
 function refold(change: () => void, anchor: string = state.focus, jump = false): void {
+  record();
   const at = (a: string) => ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(a)}"]`)?.getBoundingClientRect().top;
   const before = at(anchor) ?? at(state.focus);
   const held = at(anchor) !== undefined ? anchor : state.focus;
@@ -1949,12 +1994,13 @@ const down = (): void => moveTo(level(state.focus)[0]?.address ?? state.focus);
 /** Scopes the lane to a brief: its holon becomes the whole, its heading the opening, and the registers count from it. */
 function scopeTo(S: string): void {
   if (S === state.scope || !brief(S)) return;
+  record();
   state.scope = S;
   if (!within(state.focus, S)) state.focus = S;
   lay(state.focus);
   drawAll();
   scrollToFocus(false);
-  // a change of scope is a step of its own, so escape takes the reader back out of it
+  // a change of scope is a step of its own in the browser's history as well
   enterHistory(hashFor(state.focus));
 }
 
@@ -1963,12 +2009,6 @@ const enter = (): void => void (level(state.focus).length > 0 && scopeTo(state.f
 
 /** Shift and enter: the scope widens by one level, to the parent of the scope root. */
 const popUp = (): void => void (state.scope !== "" && scopeTo(parentOf(state.scope)));
-
-/** Escape: a step back in the page's history, arrivals and scope changes alike, never off the page. */
-const back = (): void => void (depth > 0 && history.back());
-
-/** Shift and escape: a step forward again. */
-const forward = (): void => history.forward();
 
 /** How long the space bar is held before it acts on the whole scope rather than the brief in focus. */
 const HOLD = 450;
@@ -2015,10 +2055,11 @@ function wire(): void {
 
   document.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
-    // a link within the body enters a step of the page's own, with its depth, and arrives; one held with a modifier is left to the browser
+    // a link within the body is followed by the page itself, as a change that can be undone; one held with a modifier is left to the browser
     const inner = t.closest<HTMLAnchorElement>('a[href^="#/"]');
     if (inner && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) {
       e.preventDefault();
+      record();
       enterHistory(inner.getAttribute("href")!);
       state.scope = brief(readScope()) ? readScope() : "";
       return void arrive(readHash());
@@ -2172,16 +2213,15 @@ function wire(): void {
     // scoping: enter makes the focus the root of the lane, shift and enter widens by a level
     else if (e.key === "Enter" && e.shiftKey) (e.preventDefault(), popUp());
     else if (e.key === "Enter") (e.preventDefault(), enter());
-    // escape steps back through the page's history, and with shift forward again
-    else if (e.key === "Escape" && e.shiftKey) forward();
-    else if (e.key === "Escape") back();
+    // escape undoes the last change the reader made to the lane, and with shift makes it again
+    else if (e.key === "Escape" && e.shiftKey) redo();
+    else if (e.key === "Escape") undo();
   });
 
   ui.scroll.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
-  // a step back or forward carries its depth; a link followed by the browser enters a step with none, which is given one
+  // the browser's back and forward, or an address typed, arrive as a change the reader made
   window.addEventListener("hashchange", () => {
-    if (typeof history.state?.depth === "number") depth = history.state.depth;
-    else history.replaceState({ depth: ++depth }, "", location.href);
+    record();
     state.scope = brief(readScope()) ? readScope() : "";
     arrive(readHash());
   });
@@ -2214,10 +2254,9 @@ function setBody(body: Body): void {
   w.title = body.warnings.join("\n");
   body.warnings.forEach((x) => console.warn(x));
   if (first) {
-    depth = typeof history.state?.depth === "number" ? history.state.depth : 0;
     // read before the address is written back, since writing it keeps the lane as it stands, which is not yet laid
     const kept = recalledLane();
-    history.replaceState({ depth }, "", location.hash || "#/");
+    history.replaceState(null, "", location.hash || "#/");
     state.scope = brief(readScope()) ? readScope() : "";
     return kept ? resume(readHash(), kept) : arrive(readHash());
   }
