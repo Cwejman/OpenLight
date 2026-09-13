@@ -26,45 +26,35 @@ What it finds there it does not interpret. What counts as a brief, and what nest
 
 *Reasoned, 2026-09-12.*
 
-## 2. A level to a pane
+## 2. Reading and orientation come apart
 
-Wherever you are reading you are at a path in the holarchy, and no brief is orphaned, since each is a part of the understanding above it. That is what a surface can be built on: there is always somewhere you are, and always a way you came.
+A reader reads one thing at a time, and the eye that moves to a second column of prose has stopped reading the first. What a reader wants from around the text is not more text but a sense of place: where they came from, what lies beneath, what this brief points at. Headings and shape give that, and prose does not.
 
-So each level of the path takes a pane, and the panes stand side by side, left to right. Going deeper adds one on the right, and nothing a reader has passed through is ever taken off the row.
+So the surface is one lane of prose, centred, with room on either side, and the sides orient. The lane carries the body in the order a document reads, each brief at a grade the reader sets: folded to its heading, opened to its face, or read whole. The sides carry the tree, the shape beneath, the links, and whatever else a reader spawns there, and never prose.
 
-A pane holds a level and never a single brief. The briefs of that level stand in it in the order they stand in, as prose read straight down, each giving its own prose and leaving what is beneath it for the pane to the right. That order is a reading and not a menu, since [the briefs at a level stand on the ones before them](../../code.md#42-the-order-of-a-holarchy) and never on the ones after.
+The first reading model gave a level to a pane and stood three panes side by side. The author's verdict, after a day of use, was that only one pane is ever read, and that the others earned their room for orientation alone, which they gave in prose, the costliest way there is. The depth a reader most wanted, the level beneath the brief in front of them, stood behind a pointer and a press. Both are what this model answers.
 
-Pressing a brief opens the level under it. You do not enter the brief, because you have just read it.
+*Reasoned, the author's, 2026-09-13, from using the program built the same day; the first model stands beneath, refused.*
 
-*Reasoned, the author's, 2026-09-12.*
+[the level beneath](lane.md)
 
-[the level beneath](panes.md)
+## 3. Five areas, and what stands in them
 
-## 3. What the prose cannot say
+The lane is one of five areas in a row: a wing, a gutter, the lane, a gutter, a wing. The gutters hold what stands beside a brief, aligned with it and scrolling with it. The wings hold figures of the body that stand on their own. A reader chooses what each area shows from a light row of icons at its foot, and settings are a figure like any other.
 
-A brief says what it means. It cannot say what it is, and it can say nothing about the body it sits in, because no brief can see the whole.
+That is a small framework, kept small on purpose. It is what lets a new drawing be tried by adding one function, and what keeps every drawing in step, since all of them read one shared state and act through the same few verbs.
 
-Plotted out, that body becomes reachable from anywhere. A holarchy gives one route to each of its parts, down from the root, and one route is not enough for a reader who arrives with a question rather than at the beginning. With the structure laid out in front of them they go straight to what bears on it, and they move by what sits near what rather than along a path they have to walk. That is the half of navigating a body the descent cannot give, and it is what plotting the shape is for.
+*Reasoned, the author's, 2026-09-13.*
 
-Seen as shape, the body also says what no brief says: where its mass sits, which regions have been worked and which are thin, and whether the gradient it was written by holds at all. That last turns the code's own promise into something a reader can check, since a short top with heavier levels beneath is visible, and so is its failure.
+[the level beneath](framework.md)
 
-Closer in, the same drawing quotes the price. Reading is a spend and prose never names it, so a reader weighs a part before entering. That is the job a minimap does beside a long file, and it is the least of what these do.
+## 4. The widgets
 
-*Reasoned, the author's, 2026-09-12. Two parts of it are measured: [the study counted its own tree as shape](../../study/measured.md#1-the-study-against-the-gradient-2026-09-12) and found both that the gradient holds and where heaviness does not, and judging a part by its look before reading it is the judgment [the labs failed most often](../../study/findings.md#1-heaviness-is-seen-before-it-is-read). Both carried here unchecked.*
+What can stand in a wing or a gutter, each described once it exists, and the rules every one of them keeps: nothing drawn that the substrate does not hold, nothing drawn too small to read, one brief lit wherever it is drawn, and ink spent only where a reader has asked.
 
-[the level beneath](drawings.md)
+*Reasoned, 2026-09-13; each widget carries its own grade beneath.*
 
-## 4. Moving, and asking
-
-A reader does three things besides read. They go deeper, they go sideways, and they ask about a brief without going anywhere at all. The first two change the path and are remembered. The third leaves no trace.
-
-That division is what makes looking free. A reader can see what a descent would give before spending it, and nothing they merely looked at follows them.
-
-A descent is committed from a door in a pane or from a cell in any drawing, and either one adds the level beneath to the panes and to the drawing of the path. From a drawing it may carry more than one level, since a reader can look several levels down before choosing.
-
-*Reasoned, the author's, 2026-09-12.*
-
-[the level beneath](moving.md)
+[the level beneath](widgets.md)
 
 ## 5. How it is built
 
@@ -78,20 +68,22 @@ Either way the file reads the stamped markdown and hands the page the substrate 
 
 ## 6. What this does not answer
 
-How a reader sees where they have been. Following a link rebuilds the panes, and the history carries the way back, but nothing draws that history and the drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
+How a reader sees where they have been. The lane keeps what a reader opened, so part of the trail shows as what stands unfolded, but following a link lays the lane afresh and nothing draws the way back beyond the browser's own history. The drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
 
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and it is unanswered.
 
-What a session keeps. The panes and the drawing read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.
+What a session keeps. The lane and the widgets read any substrate, so they read a session's record once it is written down, but nothing here says what a session should write, or how it is made to write it while it works rather than at its close.
 
-*Open, 2026-09-12. What each level leaves open stands at its own foot, the technical ground included.*
+What stands beside a brief in the left gutter. Commits and people belong there, and both wait for git, which [the implementation](implementation.md#9-git-waits-for-history) leaves for history.
+
+*Open, 2026-09-13. What each level leaves open stands at its own foot, the technical ground included.*
 
 ## 7. What was tried and refused
 
-A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and the program written against them on 2026-09-13 stands beside them as `surface.ts`.
+Two programs were built before this model. A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. A second program was written on 2026-09-13 against the specification written first, a level to a pane, three abreast, and the author used it that day. Its trace of the body and its figures carry into this model; its reading model does not.
 
-What that program reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, because a refusal is looked up when someone proposes it again and never read through.
+What both reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, because a refusal is looked up when someone proposes it again and never read through.
 
-*Seen, in that program and in the author's reading of it; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
+*Seen, in both programs and in the author's reading of them; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
 
 [the level beneath](refused.md)

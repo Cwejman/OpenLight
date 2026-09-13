@@ -104,29 +104,27 @@ So the pipeline's whole job is to run the build on each commit and put the one p
 
 ## 6. How it is drawn
 
-The page draws from three things and nothing else: the address a reader opened, which lives in the URL; the address the pointer rests on, which lives nowhere and leaves no trace; and whether the plate is shown. Every change to one of them draws again.
+The page draws from a small shared state and nothing else: the address in focus, which the page's own address follows; the address the pointer rests on, which lives nowhere and leaves no trace; the grade of every brief in the lane; and the settings. Every change to one of them draws what depends on it again.
 
-*In force, the author's decision, 2026-09-12.*
+*In force, the author's decision, 2026-09-13.*
 
-### 6.1 Panes are HTML, and the row steps
+### 6.1 The lane is HTML in one scroll box, with its gutters inside
 
-The panes are HTML, side by side in a row, and each scrolls its own level up and down. The row itself never scrolls sideways. Scrubbing the drawing of the path moves it instead, and it moves by whole panes, one level at a time, never a part of one.
+The lane, the gutter on either side of it and the prose between are one scroll box, so the gutters scroll with the text for free. The prose is a column of articles in reading order, each drawn at its grade, and the gutters are columns beside it in which each adjunct is placed at the height of the line it belongs to, pushed down where two would overlap. Folding draws the lane again whole and then scrolls so that the heading of the brief in focus stands where it stood.
 
-Every opened level keeps its own pane, kept by its address even while it is off screen, and the row is shifted by a whole number of panes with a short transition. So each pane keeps its scroll position without anything saving it, and the eye sees which way the levels went rather than text jumping in place.
+The focus is found on every scroll: the article under the reading line, the middle of the viewport, or the nearest above it. When it changes, the page's address is replaced without entering the history, and the widgets that depend on the focus draw again.
 
-*In force, the author's decision, 2026-09-12.*
+*In force, the author's decision, 2026-09-13.*
 
-### 6.2 Figures are SVG
+### 6.2 Wings are drawn whole, as HTML or SVG
 
-A level's drawing, the level beside a brief's heading, the path and the plate are SVG. It stays sharp at any size, and every cell is an element of its own, so pointing at one needs nothing more. Should the plate ever hold more cells than that bears, it alone moves to a canvas.
+A wing holds one figure, drawn whole from the state whenever the state it reads changes: the tree and the settings as HTML, the ahead, the shape and the plate as SVG. The strips are laid over the foot of the row from the areas' own geometry, so a closed area's rail stands where the area stood. Every cell that names a brief is an element of its own carrying the brief's address, so pointing and pressing need nothing more. Should the plate ever hold more cells than that bears, it alone moves to a canvas.
 
-*In force, the author's decision, 2026-09-12.*
+*In force, the author's decision, 2026-09-13.*
 
-### 6.3 One brief lit, and one overlay
+### 6.3 One brief lit, wherever it is drawn
 
-Everything drawn carries its brief's address. When the pointer rests on one, the page marks that address, and everything carrying it lights at once, wherever it is drawn.
-
-The overlay is one element, used again for every telling. It moves beside whatever raised it, outside the bounds of that figure.
+Everything drawn carries its brief's address. When the pointer rests on one, the page marks that address, and everything carrying it lights at once, in the lane, in the gutters and in the wings.
 
 *In force, the author's decision, 2026-09-12.*
 
@@ -134,13 +132,13 @@ The overlay is one element, used again for every telling. It moves beside whatev
 
 The server, the build, the client and the talk between them are one TypeScript file, run with Bun. A flag chooses between serving live and writing the page. This is the proof of concept, and nothing in it should grow larger than reading a body needs.
 
-The file is composed the way a brief is. What it is and how it is run come first, then how the body is assembled, then how it is drawn, and the details beneath. Its sections carry numbered headings in comments, so it is read by depth like anything else under the code.
+The file is composed the way a brief is. What it is and how it is run come first, then how the body is assembled, then how it is drawn, and the details beneath. The drawing holds the lane, then the areas and their strip, then one section per widget, then what wires the gestures. Every widget is one entry in one table, so the day the file outgrows reading by depth, each entry becomes a file of its own and nothing else moves. Its sections carry numbered headings in comments, so it is read by depth like anything else under the code.
 
 For taste in the code itself, the author's guidelines from the sister project stand as general guidance: [Hjulverkstan's principles](https://github.com/Hjulverkstan/hjulverkstan/blob/main/GUIDELINES.md#principles-). They hold simplicity and coherence, data over logic, pure functions with their side effects kept apart, and flat data with a single source of truth. They are not brought in here, and the link is to the source.
 
 It stands beside its specification, as `surface.ts` in this holon.
 
-*In force, the author's decision, 2026-09-12.*
+*In force, the author's decision, 2026-09-12; the widget table 2026-09-13.*
 
 ## 8. Plain functions before a framework
 
@@ -160,6 +158,6 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 ## 10. What is not settled yet
 
-Whether a file's kind and status travel with its briefs, which waits until a pane needs them. And where the published page stands beside the wiki the repository already publishes.
+Whether a file's status travels with its briefs, which waits until a widget needs it; its kind already does, since a record's level says so. Where the published page stands beside the wiki the repository already publishes. And the trials the lane and the widgets name: the fade, the flick, the floor of the ahead, and knobs against sliders.
 
-*Open, 2026-09-12, and taken up in that order.*
+*Open, 2026-09-13, and taken up in that order.*

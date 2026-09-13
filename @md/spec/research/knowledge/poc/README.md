@@ -23,8 +23,8 @@ The skill is the harness side. It says what a session does with files under the 
 
 Knowledge under the code stands in a shape, and nothing it is written in lets a reader either move by that shape or see it. A document makes you scroll past whatever you meant to skip. A directory listing gives you names and nothing of the shape they stand in. Neither tells you what a part will cost before you have spent the reading on it.
 
-The surface is the interface those two are missing. It lays a body out by its own shape so a reader descends it rather than scrolling, and it plots that shape so a reader can see the body whole and reach any part of it from wherever they stand. Both stand on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
+The surface is the interface those two are missing. It reads a body in one lane of prose, each brief folded or opened as the reader chooses, and it orients from the sides: where the reader came from, what lies beneath, what a brief points at, as headings and shape rather than as more text. It stands on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
 
-It is the human side, as the skill is the harness side, and it is being specified before it is built a second time.
+It is the human side, as the skill is the harness side. Its first reading model was built, used and refused in a day, and its second is specified before it is built.
 
 [the level beneath](surface/README.md)
