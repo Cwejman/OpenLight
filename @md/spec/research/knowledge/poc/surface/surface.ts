@@ -1696,7 +1696,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
   -webkit-mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); }
 #scroll::-webkit-scrollbar { display: none; }
-#content { position: relative; display: grid; margin: 0 auto; padding: 30vh 0 55vh; }
+/* the same room above the first brief as below the last, so the first and the last can both reach the reading line and the shape centres */
+#content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
 .gutter { position: relative; }
 .gutter.closed { visibility: hidden; }
 #lane { min-width: 0; }
