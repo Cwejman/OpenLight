@@ -68,7 +68,7 @@ A reader can make any brief the root of the lane: its heading becomes the openin
 
 Scoping is what heading sizes can only do so far. The registers count from the scope root, so the level a reader has scoped into reads at the top register again, and nesting beneath it has the full range to step down through; without scoping, a deep level reads in the smallest registers whatever it holds.
 
-Shift with enter widens the scope by one level, to the parent of the scope root, and escape steps back along the way the reader scoped, one step at a time, so a reader who scoped in three times can leave the way they came. Going to a brief outside the scope, by a link or a row above, widens the scope to the whole body first, and that step is on the way back too. The levels above the scope stay visible in the figures, as the levels beneath a fold are: the shape draws them as grey bars leading in from the left, the tree as dim rows above the root, and the header names the way down.
+Shift with enter widens the scope by one level, to the parent of the scope root, and escape steps back along the way the reader scoped, one step at a time, so a reader who scoped in three times can leave the way they came. Going to a brief outside the scope, by a link or a row above, widens the scope to the whole body first, and that step is on the way back too. The levels above the scope stay visible in the figures, as the levels beneath a fold are: the shape draws them as grey ticks to the left of the opening's row, each a press that scopes out to it, the tree as dim rows above the root, and the header names the way down.
 
 *Reasoned, the author's, 2026-09-13; the address form and what going outside the scope does are the builder's calls.*
 

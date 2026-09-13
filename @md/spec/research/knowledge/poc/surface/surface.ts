@@ -1027,19 +1027,17 @@ function shapeSvg(W: number, H: number): string {
   const box = ui.scroll;
   const laid = laidBlocks();
   const total = Math.max(1, box.scrollHeight);
-  const ancestors = prefixesOf(state.scope).length - 1;
-  const k = (H - 8 - (ancestors ? ancestors * 6 + 4 : 0)) / total;
+  const k = (H - 8) / total;
   const ix = state.index!;
-  const deepest = Math.max(0, ...laid.map((l) => depthOf(l.a)));
-  const w = Math.min(W, SHAPE.pad * 2 + deepest * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail);
-  // the levels above the scope: a grey heading bar per ancestor, leading in from the left, above the lane's own run
+  // the levels above the scope stand to the left of the opening's row, a tick per ancestor, outermost leftmost
   const anc = prefixesOf(state.scope).slice(0, -1);
-  const A = anc.length ? anc.length * 6 + 4 : 0;
-  const above = anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" ${hued(a)}><rect class="head" x="${SHAPE.pad + depthOf(a) * SHAPE.indent}" y="${4 + i * 6}" width="${Math.round(SHAPE.bar * 0.6)}" height="3" rx="1"/></g>`).join("");
+  const L = anc.length ? anc.length * 5 + 3 : 0;
+  const deepest = Math.max(0, ...laid.map((l) => depthIn(l.a)));
+  const w = Math.min(W, SHAPE.pad * 2 + L + deepest * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail);
   const cells = laid.map((l) => {
-    const x = SHAPE.pad + depthOf(l.a) * SHAPE.indent;
+    const x = SHAPE.pad + L + depthIn(l.a) * SHAPE.indent;
     const bars = l.blocks
-      .map((b) => `<rect class="${b.head ? "head" : "para"}" x="${x}" y="${(4 + A + b.top * k).toFixed(1)}" width="${b.head ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${Math.max(1.2, b.height * k - 1).toFixed(1)}" rx="1"/>`)
+      .map((b) => `<rect class="${b.head ? "head" : "para"}" x="${x}" y="${(4 + b.top * k).toFixed(1)}" width="${b.head ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${Math.max(1.2, b.height * k - 1).toFixed(1)}" rx="1"/>`)
       .join("");
     // a folded brief tells beside its face what it hides: a tick per paragraph, then a grey tail as long as the levels beneath are heavy
     const b = brief(l.a);
@@ -1047,20 +1045,35 @@ function shapeSvg(W: number, H: number): string {
     const paras = folded ? Math.max(0, blocksOf(b!).length - 1) : 0;
     const hidden = folded && level(l.a).length > 0 ? ix.branch.get(l.a)! - ix.own.get(l.a)! : 0;
     const last = l.blocks.at(-1);
-    const y = last ? (4 + A + last.top * k).toFixed(1) : "0";
+    const y = last ? (4 + last.top * k).toFixed(1) : "0";
     const h = last ? Math.max(1.2, last.height * k - 1).toFixed(1) : "1";
     const ticks = last ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
     const tx = x + SHAPE.bar + 4 + Math.min(paras, 8) * 3 + (paras ? 2 : 0);
     const tail = hidden > 0 && last ? `<rect class="hidden" x="${tx}" y="${y}" width="${clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${h}" rx="1"/>` : "";
-    return `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}><rect class="hit" x="0" y="${(4 + A + l.top * k).toFixed(1)}" width="${w}" height="${Math.max(1, l.height * k).toFixed(1)}"/>${bars}${ticks}${tail}</g>`;
+    // the opening's row carries the levels above to its left, each a press that scopes out to it
+    const first = l.blocks[0];
+    const above =
+      l.a === state.scope && first
+        ? anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}><rect class="hit" x="${SHAPE.pad + i * 5 - 1}" y="${(4 + first.top * k - 2).toFixed(1)}" width="5" height="${(Math.max(4, first.height * k) + 4).toFixed(1)}"/><rect class="head" x="${SHAPE.pad + i * 5}" y="${(4 + first.top * k).toFixed(1)}" width="3" height="${Math.max(3, first.height * k - 1).toFixed(1)}" rx="1"/></g>`).join("")
+        : "";
+    // two presses: the blocks go to the brief; the room to their right, where what is hidden stands, folds or opens it
+    const top = (4 + l.top * k).toFixed(1);
+    const height = Math.max(1, l.height * k).toFixed(1);
+    return (
+      above +
+      `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}>` +
+      `<rect class="hit" data-press="go" x="0" y="${top}" width="${x + SHAPE.bar + 2}" height="${height}"/>` +
+      `<rect class="hit" data-press="fold" x="${x + SHAPE.bar + 2}" y="${top}" width="${Math.max(0, w - x - SHAPE.bar - 2)}" height="${height}"/>` +
+      `${bars}${ticks}${tail}</g>`
+    );
   });
-  return `<svg class="fig shape" data-k="${k}" data-a0="${A}" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">${above}${cells.join("")}<rect class="cursor" x="0" y="${(4 + A + box.scrollTop * k).toFixed(1)}" width="${w}" height="${(box.clientHeight * k).toFixed(1)}" rx="4"/></svg>`;
+  return `<svg class="fig shape" data-k="${k}" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">${cells.join("")}<rect class="cursor" x="0" y="${(4 + box.scrollTop * k).toFixed(1)}" width="${w}" height="${(box.clientHeight * k).toFixed(1)}" rx="4"/></svg>`;
 }
 
 function drawShapeCursor(): void {
   all<SVGSVGElement>("svg.shape", ui.areas).forEach((svg) => {
     const k = Number(svg.dataset.k);
-    svg.querySelector<SVGRectElement>(".cursor")!.setAttribute("y", (4 + Number(svg.dataset.a0 ?? 0) + ui.scroll.scrollTop * k).toFixed(1));
+    svg.querySelector<SVGRectElement>(".cursor")!.setAttribute("y", (4 + ui.scroll.scrollTop * k).toFixed(1));
   });
 }
 
@@ -1558,8 +1571,12 @@ function wire(): void {
     if (go) return void goTo(go.dataset.go!);
     const cell = t.closest<HTMLElement>("svg.fig [data-a]");
     if (!cell || state.scrubbing) return;
-    // in the shape a press folds or opens and the modifier goes; in the other figures a press goes and the modifier folds
-    const folds = cell.closest("svg.shape") ? !(e.metaKey || e.ctrlKey) : e.metaKey || e.ctrlKey;
+    // in the shape a level above scopes out to itself, the blocks go, and the room to their right folds or opens;
+    // in the other figures a press goes and the modifier folds
+    const scope = t.closest<HTMLElement>("[data-scope]");
+    if (scope) return void scopeTo(scope.dataset.scope!);
+    const press = t.closest<HTMLElement>("[data-press]")?.dataset.press;
+    const folds = press ? press === "fold" : e.metaKey || e.ctrlKey;
     return void (folds ? cycle(cell.dataset.a!) : goTo(cell.dataset.a!));
   });
 
@@ -1900,6 +1917,8 @@ svg.shape .cell.here .para { fill: var(--door); }
 svg.shape .cell.here .head { fill: var(--on); }
 svg.shape .cell.lit .para, svg.shape .cell.lit .head { fill: var(--lit); }
 svg.shape .above .head { fill: var(--grey); }
+svg.shape .above.lit .head { fill: var(--lit); }
+svg.shape .hit[data-press="fold"] { cursor: default; }
 svg.shape .tick { fill: var(--grey); }
 svg.shape .hidden { fill: var(--grey); }
 svg.shape .cell.lit .hidden { fill: oklch(80% 0.08 var(--h)); }
