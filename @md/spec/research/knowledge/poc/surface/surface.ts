@@ -799,7 +799,7 @@ const ICON: Record<string, string> = {
   none: `<path d="M5 5l6 6M11 5l-6 6"/>`,
   shape: `<path d="M3 3h7M3 6h9M6 9h6M6 12h4"/>`,
   tree: `<path d="M3 3h4M6 8h6M8 13h5M4.5 3v5M6.5 8v5"/>`,
-  ahead: `<path d="M2 3v10M6 3v5M6 8v5M10 3v2M10 5v3M10 8v5M2 3h12M2 8h8M2 13h12M2 5h8"/>`,
+  ahead: `<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8s-2.4 4.5-6.5 4.5S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>`,
   plate: `<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2"/>`,
   settings: `<path d="M4 11.5a5.5 5.5 0 1 1 8 0"/><path d="M8 8v-3"/>`,
   links: `<path d="M6 10 10 6M4.5 8.5 3 10a2.1 2.1 0 0 0 3 3l1.5-1.5M11.5 7.5 13 6a2.1 2.1 0 0 0-3-3L8.5 4.5"/>`,
@@ -1606,7 +1606,7 @@ function drawWing(area: "wingL" | "wingR"): void {
   const slotted = figures.map((f) => {
     const div = document.createElement("div");
     div.className = "slot";
-    div.dataset.widget = state.settings.areas[area][figures.indexOf(f)];
+    div.dataset.slot = state.settings.areas[area][figures.indexOf(f)];
     el.appendChild(div);
     if (!f.grow) div.innerHTML = f.draw(W, figures.length === 1 ? room : (room - s.gap) / 2);
     return { f, div, height: f.grow ? 0 : Math.min(room, div.scrollHeight) };
@@ -1621,14 +1621,14 @@ function drawWing(area: "wingL" | "wingR"): void {
     const y = i === 0 ? top : top + room - height;
     x.div.style.top = `${Math.round(y)}px`;
     x.div.style.height = `${Math.round(height)}px`;
-    slots.set(`${area}:${x.div.dataset.widget}`, { top: Math.round(y), height: Math.round(height) });
+    slots.set(`${area}:${x.div.dataset.slot}`, { top: Math.round(y), height: Math.round(height) });
     if (x.f.grow) x.div.innerHTML = x.f.draw(W, Math.round(height));
   });
 }
 
 /** Draws one figure again in the slot it already has, for what changes with the focus or the pointer. */
 function drawSlot(area: "wingL" | "wingR", name: string): void {
-  const div = ui.parts[area].querySelector<HTMLElement>(`.slot[data-widget="${name}"]`);
+  const div = ui.parts[area].querySelector<HTMLElement>(`.slot[data-slot="${name}"]`);
   const at = slots.get(`${area}:${name}`);
   const f = WIDGETS[name];
   if (div && at && f?.kind === "figure") div.innerHTML = f.draw(ui.parts[area].clientWidth, at.height);
@@ -1926,8 +1926,8 @@ function wire(): void {
   document.addEventListener("pointermove", (e) => {
     if (Math.hypot(e.clientX - rest.x, e.clientY - rest.y) < 4) return;
     rest = { x: e.clientX, y: e.clientY };
-    // the room right of a brief's blocks is a control, not the brief: resting on it moves no highlight
-    const el = (e.target as HTMLElement).closest?.('[data-press="fold"]') ? null : named(e);
+    // the room right of a brief's blocks in the shape points at the brief like its blocks do, so the ahead shows what a fold there would open
+    const el = named(e);
     all<HTMLElement>(".keep").forEach((k) => k.classList.remove("keep"));
     if (el?.tagName === "A" && el.closest("#lane")) el.closest("article.brief")?.classList.add("keep");
     point(el ? el.dataset.a! : null);
@@ -1939,7 +1939,7 @@ function wire(): void {
     if (t.closest("a[href]") || window.getSelection()?.toString()) return;
     const fold = t.closest<HTMLElement>("[data-fold]");
     if (fold) return void cycle(fold.dataset.fold!);
-    const pick = t.closest<HTMLElement>("[data-widget]");
+    const pick = t.closest<HTMLElement>(".strip [data-widget]");
     if (pick) {
       const area = pick.dataset.area as AreaName;
       state.settings.areas[area] = pressed(area, pick.dataset.widget!);
