@@ -1431,14 +1431,27 @@ function cycle(a: string): void {
   }, a);
 }
 
-/** Up: the parent of the focus becomes the focus, without relaying the lane. */
-function up(): void {
-  const p = parentOf(state.focus);
-  if (p === state.focus) return;
-  state.focus = p;
-  history.replaceState(null, "", `#/${p}`);
+/** Moves the focus to an address that is in the lane, without changing any grade. */
+function moveTo(a: string): void {
+  if (a === state.focus || !(a === "" || inLane(a))) return;
+  state.focus = a;
+  history.replaceState(null, "", `#/${a}`);
   scrollToFocus(true);
   drawWings("focus");
+}
+
+/** Up: the parent of the focus becomes the focus, without folding anything. */
+const up = (): void => moveTo(parentOf(state.focus));
+
+/** Down into the level beneath: its first brief, when it stands in the lane. */
+const down = (): void => moveTo(level(state.focus)[0]?.address ?? state.focus);
+
+/** The previous or the next brief in the lane's order. */
+function step(delta: number): void {
+  const order = laneOrder();
+  const i = order.findIndex((b) => b.address === state.focus);
+  const j = clamp(i + delta, 0, order.length - 1);
+  moveTo(i < 0 ? order[0]?.address ?? "" : order[j].address);
 }
 
 /** Wires the gestures: pointing lights, pressing goes, the mark folds, dragging scrubs, and keys do the same. */
@@ -1570,7 +1583,11 @@ function wire(): void {
     if (e.key === " " && !e.shiftKey) (e.preventDefault(), cycle(state.focus));
     // with shift held the parent folds, which takes the reader up to it
     else if (e.key === " " && e.shiftKey) (e.preventDefault(), cycle(parentOf(state.focus)));
-    else if (e.key === "ArrowLeft" || e.key === "u") up();
+    // the arrows move the focus and fold nothing: up and down along the lane, left to the parent, right into the level beneath
+    else if (e.key === "ArrowUp") (e.preventDefault(), step(-1));
+    else if (e.key === "ArrowDown") (e.preventDefault(), step(1));
+    else if (e.key === "ArrowLeft") (e.preventDefault(), up());
+    else if (e.key === "ArrowRight") (e.preventDefault(), down());
     else if (e.key === "Enter" && gradeOf(state.focus) !== "whole") cycle(state.focus);
   });
 
