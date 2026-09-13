@@ -1230,14 +1230,26 @@ const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
 
 const GUTTER = 210;
 const RAIL = 30;
+/** The least room an open wing is given before it gives way. */
+const WING = 200;
 
-/** Which areas the width allows at all: the wings need room of their own, and the gutters go before the lane does. */
+/**
+ * Which areas the width allows, taken in the order they give way last: after the lane, the left wing, then the right
+ * wing, then the gutters as a pair. So as the viewport narrows the gutters go first, then the right wing, then the
+ * left, and the lane stands alone. A closed area costs only its rail.
+ */
 function fits(): Record<AreaName, boolean> {
   const s = state.settings;
-  const W = ui.areas.getBoundingClientRect().width;
-  const gutters = W >= s.measure + 2 * (GUTTER + s.gap) + 48;
-  const wings = W >= s.measure + 2 * (GUTTER + 200 + 2 * s.gap) + 48;
-  return { wingL: wings, gutterL: gutters, gutterR: gutters, wingR: wings };
+  const cost = (a: AreaName) => s.gap + (!isOpen(a) ? RAIL : a.startsWith("wing") ? WING : GUTTER);
+  const on: Record<AreaName, boolean> = { wingL: false, gutterL: false, gutterR: false, wingR: false };
+  let room = ui.areas.clientWidth - 2 * s.gap - s.measure;
+  for (const group of [["wingL"], ["wingR"], ["gutterL", "gutterR"]] as AreaName[][]) {
+    const need = group.reduce((x, a) => x + cost(a), 0);
+    if (need > room) break;
+    room -= need;
+    group.forEach((a) => (on[a] = true));
+  }
+  return on;
 }
 
 /** Applies the settings: type registers from zoom and ratio, and the row of areas from measure, gap and what is open. */
@@ -1268,20 +1280,19 @@ function drawLayout(): void {
   else document.documentElement.dataset.theme = s.theme;
   const on = fits();
   // a viewport narrower than the measure gives the lane what there is
-  const measure = Math.min(s.measure, ui.areas.getBoundingClientRect().width - 32);
+  const measure = Math.min(s.measure, ui.areas.clientWidth - 2 * s.gap);
   root.setProperty("--measure", `${measure}px`);
-  const gutter = (a: "gutterL" | "gutterR") => (!on[a] ? 0 : isOpen(a) ? GUTTER : RAIL);
-  const wing = (a: "wingL" | "wingR") => (!on[a] ? "0px" : isOpen(a) ? "minmax(0, 1fr)" : `${RAIL}px`);
-  const gl = gutter("gutterL");
-  const gr = gutter("gutterR");
-  const inner = [gl, measure, gr].filter((x) => x > 0);
+  // only what the width allows takes a column: an area given no room is absent, never a track of nothing, since an
+  // absent element leaves the grid and would pull the lane into the empty track it left
+  const present = (a: AreaName) => on[a];
+  const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : present(a) ? [isOpen(a) ? GUTTER : RAIL] : []));
   const mid = inner.reduce((x, y) => x + y, 0) + s.gap * (inner.length - 1);
-  ui.areas.style.gridTemplateColumns = `${wing("wingL")} ${mid}px ${wing("wingR")}`;
+  const wing = (a: "wingL" | "wingR") => (present(a) ? [isOpen(a) ? "minmax(0, 1fr)" : `${RAIL}px`] : []);
+  ui.areas.style.gridTemplateColumns = [...wing("wingL"), `${mid}px`, ...wing("wingR")].join(" ");
   ui.areas.style.columnGap = `${s.gap}px`;
-  ui.content.style.gridTemplateColumns = `${gl}px ${measure}px ${gr}px`;
+  ui.content.style.gridTemplateColumns = inner.map((x) => `${x}px`).join(" ");
   ui.content.style.columnGap = `${s.gap}px`;
-  ui.parts.gutterL.hidden = gl === 0;
-  ui.parts.gutterR.hidden = gr === 0;
+  AREAS.forEach(({ name }) => (ui.parts[name].hidden = !present(name)));
   (["gutterL", "gutterR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
   (["wingL", "wingR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
 }
@@ -1909,12 +1920,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #header .scope span:hover, #header .scope span.lit { color: var(--on); }
 #header .notice { color: var(--lit); }
 
-#areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; }
+#areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; padding-inline: var(--gap); }
+#areas > [hidden] { display: none; }
 .wing { position: relative; overflow: hidden; padding: 24px 20px 72px; scrollbar-width: none; display: flex; align-items: center; justify-content: center; }
 .wing::-webkit-scrollbar { display: none; }
 .wing .box { max-width: 100%; max-height: 100%; display: flex; justify-content: center; }
 .wing .box > * { max-width: 100%; }
 .wing.closed .box { display: none; }
+.wing.closed { padding-inline: 0; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
   -webkit-mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); }
 #scroll::-webkit-scrollbar { display: none; }

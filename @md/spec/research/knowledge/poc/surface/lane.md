@@ -90,6 +90,6 @@ That is a way back and not a good one, and it asks a reader to press before know
 
 ## 10. Where only the lane fits
 
-On a narrow screen the sides fold away and the lane stands alone, which it can, since orientation is help and never the reading. A reader may also close either side by hand, and the lane moves over into the room. Nothing about a touch reading is taken up here.
+On a narrow screen the sides give way, [the gutters first, then the right wing, then the left](framework.md#1-the-areas), and the lane stands alone, which it can, since orientation is help and never the reading. A reader may also close either side by hand, and the lane moves over into the room. Nothing about a touch reading is taken up here.
 
 *Reasoned, the author's, 2026-09-13.*

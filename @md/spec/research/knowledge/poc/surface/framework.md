@@ -12,7 +12,7 @@ Five areas stand in a row: a wing, a gutter, the lane, a gutter, a wing. The lan
 
 Each area pulls its content to its centre, and a figure takes only the room it needs, never reaching the strip at the area's foot. Between areas there is one gap, a setting, and no ink: no boxes, no borders, the flat page [the design language](../../../../design.md#why-flat--the-newspaper-precedent) asks for.
 
-Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. The lane moves over into the room a closed side leaves. On a screen too narrow for the sides the lane stands alone.
+Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. The lane moves over into the room a closed side leaves. As the screen narrows the areas give way in one order: the gutters first, as a pair, then the right wing, then the left, until the lane stands alone. An open wing gives way when it would have less than two hundred pixels, and a closed area costs only its rail. An area given no room is gone from the row, never kept as an empty column.
 
 Nothing here nests, splits, or is dragged. An area holds one widget at a time, and whether it should ever hold two waits until use asks.
 
