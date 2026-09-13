@@ -521,6 +521,8 @@ type Settings = {
   fade: number;
   /** the spacing of the prose's lines, as a multiple of the serif's size */
   leading: number;
+  /** where the reading line stands: always at the middle, or easing onto the opening and the last brief at the ends */
+  line: "middle" | "ends";
   flick: number;
   /** light, dark, or whichever the system is set to */
   theme: Theme;
@@ -538,6 +540,7 @@ const DEFAULTS: Settings = {
   dim: 0.4,
   fade: 8,
   leading: 1.6,
+  line: "ends",
   flick: 1,
   theme: "system",
   headings: "serif",
@@ -1013,11 +1016,12 @@ function settingsHtml(): string {
 }
 
 /** The switches beneath the meters: a setting with a few named values, a row apiece. */
-type Switch = { key: "flick" | "theme" | "headings" | "prose"; name: string; values: (string | number)[]; labels?: string[] };
+type Switch = { key: "flick" | "theme" | "headings" | "prose" | "line"; name: string; values: (string | number)[]; labels?: string[] };
 const SWITCHES: Switch[] = [
   { key: "theme", name: "theme", values: THEMES },
   { key: "headings", name: "headings", values: FACES },
   { key: "prose", name: "prose", values: FACES },
+  { key: "line", name: "reading line", values: ["middle", "ends"] },
   { key: "flick", name: "flick", values: [1, 0], labels: ["on", "off"] },
 ];
 
@@ -1044,6 +1048,7 @@ function loadSettings(): void {
   if (!THEMES.includes(state.settings.theme)) state.settings.theme = DEFAULTS.theme;
   if (!FACES.includes(state.settings.headings)) state.settings.headings = DEFAULTS.headings;
   if (!FACES.includes(state.settings.prose)) state.settings.prose = DEFAULTS.prose;
+  if (state.settings.line !== "middle" && state.settings.line !== "ends") state.settings.line = DEFAULTS.line;
 }
 const saveSettings = (): void => void localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
 
@@ -1305,52 +1310,79 @@ function drawLane(): void {
   const crumb = ui.header.querySelector<HTMLElement>(".scope")!;
   crumb.innerHTML = state.scope ? `in ${prefixesOf(state.scope).map((a) => `<span data-a="${esc(a)}" data-scope="${esc(a)}">${esc(brief(a)!.title)}</span>`).join(" › ")}` : "";
   ui.lane.innerHTML = laneHtml();
-  alignTop();
+  alignEnds();
   drawAdjuncts();
 }
 
 /** Where a figure begins beneath the top of its wing: the wing's padding, half the room a figure is left, and the shape's own inset. */
 const FIGURE_TOP = 24 + 44 / 2 + 4;
-/** How far the lane scrolls, as a share of its height, while the reading line eases from the opening to the middle. */
+/** How far the lane scrolls, as a share of its height, while the reading line eases between an end and the middle. */
 const EASE_RUN = 0.35;
 
+/** What the reading line rests on at the ends of the lane, measured each time the lane is laid: heights in the scroll box. */
+const ends = { top: 0, bottom: 0 };
+
 /**
- * The room above the lane: enough that, scrolled to the top, the opening's heading stands level with the first cell
- * of the shape. The shape draws that room at its own scale, and the scale depends on the room, so it is settled in a
- * few steps.
+ * The room above and below the lane. With the line at the middle, half a screen at either end, so the first brief and
+ * the last can both reach it. With the line easing to the ends, just enough that, scrolled to the top, the opening's
+ * heading stands level with the first cell of the shape, and scrolled to the bottom, the last block stands level with
+ * its last cell, so the shape stands balanced. The shape draws the room at its own scale, and the scale depends on the
+ * room, so it is settled in a few steps.
  */
-function alignTop(): void {
-  const margin = 6; // above the opening's heading
-  const figure = ui.scroll.clientHeight - 24 - 72 - 44; // as a wing sizes its figure
-  const rest = ui.scroll.scrollHeight - (parseFloat(ui.content.style.paddingTop) || 0);
-  let room = FIGURE_TOP;
-  for (let i = 0; i < 4; i++) room = FIGURE_TOP / (1 - (figure - 8) / (rest + room)) - margin;
+function alignEnds(): void {
+  const h = ui.scroll.clientHeight;
+  const c0 = ui.content.getBoundingClientRect().top;
+  const P0 = parseFloat(ui.content.style.paddingTop) || 0;
+  const articles = all<HTMLElement>(".brief", ui.lane);
+  const opening = articles[0];
+  const last = articles.at(-1);
+  const blocks = last ? all<HTMLElement>(":scope > *:not(.surface):not(.act), :scope > .surface > *:not(.act)", last) : [];
+  const off = opening ? opening.getBoundingClientRect().top - c0 - P0 : 0; // the heading's margin collapses through the opening
+  const lastTop = last ? last.getBoundingClientRect().top - c0 - P0 : 0;
+  const lane = (blocks.at(-1) ?? last)?.getBoundingClientRect().bottom ?? c0;
+  const laneH = lane - c0 - P0;
+  const tail = ui.lane.getBoundingClientRect().bottom - lane;
+  let P = h / 2;
+  let B = h / 2;
+  if (state.settings.line === "ends") {
+    const figure = h - 24 - 72 - 44; // as a wing sizes its figure
+    for (let i = 0; i < 6; i++) {
+      const k = (figure - 8) / (P + laneH + tail + B);
+      P = Math.max(0, FIGURE_TOP / (1 - k) - off);
+      B = Math.max(0, h - tail - FIGURE_TOP - (P + laneH) * k);
+    }
+  }
   // the browser anchors the scroll against a change of room above; a lane at its top stays at its top
   const atTop = ui.scroll.scrollTop === 0;
-  ui.content.style.paddingTop = `${Math.max(0, Math.round(room))}px`;
+  ui.content.style.paddingTop = `${Math.round(P)}px`;
+  ui.content.style.paddingBottom = `${Math.round(B)}px`;
   if (atTop) ui.scroll.scrollTop = 0;
-  const opening = ui.lane.querySelector<HTMLElement>(".opening");
-  openingTop = opening ? opening.getBoundingClientRect().top - ui.content.getBoundingClientRect().top : 0;
+  const sMax = Math.max(0, ui.scroll.scrollHeight - h);
+  ends.top = Math.round(P) + off + 24;
+  ends.bottom = Math.max(h / 2, Math.round(P) + lastTop + 24 - sMax);
   drawFade();
 }
 
-/** Where the opening stands in the lane, measured, since its heading's margin collapses through it. */
-let openingTop = 0;
-
-/** How far the reading line has eased from the opening towards the middle, from 0 at the top to 1. */
-const eased = (s: number): number => {
-  const t = clamp(s / (ui.scroll.clientHeight * EASE_RUN), 0, 1);
+/** How far the reading line stands from an end: 0 at it, 1 once a stretch of scrolling away. */
+const eased = (d: number): number => {
+  const t = clamp(d / (ui.scroll.clientHeight * EASE_RUN), 0, 1);
   return t * t * (3 - 2 * t);
 };
+const fromTop = (s: number): number => (state.settings.line === "ends" ? eased(s) : 1);
+const fromBottom = (s: number): number => (state.settings.line === "ends" ? eased(ui.scroll.scrollHeight - ui.scroll.clientHeight - s) : 1);
 
-/** The reading line's height in the scroll box at a scroll: on the opening at the top, the middle once scrolled a little. */
+/** The reading line's height in the scroll box at a scroll: the middle, or, easing to the ends, on the opening at the top and the last brief at the bottom. */
 const lineAt = (s: number): number => {
-  const top = openingTop + 24;
-  return top + (ui.scroll.clientHeight * 0.5 - top) * eased(s);
+  const mid = ui.scroll.clientHeight * 0.5;
+  return mid + (ends.top - mid) * (1 - fromTop(s)) + (ends.bottom - mid) * (1 - fromBottom(s));
 };
 
-/** The fade at the top edge comes in with the line, so nothing above the opening is faded before anything is above it. */
-const drawFade = (): void => ui.scroll.style.setProperty("--lift", eased(ui.scroll.scrollTop).toFixed(3));
+/** The fades at the edges come in with the line, so nothing is faded at an end before anything stands beyond it. */
+const drawFade = (): void => {
+  const s = ui.scroll.scrollTop;
+  ui.scroll.style.setProperty("--lift", fromTop(s).toFixed(3));
+  ui.scroll.style.setProperty("--drop", fromBottom(s).toFixed(3));
+};
 
 /** The scroll that brings a height in the lane to its reading line; the line moves with the scroll, so it is found by halving. */
 function scrollFor(y: number): number {
@@ -1689,7 +1721,12 @@ function step(delta: number): void {
 function wire(): void {
   const named = (e: Event) => (e.target as HTMLElement | null)?.closest<HTMLElement>("[data-a]") ?? null;
 
+  // a pointer lights a brief only once it has travelled a little: a scroll that comes to rest under a still pointer makes
+  // the browser send a move of its own, which would light whatever brief the scroll left beneath it
+  let rest = { x: -1, y: -1 };
   document.addEventListener("pointermove", (e) => {
+    if (Math.hypot(e.clientX - rest.x, e.clientY - rest.y) < 4) return;
+    rest = { x: e.clientX, y: e.clientY };
     // the room right of a brief's blocks is a control, not the brief: resting on it moves no highlight
     const el = (e.target as HTMLElement).closest?.('[data-press="fold"]') ? null : named(e);
     all<HTMLElement>(".keep").forEach((k) => k.classList.remove("keep"));
@@ -1840,7 +1877,7 @@ function wire(): void {
   });
   window.addEventListener("resize", () => {
     drawLayout();
-    alignTop();
+    alignEnds();
     drawAdjuncts();
     drawStrips();
     drawWings();
@@ -1905,7 +1942,7 @@ async function start(): Promise<void> {
   setBody(await load());
   // the web fonts land after the first draw and reflow the prose, so what stands beside it is laid again
   document.fonts?.ready.then(() => {
-    alignTop();
+    alignEnds();
     drawAdjuncts();
     drawWings();
   });
@@ -1999,10 +2036,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .wing.closed .box { display: none; }
 .wing.closed { padding-inline: 0; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(94% - var(--edge)), transparent 94%); }
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); }
 #scroll::-webkit-scrollbar { display: none; }
-/* the room above the opening is set so its heading stands level with the shape; the room below lets the last brief reach the middle */
-#content { position: relative; display: grid; margin: 0 auto; padding: 50px 0 50vh; }
+/* the room above and below the lane is set by the reading line's setting, each time the lane is laid */
+#content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
 .gutter { position: relative; }
 .gutter.closed { visibility: hidden; }
 #lane { min-width: 0; line-height: var(--leading); }
