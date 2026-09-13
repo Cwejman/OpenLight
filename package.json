@@ -10,5 +10,8 @@
   ],
   "scripts": {
     "test": "bun run --filter '*' test"
+  },
+  "dependencies": {
+    "marked": "^18.0.13"
   }
 }

@@ -88,7 +88,7 @@ What a session keeps. The panes and the drawing read any substrate, so they read
 
 ## 7. What was tried and refused
 
-A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and no program has yet been written against them.
+A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. These briefs are the specification written first instead, and the program written against them on 2026-09-13 stands beside them as `surface.ts`.
 
 What that program reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, because a refusal is looked up when someone proposes it again and never read through.
 

@@ -64,7 +64,7 @@ A web address is left as it is. A link to a file the trace never reached is mark
 
 The page renders those tokens with its own small functions, the same ones that give the prose its style. The arc uses few kinds: paragraphs, lists, code, tables, and text with emphasis, code and links inside them.
 
-*In force, the author's decision, 2026-09-12. That marked carries no dependencies of its own is from memory and not checked.*
+*In force, the author's decision, 2026-09-12. That marked carries no dependencies of its own was checked on 2026-09-13, at version 18.*
 
 ### 3.5 A size is the visible text
 
