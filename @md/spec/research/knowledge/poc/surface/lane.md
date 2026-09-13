@@ -30,13 +30,13 @@ A brief shown whole shows the level beneath it, at faces unless the reader has s
 
 ## 4. Where you are is the brief in focus
 
-The focus is the brief under the reading line, the middle of the viewport, and it moves as the lane scrolls. The wheel scrolls the lane wherever the pointer rests, over a wing or a gutter as over the text, so the reader never has to aim at the prose to read on; only a meter takes the wheel for itself. Its address is the page's address, so the place a reader stands can be handed to someone, and it is what a fold or a flick acts on. So a reader who only scrolls never needs the pointer: the centremost brief is the one highlighted, in the lane and in every widget.
+The focus is the brief under the reading line, and it moves as the lane scrolls. At the top of the lane the reading line stands on the opening, whose heading stands level with the first cell of the shape, so the first prose starts at the top of the screen and not halfway down. Once the reader scrolls a little, about a third of a screen, the line eases down to the middle of the viewport and stays there. The wheel scrolls the lane wherever the pointer rests, over a wing or a gutter as over the text, so the reader never has to aim at the prose to read on; only a meter takes the wheel for itself. Its address is the page's address, so the place a reader stands can be handed to someone, and it is what a fold or a flick acts on. So a reader who only scrolls never needs the pointer: the brief on the reading line is the one highlighted, in the lane and in every widget.
 
 Pointing overrides it: while the pointer rests on a brief, in the lane or in a widget, that brief takes the highlight instead, and every widget answers for it. In the lane a brief reaches down to the next, so the highlight moves from brief to brief and never drops into a gap between them. Pointing at a link inside the brief being read lights the link's target wherever it is drawn and never dims the brief the link sits in. The moment the lane scrolls, the highlight swings back to the centre and what the pointer rested on is let go.
 
 The brief highlighted stands whole and every other brief stands one step dimmer, so the reader sees what a fold will act on. The prose also fades out a little in from the top and the bottom of the viewport, over a short run, so the strip at the foot never reads as an edge of the text. The step and the run of the edge fade are two settings, dim and fade, since the author turned one expecting the other.
 
-*Reasoned, the author's, 2026-09-13. A fade by distance from the focus was built first and the author could not read it; the one step replaced it the same day, and the edge fade was shortened and moved in on the author's second reading.*
+*Reasoned, the author's, 2026-09-13. A fade by distance from the focus was built first and the author could not read it; the one step replaced it the same day, and the edge fade was shortened and moved in on the author's second reading. The reading line starting on the opening and easing to the middle was the author's ask on 2026-09-14; the fade at the top comes in with the line, since nothing stands above the opening to fade.*
 
 ## 5. Arriving lays the lane
 
@@ -90,6 +90,6 @@ That is a way back and not a good one, and it asks a reader to press before know
 
 ## 10. Where only the lane fits
 
-On a narrow screen the sides give way, [the gutters first, then the right wing, then the left](framework.md#1-the-areas), and the lane stands alone, which it can, since orientation is help and never the reading. A reader may also close either side by hand, and the lane moves over into the room. Nothing about a touch reading is taken up here.
+On a narrow screen the sides give way, [the gutters first, then the right wing, then the left](framework.md#1-the-areas), and the lane stands alone, which it can, since orientation is help and never the reading. A reader may also close either side by hand, and the side keeps its room, so the lane stays where it stood. Nothing about a touch reading is taken up here.
 
 *Reasoned, the author's, 2026-09-13.*

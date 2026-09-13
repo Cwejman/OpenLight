@@ -8,11 +8,11 @@ status: in force
 
 ## 1. The areas
 
-Five areas stand in a row: a wing, a gutter, the lane, a gutter, a wing. The lane keeps its measure, which is a setting. The gutters are as wide as an adjunct needs, wider than an editor's gutter, since what stands there is read. The wings share what is left.
+Five areas stand in a row: a wing, a gutter, the lane, a gutter, a wing. The lane keeps its measure, which is a setting. The gutters are as wide as an adjunct needs, wider than an editor's gutter, since what stands there is read. The wings share what is left, evenly, so the lane stands centred, and a wing takes more than its share only when it needs its least.
 
 Each area pulls its content to its centre, and a figure takes only the room it needs, never reaching the strip at the area's foot. Between areas there is one gap, a setting, and no ink: no boxes, no borders, the flat page [the design language](../../../../design.md#why-flat--the-newspaper-precedent) asks for.
 
-Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. The lane moves over into the room a closed side leaves. As the screen narrows the areas give way in one order: the gutters first, as a pair, then the right wing, then the left, until the lane stands alone. An open wing gives way when it would have less than two hundred pixels, and a closed area costs only its rail. An area given no room is gone from the row, never kept as an empty column.
+Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. A closed side keeps its share of the room with its rail at the outer edge, so closing one wing never hands the other more than it had. As the screen narrows the areas give way in one order: the gutters first, as a pair, then the right wing, then the left, until the lane stands alone. An open wing gives way when it would have less than two hundred pixels, and a closed area costs only its rail. An area given no room is gone from the row, and its side keeps its share as empty room.
 
 Nothing here nests, splits, or is dragged. An area holds one widget at a time, and whether it should ever hold two waits until use asks.
 

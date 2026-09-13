@@ -1240,7 +1240,8 @@ const WING = 200;
  */
 function fits(): Record<AreaName, boolean> {
   const s = state.settings;
-  const cost = (a: AreaName) => s.gap + (!isOpen(a) ? RAIL : a.startsWith("wing") ? WING : GUTTER);
+  // the row always has three tracks and two gaps, so a wing costs only its own room and a gutter its room and a gap
+  const cost = (a: AreaName) => (a.startsWith("wing") ? (isOpen(a) ? WING : RAIL) : s.gap + (isOpen(a) ? GUTTER : RAIL));
   const on: Record<AreaName, boolean> = { wingL: false, gutterL: false, gutterR: false, wingR: false };
   let room = ui.areas.clientWidth - 2 * s.gap - s.measure;
   for (const group of [["wingL"], ["wingR"], ["gutterL", "gutterR"]] as AreaName[][]) {
@@ -1287,8 +1288,10 @@ function drawLayout(): void {
   const present = (a: AreaName) => on[a];
   const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : present(a) ? [isOpen(a) ? GUTTER : RAIL] : []));
   const mid = inner.reduce((x, y) => x + y, 0) + s.gap * (inner.length - 1);
-  const wing = (a: "wingL" | "wingR") => (present(a) ? [isOpen(a) ? "minmax(0, 1fr)" : `${RAIL}px`] : []);
-  ui.areas.style.gridTemplateColumns = [...wing("wingL"), `${mid}px`, ...wing("wingR")].join(" ");
+  // the two sides share what is left, so the lane stays centred: a side whose wing gave way or was closed keeps its
+  // share as room, its rail at the edge, and a side takes more than its share only when its open wing needs its least
+  const side = (a: "wingL" | "wingR") => (!present(a) ? "minmax(0, 1fr)" : isOpen(a) ? `minmax(${WING}px, 1fr)` : `minmax(${RAIL}px, 1fr)`);
+  ui.areas.style.gridTemplateColumns = `${side("wingL")} ${mid}px ${side("wingR")}`;
   ui.areas.style.columnGap = `${s.gap}px`;
   ui.content.style.gridTemplateColumns = inner.map((x) => `${x}px`).join(" ");
   ui.content.style.columnGap = `${s.gap}px`;
@@ -1302,7 +1305,65 @@ function drawLane(): void {
   const crumb = ui.header.querySelector<HTMLElement>(".scope")!;
   crumb.innerHTML = state.scope ? `in ${prefixesOf(state.scope).map((a) => `<span data-a="${esc(a)}" data-scope="${esc(a)}">${esc(brief(a)!.title)}</span>`).join(" › ")}` : "";
   ui.lane.innerHTML = laneHtml();
+  alignTop();
   drawAdjuncts();
+}
+
+/** Where a figure begins beneath the top of its wing: the wing's padding, half the room a figure is left, and the shape's own inset. */
+const FIGURE_TOP = 24 + 44 / 2 + 4;
+/** How far the lane scrolls, as a share of its height, while the reading line eases from the opening to the middle. */
+const EASE_RUN = 0.35;
+
+/**
+ * The room above the lane: enough that, scrolled to the top, the opening's heading stands level with the first cell
+ * of the shape. The shape draws that room at its own scale, and the scale depends on the room, so it is settled in a
+ * few steps.
+ */
+function alignTop(): void {
+  const margin = 6; // above the opening's heading
+  const figure = ui.scroll.clientHeight - 24 - 72 - 44; // as a wing sizes its figure
+  const rest = ui.scroll.scrollHeight - (parseFloat(ui.content.style.paddingTop) || 0);
+  let room = FIGURE_TOP;
+  for (let i = 0; i < 4; i++) room = FIGURE_TOP / (1 - (figure - 8) / (rest + room)) - margin;
+  // the browser anchors the scroll against a change of room above; a lane at its top stays at its top
+  const atTop = ui.scroll.scrollTop === 0;
+  ui.content.style.paddingTop = `${Math.max(0, Math.round(room))}px`;
+  if (atTop) ui.scroll.scrollTop = 0;
+  const opening = ui.lane.querySelector<HTMLElement>(".opening");
+  openingTop = opening ? opening.getBoundingClientRect().top - ui.content.getBoundingClientRect().top : 0;
+  drawFade();
+}
+
+/** Where the opening stands in the lane, measured, since its heading's margin collapses through it. */
+let openingTop = 0;
+
+/** How far the reading line has eased from the opening towards the middle, from 0 at the top to 1. */
+const eased = (s: number): number => {
+  const t = clamp(s / (ui.scroll.clientHeight * EASE_RUN), 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
+/** The reading line's height in the scroll box at a scroll: on the opening at the top, the middle once scrolled a little. */
+const lineAt = (s: number): number => {
+  const top = openingTop + 24;
+  return top + (ui.scroll.clientHeight * 0.5 - top) * eased(s);
+};
+
+/** The fade at the top edge comes in with the line, so nothing above the opening is faded before anything is above it. */
+const drawFade = (): void => ui.scroll.style.setProperty("--lift", eased(ui.scroll.scrollTop).toFixed(3));
+
+/** The scroll that brings a height in the lane to its reading line; the line moves with the scroll, so it is found by halving. */
+function scrollFor(y: number): number {
+  let lo = 0;
+  let hi = Math.max(0, ui.scroll.scrollHeight - ui.scroll.clientHeight);
+  if (lo + lineAt(lo) >= y) return lo;
+  if (hi + lineAt(hi) <= y) return hi;
+  for (let i = 0; i < 24; i++) {
+    const m = (lo + hi) / 2;
+    if (m + lineAt(m) < y) lo = m;
+    else hi = m;
+  }
+  return hi;
 }
 
 /** Adjuncts stand in the gutter columns at the height of the line they belong to, pushed down where two would meet. */
@@ -1332,8 +1393,8 @@ function drawAdjuncts(): void {
   });
 }
 
-/** The reading line: the middle of the scroll box. */
-const readingLine = (): number => ui.scroll.getBoundingClientRect().top + ui.scroll.clientHeight * 0.5;
+/** The reading line, where it stands on the screen now. */
+const readingLine = (): number => ui.scroll.getBoundingClientRect().top + lineAt(ui.scroll.scrollTop);
 
 /** The brief under the reading line, or the nearest above it. */
 function focusUnderLine(): string {
@@ -1407,8 +1468,11 @@ function drawStrips(): void {
     const strip = ui.strips.querySelector<HTMLElement>(`[data-strip="${name}"]`);
     if (!strip) return;
     const r = ui.parts[name].getBoundingClientRect();
-    strip.style.left = `${Math.round(r.left - a0.left)}px`;
-    strip.style.width = `${Math.round(r.width)}px`;
+    // a rail stands at the outer edge of its side, however wide the side is
+    const rail = strip.classList.contains("rail");
+    const left = rail && name === "wingR" ? r.right - RAIL : r.left;
+    strip.style.left = `${Math.round(left - a0.left)}px`;
+    strip.style.width = `${Math.round(rail ? RAIL : r.width)}px`;
   });
 }
 
@@ -1504,7 +1568,7 @@ function scrollToFocus(smooth: boolean): void {
   const art = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.focus)}"]`);
   if (!art) return;
   const top = art.getBoundingClientRect().top - ui.content.getBoundingClientRect().top;
-  const target = Math.max(0, Math.min(ui.scroll.scrollHeight - ui.scroll.clientHeight, top - ui.scroll.clientHeight * 0.5 + 24));
+  const target = scrollFor(top + 24);
   if (smooth) {
     state.holding = state.focus;
     clearTimeout(holdTimer);
@@ -1516,6 +1580,7 @@ function scrollToFocus(smooth: boolean): void {
 /** Scrolling moves the focus and nothing else; the address follows without entering the history. */
 function onScroll(): void {
   drawShapeCursor();
+  drawFade();
   // scrolling swings the highlight back to the centre: what the pointer rested on is let go
   if (state.pointed !== null) {
     state.pointed = null;
@@ -1525,7 +1590,7 @@ function onScroll(): void {
   // a keyed move holds its target until the scroll has brought it to the line
   if (state.holding !== null) {
     const held = ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(state.holding)}"]`);
-    const at = held ? held.getBoundingClientRect().top - (ui.scroll.getBoundingClientRect().top + ui.scroll.clientHeight * 0.5 - 24) : 0;
+    const at = held ? held.getBoundingClientRect().top - (ui.scroll.getBoundingClientRect().top + lineAt(ui.scroll.scrollTop) - 24) : 0;
     if (Math.abs(at) > 2) return;
     state.holding = null;
     clearTimeout(holdTimer);
@@ -1775,6 +1840,7 @@ function wire(): void {
   });
   window.addEventListener("resize", () => {
     drawLayout();
+    alignTop();
     drawAdjuncts();
     drawStrips();
     drawWings();
@@ -1839,6 +1905,7 @@ async function start(): Promise<void> {
   setBody(await load());
   // the web fonts land after the first draw and reflow the prose, so what stands beside it is laid again
   document.fonts?.ready.then(() => {
+    alignTop();
     drawAdjuncts();
     drawWings();
   });
@@ -1920,7 +1987,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #header .scope span:hover, #header .scope span.lit { color: var(--on); }
 #header .notice { color: var(--lit); }
 
-#areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; padding-inline: var(--gap); }
+#areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; }
+#areas > [data-area="wingL"] { grid-column: 1; }
+#areas > #scroll { grid-column: 2; }
+#areas > [data-area="wingR"] { grid-column: 3; }
 #areas > [hidden] { display: none; }
 .wing { position: relative; overflow: hidden; padding: 24px 20px 72px; scrollbar-width: none; display: flex; align-items: center; justify-content: center; }
 .wing::-webkit-scrollbar { display: none; }
@@ -1929,10 +1999,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .wing.closed .box { display: none; }
 .wing.closed { padding-inline: 0; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent 3%, black calc(3% + var(--edge)), black calc(94% - var(--edge)), transparent 94%); }
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(94% - var(--edge)), transparent 94%); mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(94% - var(--edge)), transparent 94%); }
 #scroll::-webkit-scrollbar { display: none; }
-/* the same room above the first brief as below the last, so the first and the last can both reach the reading line and the shape centres */
-#content { position: relative; display: grid; margin: 0 auto; padding: 50vh 0; }
+/* the room above the opening is set so its heading stands level with the shape; the room below lets the last brief reach the middle */
+#content { position: relative; display: grid; margin: 0 auto; padding: 50px 0 50vh; }
 .gutter { position: relative; }
 .gutter.closed { visibility: hidden; }
 #lane { min-width: 0; line-height: var(--leading); }
