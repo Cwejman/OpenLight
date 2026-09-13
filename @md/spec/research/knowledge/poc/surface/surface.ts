@@ -529,7 +529,8 @@ type Settings = {
   /** the face of the headings, and of the prose */
   headings: Face;
   prose: Face;
-  areas: Record<AreaName, string>;
+  /** the widgets each area holds, in order: a wing up to two, top then bottom; a gutter one; none is closed */
+  areas: Record<AreaName, string[]>;
 };
 
 const DEFAULTS: Settings = {
@@ -545,7 +546,7 @@ const DEFAULTS: Settings = {
   theme: "system",
   headings: "serif",
   prose: "serif",
-  areas: { wingL: "shape", gutterL: "none", gutterR: "links", wingR: "ahead" },
+  areas: { wingL: ["shape"], gutterL: [], gutterR: ["links"], wingR: ["ahead"] },
 };
 
 const state = {
@@ -787,7 +788,11 @@ function laneHtml(): string {
 // choosing nothing closes the area to a rail of the same icons.
 
 type Adjunct = { kind: "adjunct"; name: string; icon: string; of: (b: Brief, article: HTMLElement) => { at: HTMLElement | null; html: string }[] };
-type Figure = { kind: "figure"; name: string; icon: string; draw: (w: number, h: number) => string; onFocus?: boolean; onPoint?: boolean };
+/**
+ * A figure draws into the room its wing gives it. It declares the width it stands in, which never changes with what it
+ * draws, so nothing beside it moves as it redraws; and whether it grows into the wing's height or takes only what it needs.
+ */
+type Figure = { kind: "figure"; name: string; icon: string; draw: (w: number, h: number) => string; width: () => number; grow: boolean; onFocus?: boolean; onPoint?: boolean };
 type Widget = Adjunct | Figure;
 
 const ICON: Record<string, string> = {
@@ -802,12 +807,12 @@ const ICON: Record<string, string> = {
 const icon = (name: string): string => `<svg class="icon" viewBox="0 0 16 16">${ICON[name] ?? ICON.none}</svg>`;
 
 const WIDGETS: Record<string, Widget> = {
-  none: { kind: "figure", name: "close", icon: "none", draw: () => "" },
-  shape: { kind: "figure", name: "the shape: the lane as laid", icon: "shape", draw: (w, h) => shapeSvg(w, h) },
-  tree: { kind: "figure", name: "the tree", icon: "tree", draw: () => treeHtml(), onFocus: true },
-  ahead: { kind: "figure", name: "the ahead: what lies beneath and is not in the lane", icon: "ahead", draw: (w, h) => aheadSvg(w, h), onFocus: true, onPoint: true },
-  plate: { kind: "figure", name: "the plate: the body whole", icon: "plate", draw: (w, h) => plateSvg(Math.floor(Math.min(w, h))) },
-  settings: { kind: "figure", name: "settings", icon: "settings", draw: () => settingsHtml() },
+  none: { kind: "figure", name: "close", icon: "none", draw: () => "", width: () => 0, grow: false },
+  shape: { kind: "figure", name: "the shape: the lane as laid", icon: "shape", draw: (w, h) => shapeSvg(w, h), width: () => shapeWidth(), grow: true },
+  tree: { kind: "figure", name: "the tree", icon: "tree", draw: () => treeHtml(), width: () => 240, grow: true, onFocus: true },
+  ahead: { kind: "figure", name: "the ahead: what lies beneath and is not in the lane", icon: "ahead", draw: (w, h) => aheadSvg(w, h), width: () => aheadWidth(), grow: true, onFocus: true, onPoint: true },
+  plate: { kind: "figure", name: "the plate: the body whole", icon: "plate", draw: (w, h) => plateSvg(Math.floor(Math.min(w, h))), width: () => 260, grow: false },
+  settings: { kind: "figure", name: "settings", icon: "settings", draw: () => settingsHtml(), width: () => 216, grow: false },
   links: { kind: "adjunct", name: "links: what a brief points at, and what points at it", icon: "links", of: (b, el) => linkAdjuncts(b, el) },
 };
 
@@ -817,14 +822,19 @@ const AREAS: { name: AreaName; kind: Widget["kind"] }[] = [
   { name: "gutterR", kind: "adjunct" },
   { name: "wingR", kind: "figure" },
 ];
-const widgetOf = (area: AreaName): Widget => WIDGETS[state.settings.areas[area]] ?? WIDGETS.none;
-const isOpen = (area: AreaName): boolean => state.settings.areas[area] !== "none" && state.settings.areas[area] in WIDGETS;
+/** The widgets an area holds, in order. */
+const widgetsOf = (area: AreaName): Widget[] => state.settings.areas[area].map((k) => WIDGETS[k]).filter((w): w is Widget => !!w);
+/** The first widget an area holds, which is all a gutter holds. */
+const widgetOf = (area: AreaName): Widget => widgetsOf(area)[0] ?? WIDGETS.none;
+const isOpen = (area: AreaName): boolean => widgetsOf(area).length > 0;
 const choicesFor = (kind: Widget["kind"]): string[] => Object.keys(WIDGETS).filter((k) => k === "none" || WIDGETS[k].kind === kind);
+/** A strip's width: its icons laid in a row. */
+const stripWidth = (kind: Widget["kind"]): number => choicesFor(kind).length * 30 - 4;
 
 /** The strip of an area: one light icon per widget it can hold, the one in use a little darker; closed, it stands as a rail. */
 const stripHtml = (area: AreaName, kind: Widget["kind"]): string =>
   `<div class="strip${!isOpen(area) && kind === "figure" ? " rail" : ""}" data-strip="${area}">${choicesFor(kind)
-    .map((k) => `<button class="pick${state.settings.areas[area] === k ? " on" : ""}" data-area="${area}" data-widget="${k}" title="${esc(WIDGETS[k].name)}">${icon(WIDGETS[k].icon)}</button>`)
+    .map((k) => `<button class="pick${(k === "none" ? !isOpen(area) : state.settings.areas[area].includes(k)) ? " on" : ""}" data-area="${area}" data-widget="${k}" title="${esc(WIDGETS[k].name)}">${icon(WIDGETS[k].icon)}</button>`)
     .join("")}</div>`;
 
 // ## 3.5 The tree: the lane as an outline
@@ -1044,7 +1054,12 @@ function loadSettings(): void {
     if (saved) state.settings = { ...DEFAULTS, ...saved, areas: { ...DEFAULTS.areas, ...(saved.areas ?? {}) } };
     if (saved && typeof saved.fade === "number" && saved.fade <= 1 && saved.dim === undefined) (state.settings.dim = saved.fade), (state.settings.fade = DEFAULTS.fade);
   } catch {}
-  AREAS.forEach(({ name }) => (state.settings.areas[name] in WIDGETS ? null : (state.settings.areas[name] = DEFAULTS.areas[name])));
+  // an area once held one name, "none" when closed; it now holds a list, and anything it cannot hold is dropped
+  AREAS.forEach(({ name, kind }) => {
+    const held = state.settings.areas[name] as unknown;
+    const list = Array.isArray(held) ? held : typeof held === "string" && held !== "none" ? [held] : [];
+    state.settings.areas[name] = list.filter((k) => WIDGETS[k]?.kind === kind && k !== "none").slice(0, kind === "figure" ? 2 : 1);
+  });
   if (!THEMES.includes(state.settings.theme)) state.settings.theme = DEFAULTS.theme;
   if (!FACES.includes(state.settings.headings)) state.settings.headings = DEFAULTS.headings;
   if (!FACES.includes(state.settings.prose)) state.settings.prose = DEFAULTS.prose;
@@ -1058,7 +1073,12 @@ const saveSettings = (): void => void localStorage.setItem(SETTINGS_KEY, JSON.st
 // drawn, shifted right by the brief's depth, with the viewport drawn over it.
 // Dragging scrubs; pressing goes.
 
-const SHAPE = { indent: 9, bar: 46, pad: 6, tail: 30 };
+const SHAPE = { indent: 9, bar: 46, pad: 6, tail: 30, inset: 4 };
+
+/** The width the shape stands in: its deepest possible row, whatever the lane is scoped to, with the marks beside it. */
+const shapeWidth = (): number => SHAPE.pad * 2 + 4 + (state.index?.depth ?? 0) * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail;
+/** The width the ahead stands in: its deepest possible row with its tail. */
+const aheadWidth = (): number => SHAPE.pad * 2 + (state.index?.depth ?? 0) * SHAPE.indent + SHAPE.bar + 4 + SHAPE.tail;
 
 /** The lane's briefs and their blocks as laid, in the scroll box's own coordinates. */
 function laidBlocks(): { a: string; top: number; height: number; blocks: { top: number; height: number; head: boolean }[] }[] {
@@ -1235,24 +1255,26 @@ const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
 
 const GUTTER = 210;
 const RAIL = 30;
-/** The least room an open wing is given before it gives way. */
-const WING = 200;
+/** The room beneath a wing's figures that its strip stands in, above the space every area keeps. */
+const STRIP = 34;
+
+/** How wide an area stands: a closed one its rail, a gutter its column, a wing its widest widget or its strip. */
+const widthOf = (area: AreaName): number =>
+  !isOpen(area) ? RAIL : area.startsWith("gutter") ? GUTTER : Math.max(stripWidth("figure"), ...widgetsOf(area).map((w) => (w.kind === "figure" ? w.width() : 0)));
 
 /**
  * Which areas the width allows, taken in the order they give way last: after the lane, the left wing, then the right
  * wing, then the gutters as a pair. So as the viewport narrows the gutters go first, then the right wing, then the
- * left, and the lane stands alone. A closed area costs only its rail.
+ * left, and the lane stands alone. Every area costs its own width and one space.
  */
 function fits(): Record<AreaName, boolean> {
   const s = state.settings;
-  // the row always has three tracks and two gaps, so a wing costs only its own room and a gutter its room and a gap
-  const cost = (a: AreaName) => (a.startsWith("wing") ? (isOpen(a) ? WING : RAIL) : s.gap + (isOpen(a) ? GUTTER : RAIL));
   const on: Record<AreaName, boolean> = { wingL: false, gutterL: false, gutterR: false, wingR: false };
-  let room = ui.areas.clientWidth - 2 * s.gap - s.measure;
+  let used = s.measure + 2 * s.gap;
   for (const group of [["wingL"], ["wingR"], ["gutterL", "gutterR"]] as AreaName[][]) {
-    const need = group.reduce((x, a) => x + cost(a), 0);
-    if (need > room) break;
-    room -= need;
+    const need = group.reduce((x, a) => x + widthOf(a) + s.gap, 0);
+    if (used + need > ui.areas.clientWidth) break;
+    used += need;
     group.forEach((a) => (on[a] = true));
   }
   return on;
@@ -1288,19 +1310,27 @@ function drawLayout(): void {
   // a viewport narrower than the measure gives the lane what there is
   const measure = Math.min(s.measure, ui.areas.clientWidth - 2 * s.gap);
   root.setProperty("--measure", `${measure}px`);
-  // only what the width allows takes a column: an area given no room is absent, never a track of nothing, since an
-  // absent element leaves the grid and would pull the lane into the empty track it left
-  const present = (a: AreaName) => on[a];
-  const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : present(a) ? [isOpen(a) ? GUTTER : RAIL] : []));
+  // the gutters hug the lane at the gap, since what stands in them is aligned to its lines; only what the width allows
+  // takes a column, since an absent element leaves the grid and would pull the lane into the empty track it left
+  const inner = (["gutterL", "lane", "gutterR"] as const).flatMap((a) => (a === "lane" ? [measure] : on[a] ? [widthOf(a)] : []));
   const mid = inner.reduce((x, y) => x + y, 0) + s.gap * (inner.length - 1);
-  // the two sides share what is left, so the lane stays centred: a side whose wing gave way or was closed keeps its
-  // share as room, its rail at the edge, and a side takes more than its share only when its open wing needs its least
-  const side = (a: "wingL" | "wingR") => (!present(a) ? "minmax(0, 1fr)" : isOpen(a) ? `minmax(${WING}px, 1fr)` : `minmax(${RAIL}px, 1fr)`);
-  ui.areas.style.gridTemplateColumns = `${side("wingL")} ${mid}px ${side("wingR")}`;
-  ui.areas.style.columnGap = `${s.gap}px`;
+  // every area is as wide as what it holds, and the spaces beside them are one: at the two edges of the viewport as
+  // between the wings and the lane. The gap is the least a space is given, and what the width leaves over is shared
+  // among the spaces evenly, so no area carries room it does not use
+  const space = `minmax(${s.gap}px, 1fr)`;
+  const tracks = [space];
+  const place = (el: HTMLElement, width: number) => {
+    tracks.push(`${width}px`, space);
+    el.style.gridColumn = `${tracks.length - 1}`;
+  };
+  if (on.wingL) place(ui.parts.wingL, widthOf("wingL"));
+  place(ui.scroll, mid);
+  if (on.wingR) place(ui.parts.wingR, widthOf("wingR"));
+  ui.areas.style.gridTemplateColumns = tracks.join(" ");
+  ui.areas.style.columnGap = "0px";
   ui.content.style.gridTemplateColumns = inner.map((x) => `${x}px`).join(" ");
   ui.content.style.columnGap = `${s.gap}px`;
-  AREAS.forEach(({ name }) => (ui.parts[name].hidden = !present(name)));
+  AREAS.forEach(({ name }) => (ui.parts[name].hidden = !on[name]));
   (["gutterL", "gutterR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
   (["wingL", "wingR"] as const).forEach((a) => ui.parts[a].classList.toggle("closed", !isOpen(a)));
 }
@@ -1314,8 +1344,6 @@ function drawLane(): void {
   drawAdjuncts();
 }
 
-/** Where a figure begins beneath the top of its wing: the wing's padding, half the room a figure is left, and the shape's own inset. */
-const FIGURE_TOP = 24 + 44 / 2 + 4;
 /** How far the lane scrolls, as a share of its height, while the reading line eases between an end and the middle. */
 const EASE_RUN = 0.35;
 
@@ -1345,11 +1373,13 @@ function alignEnds(): void {
   let P = h / 2;
   let B = h / 2;
   if (state.settings.line === "ends") {
-    const figure = h - 24 - 72 - 44; // as a wing sizes its figure
+    // the shape's own room, wherever in a wing it stands; with no shape drawn, the room a lone figure would have
+    const slot = slots.get("wingL:shape") ?? slots.get("wingR:shape") ?? { top: state.settings.gap, height: h - 2 * state.settings.gap - STRIP };
+    const first = slot.top + SHAPE.inset;
     for (let i = 0; i < 6; i++) {
-      const k = (figure - 8) / (P + laneH + tail + B);
-      P = Math.max(0, FIGURE_TOP / (1 - k) - off);
-      B = Math.max(0, h - tail - FIGURE_TOP - (P + laneH) * k);
+      const k = (slot.height - 8) / (P + laneH + tail + B);
+      P = Math.max(0, first / (1 - k) - off);
+      B = Math.max(0, h - tail - first - (P + laneH) * k);
     }
   }
   // the browser anchors the scroll against a change of room above; a lane at its top stays at its top
@@ -1467,26 +1497,80 @@ function drawLaser(): void {
   laser.style.left = `${row.offsetLeft}px`;
   laser.style.width = `${row.offsetWidth}px`;
   if (a !== state.focus) return;
-  const wing = tree.closest<HTMLElement>(".wing")!;
+  const wing = tree.closest<HTMLElement>(".slot")!;
   const rr = row.getBoundingClientRect();
   const wr = wing.getBoundingClientRect();
   if (rr.top < wr.top + 24 || rr.bottom > wr.bottom - 48) wing.scrollTo({ top: row.offsetTop - wing.clientHeight / 2, behavior: "smooth" });
 }
 
-/** Draws one wing's figure whole, into the box that centres it. */
+/** Where each figure stands in its wing, keyed by the wing and the widget, measured as the wing is laid. */
+const slots = new Map<string, { top: number; height: number }>();
+
+/**
+ * Lays one wing whole. One figure has the wing's height; two stand at its top and its foot, with one space between. A
+ * figure that takes only what it needs is drawn first and measured, and a figure that grows takes what is left, shared
+ * evenly when both grow. The wing keeps one space above its figures and one above its strip, as every area does.
+ */
 function drawWing(area: "wingL" | "wingR"): void {
   const el = ui.parts[area];
-  const widget = widgetOf(area);
-  const box = el.querySelector<HTMLElement>(".box")!;
-  box.innerHTML = fits()[area] && isOpen(area) && widget.kind === "figure" ? widget.draw(Math.floor(el.clientWidth - 2 * 20), Math.floor(el.clientHeight - 24 - 72 - 44)) : "";
+  const s = state.settings;
+  const figures = fits()[area] ? widgetsOf(area).filter((w): w is Figure => w.kind === "figure") : [];
+  el.innerHTML = "";
+  Array.from(slots.keys())
+    .filter((k) => k.startsWith(area + ":"))
+    .forEach((k) => slots.delete(k));
+  if (figures.length === 0) return;
+  const W = el.clientWidth;
+  const top = s.gap;
+  const room = el.clientHeight - 2 * s.gap - STRIP;
+  const slotted = figures.map((f) => {
+    const div = document.createElement("div");
+    div.className = "slot";
+    div.dataset.widget = state.settings.areas[area][figures.indexOf(f)];
+    el.appendChild(div);
+    if (!f.grow) div.innerHTML = f.draw(W, figures.length === 1 ? room : (room - s.gap) / 2);
+    return { f, div, height: f.grow ? 0 : Math.min(room, div.scrollHeight) };
+  });
+  const growing = slotted.filter((x) => x.f.grow);
+  const fixed = slotted.reduce((x, y) => x + y.height, 0);
+  const share = growing.length ? (room - fixed - s.gap * (slotted.length - 1)) / growing.length : 0;
+  growing.forEach((x) => (x.height = Math.max(0, share)));
+  slotted.forEach((x, i) => {
+    // one figure stands in the whole room, centred; of two, the first stands at the top and the second at the foot
+    const height = slotted.length === 1 ? room : x.height;
+    const y = i === 0 ? top : top + room - height;
+    x.div.style.top = `${Math.round(y)}px`;
+    x.div.style.height = `${Math.round(height)}px`;
+    slots.set(`${area}:${x.div.dataset.widget}`, { top: Math.round(y), height: Math.round(height) });
+    if (x.f.grow) x.div.innerHTML = x.f.draw(W, Math.round(height));
+  });
+}
+
+/** Draws one figure again in the slot it already has, for what changes with the focus or the pointer. */
+function drawSlot(area: "wingL" | "wingR", name: string): void {
+  const div = ui.parts[area].querySelector<HTMLElement>(`.slot[data-widget="${name}"]`);
+  const at = slots.get(`${area}:${name}`);
+  const f = WIDGETS[name];
+  if (div && at && f?.kind === "figure") div.innerHTML = f.draw(ui.parts[area].clientWidth, at.height);
 }
 
 function drawWings(only?: "focus" | "point"): void {
   (["wingL", "wingR"] as const).forEach((area) => {
-    const w = widgetOf(area);
-    if (!only || (w.kind === "figure" && (only === "focus" ? w.onFocus : w.onPoint))) drawWing(area);
+    if (!only) return drawWing(area);
+    state.settings.areas[area].forEach((name) => {
+      const f = WIDGETS[name];
+      if (f?.kind === "figure" && (only === "focus" ? f.onFocus : f.onPoint)) drawSlot(area, name);
+    });
   });
   drawFocusMarks();
+}
+
+/** Lays the wings, then settles the lane's ends against where the shape now stands, and draws again if they moved. */
+function drawWingsAligned(): void {
+  drawWings();
+  const before = `${ui.content.style.paddingTop} ${ui.content.style.paddingBottom}`;
+  alignEnds();
+  if (`${ui.content.style.paddingTop} ${ui.content.style.paddingBottom}` !== before) drawWings();
 }
 
 /** The strips stand at the foot of their areas, laid over the row by the areas' own geometry. */
@@ -1513,7 +1597,7 @@ function drawAll(): void {
   drawLayout();
   drawLane();
   drawStrips();
-  drawWings();
+  drawWingsAligned();
   light();
 }
 
@@ -1742,7 +1826,12 @@ function wire(): void {
     if (fold) return void cycle(fold.dataset.fold!);
     const pick = t.closest<HTMLElement>("[data-widget]");
     if (pick) {
-      state.settings.areas[pick.dataset.area as AreaName] = pick.dataset.widget!;
+      const area = pick.dataset.area as AreaName;
+      const k = pick.dataset.widget!;
+      const held = state.settings.areas[area];
+      const wing = AREAS.find((x) => x.name === area)!.kind === "figure";
+      // close empties the area; a widget held is let go; a wing holds two, a third taking the place at the foot
+      state.settings.areas[area] = k === "none" ? [] : held.includes(k) ? held.filter((x) => x !== k) : !wing ? [k] : held.length < 2 ? [...held, k] : [held[0], k];
       saveSettings();
       return void drawAll();
     }
@@ -1880,7 +1969,7 @@ function wire(): void {
     alignEnds();
     drawAdjuncts();
     drawStrips();
-    drawWings();
+    drawWingsAligned();
   });
 }
 
@@ -1922,9 +2011,9 @@ async function start(): Promise<void> {
   document.body.innerHTML = `
     <header id="header"><span class="scope chrome"></span><span class="warnings chrome dim"></span><span class="notice chrome"></span></header>
     <main id="areas">
-      <section class="wing" data-area="wingL"><div class="box"></div></section>
+      <section class="wing" data-area="wingL"></section>
       <section id="scroll"><div id="content"><div class="gutter" data-area="gutterL"></div><div id="lane"></div><div class="gutter" data-area="gutterR"></div></div></section>
-      <section class="wing" data-area="wingR"><div class="box"></div></section>
+      <section class="wing" data-area="wingR"></section>
       <div id="strips"></div>
     </main>`;
   const $ = (sel: string) => document.querySelector<HTMLElement>(sel)!;
@@ -2025,16 +2114,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #header .notice { color: var(--lit); }
 
 #areas { position: relative; flex: 1 1 auto; min-height: 0; display: grid; justify-content: center; }
-#areas > [data-area="wingL"] { grid-column: 1; }
-#areas > #scroll { grid-column: 2; }
-#areas > [data-area="wingR"] { grid-column: 3; }
 #areas > [hidden] { display: none; }
-.wing { position: relative; overflow: hidden; padding: 24px 20px 72px; scrollbar-width: none; display: flex; align-items: center; justify-content: center; }
-.wing::-webkit-scrollbar { display: none; }
-.wing .box { max-width: 100%; max-height: 100%; display: flex; justify-content: center; }
-.wing .box > * { max-width: 100%; }
-.wing.closed .box { display: none; }
-.wing.closed { padding-inline: 0; }
+/* a wing is as wide as what it holds and has no padding of its own; its figures stand in slots the layout places */
+.wing { position: relative; overflow: hidden; }
+.slot { position: absolute; left: 0; right: 0; display: flex; align-items: safe center; justify-content: center; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.slot::-webkit-scrollbar { display: none; }
+.slot > * { max-width: 100%; }
 #scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); mask-image: linear-gradient(to bottom, transparent calc(3% * var(--lift, 1)), black calc((3% + var(--edge)) * var(--lift, 1)), black calc(100% - (6% + var(--edge)) * var(--drop, 1)), transparent calc(100% - 6% * var(--drop, 1))); }
 #scroll::-webkit-scrollbar { display: none; }
@@ -2127,7 +2212,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 svg.fig { display: block; overflow: visible; touch-action: none; user-select: none; }
 svg.fig .cell { cursor: pointer; }
-.ahead-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ahead-box { max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 svg.ahead .hit { fill: transparent; }
 svg.ahead .para { fill: var(--rest); }
 svg.ahead .head { fill: var(--door); }
@@ -2165,19 +2250,19 @@ svg.plate .cell.lit path, svg.plate .cell.lit circle { fill: var(--lit); }
 svg.plate .label { font-family: var(--sans); font-size: 11px; fill: var(--ink); pointer-events: none; }
 svg.plate .label.lit, svg.plate .cell.lit .label, svg.plate .label.here { fill: var(--ground); }
 
-.settings { display: flex; flex-direction: column; align-items: center; gap: 22px; }
-.knobs { display: flex; gap: 14px; justify-content: center; }
-.knob { position: relative; width: 48px; height: 48px; cursor: ns-resize; touch-action: none; user-select: none; color: var(--faint); }
-.knob svg { width: 48px; height: 48px; display: block; }
+.settings { width: 216px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.knobs { display: flex; gap: 12px; justify-content: center; }
+.knob { position: relative; width: 40px; height: 40px; cursor: ns-resize; touch-action: none; user-select: none; color: var(--faint); }
+.knob svg { width: 40px; height: 40px; display: block; }
 .knob .track { fill: none; stroke: var(--track); stroke-width: 3; stroke-linecap: round; }
 .knob .value { fill: none; stroke: var(--meter); stroke-width: 3; stroke-linecap: round; }
 .knob .glyph { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 .knob .hint { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; opacity: 0; transition: opacity .15s; pointer-events: none; }
 .knob:hover .hint { opacity: 1; }
-.switches { display: grid; grid-template-columns: auto auto; gap: 2px 10px; align-items: center; }
+.switches { display: grid; grid-template-columns: auto auto; gap: 2px 8px; align-items: center; }
 .switches .name { justify-self: end; color: var(--faint); }
 .switches .values { display: flex; gap: 2px; }
-.switches .pick { padding: 2px 8px; border-radius: 6px; color: var(--muted); }
+.switches .pick { padding: 2px 5px; border-radius: 6px; color: var(--muted); }
 .switches .pick.on { color: var(--ink); }
 .switches .pick:hover { background: var(--wash); }
 `;

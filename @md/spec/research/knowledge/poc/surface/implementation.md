@@ -118,7 +118,7 @@ The focus is found on every scroll: the article under the reading line, or the n
 
 ### 6.2 Wings are drawn whole, as HTML or SVG
 
-A wing holds one figure, drawn whole from the state whenever the state it reads changes: the tree and the settings as HTML, the ahead, the shape and the plate as SVG. The strips are laid over the foot of the row from the areas' own geometry, so a closed area's rail stands where the area stood. Every cell that names a brief is an element of its own carrying the brief's address, so pointing and pressing need nothing more. Should the plate ever hold more cells than that bears, it alone moves to a canvas.
+A wing lays its figures in slots: a figure of fixed size is drawn first and measured, a growing figure is drawn into what is left, and a figure that answers the focus or the pointer is drawn again in its own slot alone. Each figure is drawn whole from the state whenever the state it reads changes: the tree and the settings as HTML, the ahead, the shape and the plate as SVG. The lane's ends align with the shape's slot wherever in its wing the shape stands, so once the wings are laid the ends are settled again, and the wings drawn again if they moved. The strips are laid over the foot of the row from the areas' own geometry, so a closed area's rail stands where the area stood. Every cell that names a brief is an element of its own carrying the brief's address, so pointing and pressing need nothing more. Should the plate ever hold more cells than that bears, it alone moves to a canvas.
 
 *In force, the author's decision, 2026-09-13.*
 
