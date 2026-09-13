@@ -2343,6 +2343,12 @@ svg.shape .head, svg.shape .para, svg.shape .tick, svg.shape .hidden { pointer-e
 svg.shape .ghost { opacity: 0; transition: opacity .12s; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .ghost { opacity: 1; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick:not(.ghost), svg.shape .cell:has(.hit[data-press="fold"]:hover) .hidden:not(.ghost) { fill: var(--lit); }
+/* resting on the room to the right points at the brief, so the ahead previews it, but the brief's blocks keep their
+   colour there: only its marks light, so resting on the room reads apart from resting on the blocks */
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .para { fill: var(--rest); }
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .head { fill: var(--door); }
+svg.shape .cell.here:has(.hit[data-press="fold"]:hover) .para { fill: var(--door); }
+svg.shape .cell.here:has(.hit[data-press="fold"]:hover) .head { fill: var(--on); }
 svg.shape .hit[data-press="fold"] { cursor: pointer; }
 svg.shape .tick { fill: var(--grey); }
 svg.shape .hidden { fill: var(--grey); }
