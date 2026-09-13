@@ -1031,7 +1031,7 @@ function shapeSvg(W: number, H: number): string {
   const ix = state.index!;
   // the levels above the scope stand to the left of the opening's row, a tick per ancestor, outermost leftmost
   const anc = prefixesOf(state.scope).slice(0, -1);
-  const L = anc.length ? anc.length * 5 + 3 : 0;
+  const L = anc.length ? anc.length * 8 + 4 : 0;
   const deepest = Math.max(0, ...laid.map((l) => depthIn(l.a)));
   const w = Math.min(W, SHAPE.pad * 2 + L + deepest * SHAPE.indent + SHAPE.bar + 4 + 26 + SHAPE.tail);
   const cells = laid.map((l) => {
@@ -1051,12 +1051,14 @@ function shapeSvg(W: number, H: number): string {
     const h = face ? Math.max(1.2, face.height * k - 1).toFixed(1) : "1";
     const ticks = face && b ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick${ghost}" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
     const tx = x + SHAPE.bar + 4 + Math.min(paras, 8) * 3 + (paras ? 2 : 0);
-    const tail = hidden > 0 && face ? `<rect class="hidden${ghost}" x="${tx}" y="${y}" width="${clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail).toFixed(1)}" height="${h}" rx="1"/>` : "";
+    const tailW = hidden > 0 ? clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail) : 0;
+    const tail = hidden > 0 && face ? `<rect class="hidden${ghost}" x="${tx}" y="${y}" width="${tailW.toFixed(1)}" height="${h}" rx="1"/>` : "";
+    const marksEnd = tx + tailW + (paras || hidden ? 8 : 0);
     // the opening's row carries the levels above to its left, each a press that scopes out to it
     const first = l.blocks[0];
     const above =
       l.a === state.scope && first
-        ? anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}><rect class="hit" x="${SHAPE.pad + i * 5 - 1}" y="${(4 + first.top * k - 2).toFixed(1)}" width="5" height="${(Math.max(4, first.height * k) + 4).toFixed(1)}"/><rect class="head" x="${SHAPE.pad + i * 5}" y="${(4 + first.top * k).toFixed(1)}" width="3" height="${Math.max(3, first.height * k - 1).toFixed(1)}" rx="1"/></g>`).join("")
+        ? anc.map((a, i) => `<g class="cell above" data-a="${esc(a)}" data-scope="${esc(a)}" ${hued(a)}><rect class="hit" x="${SHAPE.pad + i * 8 - 1}" y="${(4 + first.top * k - 4).toFixed(1)}" width="8" height="${(Math.max(10, first.height * k) + 8).toFixed(1)}"/><rect class="head" x="${SHAPE.pad + i * 8}" y="${(4 + first.top * k).toFixed(1)}" width="6" height="${Math.max(10, first.height * k - 1).toFixed(1)}" rx="1.5"/></g>`).join("")
         : "";
     // two presses: the blocks go to the brief; the room to their right, where what is hidden stands, folds or opens it,
     // with forgiving room around it since a brief may be a sliver here; the levels above are drawn last, so they take the press
@@ -1067,7 +1069,7 @@ function shapeSvg(W: number, H: number): string {
     return (
       `<g class="cell${l.a === state.focus ? " here" : ""}" data-a="${esc(l.a)}" ${hued(l.a)}>` +
       `<rect class="hit" data-press="go" x="${x - 3}" y="${top}" width="${SHAPE.bar + 5}" height="${height}"/>` +
-      `<rect class="hit" data-press="fold" x="${x + SHAPE.bar + 2}" y="${fy}" width="${Math.max(0, w - x - SHAPE.bar - 2)}" height="${fh}"/>` +
+      (paras || hidden ? `<rect class="hit" data-press="fold" x="${x + SHAPE.bar + 2}" y="${fy}" width="${Math.max(6, marksEnd - x - SHAPE.bar - 2)}" height="${fh}"/>` : "") +
       `${bars}${ticks}${tail}</g>` +
       above
     );
@@ -1229,7 +1231,7 @@ function drawLayout(): void {
 /** Draws the lane whole and lays the adjuncts beside it; the header says where the lane is scoped. */
 function drawLane(): void {
   const crumb = ui.header.querySelector<HTMLElement>(".scope")!;
-  crumb.innerHTML = state.scope ? `in ${prefixesOf(state.scope).map((a) => `<span data-a="${esc(a)}" data-go="${esc(a)}">${esc(brief(a)!.title)}</span>`).join(" › ")}` : "";
+  crumb.innerHTML = state.scope ? `in ${prefixesOf(state.scope).map((a) => `<span data-a="${esc(a)}" data-scope="${esc(a)}">${esc(brief(a)!.title)}</span>`).join(" › ")}` : "";
   ui.lane.innerHTML = laneHtml();
   drawAdjuncts();
 }
@@ -1394,8 +1396,8 @@ let going = false;
 /** Goes to an address from the tree or a figure: enters the history, then settles there, keeping what the reader folded. */
 function goTo(a: string): void {
   going = true;
-  // a target outside the scope widens the scope to the whole body first, and the step is on the way back
-  if (!within(a, state.scope)) (state.scopes.push(state.scope), (state.scope = ""));
+  // a target outside the scope widens the scope to the whole body first, laid afresh, and the step is on the way back
+  if (!within(a, state.scope)) scopeTo("");
   if (readHash() === a && readScope() === state.scope) return settle(a);
   location.hash = hashFor(a);
 }
@@ -1467,7 +1469,7 @@ function onScroll(): void {
 }
 
 /** Changes grades under a function, keeping the acted-on brief's heading where it stood on the screen. */
-function refold(change: () => void, anchor: string = state.focus): void {
+function refold(change: () => void, anchor: string = state.focus, jump = false): void {
   const at = (a: string) => ui.lane.querySelector<HTMLElement>(`.brief[data-a="${cssEsc(a)}"]`)?.getBoundingClientRect().top;
   const before = at(anchor) ?? at(state.focus);
   const held = at(anchor) !== undefined ? anchor : state.focus;
@@ -1476,11 +1478,11 @@ function refold(change: () => void, anchor: string = state.focus): void {
   drawLane();
   const after = at(held);
   if (before !== undefined && after !== undefined) ui.scroll.scrollTop += after - before;
-  // a brief folded from deep inside it takes the reader up with it: its heading returns to the reading line
+  // a brief folded from inside it takes the reader up with it: its heading returns to the reading line;
   // the jump is instant, since a smooth scroll is cancelled by any scroll that follows the press, as trackpad inertia does
   const top = at(held);
   const box = ui.scroll.getBoundingClientRect();
-  if (top !== undefined && (top < box.top + 8 || top > box.bottom - 40)) {
+  if (jump && top !== undefined && (top < box.top + 8 || top > box.bottom - 40)) {
     state.focus = held;
     scrollToFocus(false);
   }
@@ -1493,10 +1495,16 @@ function refold(change: () => void, anchor: string = state.focus): void {
 function cycle(a: string): void {
   const b = brief(a);
   if (a === "" || !b || (blocksOf(b).length <= 1 && level(a).length === 0)) return;
-  refold(() => {
-    if (!inLane(a)) prefixesOf(a).forEach((p) => p !== a && gradeOf(p) !== "whole" && setGrade(p, "whole"));
-    setGrade(a, inLane(a) ? nextGrade(gradeOf(a)) : "whole");
-  }, a);
+  // only a fold that takes away what stood under the reader moves them; opening, or folding elsewhere, never scrolls
+  const jump = gradeOf(a) === "whole" && within(state.focus, a);
+  refold(
+    () => {
+      if (!inLane(a)) prefixesOf(a).forEach((p) => p !== a && gradeOf(p) !== "whole" && setGrade(p, "whole"));
+      setGrade(a, inLane(a) ? nextGrade(gradeOf(a)) : "whole");
+    },
+    a,
+    jump,
+  );
 }
 
 /** Moves the focus to an address that is in the lane, without changing any grade. */
@@ -1548,7 +1556,8 @@ function wire(): void {
   const named = (e: Event) => (e.target as HTMLElement | null)?.closest<HTMLElement>("[data-a]") ?? null;
 
   document.addEventListener("pointermove", (e) => {
-    const el = named(e);
+    // the room right of a brief's blocks is a control, not the brief: resting on it moves no highlight
+    const el = (e.target as HTMLElement).closest?.('[data-press="fold"]') ? null : named(e);
     all<HTMLElement>(".keep").forEach((k) => k.classList.remove("keep"));
     if (el?.tagName === "A" && el.closest("#lane")) el.closest("article.brief")?.classList.add("keep");
     point(el ? el.dataset.a! : null);
@@ -1572,14 +1581,14 @@ function wire(): void {
       saveSettings();
       return void drawAll();
     }
+    // a level above, in the shape or the crumb, scopes out to itself
+    const scope = t.closest<HTMLElement>("[data-scope]");
+    if (scope) return void scopeTo(scope.dataset.scope!);
     const go = t.closest<HTMLElement>("[data-go]");
     if (go) return void goTo(go.dataset.go!);
     const cell = t.closest<HTMLElement>("svg.fig [data-a]");
     if (!cell || state.scrubbing) return;
-    // in the shape a level above scopes out to itself, the blocks go, and the room to their right folds or opens;
-    // in the other figures a press goes and the modifier folds
-    const scope = t.closest<HTMLElement>("[data-scope]");
-    if (scope) return void scopeTo(scope.dataset.scope!);
+    // in the shape the blocks go and the room to their right folds or opens; in the other figures a press goes and the modifier folds
     const press = t.closest<HTMLElement>("[data-press]")?.dataset.press;
     const folds = press ? press === "fold" : e.metaKey || e.ctrlKey;
     return void (folds ? cycle(cell.dataset.a!) : goTo(cell.dataset.a!));
@@ -1928,7 +1937,7 @@ svg.shape .head, svg.shape .para, svg.shape .tick, svg.shape .hidden { pointer-e
 svg.shape .ghost { opacity: 0; transition: opacity .12s; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .ghost { opacity: 1; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick:not(.ghost), svg.shape .cell:has(.hit[data-press="fold"]:hover) .hidden:not(.ghost) { fill: var(--lit); }
-svg.shape .hit[data-press="fold"] { cursor: default; }
+svg.shape .hit[data-press="fold"] { cursor: pointer; }
 svg.shape .tick { fill: var(--grey); }
 svg.shape .hidden { fill: var(--grey); }
 svg.shape .cell.lit .hidden { fill: oklch(80% 0.08 var(--h)); }
