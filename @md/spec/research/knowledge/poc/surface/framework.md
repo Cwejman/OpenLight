@@ -12,7 +12,7 @@ Five areas stand in a row: a wing, a gutter, the lane, a gutter, a wing. The lan
 
 No area carries room it does not use, so the spacing is the spaces between them, and those are one: the space at either edge of the viewport is the space between a wing and the lane. The gap setting is the least a space is given, and what the width leaves over is shared among the spaces evenly. The gutters are the exception, standing a gap from the lane, since what stands in them is aligned to its lines. Vertically a wing's figures reach no further up or down than the prose does: they stand between the middles of the lane's fades at its top and its foot, so they follow the fade setting, keeping at least a gap at the top and the strip's room at the foot, with one gap between two figures. And no ink: no boxes, no borders, the flat page [the design language](../../../../design.md#why-flat--the-newspaper-precedent) asks for.
 
-Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. A closed wing is its rail, spaced like any other area; a closed gutter takes no room at all. As the screen narrows the areas give way in one order: the gutters first, as a pair, then the right wing, then the left, until the lane stands alone. An area gives way when its width and one space no longer fit, and an area given no room is gone from the row.
+Any area closes by hand, from its own strip, and a closed area collapses to a thin rail of the same icons, so it opens again from where it stands. A closed area takes no room at all; only its strip stays. As the screen narrows the areas give way in one order: the gutters first, as a pair, then the right wing, then the left, until the lane stands alone. An area gives way when its width and one space no longer fit, and an area given no room is gone from the row.
 
 A wing holds up to two figures, one at its top and one at its foot. A figure of fixed size, the plate or the settings, takes only the height it needs; a figure that grows, the shape, the tree or the ahead, takes what is left, shared evenly when both grow. A gutter holds one adjunct. Nothing nests further, splits, or is dragged.
 
@@ -38,9 +38,11 @@ Everything drawn that names a brief carries that brief's address. That one conve
 
 ## 4. The strip
 
-At the foot of each area stands a low row of icons, one per widget the area can hold and one to close it, centred under the area. They are light, not buttons: no ground, no border, the one in use a little darker than the rest. Pointing at one names it. On a wing, pressing adds the figure, at the foot when one is already there, or takes it away when it is already in use, and a third press takes the place at the foot; on a gutter, pressing makes it the gutter's adjunct. A closed gutter keeps its row at the foot of the lane, at the edge the gutter would open on, where the lane's text has already faded; a closed wing turns its row and stands as a rail at the edge, since a row would run off the screen there.
+At the foot of each area stands a low row of icons, one per widget the area can hold and one to close it, and a row always lies flat. They are light, not buttons: no ground, no border, the ones in use a little darker than the rest. Pointing at one names it. On a wing, pressing adds the figure, at the foot when one is already there, or takes it away when it is already in use, and a third press takes the place at the foot; on a gutter, pressing makes it the gutter's adjunct.
 
-*Reasoned, the author's, 2026-09-13.*
+A row offers only what can stand. An icon whose press would leave its area without room is not shown, and a closed area with nothing it could open shows no row, so a press never makes the row it was made on vanish. An open area's row is centred under it. A closed gutter's row stands at the foot of the lane, at the edge the gutter would open on, where the lane's text has already faded; a closed wing's row stands in the space beside the lane where the wing would open. Rows on one side never lie over each other: from the edge inward, each starts where the one before it ended.
+
+*Reasoned, the author's, 2026-09-13; the flat rows and the offer of only what fits the author's asks of 2026-09-14, when opening a gutter the width could not hold made its row disappear.*
 
 ## 5. Settings are data, and a figure edits them
 

@@ -474,7 +474,7 @@ function trace(rootArg: string): Body {
 // every brief in the lane, and the settings. Five areas stand in a row, a wing,
 // a gutter, the lane, a gutter, a wing. The lane is prose; the rest is widgets,
 // plain functions in one table, chosen per area from a strip of icons at its
-// foot, and an area closes to a rail of those icons. Everything drawn that
+// foot, and a closed area takes no room, leaving its icons where it would open. Everything drawn that
 // names a brief carries its address, which is what keeps every widget in step.
 // The pure functions come first, the ones that touch the document after them.
 
@@ -785,7 +785,7 @@ function laneHtml(): string {
 // Five areas in a row. A widget is one entry in one table: an adjunct stands in
 // a gutter and returns what belongs beside a brief; a figure stands in a wing
 // and returns a drawing of the body. The strip at an area's foot chooses, and
-// choosing nothing closes the area to a rail of the same icons.
+// choosing nothing closes the area, which then takes no room and leaves its icons.
 
 type Adjunct = { kind: "adjunct"; name: string; icon: string; of: (b: Brief, article: HTMLElement) => { at: HTMLElement | null; html: string }[] };
 /**
@@ -831,11 +831,26 @@ const choicesFor = (kind: Widget["kind"]): string[] => Object.keys(WIDGETS).filt
 /** A strip's width: its icons laid in a row. */
 const stripWidth = (kind: Widget["kind"]): number => choicesFor(kind).length * 30 - 4;
 
-/** The strip of an area: one light icon per widget it can hold, the one in use a little darker; closed, it stands as a rail. */
-const stripHtml = (area: AreaName, kind: Widget["kind"]): string =>
-  `<div class="strip${!isOpen(area) && kind === "figure" ? " rail" : ""}" data-strip="${area}">${choicesFor(kind)
-    .map((k) => `<button class="pick${(k === "none" ? !isOpen(area) : state.settings.areas[area].includes(k)) ? " on" : ""}" data-area="${area}" data-widget="${k}" title="${esc(WIDGETS[k].name)}">${icon(WIDGETS[k].icon)}</button>`)
+/** What an area holds once an icon on its strip is pressed: close empties it, a widget held is let go, a wing holds two, a third taking the place at the foot. */
+function pressed(area: AreaName, k: string): string[] {
+  const held = state.settings.areas[area];
+  const wing = area.startsWith("wing");
+  return k === "none" ? [] : held.includes(k) ? held.filter((x) => x !== k) : !wing ? [k] : held.length < 2 ? [...held, k] : [held[0], k];
+}
+
+/**
+ * The strip of an area: a light icon per widget, the ones in use a little darker. It offers only what can stand: a
+ * widget whose pressing would leave the area without room is not shown, and a closed area with nothing it could open
+ * shows no strip at all, so no press ever makes a strip vanish from under the pointer.
+ */
+function stripHtml(area: AreaName, kind: Widget["kind"]): string {
+  const held = state.settings.areas[area];
+  const offered = choicesFor(kind).filter((k) => k === "none" || held.includes(k) || fitsWith({ ...state.settings.areas, [area]: pressed(area, k) })[area]);
+  if (!isOpen(area) && offered.length <= 1) return "";
+  return `<div class="strip" data-strip="${area}">${offered
+    .map((k) => `<button class="pick${(k === "none" ? !isOpen(area) : held.includes(k)) ? " on" : ""}" data-area="${area}" data-widget="${k}" title="${esc(WIDGETS[k].name)}">${icon(WIDGETS[k].icon)}</button>`)
     .join("")}</div>`;
+}
 
 // ## 3.5 The tree: the lane as an outline
 //
@@ -1254,7 +1269,6 @@ const all = <T extends Element>(sel: string, root: ParentNode = document): T[] =
 const cssEsc = (s: string): string => s.replace(/["\\]/g, "\\$&");
 
 const GUTTER = 210;
-const RAIL = 30;
 /** The room beneath a wing's figures that its strip stands in, above the space every area keeps. */
 const STRIP = 34;
 /** Where the prose's fade lies at each edge of the lane: clear from the edge to here, then fading in over the fade setting. */
@@ -1272,28 +1286,36 @@ function band(h: number): { top: number; height: number } {
   return { top: Math.round(top), height: Math.max(0, Math.round(h - top - foot)) };
 }
 
-/** How wide an area stands: a closed wing its rail, a closed gutter nothing, a gutter its column, a wing its widest figure, its strip free to reach a little past it into the space beside. */
-const takesRoom = (area: AreaName): boolean => isOpen(area) || area.startsWith("wing");
-const widthOf = (area: AreaName): number =>
-  !takesRoom(area) ? 0 : !isOpen(area) ? RAIL : area.startsWith("gutter") ? GUTTER : Math.max(...widgetsOf(area).map((w) => (w.kind === "figure" ? w.width() : 0)));
+/** What each area holds, as the settings keep it or as a press would leave it. */
+type Held = Record<AreaName, string[]>;
+
+/** How wide an area stands with what it holds: closed, nothing; a gutter its column; a wing its widest figure, its strip free to reach a little past it. */
+const widthIn = (held: Held, area: AreaName): number =>
+  held[area].length === 0 ? 0 : area.startsWith("gutter") ? GUTTER : Math.max(...held[area].map((k) => (WIDGETS[k]?.kind === "figure" ? (WIDGETS[k] as Figure).width() : 0)));
+const widthOf = (area: AreaName): number => widthIn(state.settings.areas, area);
+/** A closed area takes no room at all; its strip stands at the foot of where it would open. */
+const takesRoom = (area: AreaName): boolean => isOpen(area);
 
 /**
  * Which areas the width allows, taken in the order they give way last: after the lane, the left wing, then the right
  * wing, then the gutters as a pair. So as the viewport narrows the gutters go first, then the right wing, then the
- * left, and the lane stands alone. Every area costs its own width and one space, and a closed gutter costs nothing.
+ * left, and the lane stands alone. An open area costs its own width and one space; a closed one costs nothing and is
+ * always allowed, since all it shows is its strip.
  */
-function fits(): Record<AreaName, boolean> {
+function fitsWith(held: Held): Record<AreaName, boolean> {
   const s = state.settings;
   const on: Record<AreaName, boolean> = { wingL: false, gutterL: false, gutterR: false, wingR: false };
+  AREAS.forEach(({ name }) => (on[name] = held[name].length === 0));
   let used = s.measure + 2 * s.gap;
   for (const group of [["wingL"], ["wingR"], ["gutterL", "gutterR"]] as AreaName[][]) {
-    const need = group.reduce((x, a) => x + (takesRoom(a) ? widthOf(a) + s.gap : 0), 0);
+    const need = group.reduce((x, a) => x + (held[a].length ? widthIn(held, a) + s.gap : 0), 0);
     if (used + need > ui.areas.clientWidth) break;
     used += need;
     group.forEach((a) => (on[a] = true));
   }
   return on;
 }
+const fits = (): Record<AreaName, boolean> => fitsWith(state.settings.areas);
 
 /** Applies the settings: type registers from zoom and ratio, and the row of areas from measure, gap and what is open. */
 function drawLayout(): void {
@@ -1340,9 +1362,9 @@ function drawLayout(): void {
     tracks.push(`${width}px`, space);
     el.style.gridColumn = `${tracks.length - 1}`;
   };
-  if (on.wingL) place(ui.parts.wingL, widthOf("wingL"));
+  if (on.wingL && takesRoom("wingL")) place(ui.parts.wingL, widthOf("wingL"));
   place(ui.scroll, mid);
-  if (on.wingR) place(ui.parts.wingR, widthOf("wingR"));
+  if (on.wingR && takesRoom("wingR")) place(ui.parts.wingR, widthOf("wingR"));
   ui.areas.style.gridTemplateColumns = tracks.join(" ");
   ui.areas.style.columnGap = "0px";
   ui.content.style.gridTemplateColumns = inner.map((x) => `${x}px`).join(" ");
@@ -1599,22 +1621,32 @@ function drawStrips(): void {
   AREAS.forEach(({ name }) => {
     const strip = ui.strips.querySelector<HTMLElement>(`[data-strip="${name}"]`);
     if (!strip) return;
-    // a closed gutter takes no room, so its row stands at the foot of the lane, at the edge the gutter would open on
-    if (!takesRoom(name)) {
-      const lane = ui.lane.getBoundingClientRect();
-      const width = stripWidth("adjunct");
-      strip.style.left = `${Math.round((name === "gutterL" ? lane.left : lane.right - width) - a0.left)}px`;
-      strip.style.width = `${width}px`;
-      strip.style.justifyContent = name === "gutterL" ? "flex-start" : "flex-end";
-      return;
+    const width = strip.scrollWidth;
+    const at = (left: number) => void (strip.style.left = `${Math.round(left - a0.left)}px`);
+    // an open area's row is centred under it
+    if (takesRoom(name)) {
+      const r = ui.parts[name].getBoundingClientRect();
+      return at(r.left + r.width / 2 - width / 2);
     }
-    const r = ui.parts[name].getBoundingClientRect();
-    // a rail stands at the outer edge of its side, however wide the side is
-    const rail = strip.classList.contains("rail");
-    const left = rail && name === "wingR" ? r.right - RAIL : r.left;
-    strip.style.left = `${Math.round(left - a0.left)}px`;
-    strip.style.width = `${Math.round(rail ? RAIL : r.width)}px`;
+    // a closed gutter's row stands at the foot of the lane, at the edge the gutter would open on
+    const lane = ui.lane.getBoundingClientRect();
+    if (name === "gutterL") return at(lane.left);
+    if (name === "gutterR") return at(lane.right - width);
+    // a closed wing's row stands centred in the space beside the lane where the wing would open, a gap from the edge
+    const block = ui.scroll.getBoundingClientRect();
+    const [from, to] = name === "wingL" ? [a0.left, block.left] : [block.right, a0.right];
+    const gap = state.settings.gap;
+    at(clamp((from + to) / 2 - width / 2, a0.left + gap, a0.right - gap - width));
   });
+  // rows on one side never lie over each other: from each edge inward, a row starts where the one before it ended
+  const rows = all<HTMLElement>(".strip", ui.strips).map((el) => ({ el, left: el.offsetLeft, width: el.offsetWidth }));
+  const middle = ui.areas.clientWidth / 2;
+  const apart = 8;
+  const leftSide = rows.filter((r) => r.left + r.width / 2 < middle).sort((x, y) => x.left - y.left);
+  leftSide.forEach((r, i) => i > 0 && (r.left = Math.max(r.left, leftSide[i - 1].left + leftSide[i - 1].width + apart)));
+  const rightSide = rows.filter((r) => r.left + r.width / 2 >= middle).sort((x, y) => y.left - x.left);
+  rightSide.forEach((r, i) => i > 0 && (r.left = Math.min(r.left, rightSide[i - 1].left - r.width - apart)));
+  rows.forEach((r) => (r.el.style.left = `${Math.round(r.left)}px`));
 }
 
 function drawAll(): void {
@@ -1852,11 +1884,7 @@ function wire(): void {
     const pick = t.closest<HTMLElement>("[data-widget]");
     if (pick) {
       const area = pick.dataset.area as AreaName;
-      const k = pick.dataset.widget!;
-      const held = state.settings.areas[area];
-      const wing = AREAS.find((x) => x.name === area)!.kind === "figure";
-      // close empties the area; a widget held is let go; a wing holds two, a third taking the place at the foot
-      state.settings.areas[area] = k === "none" ? [] : held.includes(k) ? held.filter((x) => x !== k) : !wing ? [k] : held.length < 2 ? [...held, k] : [held[0], k];
+      state.settings.areas[area] = pressed(area, pick.dataset.widget!);
       saveSettings();
       return void drawAll();
     }
@@ -2156,11 +2184,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 #strips { position: absolute; left: 0; right: 0; bottom: 0; height: 0; z-index: 5; pointer-events: none; }
 .strip { position: absolute; bottom: 10px; display: flex; gap: 4px; justify-content: center; pointer-events: auto; }
-.strip.rail { flex-direction: column; align-items: center; }
 .strip .pick { width: 26px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--ink); opacity: .22; transition: opacity .15s, color .15s; }
 .strip .pick:hover { opacity: .7; }
 .strip .pick.on { opacity: 1; color: var(--muted); }
-.strip.rail .pick.on { opacity: .22; }
 .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
 .opening { margin-bottom: 40px; }
