@@ -497,6 +497,8 @@ const state = {
   shift: -1,
   /** set while a scrub is in progress, so pointing does not fight it */
   scrubbing: false,
+  /** whether the pointer rests in the brief's own pane, where it lights the figures but not the brief itself */
+  fromPane: false,
 };
 
 /** Everything derived from the body, computed once per body. */
@@ -1004,7 +1006,7 @@ function light(): void {
   const a = state.pointed;
   all<HTMLElement>(".lit").forEach((el) => el.classList.remove("lit"));
   if (a === null) return;
-  const exact = all<HTMLElement>(`[data-a="${cssEsc(a)}"]`);
+  const exact = all<HTMLElement>(`[data-a="${cssEsc(a)}"]`).filter((el) => !(state.fromPane && el.classList.contains("brief")));
   exact.forEach((el) => el.classList.add("lit"));
   const litFigures = new Set(exact.map((el) => el.closest(".fig")));
   all<HTMLElement>(".fig")
@@ -1040,9 +1042,8 @@ const hideTell = (): void => void (ui.tell.hidden = true);
 
 function point(a: string | null, raiser?: HTMLElement, px = 0, py = 0): void {
   if (state.scrubbing) return;
-  const changed = a !== state.pointed;
   state.pointed = a;
-  if (changed) light();
+  light();
   if (a === null || !raiser) hideTell();
   else tell(a, raiser, px, py);
 }
@@ -1105,12 +1106,11 @@ function wire(): void {
   document.addEventListener("pointermove", (e) => {
     const t = e.target as HTMLElement;
     const el = named(e);
-    // A brief in a pane is already in front of the reader: pointing at its face lights it in the figures
-    // and tells nothing; pointing at its prose does nothing at all. Cells and links tell.
-    const isBrief = el?.classList.contains("brief") ?? false;
-    const onFace = isBrief && !!t.closest(".face") && !t.closest(".fig");
-    const inProse = isBrief && !onFace;
-    point(el && !inProse ? el.dataset.a! : null, isBrief ? undefined : (el ?? undefined), e.clientX, e.clientY);
+    // A brief in a pane is already in front of the reader: pointing anywhere in it keeps the figures in step
+    // with the reading and tells nothing. Cells and links tell.
+    const isBrief = (el?.classList.contains("brief") ?? false) && !t.closest(".fig");
+    state.fromPane = isBrief;
+    point(el ? el.dataset.a! : null, isBrief ? undefined : (el ?? undefined), e.clientX, e.clientY);
   });
   document.documentElement.addEventListener("pointerleave", () => point(null));
 
