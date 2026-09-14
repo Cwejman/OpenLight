@@ -9,6 +9,9 @@ kind: brief
 
 Classic frequency-modulation synthesis lays its operators in a graph with no cycles *[Chowning 1973]*, and the one loop it allows is an operator feeding itself, reading not the present sample but the last two averaged the Yamaha DX7. Two operators modulating each other is refused. The refusal is not timidity: computing the first now needs the second now, which needs the first now, and nothing resolves it. A loop with no delay in it has no solution to compute.
 
+![A chart of eight numbered panels, each wiring four boxes numbered 1 to 4 with lines running down to an arrow; in every panel operator 4 has a line looping back into itself, and no other line returns upward](https://upload.wikimedia.org/wikipedia/commons/a/ae/FM_4-Op_Algorithm.png)\
+The eight algorithms of the DX7's smaller four-operator siblings, in [TYalaA's chart](https://commons.wikimedia.org/wiki/File:FM_4-Op_Algorithm.png) under CC BY-SA 4.0: every wiring flows down to the output, and the only loop is an operator's own.
+
 So the first finding is a negative one, and it is the useful half. Two wholes cannot drive each other through each other's present state. Whatever passes between them must have left one before it arrives at the other.
 
 ## 2. The violin says the same thing, physically
