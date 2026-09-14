@@ -30,7 +30,7 @@ What it finds there it does not interpret. What counts as a brief, and what nest
 
 A reader reads one thing at a time, and the eye that moves to a second column of prose has stopped reading the first. What a reader wants from around the text is not more text but a sense of place: where they came from, what lies beneath, what this brief points at. Headings and shape give that, and prose does not.
 
-So the surface is one lane of prose, centred, with room on either side, and the sides orient. The lane carries the body in the order a document reads, each brief at a grade the reader sets: folded to its heading, opened to its face, or read whole. The sides carry the tree, the shape beneath, the links, and whatever else a reader spawns there, and never prose.
+So the surface is one lane of prose, centred, with room on either side, and the sides orient. The lane carries the body in the order a document reads, each brief at a grade the reader sets: folded to its face, or read whole. The sides carry the tree, the shape beneath, the links, and whatever else a reader spawns there, and never prose.
 
 The first reading model gave a level to a pane and stood three panes side by side. The author's verdict, after a day of use, was that only one pane is ever read, and that the others earned their room for orientation alone, which they gave in prose, the costliest way there is. The depth a reader most wanted, the level beneath the brief in front of them, stood behind a pointer and a press. Both are what this model answers.
 
@@ -68,7 +68,7 @@ Either way the file reads the stamped markdown and hands the page the substrate 
 
 ## 6. What this does not answer
 
-How a reader sees where they have been. The lane keeps what a reader opened, so part of the trail shows as what stands unfolded, but following a link lays the lane afresh and nothing draws the way back beyond the browser's own history. The drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
+How a reader sees where they have been. The lane keeps what a reader opened, so part of the trail shows as what stands unfolded, but following a link lays the lane afresh, and though the browser's history and escape both step back, nothing draws the way. The drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
 
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and it is unanswered.
 

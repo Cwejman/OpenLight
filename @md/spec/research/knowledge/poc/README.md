@@ -25,6 +25,6 @@ Knowledge under the code stands in a shape, and nothing it is written in lets a 
 
 The surface is the interface those two are missing. It reads a body in one lane of prose, each brief folded or opened as the reader chooses, and it orients from the sides: where the reader came from, what lies beneath, what a brief points at, as headings and shape rather than as more text. It stands on the markdown and the directories rather than replacing them, and a session's own work is read the same way once it is written down there.
 
-It is the human side, as the skill is the harness side. Its first reading model was built, used and refused in a day, and its second is specified before it is built.
+It is the human side, as the skill is the harness side. Its first reading model was built, used and refused in a day, and its second, specified before it was built, is the one in use.
 
 [the level beneath](surface/README.md)

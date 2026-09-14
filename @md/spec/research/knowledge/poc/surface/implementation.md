@@ -8,7 +8,7 @@ status: in force
 
 ## 1. A page the browser manages
 
-The surface is a single page, and everything a reader does happens in the browser: the path, the panes, the drawings, the overlay. Nothing is rendered on a server for a request.
+The surface is a single page, and everything a reader does happens in the browser: the lane and its folds, the widgets, and every move between them. Nothing is rendered on a server for a request.
 
 That is what lets one page serve both moments of a repository. Live or published, the same client receives a body and draws it, and only where the body comes from differs.
 
@@ -30,7 +30,7 @@ The body is traced from a root and handed over as a flat list of briefs in readi
 
 ### 3.1 It is traced from a root, by its mounts
 
-The process is pointed at a `README.md` that carries [the stamp](../practice.md#9-a-file-says-it-is-under-the-code), and it does not run on anything else. From there it follows the mounts: every brief that ends with a lone link names a file or a folder's entry, and a stamped file named that way is parsed and traced in turn, until nothing new is reached.
+The process is pointed at a file that carries [the stamp](../practice.md#9-a-file-says-it-is-under-the-code), named directly or as a folder's `README.md`, and it does not run on anything unstamped. From there it follows the mounts: every brief that ends with a lone link names a file or a folder's entry, and a stamped file named that way is parsed and traced in turn, until nothing new is reached.
 
 So the body is whatever the root connects, and nothing is scanned. A file no mount reaches is simply not in it. A mount that names a missing or unstamped file is skipped, and the process says so rather than failing silently. So is a brief that mounts a part and holds subsections of its own, which [the practice forbids](../practice.md#1-the-medium), so every brief the page receives has exactly one level.
 
@@ -41,7 +41,7 @@ So the body is whatever the root connects, and nothing is scanned. A file no mou
 A brief's address is the titles on its way down from the root, each written as an anchor is and joined by slashes, and the root's address is empty:
 
 ```
-the-proof-of-concept/the-surface/a-level-to-a-pane/following-a-link-moves-you-and-the-history-is-the-way-back
+the-proof-of-concept/the-surface/reading-and-orientation-come-apart/following-a-link-moves-you
 ```
 
 The address alone gives a brief's parent and depth, and the list's order gives its place in its level, so the number a heading shows is derived when it is drawn and never stored. A written number that disagrees with a brief's place is warned of.
@@ -54,7 +54,7 @@ Titles rather than positions, because a reader's history and a sent link hold ad
 
 A markdown link names a file, and sometimes a heading's anchor in it. As the trace walks, it keeps a table from each to the address it holds: a file and an anchor to that section, and a file alone to the brief that mounts it, since the file is that brief's level. When the trace is done, every link in every brief's tokens is rewritten through that table.
 
-A web address is left as it is. A link to a file the trace never reached is marked as leaving the body.
+A web address is left as it is, and any other scheme is not followed and is warned of. A link to a file the trace never reached is marked as leaving the body. A link with no target is a brief not yet written, which [the code allows](../../code.md#43-work-in-progress), and is marked as owed.
 
 *In force, the author's decision, 2026-09-12.*
 
@@ -76,15 +76,17 @@ The page counts it by walking a brief's tokens and adding up the text they hold,
 
 ## 4. The address sits after a hash
 
-The page's URL holds the address of the last brief a reader opened, and that is enough to rebuild every pane, since each pane is the level of one brief along it:
+The page's URL holds the address of the brief in focus, and after `?in=` the scope, when the lane is scoped:
 
 ```
-surface.html#/the-proof-of-concept/the-surface/a-level-to-a-pane
+surface.html#/the-proof-of-concept/the-surface/reading-and-orientation-come-apart?in=the-proof-of-concept/the-surface
 ```
 
-It sits after a `#` because that works on any static host and inside one file, where a path of its own would need the host to serve the page for every URL. A reader who arrives without an address is shown the root's level with nothing opened.
+It sits after a `#` because that works on any static host and inside one file, where a path of its own would need the host to serve the page for every URL. A reader who arrives without an address stands at the root, its level at faces.
 
-*In force, the author's decision, 2026-09-12.*
+The address says where a reader stands and not how the lane is laid. Arriving at one lays the lane afresh, as [the lane says](lane.md#5-arriving-lays-the-lane), and the folds a reader made are kept apart from it, [in the browser](#65-what-the-browser-keeps).
+
+*In force, the author's decision, 2026-09-12; the scope and the focus in the address as built on 2026-09-13.*
 
 ## 5. Live and published differ only in where the body comes from
 
@@ -104,13 +106,13 @@ So the pipeline's whole job is to run the build on each commit and put the one p
 
 ## 6. How it is drawn
 
-The page draws from a small shared state and nothing else: the address in focus, which the page's own address follows; the address the pointer rests on, which lives nowhere and leaves no trace; the grade of every brief in the lane; and the settings. Every change to one of them draws what depends on it again.
+The page draws from a small shared state and nothing else: the address in focus, which the page's own address follows; the address the pointer rests on, which lives nowhere and leaves no trace; the scope; the grade of every brief in the lane; and the settings. Every change to one of them draws what depends on it again.
 
 *In force, the author's decision, 2026-09-13.*
 
 ### 6.1 The lane is HTML in one scroll box, with its gutters inside
 
-The lane, the gutter on either side of it and the prose between are one scroll box, so the gutters scroll with the text for free. The prose is a column of articles in reading order, each drawn at its grade, and the gutters are columns beside it in which each adjunct is placed at the height of the line it belongs to, pushed down where two would overlap. Folding draws the lane again whole and then scrolls so that the heading of the brief in focus stands where it stood.
+The lane, the gutter on either side of it and the prose between are one scroll box, so the gutters scroll with the text for free. The prose is a column of articles in reading order, each drawn at its grade, and the gutters are columns beside it in which each adjunct is placed at the height of the line it belongs to, pushed down where two would overlap. Folding draws the lane again whole and then scrolls so that the heading of the brief acted on stands where it stood. The way down to the scope stands over the scroll box rather than in it, and the prose's fade clears beneath it.
 
 The focus is found on every scroll: the article under the reading line, or the nearest above it. The line stands at the middle of the viewport, or, easing to the ends, on the opening at the top and on the last brief at the foot, each end eased to the middle over a third of a screen of scrolling. A move to a brief finds the scroll that brings the brief to the line by halving, since the line moves with the scroll. When the line eases to the ends, the room above and below the lane is set each time the lane is laid, so the opening's heading and the last block stand level with the shape's first and last cells; the shape's scale depends on that room, so it is settled in a few steps. When it changes, the page's address is replaced without entering the history, and the widgets that depend on the focus draw again.
 
@@ -138,6 +140,12 @@ Colour stays even across branches by chroma. How much chroma a hue can hold depe
 
 *Measured, 2026-09-13: the gamut by hue and APCA contrast were computed for every role. The highlight had asked 0.17 chroma where cyan holds 0.10, and now asks 0.12. The dark values were then set by eye against the numbers, since APCA overstates what a large fill needs near a dark ground. The perceptual claims are established colour science, carried and not tested here.*
 
+### 6.5 What the browser keeps
+
+Three things outlive a draw, and none of them is in the address. The settings are kept in the browser's storage, once for every body. The lane as laid, its scope and every grade, is kept there too, under the page and the body, with the address it was laid at, and a reload at that same address lays it again; at any other address it is set aside. And every change a reader makes is recorded as the lane stood before it, the scope, the grades, the focus and the scroll, for escape to undo and shift with escape to redo. That record lives only in memory, holds the last two hundred changes, and is gone with a reload.
+
+*In force, 2026-09-14, as built.*
+
 ## 7. One file, laid by the gradient
 
 The server, the build, the client and the talk between them are one TypeScript file, run with Bun. A flag chooses between serving live and writing the page. This is the proof of concept, and nothing in it should grow larger than reading a body needs.
@@ -152,9 +160,9 @@ It stands beside its specification, as `surface.ts` in this holon.
 
 ## 8. Plain functions before a framework
 
-The drawings and the panes start as plain functions that return SVG and HTML, written to one style so they read as a family. A framework such as Solid would render in the browser like anything else, but it needs its own compile step for its markup, and that step is exactly what one file run with Bun avoids.
+The lane and the widgets are plain functions that return HTML and SVG, written to one style so they read as a family. A framework such as Solid would render in the browser like anything else, but it needs its own compile step for its markup, and that step is exactly what one file run with Bun avoids.
 
-Whether the functions grow into components is decided once the figures exist and have been used.
+Whether the functions grow into components is left until their use asks for it.
 
 *Preferred, the author's, 2026-09-12.*
 
@@ -168,6 +176,6 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 ## 10. What is not settled yet
 
-Whether a file's status travels with its briefs, which waits until a widget needs it; its kind already does, since a record's level says so. Where the published page stands beside the wiki the repository already publishes. And the trials the lane and the widgets name: the fade, the flick, the floor of the ahead, and knobs against sliders.
+Whether a file's status travels with its briefs, which waits until a widget needs it; its kind already does, since a record's level says so. Where the published page stands beside the wiki the repository already publishes. And the trials the lane still names: the flick, and which gesture folds best. The fade, the floor of the ahead and the meters were settled in use, each where it is described.
 
-*Open, 2026-09-13, and taken up in that order.*
+*Open, 2026-09-13; the trials brought up to date on 2026-09-14.*

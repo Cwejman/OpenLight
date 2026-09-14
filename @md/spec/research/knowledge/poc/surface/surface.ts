@@ -470,8 +470,8 @@ function trace(rootArg: string): Body {
 // # 3. How it is drawn
 //
 // The page draws from a small shared state and nothing else: the body and its
-// index, the address in focus, the address the pointer rests on, the grade of
-// every brief in the lane, and the settings. Five areas stand in a row, a wing,
+// index, the address in focus, the address the pointer rests on, the scope, the
+// grade of every brief in the lane, and the settings. Five areas stand in a row, a wing,
 // a gutter, the lane, a gutter, a wing. The lane is prose; the rest is widgets,
 // plain functions in one table, chosen per area from a strip of icons at its
 // foot, and a closed area takes no room, leaving its icons where it would open. Everything drawn that
@@ -727,7 +727,7 @@ const nextGrade = (grade: Grade | null): Grade => (grade === "whole" ? "face" : 
 
 const CHEVRON = `<svg viewBox="0 0 10 10"><path d="M3.2 1.8 6.6 5 3.2 8.2"/></svg>`;
 
-/** The fold mark beside a brief: a chevron that turns down when whole and points right at a face. */
+/** A tree row's fold mark, the one place a mark folds: a chevron that turns down when whole and points right at a face. */
 const foldMark = (b: Brief): string =>
   `<button class="mark ${gradeOf(b.address) ?? "none"}${b.door ? "" : " leaf"}" data-fold="${esc(b.address)}" title="fold or open">${CHEVRON}</button>`;
 
@@ -1776,7 +1776,7 @@ function point(a: string | null): void {
 /** A line in the header for what the reader is owed a word about: an address that did not resolve. */
 const notice = (text: string): void => void (ui.notice.textContent = text);
 
-// ## 3.13 Moving: pressing goes, the mark folds, dragging scrubs, and the address follows the focus
+// ## 3.13 Moving: pressing goes, a fold line folds, dragging scrubs, and the address follows the focus
 
 /** The address after the hash: the focus, and after `?in=` the scope, when the lane is scoped. */
 const readHash = (): string => decodeURIComponent(location.hash.replace(/^#\/?/, "").split("?")[0]).replace(/\/+$/, "");
@@ -1860,7 +1860,6 @@ function settle(a: string): void {
   scrollToFocus(true);
 }
 
-/** Arrives at an address: lays the lane afresh and scrolls the brief under the reading line. */
 /** Where the lane as laid is kept for this page and this body, in the browser's own storage. */
 const laneKey = (): string => `surface.lane:${location.pathname}:${state.body?.root ?? ""}:${state.body?.title ?? ""}`;
 let laneTimer: ReturnType<typeof setTimeout> | undefined;
@@ -1908,6 +1907,7 @@ function resume(a: string, kept: { scope: string; grades: [string, Grade][] }): 
   arriving = false;
 }
 
+/** Arrives at an address: lays the lane afresh and scrolls the brief under the reading line. */
 function arrive(a: string): void {
   arriving = true;
   const target = brief(a) ? a : nearest(a);
@@ -1934,10 +1934,10 @@ function scrollToFocus(smooth: boolean): void {
   ui.scroll.scrollTo({ top: target, behavior: smooth ? "smooth" : "auto" });
 }
 
-/** Scrolling moves the focus and nothing else; the address follows without entering the history. */
 /** Where the pointer last moved, and whether a scroll has come under it since. */
 const pointer = { x: -1, y: -1, still: false };
 
+/** Scrolling moves the focus and nothing else; the address follows without entering the history. */
 function onScroll(): void {
   drawShapeCursor();
   drawFade();
@@ -1987,7 +1987,7 @@ function refold(change: () => void, anchor: string = state.focus, jump = false):
   light();
 }
 
-/** The fold mark toggles one brief between its face and whole. Opening a brief not in the lane opens what leads to it. */
+/** A fold toggles one brief between its face and whole. Opening a brief not in the lane opens what leads to it. */
 function cycle(a: string): void {
   const b = brief(a);
   if (a === "" || !b || (blocksOf(b).length <= 1 && level(a).length === 0)) return;
@@ -2060,7 +2060,7 @@ function step(delta: number): void {
   moveTo(i < 0 ? order[0]?.address ?? "" : order[j].address);
 }
 
-/** Wires the gestures: pointing lights, pressing goes, the mark folds, dragging scrubs, and keys do the same. */
+/** Wires the gestures: pointing lights, pressing goes, a fold line folds, dragging scrubs, and keys do the same. */
 function wire(): void {
   const named = (e: Event) => (e.target as HTMLElement | null)?.closest<HTMLElement>("[data-a]") ?? null;
 

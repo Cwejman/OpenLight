@@ -28,9 +28,9 @@ A figure stands in a wing. Given the body and the shared state, it returns a dra
 
 *Reasoned, the author's, 2026-09-13.*
 
-## 3. One shared state, and three verbs
+## 3. One shared state, and four verbs
 
-Every widget reads one state and nothing else: the body with its index, the address in focus, the address the pointer rests on, the grade of every brief in the lane, and the settings. Every widget acts through the same three verbs: go to an address, point at one, fold one. A widget is a plain function in a table keyed by its name, and adding one is adding a function and a name.
+Every widget reads one state and nothing else: the body with its index, the address in focus, the address the pointer rests on, the scope, the grade of every brief in the lane, and the settings. Every widget acts through the same four verbs: go to an address, point at one, fold one, scope to one. A widget is a plain function in a table keyed by its name, and adding one is adding a function and a name.
 
 Everything drawn that names a brief carries that brief's address. That one convention is what keeps the widgets in step: pointing at a brief in any of them lights it in all of them, and pressing it anywhere goes.
 
