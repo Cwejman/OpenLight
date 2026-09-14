@@ -22,7 +22,7 @@ The author's verdict on the coupling was that one small scroll moved three panes
 
 A preview pane showing faces and no prose.
 
-The level beneath is laid in the lane as faces, [one step ahead](lane.md#3-one-step-ahead), and what lies further is [the ahead](widgets.md#3-the-ahead). Faces inline in the reading are not this refusal, which was a pane of doors standing beside it.
+The level beneath is laid in the lane as faces, [one step ahead](lane.md#3-one-step-ahead), and what lies further is [the ahead](widgets.md#4-the-ahead). Faces inline in the reading are not this refusal, which was a pane of doors standing beside it.
 
 ## 4. Two scroll axes in one region
 
@@ -52,7 +52,7 @@ The author judged it failed, and droplets replace it rather than rings or bars.
 
 The first program read a harness's transcripts directly and drew them, which made the surface a monitor of one tool rather than a reader of a substrate.
 
-The surface is [handed a directory and reads only that](README.md#11-what-it-is-handed), so whatever wants to be read writes itself into the substrate first.
+The surface is [handed a directory and reads only that](README.md#2-what-it-is-handed), so whatever wants to be read writes itself into the substrate first.
 
 ## 9. An overlay a reader has to move into
 
@@ -64,13 +64,13 @@ Reaching it is the problem. On a crowded figure the pointer cannot get from a ce
 
 The second program kept an overlay that only told, raised beside whatever the pointer rested on and never entered.
 
-What it told now has a home a reader can see without pointing: a link's target [beside the link](widgets.md#4-links), a brief's level [in the lane](lane.md#3-one-step-ahead) and [in the ahead](widgets.md#3-the-ahead). An overlay that repeats what is in view competes with the prose.
+What it told now has a home a reader can see without pointing: a link's target [beside the link](widgets.md#5-links), a brief's level [in the lane](lane.md#3-one-step-ahead) and [in the ahead](widgets.md#4-the-ahead). An overlay that repeats what is in view competes with the prose.
 
 ## 11. A level to a pane, three abreast
 
 The second program gave each level of the path a pane and stood the panes side by side, the reading stepping right as it went deeper.
 
-The author's verdict after a day of use: only one pane is ever read, since an eye that moves to the next has stopped reading the last, and the other panes earned their room for orientation alone, which they gave in prose. [Reading and orientation come apart](README.md#2-reading-and-orientation-come-apart), and orientation is headings and shape.
+The author's verdict after a day of use: only one pane is ever read, since an eye that moves to the next has stopped reading the last, and the other panes earned their room for orientation alone, which they gave in prose. [Reading and orientation come apart](README.md#3-reading-and-orientation-come-apart), and orientation is headings and shape.
 
 ## 12. A horizontal scrub of a row of panes
 
@@ -88,7 +88,7 @@ That is not how a document reads: its subsections present themselves as you scro
 
 The second program's press opened the level under a brief in a new pane, on the ground that a reader had just read the brief and need not enter it.
 
-With the level laid in the lane there is nothing to open beside the brief. A press opens the brief itself, whole, in place, and [the mark folds it](lane.md#6-folding-and-opening).
+With the level laid in the lane there is nothing to open beside the brief. A press opens the brief itself, whole, in place, and [the action line folds it](lane.md#61-the-action-line-is-the-press).
 
 ## 15. The path as columns of siblings, stacked
 
@@ -118,10 +118,28 @@ The author's verdict: going for a small, not so pretty icon up top is absolutely
 
 An icicle: what lies beneath a brief as columns left to right, one per depth, each cell as tall as its branch is heavy.
 
-Superseded by [the shape's form](widgets.md#3-the-ahead) on the author's reading: a second mode of presentation beside the shape, where one figure drawn twice, once for the lane and once for what lies beneath it, teaches the reader one thing.
+Superseded by [the shape's form](widgets.md#4-the-ahead) on the author's reading: a second mode of presentation beside the shape, where one figure drawn twice, once for the lane and once for what lies beneath it, teaches the reader one thing.
 
 ## 20. A tinted surface as the fold
 
 The heading and the first paragraph tinted under the pointer, and a press anywhere on them folding or opening the brief.
 
-The author dropped the tint and made [the action line](lane.md#6-folding-and-opening) the press: open beneath a folded face, fold at the foot of a whole brief. The text stays text.
+The author dropped the tint and made [the action line](lane.md#61-the-action-line-is-the-press) the press: open beneath a folded face, fold at the foot of a whole brief. The text stays text.
+
+## 21. A tree with an opening of its own
+
+The tree's second build could open and close its rows apart from the lane.
+
+The author found it strange again: opening there and opening in the text should be one thing. [The tree](widgets.md#2-the-tree) is the lane's own outline, one state and never two.
+
+## 22. A level merged into one block
+
+A step on the ahead's ladder that merged a whole level into one block when it did not fit.
+
+The author found it incomprehensible. [The ladder](widgets.md#42-a-ladder-down-when-it-does-not-fit) drops the deepest level instead and marks it with a tail, so every brief still in view keeps its place.
+
+## 23. A dial
+
+The settings' first control was a dial.
+
+The author found it ugly the same day. [The meter](widgets.md#61-the-meters) replaced it: an arc with the value drawn over a faint track and the icon in the middle.

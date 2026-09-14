@@ -12,35 +12,31 @@ One interface serves two moments of the same repository. Locally it reads a work
 
 It also shows what the harness hides. A harness gives very little sight of what a session is doing, and keeps what it does give in a transcript outside the repository the work produced. A session that records its work where the knowledge lives is read here like everything else.
 
-Both of those are bought by refusing more. This builds no new substrate and no new harness, so the substrate stays prose in markdown and git, and the harness stays the one that exists with its context appended rather than composed. The medium [the code's sixth section](../../code.md#6-how-far-this-goes) reaches for is not this and is not built from this.
+Both of those are bought by refusing more. This builds no new substrate and no new harness, so the substrate stays [markdown and git](../practice.md#1-files-folders-and-commits), and the harness stays the one that exists, its context a transcript it appends to. The medium [the code's sixth section](../../code.md#6-how-far-this-goes) reaches for is not this and is not built from this.
 
 *Reasoned, the author's, 2026-09-12.*
 
-### 1.1 What it is handed
+## 2. What it is handed
 
-The surface is given a path in a working tree and never reads above it, so a repository, a folder inside one, or a single file are all valid roots and the root is the body.
+The surface is given a path in a working tree and never reads above it, so a repository, a folder inside one, or a single file are all valid roots. What the root connects is the body, the whole the surface reads and draws.
 
-It digests only what [the stamp](../practice.md#9-a-file-says-it-is-under-the-code) declares to be knowledge, which is what lets a directory be onboarded a file at a time. So the surface needs no knowledge of harnesses at all: whatever wants to be read writes itself into the substrate first. An image is not stamped, and needs no stamp: it is drawn because a stamped brief shows it, and a file no brief shows is never read.
+It digests only what [the stamp](../practice.md#2-a-file-says-it-is-under-the-code) declares to be knowledge, which is what lets a directory be onboarded a file at a time, and it needs no knowledge of harnesses at all: whatever wants to be read writes itself into the substrate first. An image is not stamped, and needs no stamp: it is drawn because a stamped brief shows it, and a file no brief shows is never read.
 
-What it finds there it does not interpret. What counts as a brief, and what nests beneath it, is [the practice's answer](../practice.md#1-the-medium): a brief is a file or a section in one, a folder is a holon whose brief is its entry, and a level is what stands beneath one brief.
+What it finds there it does not interpret. What counts as a brief, and what nests beneath it, is [the practice's answer](../practice.md#1-files-folders-and-commits): a brief is a file or a section in one, a folder is a holon whose brief is its entry; and a level, then, is what stands beneath one brief.
 
 *Reasoned, 2026-09-12.*
 
-## 2. Reading and orientation come apart
+## 3. Reading and orientation come apart
 
-A reader reads one thing at a time, and the eye that moves to a second column of prose has stopped reading the first. What a reader wants from around the text is not more text but a sense of place: where they came from, what lies beneath, what this brief points at. Headings and shape give that, and prose does not.
+A reader reads one thing at a time, and the eye that moves to a second column of prose has stopped reading the first. So the lane is one, and what stands at its sides is headings and shape, never prose, since a sense of place is what a reader wants from around the text and prose is the costliest way to give it.
 
-So the surface is one lane of prose, centred, with room on either side, and the sides orient. The lane carries the body in the order a document reads, each brief at a grade the reader sets: folded to its face, or read whole. The sides carry the tree, the shape beneath, the links, and whatever else a reader spawns there, and never prose.
-
-The first reading model gave a level to a pane and stood three panes side by side. The author's verdict, after a day of use, was that only one pane is ever read, and that the others earned their room for orientation alone, which they gave in prose, the costliest way there is. The depth a reader most wanted, the level beneath the brief in front of them, stood behind a pointer and a press. Both are what this model answers.
-
-*Reasoned, the author's, 2026-09-13, from using the program built the same day; the first model stands beneath, refused.*
+*Reasoned, the author's, 2026-09-13, from a day's use of [the first reading model](refused.md#11-a-level-to-a-pane-three-abreast), which gave a level to a pane.*
 
 [the level beneath](lane.md)
 
-## 3. Five areas, and what stands in them
+## 4. Five areas, and what stands in them
 
-The lane is one of five areas in a row: a wing, a gutter, the lane, a gutter, a wing. The gutters hold what stands beside a brief, aligned with it and scrolling with it. The wings hold figures of the body that stand on their own. A reader chooses what each area shows from a light row of icons at its foot, and settings are a figure like any other.
+The lane is one of five areas in a row: a wing, a gutter, the lane, a gutter, a wing. The gutters hold what stands beside a brief, aligned with it and scrolling with it. The wings hold figures, the widgets that draw [the body](#2-what-it-is-handed) and stand on their own. A reader chooses what each area shows from a light row of icons at its foot, and settings are a figure like any other.
 
 That is a small framework, kept small on purpose. It is what lets a new drawing be tried by adding one function, and what keeps every drawing in step, since all of them read one shared state and act through the same few verbs.
 
@@ -48,27 +44,31 @@ That is a small framework, kept small on purpose. It is what lets a new drawing 
 
 [the level beneath](framework.md)
 
-## 4. The widgets
+## 5. The widgets
 
-What can stand in a wing or a gutter, each described once it exists, and the rules every one of them keeps: nothing drawn that the substrate does not hold, nothing drawn too small to read, one brief lit wherever it is drawn, and ink spent only where a reader has asked.
+The widgets are what can stand in a wing or a gutter: the tree, the shape, the ahead, the links, the settings and the plate, each described once it exists. They keep one set of rules between them, so a reader learns a family rather than a stranger per figure.
 
 *Reasoned, 2026-09-13; each widget carries its own grade beneath.*
 
 [the level beneath](widgets.md)
 
-## 5. How it is built
+## 6. How it is built
 
-The surface is one page the browser manages, and one TypeScript file run with Bun makes it. Run against a path in a working tree, the file serves the page live and tells it when a file changes. Run once with a flag, it writes the page with the body inside, and that is all the pipeline does on each commit.
+The surface is one page the browser manages, and one TypeScript file run with Bun makes it, standing beside this entry as [`surface.ts`](surface.ts). Run against a path in a working tree, the file serves the page live and tells it when a file changes. Run once with a flag, it writes the page with the body inside, and that is all the pipeline does on each commit.
 
-Either way the file reads the stamped markdown and hands the page the substrate already typed, so the page draws structure it receives and never parses prose to find it. It is kept to one file because this is the proof of concept.
+Run with `--check`, it only traces, and prints its warnings and every face past [the practice's flag](../practice.md#53-the-check-flags-a-face-past-four-hundred-characters).
+
+Either way the file reads [the stamped](#2-what-it-is-handed) markdown and hands the page the substrate already typed, as data with its structure declared, so the page draws structure it receives and never parses prose to find it. It is kept to one file because this is the proof of concept.
 
 *In force, the author's decision, 2026-09-12.*
 
 [the level beneath](implementation.md)
 
-## 6. What this does not answer
+## 7. What this does not answer
 
-How a reader sees where they have been. The lane keeps what a reader opened, so part of the trail shows as what stands unfolded, but following a link lays the lane afresh, and though the browser's history and escape both step back, nothing draws the way. The drawing it wants is two-dimensional rather than a line. It is owed, and it is not needed to begin.
+Four things the surface does not answer cross the levels beneath, so they stand here rather than at one level's foot.
+
+How a reader sees where they have been. The lane keeps what a reader opened, so part of the trail shows as what stands unfolded, but [following a link lays the lane afresh](lane.md#9-following-a-link-moves-you), and though the browser's history and [escape](lane.md#52-escape-is-an-undo) both step back, nothing draws the way. The drawing that would is a map of the visits rather than a line back through them. It is owed, and it is not needed to begin.
 
 Whether the harness can be modified after all. Its SDK could assemble a context from the substrate rather than append to a trail, which is the largest gain in reach here, and it is unanswered.
 
@@ -76,14 +76,14 @@ What a session keeps. The lane and the widgets read any substrate, so they read 
 
 What stands beside a brief in the left gutter. Commits and people belong there, and both wait for git, which [the implementation](implementation.md#9-git-waits-for-history) leaves for history.
 
-*Open, 2026-09-13. What each level leaves open stands at its own foot, the technical ground included.*
+*Open, 2026-09-13.*
 
-## 7. What was tried and refused
+## 8. What was tried and refused
 
-Two programs were built before this model. A reader and its nine briefs were built in one sitting on 2026-09-11, each change made before the last had been used, and both were retired to git the next day. A second program was written on 2026-09-13 against the specification written first, a level to a pane, three abreast, and the author used it that day. Its trace of the body and its figures carry into this model; its reading model does not.
+What the programs before this model reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, since a refusal is looked up when someone proposes it again and never read through, so no refusal stands on another.
 
-What both reached for is kept beneath, each shape with the reason it is not wanted, so that none of them is put forward again as though it were new. That level is a flat run rather than a gradient, because a refusal is looked up when someone proposes it again and never read through.
+Two programs were built before this model. A reader and its nine briefs of specification were built in one sitting on 2026-09-11, before anything was specified first, each change made before the last had been used, and both were retired to git the next day. The first reading model was written on 2026-09-13 against a specification written first, a level to a pane, three abreast, and the author used it that day. Its trace of the body, the reading of the files that hands the page its briefs, and its figures carry into this model; its reading model does not.
 
-*Seen, in both programs and in the author's reading of them; each refusal beneath names the rule or the observation that grades it. It is also the reason [the study names running ahead](../../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own.*
+*Seen, in both programs and in the author's reading of them; each refusal beneath names the rule or the observation that grades it. [The study names running ahead](../../study/findings.md#7-building-runs-ahead-more-easily-than-writing-does) as a finding of its own for the same reason.*
 
 [the level beneath](refused.md)
