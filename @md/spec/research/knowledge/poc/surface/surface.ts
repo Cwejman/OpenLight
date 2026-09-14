@@ -32,6 +32,9 @@ import { marked } from "marked";
 
 const PORT = 4141;
 
+/** The length of visible text past which the practice asks that a brief's face be read again. */
+const FACE_FLAG = 400;
+
 // ## 1.1 The run
 
 async function run(): Promise<void> {
@@ -46,6 +49,12 @@ async function run(): Promise<void> {
     const body = await trace(root);
     console.log(`${body.briefs.length} briefs traced from ${body.root}`);
     body.warnings.forEach((w) => console.log("  " + w));
+    // faces past the practice's flag are listed apart from the warnings, since each is read and may be left with a reason
+    const long = body.briefs.flatMap((b) => {
+      const face = textOf(b.body.filter((t) => t.type !== "space").slice(0, 1)).length;
+      return face > FACE_FLAG ? [`${b.file} ${b.number || "·"} "${b.title}": a face of ${face}`] : [];
+    });
+    if (long.length) console.log(`${long.length} face${long.length === 1 ? "" : "s"} past ${FACE_FLAG} characters, to be read:\n${long.map((l) => "  " + l).join("\n")}`);
     return;
   }
   if (flag("--build") >= 0) {

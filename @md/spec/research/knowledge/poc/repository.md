@@ -33,7 +33,7 @@ The order is a claim like any other: each step stands on the ones before it.
 3. Take it back into OpenLight as a submodule at the same path, and read the arc with the surface from there to see nothing broke.
 4. Take it into Hjulverkstan and the closed-source client, where the copy of `code.md` is replaced by the submodule.
 
-*In force, 2026-09-14; images in the surface and sketching are taken up, and the move is next.*
+*In force, 2026-09-14; images in the surface and sketching are taken up, and the move comes after [the polish](polish.md).*
 
 ## 4. What is not answered
 

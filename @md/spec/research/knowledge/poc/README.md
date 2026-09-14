@@ -37,10 +37,18 @@ What is drawn, and how, is prose in a skill; a thin file of code keeps the geome
 
 [the level beneath](sketching/README.md)
 
-## 5. Its own repository
+## 5. The polish
+
+Much of the arc grew a decision at a time, and its faces grew with it. The polish reads every file outside the code and the study against the code, in the order they stand on each other, and writes each again where it fails, before the arc moves.
+
+It is a plan written for a session that starts fresh, with what it reads first, the method per file, and the decisions that wait on the author.
+
+[the level beneath](polish.md)
+
+## 6. Its own repository
 
 The proof of concept is no longer used by one project. OpenLight holds it, Hjulverkstan is taking it up, and a closed-source client began with it the week of 2026-09-07 from a copy of the code, which is the drift the code warns of: two copies quietly become two codes.
 
-So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done, and it comes next, now that sketching is taken up.
+So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done, and it comes after the polish.
 
 [the level beneath](repository.md)

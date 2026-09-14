@@ -25,6 +25,8 @@ Headings are numbered, and the numbers nest with the headings: 1, then 1.1 and 1
 
 The heading and the first paragraph after it are the face of a brief, and nothing marks them: no italics, no bold, no blockquote. Position is the mark, so a renderer can style the surface without the author annotating it, and one fact is not written in two homes. The price is that position must be reliable: a brief never opens with a list, a table, a quote or an image. The first thing after a heading is always the prose that carries the understanding, and a bullet list follows the paragraph that needs it. Reasoned.
 
+A face is short, and it grows without anyone deciding it should. It says what the brief gives, in a sentence or two, with the why that makes it worth entering; the ground, the detail and the history of how the brief came to be go beneath it. A brief that is one paragraph and its confidence line, and whose face needs reading twice, is a brief whose break was never taken, the [level not broken down](../code.md#42-the-order-of-a-holarchy) that the code names. So a face past four hundred characters of visible text is listed by the surface's check, and read: either broken, or left with the reason it holds. The figure is a flag for noticing, and never a law a face is written to. *Measured, 2026-09-14: across 179 briefs outside the study the median face ran 322 characters and the upper quartile 457, and the 23 faces past 600 were the briefs that had grown by additions, each day's decision appended to the paragraph before it.*
+
 Bulleted and numbered lists carry a blank line between items, so they read as raw markdown. Whether a long bullet may open in bold is open: bold is the only up-signal markdown has and it fails at scale, and it would put the surface in a second home beside position.
 
 ## 4. Links and citations
@@ -90,6 +92,6 @@ The stamp's form is not settled. Open, and wanted before anything publishes a tr
 
 ## 10. Open
 
-What this practice has not settled, to be found by observation: how files hang under an entry, and whether the character counts the earlier editions used as red flags, five hundred for a paragraph and three hundred for a bullet, earn a place here.
+What this practice has not settled, to be found by observation: how files hang under an entry, and whether the character counts the earlier editions used as red flags, five hundred for a paragraph and three hundred for a bullet, earn a place here beside the one [the face](#3-the-surface-is-declared-by-position) has taken.
 
 And the labs' own files. Their outputs, prompts and editions carry the stamp from when they were written, under editions that are not the law now, and they are frozen, so they are reached by links rather than mounts and nothing here is applied to them. Whether they keep the stamp, and so whether the substrate holds them at all, is open, and a first reader need not open them.
