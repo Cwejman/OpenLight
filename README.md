@@ -48,4 +48,10 @@ Each step stands on the ones before it. Stop where your purpose is served: for t
 
 [`@md/spec/research/`](@md/spec/research/) is reference depth, not part of the order — exploration records and blind derivations the tree was built from; descend only when work calls for a decision's grounding.
 
+## Licence
+
+Everything here that is the author's is dedicated to the public domain under [CC0 1.0](LICENSE): use it for anything, with no credit asked. It was public already, and nobody can own what is in the public domain. Quotations and images from others keep their own terms.
+
+The knowledge arc at [`@md/spec/research/knowledge`](@md/spec/research/knowledge) is [the rule](https://github.com/Cwejman/the-rule), a repository of its own taken in as a submodule, under the same dedication.
+
 ![footer](.img/footer.png)
