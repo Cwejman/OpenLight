@@ -73,4 +73,4 @@ Last formal specification: ShEx 2.1, a Final Community Group Report of 2019-08-0
 
 A folklore warning attaches: a Python ShEx package shows 315,273 monthly downloads, which looks like healthy adoption. It is transitive, riding on an unrelated schema framework.
 
-Reports: [`a8712480bac2a248a`](../../../../../sweep-2026-08/raw/a8712480bac2a248a.md), [`adc9dab44aefdde97`](../../../../../sweep-2026-08/raw/adc9dab44aefdde97.md).
+Reports: [`a8712480bac2a248a`](../../../sweep-2026-08/raw/a8712480bac2a248a.md), [`adc9dab44aefdde97`](../../../sweep-2026-08/raw/adc9dab44aefdde97.md).

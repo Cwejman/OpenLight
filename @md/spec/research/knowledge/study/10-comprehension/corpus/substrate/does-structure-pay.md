@@ -97,4 +97,4 @@ Worth carrying whole, because they are the ones to answer.
 
 The agent's own most important negative: there is **no head-to-head of model-assisted, human-declared structure against a well-written prose document, on the same corpus, with the same frontier reader.** GrOIL, Memanto and the semantic-layer study each beat model-*extracted* or *unstructured* baselines — never a good prose baseline. That is the missing study, and it is exactly the one the claim turns on.
 
-Report: [`aa5f5baaa66cc8bf1`](../../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md).
+Report: [`aa5f5baaa66cc8bf1`](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md).

@@ -59,4 +59,4 @@ One personnel note worth carrying: the author of the malleable-software essay no
 
 Three independent structure-editor and codebase-as-database ventures converged on consulting as the funding answer within a year. The one explicit commercial post-mortem names the structured editor itself as what models invalidated. And from the research side, the diagnosis is that the missing piece is **theory rather than engineering** — which is the most transferable warning in the lineage for anyone attempting the same thing again.
 
-Reports: [`a4bdd8ce92076fef2`](../../../../../sweep-2026-08/raw/a4bdd8ce92076fef2.md), [`a5105d288fc90070c`](../../../../../sweep-2026-08/raw/a5105d288fc90070c.md).
+Reports: [`a4bdd8ce92076fef2`](../../../sweep-2026-08/raw/a4bdd8ce92076fef2.md), [`a5105d288fc90070c`](../../../sweep-2026-08/raw/a5105d288fc90070c.md).

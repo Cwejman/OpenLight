@@ -63,4 +63,4 @@ Seven lessons, stated as the agent stated them.
 
 The market's answer to typed structure against files is *both*, with files as the substrate. The product that proves it, and the documentation sentence that states it, are in [`../field/tools-for-thought.md`](../field/tools-for-thought.md) §1.
 
-Reports: [`a498dd38f2322a083`](../../../../../sweep-2026-08/raw/a498dd38f2322a083.md), [`a3f6ddd86cf882a6d`](../../../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).
+Reports: [`a498dd38f2322a083`](../../../sweep-2026-08/raw/a498dd38f2322a083.md), [`a3f6ddd86cf882a6d`](../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).

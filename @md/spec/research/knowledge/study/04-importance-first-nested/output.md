@@ -5,7 +5,7 @@ kind: brief
 
 # Four findings that carry the rest
 
-*Research register — structured, uncommitted. Written from the 45 raw reports of the [2026-08 sweep](../../../sweep-2026-08/README.md) alone; nothing fetched from the web. Links out are offers, not missing pieces: each sentence around one says what opening it gives, and the text reads whole without it.*
+*Research register — structured, uncommitted. Written from the 45 raw reports of the [2026-08 sweep](../sweep-2026-08/README.md) alone; nothing fetched from the web. Links out are offers, not missing pieces: each sentence around one says what opening it gives, and the text reads whole without it.*
 
 *Two cautions travel with every number here, because they travel with the sweep itself. The agents ran out of web-search budget early and fell back on direct fetches, which over-samples open sources. And two agents independently caught automated summarisers inventing quotes and sample sizes — so a figure below is worth exactly what its verification note says, no more. Where a report's agent could not verify a number, this piece says so in the same sentence.*
 

@@ -61,4 +61,4 @@ Alongside it, single-interaction memory injection with no store access, and quer
 
 **But all of it is provenance over the memory store, not over the world.** Nothing answers "which run edited this file, this row, this ticket, under what permissions, from what context." The observability tier remains **tracing**: an append-only record beside the change, joined by convention rather than carried by the changed artifact. The one shipping system where the changed data *is* the versioned artifact is a coding agent tracking its own context in git — and that is the agent's context, not the user's data.
 
-Report: [`a187277ed3a006fbc`](../../../../../sweep-2026-08/raw/a187277ed3a006fbc.md).
+Report: [`a187277ed3a006fbc`](../../../sweep-2026-08/raw/a187277ed3a006fbc.md).

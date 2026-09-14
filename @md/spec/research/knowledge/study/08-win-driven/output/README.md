@@ -19,7 +19,7 @@ Beyond prose, the code hopes for a medium in which a program, a screen and a mod
 
 ## 1. What a number here is worth
 
-The sweep is forty-five reports: eighteen named runs, each on one subject, and twenty-seven sub-agents they spawned. Each report follows a fixed skeleton, headline, map, findings with a link and a date, what moved, what could not be established, leads. [The sweep's register](../../../../sweep-2026-08/README.md) names the runs and their subjects; each file in this folder opens by linking the reports it stands on, which hold the paper links, the exact wording and the numbers behind it. Seen.
+The sweep is forty-five reports: eighteen named runs, each on one subject, and twenty-seven sub-agents they spawned. Each report follows a fixed skeleton, headline, map, findings with a link and a date, what moved, what could not be established, leads. [The sweep's register](../../sweep-2026-08/README.md) names the runs and their subjects; each file in this folder opens by linking the reports it stands on, which hold the paper links, the exact wording and the numbers behind it. Seen.
 
 xTwo things bound every figure. Most agents exhausted their web-search budget early and fell back to fetching primary sources directly, so the sweep over-samples what has an open PDF or a public API, standards bodies, GitHub, preprint servers, and under-samples blogs, paywalled journals, trade press and anything not in English. And two agents independently caught an automated summariser inventing quotations and sample sizes, and re-verified their findings against the primary texts. So a figure here is worth what its report's verification note says, and no more. Seen.
 

@@ -8,7 +8,7 @@ status: in force
 
 ## 1. Why the arc is polished now
 
-The knowledge arc, [everything its entry connects](../README.md), was written a decision at a time, and much of it grew by addition rather than being laid by the gradient. This plan brings it under [the code](../code.md) before it moves to [its own repository](repository.md), and it is written for a session that starts with nothing but the files.
+The knowledge arc, [everything its entry connects](../README.md), was written a decision at a time, and much of it grew by addition rather than being laid by the gradient. This plan brings it under [the code](../code.md) before it moves to [its own repository](../repository.md), and it is written for a session that starts with nothing but the files.
 
 The sign is [the face](practice.md#52-a-face-is-short), a brief's heading and first paragraph. A brief that grows by addition lengthens its one paragraph until the face is the whole brief and nothing in it can be skipped, and its confidence line grows the same way, into a history of each ask. On 2026-09-14 sixty faces across the arc ran past [the flag](practice.md#53-the-check-flags-a-face-past-four-hundred-characters).
 
@@ -34,7 +34,7 @@ In scope is every stamped file the arc's entry reaches, except [the code and the
 
 4. Sketching: [its entry](sketching/README.md), [its skill](sketching/skill.md), and [its tool](sketching/implementation.md).
 
-5. [The repository](repository.md), then the entries: [the proof of concept's](README.md) and [the arc's](../README.md).
+5. [The repository](../repository.md), then the entries: [the proof of concept's](README.md) and [the arc's](../README.md).
 
 6. [The ideas](../ideas/README.md), only as [the author decides](#6-what-the-author-decided).
 
@@ -152,6 +152,6 @@ Whether "grade" for a brief's fold state in the surface and "grade" for a claim'
 
 Whether the entries and the ideas want confidence lines on every brief; the pass added short ones where a brief makes a claim, and left the rest.
 
-The surface's three links into OpenLight's design language stand as they were, since cutting them is [the repository's first step](repository.md#3-the-steps-in-order).
+The surface's three links into OpenLight's design language stand as they were, since cutting them is [the repository's first step](../repository.md#6-the-steps-in-order).
 
 *Open, 2026-09-14.*

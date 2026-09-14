@@ -39,4 +39,4 @@ Two results bound the enthusiasm.
 
 One sentence from arXiv:2607.09678, which measured message-format effects across six relay hops, states it better than any synthesis: **"Structure buys a faithful, error-localizing channel — not an error-correcting code."** Its numbers support it: a strong relay is nearly lossless in every format, a 1.5-billion-parameter relay's cross-format spread grows **8.7×**, and in a paired-fork injection an injected wrong value persists to the final hop in **83–100% of chains in every format**.
 
-Reports: [`ab601f5a0087e7fc8`](../../../../../sweep-2026-08/raw/ab601f5a0087e7fc8.md), [`aa5f5baaa66cc8bf1`](../../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a1c816c1f7cbcfdf9`](../../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md).
+Reports: [`ab601f5a0087e7fc8`](../../../sweep-2026-08/raw/ab601f5a0087e7fc8.md), [`aa5f5baaa66cc8bf1`](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a1c816c1f7cbcfdf9`](../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md).

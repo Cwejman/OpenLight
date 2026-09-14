@@ -75,7 +75,7 @@ Information architecture's own methods rest on a null result. Card sorting's sam
 
 ## 6. Where this stands
 
-The reading-science verdicts on the six principles, the misses and the generalisation gap are [the comprehension-science report](../../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md). Expertise in professionals, aviation, medicine and the lawyers are [the professional-reader report](../../../../sweep-2026-08/raw/a4071d48c3f5d869c.md). The instrumented reading studies and the eye-tracking are [the reading-time trace](../../../../sweep-2026-08/raw/aec803bcd71ce9745.md) and [its revised verdicts](../../../../sweep-2026-08/raw/af3e6b7e48703f0a0.md). Information architecture is [the corrective card-sorting sweep](../../../../sweep-2026-08/raw/ae8fc467393dd0407.md) and [the card-sorting primary](../../../../sweep-2026-08/raw/a5437aa6a38bae10c.md).
+The reading-science verdicts on the six principles, the misses and the generalisation gap are [the comprehension-science report](../../sweep-2026-08/raw/adc8fe8e64ae23f70.md). Expertise in professionals, aviation, medicine and the lawyers are [the professional-reader report](../../sweep-2026-08/raw/a4071d48c3f5d869c.md). The instrumented reading studies and the eye-tracking are [the reading-time trace](../../sweep-2026-08/raw/aec803bcd71ce9745.md) and [its revised verdicts](../../sweep-2026-08/raw/af3e6b7e48703f0a0.md). Information architecture is [the corrective card-sorting sweep](../../sweep-2026-08/raw/ae8fc467393dd0407.md) and [the card-sorting primary](../../sweep-2026-08/raw/a5437aa6a38bae10c.md).
 
 ## 7. What could not be established
 

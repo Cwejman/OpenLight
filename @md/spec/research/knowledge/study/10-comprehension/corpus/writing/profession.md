@@ -37,4 +37,4 @@ Grade everything in this section opinion dressed as data.
 
 DITA is stable but stalled, not revived: the specification is six years late and has one committer, the tooling ships only a preview, the professional body that carried it in North America is bankrupt, and the conference taxonomy no longer names it. The toolkit and the vendors are alive. The standard is not advancing.
 
-Reports: [`a86776519f614dd3a`](../../../../../sweep-2026-08/raw/a86776519f614dd3a.md), [`a5e68a671a08e519a`](../../../../../sweep-2026-08/raw/a5e68a671a08e519a.md).
+Reports: [`a86776519f614dd3a`](../../../sweep-2026-08/raw/a86776519f614dd3a.md), [`a5e68a671a08e519a`](../../../sweep-2026-08/raw/a5e68a671a08e519a.md).

@@ -52,13 +52,3 @@ Much of the arc grew a decision at a time, and [its faces](practice.md#52-a-face
 *In force, 2026-09-14.*
 
 [the level beneath](polish.md)
-
-## 6. Its own repository
-
-The proof of concept is no longer used by one project. [OpenLight](../../../../README.md) holds it, [Hjulverkstan](https://github.com/Hjulverkstan/hjulverkstan) is taking it up, and a closed-source client began with it the week of 2026-09-07 from a copy of the code, which is the drift [the code warns of](../code.md#33-the-ground): a copy quietly becomes a second code.
-
-So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done.
-
-*In force, the author's direction, 2026-09-14.*
-
-[the level beneath](repository.md)

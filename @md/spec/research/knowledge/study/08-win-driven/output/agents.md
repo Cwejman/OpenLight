@@ -5,7 +5,7 @@ kind: brief
 
 # What a model reads
 
-This is what the 2025 to 2026 evidence says structure does for a session: where it helps a model find and where it fails to help it understand, what the harness (the program around the model that assembles its context and runs its tools) now does with that context, and where the code's claim that writing for people and building context for models is one problem breaks. It stands on [the context-engineering report](../../../../sweep-2026-08/raw/aafbf4f4a32e619af.md), [the coding-agent documentation sweep](../../../../sweep-2026-08/raw/af750ce80e754223b.md) and [the documentation-platform report](../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md), which hold the paper links, the exact wording and the full numbers behind every finding here. Reading it, you know what a brief under the code does for a session and what it does not.
+This is what the 2025 to 2026 evidence says structure does for a session: where it helps a model find and where it fails to help it understand, what the harness (the program around the model that assembles its context and runs its tools) now does with that context, and where the code's claim that writing for people and building context for models is one problem breaks. It stands on [the context-engineering report](../../sweep-2026-08/raw/aafbf4f4a32e619af.md), [the coding-agent documentation sweep](../../sweep-2026-08/raw/af750ce80e754223b.md) and [the documentation-platform report](../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md), which hold the paper links, the exact wording and the full numbers behind every finding here. Reading it, you know what a brief under the code does for a session and what it does not.
 
 ## 1. Composition matters more than length
 

@@ -67,4 +67,4 @@ Worth a line: one accelerator company sells "an ecosystem of open-source, local-
 
 Against that: the underlying claims are 30–60 years old and their current custodians move at research pace. Ink & Switch published six notes in 2026 and **none of them is about AI substrates**; Dynamicland is publishing pages that predate the agent era; the leading future-of-programming community renamed itself and its most recent episode is about live programming feedback.
 
-Report: [`a09867b88abcb610b`](../../../../../sweep-2026-08/raw/a09867b88abcb610b.md).
+Report: [`a09867b88abcb610b`](../../../sweep-2026-08/raw/a09867b88abcb610b.md).

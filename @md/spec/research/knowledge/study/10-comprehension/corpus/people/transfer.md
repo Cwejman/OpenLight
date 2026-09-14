@@ -65,4 +65,4 @@ One agent offered a defensible restatement of the project's motivating claim, an
 
 Three concessions go with it: drop every figure in the 1:10:100 family, state that the documentation-to-outcome link is correlational only, and frame the artifact as one mechanism alongside mentorship and relationship design rather than as the mechanism. The retired figures are in [`folklore.md`](../folklore.md).
 
-Report: [`abdf5bfa14a7ddd82`](../../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).
+Report: [`abdf5bfa14a7ddd82`](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).

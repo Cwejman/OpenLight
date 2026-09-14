@@ -61,4 +61,4 @@ No published argument *advocating* shallow or non-transitive permission on perfo
 
 Also unestablished: any independent, non-vendor benchmark of any Zanzibar clone; any academic work quantifying bounded-depth against unbounded evaluation complexity; and any **named public breach** attributable to assistant oversharing. Microsoft's own hypothetical is the only case on record. Treat "the assistant leaked X at company Y" as folklore until sourced.
 
-Reports: [`aea19b144c46bfc26`](../../../../../sweep-2026-08/raw/aea19b144c46bfc26.md), [`abffcf492c6f3d77d`](../../../../../sweep-2026-08/raw/abffcf492c6f3d77d.md), [`adc9dab44aefdde97`](../../../../../sweep-2026-08/raw/adc9dab44aefdde97.md).
+Reports: [`aea19b144c46bfc26`](../../../sweep-2026-08/raw/aea19b144c46bfc26.md), [`abffcf492c6f3d77d`](../../../sweep-2026-08/raw/abffcf492c6f3d77d.md), [`adc9dab44aefdde97`](../../../sweep-2026-08/raw/adc9dab44aefdde97.md).

@@ -49,7 +49,7 @@ Two things, both narrower than the practice claims.
 
 **Faceted browsing.** Yee, Swearingen, Li & Hearst, CHI 2003: 32 students over 35,000 images. **90% preferred faceted browsing; complete-recall rose from 21% to 77% on one collection and 57% to 81% on another; empty result sets fell from 82 to 26.** But it was ten times slower per step (0.3s against 3.7s), the condition got three extra minutes, and the baseline was keyword search rather than a hierarchy. A 2010 review found transfer to real catalogues "inconclusive."
 
-**Navigation is wanted, not merely tolerated.** Bergman, Beyth-Marom & Nachmias, "Improved search engines and navigation preference in personal information management," *ACM TOIS* 2008, 159 citations: people prefer navigation to search. Hierarchy is a retrieval affordance people actively want, not just a filing artefact. *(From [`a3f6ddd86cf882a6d`](../../../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md), the tools-for-thought lane, not from the two information-architecture reports below.)*
+**Navigation is wanted, not merely tolerated.** Bergman, Beyth-Marom & Nachmias, "Improved search engines and navigation preference in personal information management," *ACM TOIS* 2008, 159 citations: people prefer navigation to search. Hierarchy is a retrieval affordance people actively want, not just a filing artefact. *(From [`a3f6ddd86cf882a6d`](../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md), the tools-for-thought lane, not from the two information-architecture reports below.)*
 
 ## 7. Polyhierarchy is blessed and unmeasured
 
@@ -59,4 +59,4 @@ Putting one item in several places is normatively endorsed — ANSI/NISO Z39.19-
 
 Two studies, both vendor-adjacent, both paper-only. MeasuringU (2024) put ChatGPT against 200 humans on 40 products: both produced five categories, item match averaged 68% across three runs, kappa .60 across runs against a chance level of 21%. Kuric et al.'s Card Sorting Simulator (arXiv 2505.09478) ran 28 real practitioner studies and 1,399 participants against four models: best agreement NMI 0.73 / ARI 0.48, similarity-matrix correlation only **0.42–0.50**, degrading with card count and label difficulty. One result worth carrying: **prompting for an aggregate clustering beat simulating individual synthetic participants**, and the authors observe that simulated sorting is "more analogous to card sorting by experts" than by users — precisely the comparison nobody has ever validated.
 
-Reports: [`a5437aa6a38bae10c`](../../../../../sweep-2026-08/raw/a5437aa6a38bae10c.md), [`ae8fc467393dd0407`](../../../../../sweep-2026-08/raw/ae8fc467393dd0407.md).
+Reports: [`a5437aa6a38bae10c`](../../../sweep-2026-08/raw/a5437aa6a38bae10c.md), [`ae8fc467393dd0407`](../../../sweep-2026-08/raw/ae8fc467393dd0407.md).

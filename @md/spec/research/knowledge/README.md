@@ -3,9 +3,11 @@ under: the code
 kind: brief
 ---
 
-# The knowledge arc
+# The rule
 
-How knowledge should be structured, so that what one person understands reaches whoever needs it next, is not solved. This arc, the run of work from the search to what it has produced, is that search. It has produced enough to be used, and this page says what stands and in what order to take it.
+The rule is how knowledge is built, and with it how one moves into what is not yet known: at every step, the biggest win within reach of what is already held, left whole before the next. Written knowledge is where it was found, and where it is lived first.
+
+This page says what stands here and in what order to take it. The first file still calls the rule the code, and [the last brief](#5-this-repository) says why.
 
 ## 1. The code
 
@@ -40,3 +42,11 @@ Beside the code stand the author's ideas: positions on how a model and [a harnes
 *The author's, open.*
 
 [the level beneath](ideas/README.md)
+
+## 5. This repository
+
+The rule has a repository of its own as a pragmatic first step. Projects needed it as a submodule before the code could be written again as its entry, so it moved whole, as it stands, with the code left as ratified. What comes next is that writing.
+
+*In force, the author's decision, 2026-09-14.*
+
+[the level beneath](repository.md)

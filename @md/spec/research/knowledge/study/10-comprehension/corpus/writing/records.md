@@ -93,4 +93,4 @@ Alongside it: a 4,500-ADR corpus across 750 repositories finds a **3–5 record 
 
 The competing artifact tells the adoption story: `AGENTS.md` self-reports 60,000+ open-source projects, roughly sixty-five times Buchgeher's ADR-adopting repository count, in a fraction of the time — and its own evidence is a null. See [`agents/context-files.md`](../agents/context-files.md).
 
-Reports: [`a63bf2eb6c5d05ba8`](../../../../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md), [`aae121db667d39f2d`](../../../../../sweep-2026-08/raw/aae121db667d39f2d.md), [`a7ea3bc0963c0e185`](../../../../../sweep-2026-08/raw/a7ea3bc0963c0e185.md), [`ab6fb706729be0f77`](../../../../../sweep-2026-08/raw/ab6fb706729be0f77.md), [`a7b21ac3d71f8c8f6`](../../../../../sweep-2026-08/raw/a7b21ac3d71f8c8f6.md).
+Reports: [`a63bf2eb6c5d05ba8`](../../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md), [`aae121db667d39f2d`](../../../sweep-2026-08/raw/aae121db667d39f2d.md), [`a7ea3bc0963c0e185`](../../../sweep-2026-08/raw/a7ea3bc0963c0e185.md), [`ab6fb706729be0f77`](../../../sweep-2026-08/raw/ab6fb706729be0f77.md), [`a7b21ac3d71f8c8f6`](../../../sweep-2026-08/raw/a7b21ac3d71f8c8f6.md).

@@ -61,4 +61,4 @@ Neo4j's last disclosed annual recurring revenue is **$200M from 2024-11-19** —
 
 Meanwhile every structured store is bolting on similarity: Wikidata added an embedding project in October 2025 after splitting its query service in two over scale; TypeDB previewed native vector search on 2026-08-18.
 
-Reports: [`a7bfd40b8a7c7a61c`](../../../../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md), [`a1c816c1f7cbcfdf9`](../../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md), [`a26ae7e524c53262a`](../../../../../sweep-2026-08/raw/a26ae7e524c53262a.md), [`adc9dab44aefdde97`](../../../../../sweep-2026-08/raw/adc9dab44aefdde97.md), [`aafbf4f4a32e619af`](../../../../../sweep-2026-08/raw/aafbf4f4a32e619af.md) for §5.
+Reports: [`a7bfd40b8a7c7a61c`](../../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md), [`a1c816c1f7cbcfdf9`](../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md), [`a26ae7e524c53262a`](../../../sweep-2026-08/raw/a26ae7e524c53262a.md), [`adc9dab44aefdde97`](../../../sweep-2026-08/raw/adc9dab44aefdde97.md), [`aafbf4f4a32e619af`](../../../sweep-2026-08/raw/aafbf4f4a32e619af.md) for §5.

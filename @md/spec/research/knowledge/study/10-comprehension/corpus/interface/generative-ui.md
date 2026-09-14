@@ -43,4 +43,4 @@ The agent's own reading, and it is the right one: **a project whose interface is
 
 Ship the typed layer, and treat the opaque standard as one adapter.
 
-Reports: [`a6064cc62dbf12499`](../../../../../sweep-2026-08/raw/a6064cc62dbf12499.md), [`a57740ddd62e39ab6`](../../../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).
+Reports: [`a6064cc62dbf12499`](../../../sweep-2026-08/raw/a6064cc62dbf12499.md), [`a57740ddd62e39ab6`](../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).

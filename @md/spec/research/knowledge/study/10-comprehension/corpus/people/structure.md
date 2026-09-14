@@ -34,7 +34,7 @@ On the closed question, documentation is the strongest of twelve listed factors:
 
 On the open question, where developers named factors freely, the ranking is: **(1) Mentorship, (2) Documentation, (3) Process, (4) Access and permissions, (5) System setup.** Developers "who were not assigned mentors experienced that absence of mentor resulted in significant loss of time."
 
-**Corroborated, at far larger N, from an independent direction.** The Stack Overflow 2025 Developer Survey, 49,000 respondents: 84% using or planning AI tools and 51% of professionals using them daily, but **46% actively distrust accuracy against 33% trusting**, with 66% naming "almost right, but not quite" as the top complaint — and **when AI fails, 75.3% seek humans, not documentation.** That is the largest single datum in the sweep on the document-versus-person question, and it points the same way as the onboarding ranking. *(From [`a1c816c1f7cbcfdf9`](../../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md).)*
+**Corroborated, at far larger N, from an independent direction.** The Stack Overflow 2025 Developer Survey, 49,000 respondents: 84% using or planning AI tools and 51% of professionals using them daily, but **46% actively distrust accuracy against 33% trusting**, with 66% naming "almost right, but not quite" as the top complaint — and **when AI fails, 75.3% seek humans, not documentation.** That is the largest single datum in the sweep on the document-versus-person question, and it points the same way as the onboarding ranking. *(From [`a1c816c1f7cbcfdf9`](../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md).)*
 
 Two hard caveats: the paper obscures its time units for confidentiality, so there is no absolute effect size, and the factor rankings are opinion data rather than measured causal effects. Their measured correlations for ramp-up time were "negligible to weak," +0.10 to −0.39.
 
@@ -58,4 +58,4 @@ That is the most actionable finding in the whole sweep for anyone designing a bo
 
 No causal study of documentation against an *organisational* outcome exists — no randomised trial, no quasi-experiment, no interrupted time series with documentation as the manipulated variable and an organisational outcome measured. Individual-task experiments do exist; see [`../writing/evidence.md`](../writing/evidence.md) §7. No true replication of Szulanski. No verified effect sizes from the most relevant meta-analysis of inter- and intra-organisational knowledge transfer, which was paywalled. And no credible primary source for the outsourcing-trust findings or for the productivity numbers attached to team-topology frameworks.
 
-Report: [`abdf5bfa14a7ddd82`](../../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).
+Report: [`abdf5bfa14a7ddd82`](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).

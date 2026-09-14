@@ -1,7 +1,7 @@
 {
-  "name": "knowledge-arc",
+  "name": "the-rule",
   "private": true,
-  "description": "The knowledge arc: the code, its proof of concept and its study. The surface parses markdown with marked; a sketch is rendered for a session's own look with resvg.",
+  "description": "The rule: the code, its proof of concept, its study and the ideas beside it. The surface parses markdown with marked; a sketch is rendered for a session's own look with resvg.",
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "marked": "^18.0.13"

@@ -25,4 +25,4 @@ There is **no causal study of documentation against an organisational outcome**,
 
 What a documentation structure can plausibly do is reduce friction where two parties differ in vocabulary or in meaning. There is no evidence it can close a boundary of *interest* — where the parties want different outcomes — no evidence it substitutes for mentorship, and good evidence that it decays unless something downstream consumes it. The ceiling is set by the receiver's absorptive capacity and by whether the artifact is load-bearing.
 
-Report: [`abdf5bfa14a7ddd82`](../../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).
+Report: [`abdf5bfa14a7ddd82`](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).

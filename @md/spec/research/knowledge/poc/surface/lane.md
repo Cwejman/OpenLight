@@ -10,7 +10,7 @@ status: in force
 
 The lane holds the body depth first: a brief, then the level beneath it, then the next brief of its level. It is the order a document with headings already reads, and it is the order the code lays, since [a level's briefs stand on the ones before them](../../code.md#42-the-order-of-a-holarchy) and what a brief did not need stands beneath it. The opening, the root's title and its first paragraph, stands first.
 
-The space between briefs steps down with depth, as [the design language's rhythm](../../../../design.md#rhythm--depth-derived-never-stated-twice) asks: what lies beneath a brief sits together, and the briefs of a level stand further apart the higher the level, so the gap before a brief says which level it begins.
+The space between briefs steps down with depth, as [the design language's rhythm](https://github.com/Cwejman/OpenLight/blob/main/@md/spec/design.md#rhythm--depth-derived-never-stated-twice) asks: what lies beneath a brief sits together, and the briefs of a level stand further apart the higher the level, so the gap before a brief says which level it begins.
 
 *Reasoned, the author's, 2026-09-13.*
 
@@ -150,7 +150,7 @@ A reader can make any brief the root of the lane: its heading becomes the openin
 
 ### 7.1 Scoping does what heading sizes can only do so far
 
-The registers, the heading sizes that step down by depth as [the design language's rhythm](../../../../design.md#rhythm--depth-derived-never-stated-twice) asks, count from the scope root, so the level a reader has scoped into reads at the top register again, and nesting beneath it has the full range to step down through. Without scoping, a deep level reads in the smallest registers whatever it holds.
+The registers, the heading sizes that step down by depth as [the design language's rhythm](https://github.com/Cwejman/OpenLight/blob/main/@md/spec/design.md#rhythm--depth-derived-never-stated-twice) asks, count from the scope root, so the level a reader has scoped into reads at the top register again, and nesting beneath it has the full range to step down through. Without scoping, a deep level reads in the smallest registers whatever it holds.
 
 *Reasoned, the author's, 2026-09-13.*
 

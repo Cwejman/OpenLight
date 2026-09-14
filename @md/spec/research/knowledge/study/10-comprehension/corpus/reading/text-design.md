@@ -83,4 +83,4 @@ Cognitive load theory survived by amputation: Sweller dropped germane load as a 
 
 One lead is named as the most likely place a recent negative finding is hiding: a 2025 *Educational Research Review* meta-analysis searching Mayer's own multimedia research for boundary conditions, which the agent could not reach. *Unfetched; chase it before relying on §1.*
 
-Report: [`adc8fe8e64ae23f70`](../../../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md). The two effect sizes in §1 marked as coming from the coverage chart are from [`a583337921a4f7975`](../../../../../sweep-2026-08/raw/a583337921a4f7975.md).
+Report: [`adc8fe8e64ae23f70`](../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md). The two effect sizes in §1 marked as coming from the coverage chart are from [`a583337921a4f7975`](../../../sweep-2026-08/raw/a583337921a4f7975.md).

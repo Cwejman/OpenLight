@@ -25,7 +25,7 @@ Nothing in the code needs new technology: markdown in directories, tracked in gi
 
 ### Stands in a study, under the project's entry
 
-This file is one lab's arc in a study of how knowledge is best structured ([`../README.md`](../../README.md)); the project's entry is its README ([`README.md`](../../../../../../../README.md)), whose claims the words here carry; what is only an idea waits in [`sketches.md`](../../../../../../sketches.md). The platform was first specified bottom-up, from engineering; that tree is not this file's ground.
+This file is one lab's arc in a study of how knowledge is best structured ([`../README.md`](../../README.md)); the project's entry is its README ([`README.md`](https://github.com/Cwejman/OpenLight/blob/main/README.md)), whose claims the words here carry; what is only an idea waits in [`sketches.md`](https://github.com/Cwejman/OpenLight/blob/main/@md/sketches.md). The platform was first specified bottom-up, from engineering; that tree is not this file's ground.
 
 ## Comprehension
 

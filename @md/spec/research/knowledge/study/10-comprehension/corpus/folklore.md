@@ -19,7 +19,7 @@ The pattern across them is worth more than any single entry. Three mechanisms pr
 
 **Standish CHAOS success and failure rates** are methodologically invalid — one-sided definitions (overruns counted, underruns ignored), sampling that solicited failure stories, undisclosed design. Eveleens & Verhoef, *IEEE Software* 2010.
 
-Reports: [`abdf5bfa14a7ddd82`](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), [`a63bf2eb6c5d05ba8`](../../../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
+Reports: [`abdf5bfa14a7ddd82`](../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), [`a63bf2eb6c5d05ba8`](../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
 
 ## 2. The bounded-head numbers
 
@@ -35,7 +35,7 @@ Reports: [`abdf5bfa14a7ddd82`](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.m
 
 **Luhmann's Zettelkasten as an existence proof for shallow structure.** The Luhmann-Archiv documents ZK I with 108 divisions ranging from one to over 4,000 slips, ZK II with 11 blocks of 1,000–9,000 slips and "bis zu vier Unterebenen" — up to four sub-levels — plus a division of 120 list-like subdivisions, and states it is not a strictly hierarchical ordering at all. Also: ~90,000 slips over ~45 years (1952 to early 1997), not forty.
 
-Reports: [`a3f4c332843acf946`](../../../../sweep-2026-08/raw/a3f4c332843acf946.md), [`a583337921a4f7975`](../../../../sweep-2026-08/raw/a583337921a4f7975.md).
+Reports: [`a3f4c332843acf946`](../../sweep-2026-08/raw/a3f4c332843acf946.md), [`a583337921a4f7975`](../../sweep-2026-08/raw/a583337921a4f7975.md).
 
 ## 3. The reading-and-writing numbers
 
@@ -49,13 +49,13 @@ Reports: [`a3f4c332843acf946`](../../../../sweep-2026-08/raw/a3f4c332843acf946.m
 
 **Lientz & Swanson's "maintenance is 40–80% of cost"** is partially traceable — 69 respondents from 120 organisations in CACM 1978, 487 organisations in CACM 1981 — but the 1978 abstract already launders rumour: "Rough estimates… range as high as 75–80 percent." The famous 21/25/50/4 effort split lives in the 1980 book, unverified at source.
 
-Reports: [`aec803bcd71ce9745`](../../../../sweep-2026-08/raw/aec803bcd71ce9745.md), [`af3e6b7e48703f0a0`](../../../../sweep-2026-08/raw/af3e6b7e48703f0a0.md).
+Reports: [`aec803bcd71ce9745`](../../sweep-2026-08/raw/aec803bcd71ce9745.md), [`af3e6b7e48703f0a0`](../../sweep-2026-08/raw/af3e6b7e48703f0a0.md).
 
 ## 4. The documentation-pays numbers
 
 **DORA's "2.4×" and everything downstream of it.** The 2021 figure is real and primary; the series then reverses on itself across four further reports and ends with the construct removed. The full five-year sequence, read from the primary documents, is in [`writing/evidence.md`](writing/evidence.md) §4 and is not restated here. Two items belong on a retirement list: the widely-cited 2022 percentage-lift table (continuous delivery 63%→656%, trunk-based development 36%→1525%) **appears nowhere in the 2022 report** — only on a capabilities page and a 2023 vendor blog post — and any "N×" figure for 2025 internal-data quality is invented, because those figures were published as ordinal bands with no numbers.
 
-**"Team Topologies delivers 25% less context switching and 20% more productivity."** No study. It circulates on marketing pages with no primary source, and the underlying cognitive-load construct's transfer to team boundary design is untested. *(From [`abdf5bfa14a7ddd82`](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).)*
+**"Team Topologies delivers 25% less context switching and 20% more productivity."** No study. It circulates on marketing pages with no primary source, and the underlying cognitive-load construct's transfer to team boundary design is untested. *(From [`abdf5bfa14a7ddd82`](../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md).)*
 
 **"DITA reuse saves 30–40%," "up to 79% reduction in translation costs," "31% content-creation time reduction and $111m saved over five years."** No traceable primary study for any of them; the last is attributed to a Forrester-style TEI that does not appear to exist. Three OpenAlex full-text searches returned no peer-reviewed empirical study of DITA reuse ROI at all.
 
@@ -63,7 +63,7 @@ Reports: [`aec803bcd71ce9745`](../../../../sweep-2026-08/raw/aec803bcd71ce9745.m
 
 **"6-pagers produce better decisions."** Traces solely to Bezos's 2017 shareholder letter, which contains no data; the 2018 letter does not mention memos. Likewise "design docs reduce defects."
 
-Reports: [`abeeefde341d33a2d`](../../../../sweep-2026-08/raw/abeeefde341d33a2d.md), [`a5e68a671a08e519a`](../../../../sweep-2026-08/raw/a5e68a671a08e519a.md), [`a86776519f614dd3a`](../../../../sweep-2026-08/raw/a86776519f614dd3a.md), [`a63bf2eb6c5d05ba8`](../../../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
+Reports: [`abeeefde341d33a2d`](../../sweep-2026-08/raw/abeeefde341d33a2d.md), [`a5e68a671a08e519a`](../../sweep-2026-08/raw/a5e68a671a08e519a.md), [`a86776519f614dd3a`](../../sweep-2026-08/raw/a86776519f614dd3a.md), [`a63bf2eb6c5d05ba8`](../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
 
 ## 5. The teaching and text-design numbers
 
@@ -81,7 +81,7 @@ Reports: [`abeeefde341d33a2d`](../../../../sweep-2026-08/raw/abeeefde341d33a2d.m
 
 **Romer (1990) as a proof that knowledge compounds.** Verbatim: "Linearity in A is what makes unbounded growth possible, and in this sense, unbounded growth is more like an assumption than a result of the model." The abstract adds that "having a large population is not sufficient to generate growth." What the paper *will* bear — and the second correction that goes with it, that the excludability half is load-bearing and "non-rival" alone misstates the model — is in [`people/transfer.md`](people/transfer.md) §6.
 
-Reports: [`a3f4c332843acf946`](../../../../sweep-2026-08/raw/a3f4c332843acf946.md), [`adc8fe8e64ae23f70`](../../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md).
+Reports: [`a3f4c332843acf946`](../../sweep-2026-08/raw/a3f4c332843acf946.md), [`adc8fe8e64ae23f70`](../../sweep-2026-08/raw/adc8fe8e64ae23f70.md).
 
 ## 6. The information-architecture numbers
 
@@ -93,7 +93,7 @@ Reports: [`a3f4c332843acf946`](../../../../sweep-2026-08/raw/a3f4c332843acf946.m
 
 **"If too many items are cross-listed, the hierarchy loses its value."** The polar bear book's position, with no threshold and no study behind it.
 
-Reports: [`a5437aa6a38bae10c`](../../../../sweep-2026-08/raw/a5437aa6a38bae10c.md), [`ae8fc467393dd0407`](../../../../sweep-2026-08/raw/ae8fc467393dd0407.md).
+Reports: [`a5437aa6a38bae10c`](../../sweep-2026-08/raw/a5437aa6a38bae10c.md), [`ae8fc467393dd0407`](../../sweep-2026-08/raw/ae8fc467393dd0407.md).
 
 ## 7. The agent-era numbers
 
@@ -115,7 +115,7 @@ Reports: [`a5437aa6a38bae10c`](../../../../sweep-2026-08/raw/a5437aa6a38bae10c.m
 
 **"Keep your permission hierarchy under N levels."** Widely repeated and the wrong metric: depth is not what drives cost, fan-out is, and the vendor that imposed a depth limit is removing it for exactly that reason. The quotation and the measured figures are in [`substrate/permission.md`](substrate/permission.md) §2.
 
-Reports: [`aa5f5baaa66cc8bf1`](../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a7bfd40b8a7c7a61c`](../../../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md), [`ab601f5a0087e7fc8`](../../../../sweep-2026-08/raw/ab601f5a0087e7fc8.md), [`aea19b144c46bfc26`](../../../../sweep-2026-08/raw/aea19b144c46bfc26.md).
+Reports: [`aa5f5baaa66cc8bf1`](../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a7bfd40b8a7c7a61c`](../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md), [`ab601f5a0087e7fc8`](../../sweep-2026-08/raw/ab601f5a0087e7fc8.md), [`aea19b144c46bfc26`](../../sweep-2026-08/raw/aea19b144c46bfc26.md).
 
 ## 8. Claims unsourced in both directions
 
@@ -153,4 +153,4 @@ Five practices were marked do-not-adopt by the sweep's commissioning survey, and
 
 - **Audience-forked prose** — writing two versions of the same material for different readers. The nearest thing to evidence either way is that nobody has tested whether letting a reader skip a level substitutes for it; see [`reading/bounded-head.md`](reading/bounded-head.md) §5.
 
-Report: [`a583337921a4f7975`](../../../../sweep-2026-08/raw/a583337921a4f7975.md).
+Report: [`a583337921a4f7975`](../../sweep-2026-08/raw/a583337921a4f7975.md).

@@ -35,7 +35,7 @@ The sweep was commissioned against two documents the project already held: a fif
 
 That is what this sweep was for: to follow those leads and see which held. The answer, territory by territory, is what this corpus carries. The chart's own closing caveat still applies to it and to this: every territory was tasted by one head in one pass, briefed by us, which means the framing travelled into the findings.
 
-Report: [`a583337921a4f7975`](../../../../sweep-2026-08/raw/a583337921a4f7975.md).
+Report: [`a583337921a4f7975`](../../sweep-2026-08/raw/a583337921a4f7975.md).
 
 ### 4.1 The questions it was sent to settle
 

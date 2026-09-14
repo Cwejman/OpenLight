@@ -7,7 +7,7 @@ kind: brief
 
 Every brief in this corpus links the reports it rests on. This is the reverse index: each of the 45 raw files, its subject, and where in the corpus its findings landed. Use it to go from a report back to its home, or to check that nothing was dropped.
 
-Eighteen of the runs were named in the sweep's own register and the other twenty-seven are sub-agents, so the subjects below are read off the reports themselves; what that split means for how independent the reports are is in [`method.md`](method.md) §1. Paths are relative to this file. The raw lives at [`../../../../sweep-2026-08/raw/`](../../../../sweep-2026-08/raw/).
+Eighteen of the runs were named in the sweep's own register and the other twenty-seven are sub-agents, so the subjects below are read off the reports themselves; what that split means for how independent the reports are is in [`method.md`](method.md) §1. Paths are relative to this file. The raw lives at [`../../../../sweep-2026-08/raw/`](../../sweep-2026-08/raw/).
 
 ## 1. The table
 

@@ -5,7 +5,7 @@ kind: brief
 
 # The ground others hold
 
-*Written 2026-09-01 from the 45 raw reports of [the August sweep](../../../sweep-2026-08/README.md), read whole. Nothing here comes from anywhere else.*
+*Written 2026-09-01 from the 45 raw reports of [the August sweep](../sweep-2026-08/README.md), read whole. Nothing here comes from anywhere else.*
 
 This document puts you in contact with what the world already knows — and has already built — around the work this project cares about: writing knowledge down so it reaches whoever needs it, person or machine.
 
@@ -25,7 +25,7 @@ Every section is arranged the same way. The findings stand in the section's own 
 
 The single most useful thing the sweep produced is negative: most of the numbers and rules this field repeats have no source, or say the opposite of what they are cited for. This section changes what you may stand on. Almost every load-bearing figure in the folklore of documentation and team knowledge fails one of three ways: it traces to nothing, it misreads a real study, or it was tested and came up empty.
 
-The ground for this section: the [citation-verification report](../../../sweep-2026-08/raw/a3f4c332843acf946.md), the [organisational-knowledge report](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), the [reading-folklore trace](../../../sweep-2026-08/raw/aec803bcd71ce9745.md), and the [DORA primary-source read](../../../sweep-2026-08/raw/abeeefde341d33a2d.md).
+The ground for this section: the [citation-verification report](../sweep-2026-08/raw/a3f4c332843acf946.md), the [organisational-knowledge report](../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), the [reading-folklore trace](../sweep-2026-08/raw/aec803bcd71ce9745.md), and the [DORA primary-source read](../sweep-2026-08/raw/abeeefde341d33a2d.md).
 
 ### 1.1 Numbers that trace to nothing
 
@@ -55,13 +55,13 @@ This is the one figure here whose own publisher took it apart, in public, across
 
 These are the sales numbers for structured content. None has a primary source, and knowing that is what lets you ask for one.
 
-**"Structured content reuse saves 30–40%"** (the sales figure for DITA, an XML standard for technical writing), **"structured knowledge bases beat unstructured by 29–46 points"** (attributed to a page that does not contain it), and **GitLab's "605,000-word handbook"** — none has a primary source. The [DITA evidence report](../../../sweep-2026-08/raw/a5e68a671a08e519a.md) found DITA's entire scholarly footprint smaller than a mid-tier workshop paper's.
+**"Structured content reuse saves 30–40%"** (the sales figure for DITA, an XML standard for technical writing), **"structured knowledge bases beat unstructured by 29–46 points"** (attributed to a page that does not contain it), and **GitLab's "605,000-word handbook"** — none has a primary source. The [DITA evidence report](../sweep-2026-08/raw/a5e68a671a08e519a.md) found DITA's entire scholarly footprint smaller than a mid-tier workshop paper's.
 
 #### 1.1.4 The card-sorting sample sizes
 
 The rule that fifteen users are enough is quoted as a settled result. It was read off a picture.
 
-Nielsen's card-sorting sample sizes ("15 users gives r = 0.90") come from a graph in a non-peer-reviewed 2004 conference paper that prints no such numbers. The whole method chain is traced in the [card-sorting report](../../../sweep-2026-08/raw/a5437aa6a38bae10c.md).
+Nielsen's card-sorting sample sizes ("15 users gives r = 0.90") come from a graph in a non-peer-reviewed 2004 conference paper that prints no such numbers. The whole method chain is traced in the [card-sorting report](../sweep-2026-08/raw/a5437aa6a38bae10c.md).
 
 ### 1.2 Real studies, cited backwards
 
@@ -69,7 +69,7 @@ Five genuine studies are cited for the opposite of what they found. Three of the
 
 The other two are borrowed from outside the field and fare no better. Dunbar's 150 does not survive its own re-analysis. Romer's growth model, cited as proof that knowledge compounds, calls the compounding an assumption rather than a result.
 
-The full corrections are in the [verification report](../../../sweep-2026-08/raw/a3f4c332843acf946.md).
+The full corrections are in the [verification report](../sweep-2026-08/raw/a3f4c332843acf946.md).
 
 #### 1.2.1 The three sources behind "keep it shallow"
 
@@ -101,9 +101,9 @@ And the two kinds of ceremony placed around writing, heavyweight proposal proces
 
 These are the two documents a team is most often told to write. Both have been measured, and both times the writing happened and the use did not.
 
-**Architecture Decision Records.** The one study that looked for an effect ([ICSA 2026, on 921 repositories](../../../sweep-2026-08/raw/aae121db667d39f2d.md)) found "at most, modest observable effects". Half of all such records in the wild are written once and never touched again; 63% are born already "accepted", skipping the deliberation they exist to record; 4.6% of adopting repositories show sustained team use.
+**Architecture Decision Records.** The one study that looked for an effect ([ICSA 2026, on 921 repositories](../sweep-2026-08/raw/aae121db667d39f2d.md)) found "at most, modest observable effects". Half of all such records in the wild are written once and never touched again; 63% are born already "accepted", skipping the deliberation they exist to record; 4.6% of adopting repositories show sustained team use.
 
-**Design docs.** The canonical text is a 2020 opinion post. The one controlled experiment (Ernst & Robillard, 65 people) found *no effect of document format* on architecture understanding — prior exposure to the code dominated. Google's only published number: 90% of its internal wiki had no views or updates in recent months. Details in the [design-doc report](../../../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
+**Design docs.** The canonical text is a 2020 opinion post. The one controlled experiment (Ernst & Robillard, 65 people) found *no effect of document format* on architecture understanding — prior exposure to the code dominated. Google's only published number: 90% of its internal wiki had no views or updates in recent months. Details in the [design-doc report](../sweep-2026-08/raw/a63bf2eb6c5d05ba8.md).
 
 #### 1.3.2 The methods: card sorting and Diátaxis
 
@@ -111,13 +111,13 @@ These are the two methods people use to decide a documentation shape. One failed
 
 **Card sorting.** The most direct validity test (Schmettow & Sommer 2016, peer-reviewed) found "the match between mental model and website structure has no effect on browsing performance". The method is universal practice; its evidence base failed its one real exam.
 
-**Diátaxis** cites no research, and its author disclaims the file-per-type reading adopters made of it: "four boxes… is a typical outcome of the good practice, not its end." The best failure report is Google's Pigweed team: applying it as a literal blueprint "resulted in too much fragmentation", and they retreated to sections within a page. In 2026 the author deleted his only page on complex hierarchies, saying it wasn't good enough, and has replaced it with nothing. See the [Diátaxis report](../../../sweep-2026-08/raw/a26ae7e524c53262a.md).
+**Diátaxis** cites no research, and its author disclaims the file-per-type reading adopters made of it: "four boxes… is a typical outcome of the good practice, not its end." The best failure report is Google's Pigweed team: applying it as a literal blueprint "resulted in too much fragmentation", and they retreated to sections within a page. In 2026 the author deleted his only page on complex hierarchies, saying it wasn't good enough, and has replaced it with nothing. See the [Diátaxis report](../sweep-2026-08/raw/a26ae7e524c53262a.md).
 
 #### 1.3.3 The ceremony: proposal processes and requirements rules
 
 Both of these wrap heavy process around writing. Measured, the weight buys nothing, and in one case the only visible improvement came from going around it.
 
-**Heavyweight proposal processes.** Measured across [IETF, Rust, Kubernetes, and Python](../../../sweep-2026-08/raw/ab6fb706729be0f77.md): the heavy process piles up unfinished proposals with no exit (Rust: 215 open, median age 905 days; Kubernetes: 343 live, 14 ever killed), and the only intervention with a visible before-and-after is routing around it with a lighter process.
+**Heavyweight proposal processes.** Measured across [IETF, Rust, Kubernetes, and Python](../sweep-2026-08/raw/ab6fb706729be0f77.md): the heavy process piles up unfinished proposals with no exit (Rust: 215 open, median age 905 days; Kubernetes: 343 live, 14 ever killed), and the only intervention with a visible before-and-after is routing around it with a lighter process.
 
 **Requirements-quality rules.** A systematic audit of 57 publications found 47.5% of claimed impacts merely hypothesised, and calls the field's evidence "anecdotal or folkloric". The claimed 10–100x cost of late defects was tested across 171 projects and not found.
 
@@ -133,13 +133,13 @@ Cleared ground is not empty ground. A modest set of real results exists, and the
 
 The best-evidenced single claim in the sweep: when professionals fail with a long document, they fail to *locate* the right piece, not to comprehend it once found. Three fields report this independently.
 
-In medicine, the one think-aloud study of professionals reading a real guideline ([Kilsdonk 2016, 13 clinicians](../../../sweep-2026-08/raw/a4071d48c3f5d869c.md)) found they could read it fine — they could not find the applicable recommendation. In aviation, NASA's most detailed checklist analysis (Burian 2014) found flow lines that cannot be followed across pages and unexplained jumps, and marks the load-bearing usability questions "Further Research Needed".
+In medicine, the one think-aloud study of professionals reading a real guideline ([Kilsdonk 2016, 13 clinicians](../sweep-2026-08/raw/a4071d48c3f5d869c.md)) found they could read it fine — they could not find the applicable recommendation. In aviation, NASA's most detailed checklist analysis (Burian 2014) found flow lines that cannot be followed across pages and unexplained jumps, and marks the load-bearing usability questions "Further Research Needed".
 
-In software, the strongest instrumented study ([Xia et al., 78 professionals, 3,148 hours](../../../sweep-2026-08/raw/aec803bcd71ce9745.md)) found 58% of working time spent comprehending. And a famous "35% comprehension" figure turns out, at its source, to measure the *mechanics of navigation* between files — the finding-cost again, mislabeled as understanding.
+In software, the strongest instrumented study ([Xia et al., 78 professionals, 3,148 hours](../sweep-2026-08/raw/aec803bcd71ce9745.md)) found 58% of working time spent comprehending. And a famous "35% comprehension" figure turns out, at its source, to measure the *mechanics of navigation* between files — the finding-cost again, mislabeled as understanding.
 
 Two related results sharpen this. Grol watched 61 family doctors make 12,880 real decisions: vague recommendations were followed 36% of the time, clear ones 67%. Specificity correlates with use (observational, confounded, but large and in a real population).
 
-And hypertext research ([DeStefano & LeFevre 2007, and after](../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md)) found three things. Deciding whether to follow links taxes reading. Fewer links beat more. And a *hierarchical*, predictable link structure largely rescues the cost, while a web-like structure does not — with the cost landing hardest on low-knowledge readers.
+And hypertext research ([DeStefano & LeFevre 2007, and after](../sweep-2026-08/raw/adc8fe8e64ae23f70.md)) found three things. Deciding whether to follow links taxes reading. Fewer links beat more. And a *hierarchical*, predictable link structure largely rescues the cost, while a web-like structure does not — with the cost landing hardest on low-knowledge readers.
 
 ### 2.2 The reader's ground outweighs the text
 
@@ -153,7 +153,7 @@ That is not an argument that experts are safe. Practising lawyers were slowed by
 
 These are the two studies underneath the finding. One measures where transfers actually break down. The other says what makes a reader able to absorb anything at all.
 
-**Knowledge transfer fails at the receiver.** Szulanski's study of 122 best-practice transfers in 8 firms — the strongest single study in [organisational knowledge](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md) — found the dominant barriers were the recipient's lack of absorptive capacity, the causal ambiguity of the knowledge, and an arduous relationship between the parties. Motivation ranked low. One strong study, never independently replicated.
+**Knowledge transfer fails at the receiver.** Szulanski's study of 122 best-practice transfers in 8 firms — the strongest single study in [organisational knowledge](../sweep-2026-08/raw/abdf5bfa14a7ddd82.md) — found the dominant barriers were the recipient's lack of absorptive capacity, the causal ambiguity of the knowledge, and an arduous relationship between the parties. Motivation ranked low. One strong study, never independently replicated.
 
 **Absorption depends on prior related knowledge** (Cohen & Levinthal, replicated but heavily moderated). A receiver who lacks the ground cannot be written around — which is a structural claim about readers, not a writing tip.
 
@@ -175,9 +175,9 @@ In onboarding, mentorship outranked documentation when 411 Microsoft developers 
 
 The third repeated finding is about survival, not quality: a document stays true only when something downstream stands on it.
 
-The sharpest form comes from six automotive companies ([Wohlrab et al., 53 practitioners](../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md)): artifacts that *generate* something — code, tests, other artifacts — get maintained; artifacts that merely *describe* do not. Their blunt guideline: produce descriptive documentation as late as possible, and only when actually needed.
+The sharpest form comes from six automotive companies ([Wohlrab et al., 53 practitioners](../sweep-2026-08/raw/abdf5bfa14a7ddd82.md)): artifacts that *generate* something — code, tests, other artifacts — get maintained; artifacts that merely *describe* do not. Their blunt guideline: produce descriptive documentation as late as possible, and only when actually needed.
 
-The same shape recurs everywhere the sweep looked. Section 1.3's abandoned decision records and unread wiki are two instances. Beyond them: llms.txt, a file sites publish for AI crawlers, is served by thousands of domains and fetched by none of the major crawlers ([the server-log evidence](../../../sweep-2026-08/raw/a5e1231b95c4c9ac5.md)); and skill files — packaged instructions agents load for a task — were silently invalidated, in part, by every one of 105 measured repository releases. The decay itself is universal. What varies is whether anything downstream notices.
+The same shape recurs everywhere the sweep looked. Section 1.3's abandoned decision records and unread wiki are two instances. Beyond them: llms.txt, a file sites publish for AI crawlers, is served by thousands of domains and fetched by none of the major crawlers ([the server-log evidence](../sweep-2026-08/raw/a5e1231b95c4c9ac5.md)); and skill files — packaged instructions agents load for a task — were silently invalidated, in part, by every one of 105 measured repository releases. The decay itself is universal. What varies is whether anything downstream notices.
 
 ### 2.4 The writing effects that are real — and their limits
 
@@ -187,7 +187,7 @@ Narrative form beats exposition by the largest margin in the whole literature, w
 
 One bounding fact sits against all three. These effects fade when measured after a delay, shrink when the reader controls their own pace, and are dwarfed by how a document is put to use. The surgical safety checklist is the cleanest demonstration anywhere: the same artifact gave dramatic gains, a null, and a positive trial, depending on how it was introduced.
 
-The letters d, g and r below are the standard effect-size units of these studies. For d and g, roughly 0.2 is small, 0.5 medium, 0.8 large. Ground: the [comprehension-science report](../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md) and the [minimalism reports](../../../sweep-2026-08/raw/a5e1231b95c4c9ac5.md).
+The letters d, g and r below are the standard effect-size units of these studies. For d and g, roughly 0.2 is small, 0.5 medium, 0.8 large. Ground: the [comprehension-science report](../sweep-2026-08/raw/adc8fe8e64ae23f70.md) and the [minimalism reports](../sweep-2026-08/raw/a5e1231b95c4c9ac5.md).
 
 #### 2.4.1 Minimalism, and what its authors meant by it
 
@@ -217,7 +217,7 @@ One more result belongs here because it is the cleanest natural experiment on do
 
 ## 3. The machine reader, measured
 
-2025–26 produced something this field never had before: controlled experiments on how a machine reader actually uses written material. Their results split cleanly, and the split is the most direct outside evidence bearing on how knowledge for agents should be written. Ground: the [context-engineering report](../../../sweep-2026-08/raw/aafbf4f4a32e619af.md), the [agent-documentation null results](../../../sweep-2026-08/raw/af750ce80e754223b.md), and the [adversarial stress-test](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md).
+2025–26 produced something this field never had before: controlled experiments on how a machine reader actually uses written material. Their results split cleanly, and the split is the most direct outside evidence bearing on how knowledge for agents should be written. Ground: the [context-engineering report](../sweep-2026-08/raw/aafbf4f4a32e619af.md), the [agent-documentation null results](../sweep-2026-08/raw/af750ce80e754223b.md), and the [adversarial stress-test](../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md).
 
 ### 3.1 Long context fails by composition, not length
 
@@ -263,7 +263,7 @@ The same paper — its design registered before the runs — reports that even w
 
 ### 3.3 Where typed structure wins, and where it loses
 
-The [stress-test report](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) drew the line through dozens of 2026 results, and the line is clean. **Typed structure wins at the edges of content and loses in its body.**
+The [stress-test report](../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) drew the line through dozens of 2026 results, and the line is clean. **Typed structure wins at the edges of content and loses in its body.**
 
 It wins wherever a rule must hold even when the model is wrong (permissions, budgets), wherever the question is a set operation (count, intersect, "all items where"), wherever many writers share no coordinator, wherever someone absent at writing time must later ask what happened (provenance), and wherever cost must not grow with catalog size. No model capability substitutes for any of these — they are facts about writing and accountability, not reading.
 
@@ -277,7 +277,7 @@ Research is one kind of contact; the other is the people who built systems near 
 
 ### 4.1 Ink & Switch: the closest working neighbour
 
-One lab has spent a decade on exactly this ground — documents, links, versions, local files, malleable software — and publishes its failures. The [tools-for-thought report](../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md) reads their decade as five expensive lessons.
+One lab has spent a decade on exactly this ground — documents, links, versions, local files, malleable software — and publishes its failures. The [tools-for-thought report](../sweep-2026-08/raw/a3f6ddd86cf882a6d.md) reads their decade as five expensive lessons.
 
 Formalising costs the writer now and pays the reader later, so typing must be deferrable, or people will not type. Do not take files away. Schema change will be the hardest problem, and no one will help. Do not standardise a contract before it has users. And branching, not merging, is the durable win.
 
@@ -289,17 +289,17 @@ Cambria is the only place in the sweep where anyone seriously tried to make old 
 
 Cambria is the definitive word on migrating data between schema versions by "lenses" — two-way translation rules, written once, run in both directions. The team abandoned translating at write time, shipped a flagship rule that broke the very guarantees lenses promise, never measured performance, and stopped in 2020 with no successor.
 
-The [schema-evolution deep read](../../../sweep-2026-08/raw/ad341d6da8eaac361.md) extracts what survives: tag every write with the contract it was written under, and translate lazily at read. And it warns: do not build lenses — the mathematics says the composition law you would need is incompatible with the operations you would actually want.
+The [schema-evolution deep read](../sweep-2026-08/raw/ad341d6da8eaac361.md) extracts what survives: tag every write with the contract it was written under, and translate lazily at read. And it warns: do not build lenses — the mathematics says the composition law you would need is incompatible with the operations you would actually want.
 
 ### 4.2 The cost of typing, learned in the 1990s
 
 The oldest sharp critique in the sweep is Shipman & Marshall, *Formality Considered Harmful* (1999): structured capture imposes cost at writing time — chunking, naming, labeling — that users route around, and experts cannot reliably introspect their own reasoning into forms, even when video shows their natural talk already has the structure. It is an experience essay, not a measurement study, and nothing since refutes it.
 
-The design-rationale tradition it closes is a warning label for any "record the why" ambition. Per the [design-rationale report](../../../sweep-2026-08/raw/a7ea3bc0963c0e185.md): the entire quantitative case that recorded rationale helps a later reader is one 17-subject experiment that worked on one of its two systems; in the one field observation, a professionally-scribed rationale document answered only 41% of readers' actual why-questions; and capture cost, the thing that killed every system, was never measured by anyone.
+The design-rationale tradition it closes is a warning label for any "record the why" ambition. Per the [design-rationale report](../sweep-2026-08/raw/a7ea3bc0963c0e185.md): the entire quantitative case that recorded rationale helps a later reader is one 17-subject experiment that worked on one of its two systems; in the one field observation, a professionally-scribed rationale document answered only 41% of readers' actual why-questions; and capture cost, the thing that killed every system, was never measured by anyone.
 
 ### 4.3 The graveyard, in the builders' own words
 
-The ventures that tried to replace text-as-substrate with structure left unusually honest post-mortems, gathered in the [structured-editors report](../../../sweep-2026-08/raw/a4bdd8ce92076fef2.md). They say two different things.
+The ventures that tried to replace text-as-substrate with structure left unusually honest post-mortems, gathered in the [structured-editors report](../sweep-2026-08/raw/a4bdd8ce92076fef2.md). They say two different things.
 
 Commercially, three structure-first ventures arrived at one funding answer. Darklang ran out of money and deleted the structured editor that was half its codebase, because it stopped making sense once a model was writing the code. Unison shipped after eight years and turned to consulting. Glamorous Toolkit runs on consulting too.
 
@@ -319,21 +319,21 @@ One retrospective names what the research programme lacked, in the author's own 
 
 **Jonathan Edwards** (Subtext, 2025 retrospective): "a series of overambitious failed experiments… What Subtext needed was a Theory of Change." From the research side, the missing piece was theory, not engineering.
 
-The academic line — Webstrates, Varv, Mavo — is [dormant or build-bot-only](../../../sweep-2026-08/raw/a5105d288fc90070c.md), mostly without any public explanation.
+The academic line — Webstrates, Varv, Mavo — is [dormant or build-bot-only](../sweep-2026-08/raw/a5105d288fc90070c.md), mostly without any public explanation.
 
 ### 4.4 The survivors' one move: keep the files
 
-The [note-taking market](../../../sweep-2026-08/raw/add822cc12cefe954.md) ran the same experiment commercially, and the verdict landed in 2026: plain files won, for a reason nobody predicted — agents can read them. Obsidian's plain Markdown on disk became its strongest asset. Logseq moved its data *out* of files into a database, four years late, and its own community's top response was "too little, too late" — users left precisely because agents could no longer read their notes.
+The [note-taking market](../sweep-2026-08/raw/add822cc12cefe954.md) ran the same experiment commercially, and the verdict landed in 2026: plain files won, for a reason nobody predicted — agents can read them. Obsidian's plain Markdown on disk became its strongest asset. Logseq moved its data *out* of files into a database, four years late, and its own community's top response was "too little, too late" — users left precisely because agents could no longer read their notes.
 
 The rest of that market tells the same story from other angles. The venture-funded middle (Tana, Mem, Notion Mail, Coda) left note-taking for meetings and agents. And the best-read critique of the linked-notes movement concedes the deeper point: no empirical study anywhere establishes that linked note-taking improves outcomes.
 
-The lesson generalises beyond notes. [Retool](../../../sweep-2026-08/raw/ace1709b4a562f194.md) abandoned its own visual app format for plain React and TypeScript in June 2026, saying the format "prevented LLMs from working fluently" — and kept the typed contracts (schema, permissions) as the durable asset. Structure a model cannot read is now a liability. That is the builders arriving, the hard way, at the same line section 3.3 drew.
+The lesson generalises beyond notes. [Retool](../sweep-2026-08/raw/ace1709b4a562f194.md) abandoned its own visual app format for plain React and TypeScript in June 2026, saying the format "prevented LLMs from working fluently" — and kept the typed contracts (schema, permissions) as the durable asset. Structure a model cannot read is now a liability. That is the builders arriving, the hard way, at the same line section 3.3 drew.
 
 ### 4.5 The current neighbours
 
-Nobody found in the sweep argues the whole "structured knowledge substrate" thesis. Every neighbour holds a piece and rejects the rest ([the who-else report](../../../sweep-2026-08/raw/a09867b88abcb610b.md)). The nearest is **Pentad Labs**: facts carrying context and lineage as first-class slots — essays plus a pre-release product, no shipped substrate.
+Nobody found in the sweep argues the whole "structured knowledge substrate" thesis. Every neighbour holds a piece and rejects the rest ([the who-else report](../sweep-2026-08/raw/a09867b88abcb610b.md)). The nearest is **Pentad Labs**: facts carrying context and lineage as first-class slots — essays plus a pre-release product, no shipped substrate.
 
-The [agent-memory vendors](../../../sweep-2026-08/raw/a187277ed3a006fbc.md) — Letta, Zep, Mem0 — all converged, within six weeks of each other, on the one gap the platform vendors cannot fill: memory that travels *across* agent harnesses (the software shells agents run in). Anthropic's own shipped agent memory is markdown files at paths, where every change becomes a permanent version attributed to the session that wrote it. Files plus versions is the free floor any alternative must now beat.
+The [agent-memory vendors](../sweep-2026-08/raw/a187277ed3a006fbc.md) — Letta, Zep, Mem0 — all converged, within six weeks of each other, on the one gap the platform vendors cannot fill: memory that travels *across* agent harnesses (the software shells agents run in). Anthropic's own shipped agent memory is markdown files at paths, where every change becomes a permanent version attributed to the session that wrote it. Files plus versions is the free floor any alternative must now beat.
 
 The deepest standing opposition is Dynamicland's, and it deserves respect rather than rebuttal: "to maximize agency, minimize what the computer knows." Their decade-long counter-experiment holds that every machine-readable contract added to make composition automatic makes human comprehension harder.
 
@@ -355,27 +355,27 @@ The last lane is the sharpest for this project. Graph-shaped retrieval lost its 
 
 Two findings sit together here, because the second is the wall the first runs into.
 
-**Versioned, typed knowledge stores exist and are fragile.** TerminusDB is the closest shipped product to "git for a typed knowledge graph"; it survived a year-long gap only by handoff to new maintainers. The [competitive-landscape report](../../../sweep-2026-08/raw/abffcf492c6f3d77d.md) found every piece of that idea has precedent — the unclaimed part is only the combination.
+**Versioned, typed knowledge stores exist and are fragile.** TerminusDB is the closest shipped product to "git for a typed knowledge graph"; it survived a year-long gap only by handoff to new maintainers. The [competitive-landscape report](../sweep-2026-08/raw/abffcf492c6f3d77d.md) found every piece of that idea has precedent — the unclaimed part is only the combination.
 
-**Nobody merges structure — they pick a side.** Across Dolt, Iceberg, Confluent, and TerminusDB ([the versioning report](../../../sweep-2026-08/raw/a96d8d0c3161e997c.md)): a schema conflict blocks the merge, and resolution means taking one whole side. The systems that survived schema change did it by *forbidding* breaking changes and forcing a new name, not by translating.
+**Nobody merges structure — they pick a side.** Across Dolt, Iceberg, Confluent, and TerminusDB ([the versioning report](../sweep-2026-08/raw/a96d8d0c3161e997c.md)): a schema conflict blocks the merge, and resolution means taking one whole side. The systems that survived schema change did it by *forbidding* breaking changes and forcing a new name, not by translating.
 
 ### 5.2 Permission that flows through chains
 
 Three of the largest systems in the world document this failure, each from a different angle. The last of them is why AI retrieval keeps being blamed for leaks it did not cause.
 
-Permission that flows through chains of groups is the documented failure. Google's Zanzibar paper names deep group nesting as its latency problem; Google Drive removed the ability to narrow access below a parent folder; Microsoft documents, in its own words, that AI retrieval surfaces every forgotten over-broad grant. The AI did not create the leak — [it enumerated it](../../../sweep-2026-08/raw/aea19b144c46bfc26.md).
+Permission that flows through chains of groups is the documented failure. Google's Zanzibar paper names deep group nesting as its latency problem; Google Drive removed the ability to narrow access below a parent folder; Microsoft documents, in its own words, that AI retrieval surfaces every forgotten over-broad grant. The AI did not create the leak — [it enumerated it](../sweep-2026-08/raw/aea19b144c46bfc26.md).
 
 ### 5.3 Hierarchy that deliberately does not chain
 
 If you build a hierarchy, this is the decision to copy. The most successful vocabulary of its kind made it in 2009, and the numbers from the one that decided otherwise show what it saved them.
 
-Hierarchy without automatic chaining is proven design. SKOS — the most successful W3C vocabulary — made its "broader" link deliberately non-transitive in 2009: A above B and B above C does not put A above C. Wikidata's chained class hierarchy, edited by many owners, accumulated ~2.4 million class-level confusions. The [semantic-web report](../../../sweep-2026-08/raw/adc9dab44aefdde97.md) reads the whole lineage: the vision failed; the small vocabularies and the validation layer won.
+Hierarchy without automatic chaining is proven design. SKOS — the most successful W3C vocabulary — made its "broader" link deliberately non-transitive in 2009: A above B and B above C does not put A above C. Wikidata's chained class hierarchy, edited by many owners, accumulated ~2.4 million class-level confusions. The [semantic-web report](../sweep-2026-08/raw/adc9dab44aefdde97.md) reads the whole lineage: the vision failed; the small vocabularies and the validation layer won.
 
 ### 5.4 Interfaces built from typed data
 
 Anyone imagining data that carries its own display should know that three separate lines of attempt each ended in the same place.
 
-"Which component can render this?" is not shipped anywhere general. Every product's view layer is a [closed, fixed list](../../../sweep-2026-08/raw/a2252e73e0215b641.md); every [server-driven UI team](../../../sweep-2026-08/raw/a57740ddd62e39ab6.md) independently invented capability negotiation and an escape hatch; the [generative-UI standard](../../../sweep-2026-08/raw/a6064cc62dbf12499.md) that won is an opaque embedded web page.
+"Which component can render this?" is not shipped anywhere general. Every product's view layer is a [closed, fixed list](../sweep-2026-08/raw/a2252e73e0215b641.md); every [server-driven UI team](../sweep-2026-08/raw/a57740ddd62e39ab6.md) independently invented capability negotiation and an escape hatch; the [generative-UI standard](../sweep-2026-08/raw/a6064cc62dbf12499.md) that won is an opaque embedded web page.
 
 Typed component trees live one layer up, where one party owns both sides.
 
@@ -383,7 +383,7 @@ Typed component trees live one layer up, where one party owns both sides.
 
 This is the result people cite to say that structured knowledge does not work for machines. What it actually tested is narrower, and the difference is the one this project lives in.
 
-Graph-shaped retrieval lost its benchmarks. Independent evaluations found [GraphRAG](../../../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md) frequently underperforming plain retrieval at up to 210x the token cost; Microsoft put the reference implementation in maintenance mode. The evaluations kill machine-*extracted* graphs; human-*declared* structure was never the thing tested.
+Graph-shaped retrieval lost its benchmarks. Independent evaluations found [GraphRAG](../sweep-2026-08/raw/a7bfd40b8a7c7a61c.md) frequently underperforming plain retrieval at up to 210x the token cost; Microsoft put the reference implementation in maintenance mode. The evaluations kill machine-*extracted* graphs; human-*declared* structure was never the thing tested.
 
 ## 6. The open ground
 
@@ -419,10 +419,10 @@ These absences bear directly on how this project intends to work. Two are unstud
 
 - **Whether skippability substitutes for audience-forked prose** — the adaptivity question — is untested in either direction.
 
-- **Reproducible, addressable context is unsolved in shipped products.** Branching and checkpoints shipped in the major coding agents, but nothing lets anyone say "this answer came from exactly this context, re-derivable" — the work exists [only as papers](../../../sweep-2026-08/raw/aafbf4f4a32e619af.md).
+- **Reproducible, addressable context is unsolved in shipped products.** Branching and checkpoints shipped in the major coding agents, but nothing lets anyone say "this answer came from exactly this context, re-derivable" — the work exists [only as papers](../sweep-2026-08/raw/aafbf4f4a32e619af.md).
 
 ## 7. What this document folds away
 
 One file, so the folding stops one level above the evidence. Each section here compresses two to six full reports. The per-study sample sizes, the verbatim quotes, the vendor timelines, and every report's own "could not establish" list live in the linked raw files, which are the ground this document stands on.
 
-Three territories were compressed hardest, and each rewards a direct reading: the market histories (low-code, vibe-coding, sync engines); the protocol detail (the evolution of MCP, the standard connecting agents to tools, and the vendors' memory interfaces); and the full recommendation sets of the [schema-evolution](../../../sweep-2026-08/raw/ad341d6da8eaac361.md) and [stress-test](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) reports — both end in concrete design guidance this document only names.
+Three territories were compressed hardest, and each rewards a direct reading: the market histories (low-code, vibe-coding, sync engines); the protocol detail (the evolution of MCP, the standard connecting agents to tools, and the vendors' memory interfaces); and the full recommendation sets of the [schema-evolution](../sweep-2026-08/raw/ad341d6da8eaac361.md) and [stress-test](../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md) reports — both end in concrete design guidance this document only names.

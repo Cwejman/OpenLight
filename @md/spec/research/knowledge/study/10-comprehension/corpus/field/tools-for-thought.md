@@ -41,4 +41,4 @@ The clearest expression of where the category is going: **"Open-source notetakin
 
 What is left as pure tools for thought is bootstrapped and small — Capacities, Craft, Anytype, Supernotes, Allume — or dead. And the field's most prominent tools-for-thought researcher went on leave in late 2025 to build "a conservatory for human attention," and is no longer building note tools.
 
-Reports: [`add822cc12cefe954`](../../../../../sweep-2026-08/raw/add822cc12cefe954.md), [`a3f6ddd86cf882a6d`](../../../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).
+Reports: [`add822cc12cefe954`](../../../sweep-2026-08/raw/add822cc12cefe954.md), [`a3f6ddd86cf882a6d`](../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).

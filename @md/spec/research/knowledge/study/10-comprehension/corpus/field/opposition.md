@@ -45,4 +45,4 @@ Restated from the adversarial lane, because these are the ones that survive ever
 
 **The reader for whom structure was an affordance is being replaced.** If the structure premium is a capability-deficit tax, betting the substrate on it is betting against the trend line.
 
-Reports: [`a09867b88abcb610b`](../../../../../sweep-2026-08/raw/a09867b88abcb610b.md), [`aa5f5baaa66cc8bf1`](../../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a3f6ddd86cf882a6d`](../../../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).
+Reports: [`a09867b88abcb610b`](../../../sweep-2026-08/raw/a09867b88abcb610b.md), [`aa5f5baaa66cc8bf1`](../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md), [`a3f6ddd86cf882a6d`](../../../sweep-2026-08/raw/a3f6ddd86cf882a6d.md).

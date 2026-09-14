@@ -11,7 +11,7 @@ The search ends when the proof is lived, not argued. Three marks:
 
 1. **The successor of the conventions' knowledge section** — landed: the code, ratified 2026-08-30, alive since through the labs' editions.
 
-2. **The spec tree rewritten under the code** — comprehensible, engaging, and still law-grade.
+2. **[The spec tree](openlight.md#4-the-spec-tree-in-the-finish-line) rewritten under the code** — comprehensible, engaging, and still law-grade.
 
 3. **The proof is the experience**: a senior reader finishes with no unanswerable questions, a fresh session bootstraps and can be trusted, and the author reads without fatigue.
 
@@ -59,7 +59,15 @@ It is machine work and needs nobody's judgment, which is why it is a record of i
 
 [the level beneath](measured.md)
 
-## 7. Notes
+## 7. The project it began in
+
+The study began inside OpenLight, a project building a medium for knowledge, programs and interfaces, and much of what it reads assumes that project. This level gives a reader who arrives without it what they need, and links to OpenLight for depth.
+
+*Written 2026-09-14, when the study moved with the rule to a repository of its own.*
+
+[the level beneath](openlight.md)
+
+## 8. Notes
 
 - **The law is not here.** [The code](../code.md) stands at the arc's root, with [the practice](../poc/practice.md) and [the skill](../poc/skill.md) in the proof of concept beneath it. Each lab ships the edition it ran under, and the ancestor those editions grew from is [the edition of 2026-08-30](code-2026-08-30.md). A claim matures in the labs, enters an edition, and its row retires from the notebook. Git keeps everything that leaves.
 
@@ -67,6 +75,6 @@ It is machine work and needs nobody's judgment, which is why it is a record of i
 
 - **The unit is named brief in the lab editions** (2026-09-01). The handing register won — to brief, to debrief — and brevity became the unit's duty rather than its flaw. Project-wide graduation ([the edition of 2026-08-30](code-2026-08-30.md), [`naming.md`](08-win-driven/08-01-ontology/naming.md)) rides the study's maturation; those files still say fold.
 
-- **The corpus** is the August sweep ([`sweep-2026-08/`](../../sweep-2026-08/)) — bounded, free of engineering load, holding the baseline pair. Its artifacts still await the author's read; [`landscape.md`](../../landscape.md) is kept as ore, to be re-read critically rather than trusted.
+- **The corpus** is the August sweep ([`sweep-2026-08/`](sweep-2026-08/)) — bounded, free of engineering load, holding the baseline pair. Its artifacts still await the author's read; [`landscape.md`](https://github.com/Cwejman/OpenLight/blob/main/@md/spec/research/landscape.md) is kept as ore, to be re-read critically rather than trusted.
 
 - **The sister ground** is hjulverkstan (`~/git/hjulverkstan/wiki/drafts/` — the ladder, the study, the chart). The two searches cross-pollinate; neither is the other's authority.

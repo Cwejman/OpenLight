@@ -97,4 +97,4 @@ Where Datalog genuinely won: static program analysis, and incremental view maint
 
 Each part has precedent; no system was found holding all four of membership-only typing on one primitive, contracts owned rather than published, one-hop permission, and branch-and-commit versioning of the type system itself. The interaction between owner-scoped contracts and branched versioning is where the literature is thinnest and the shipped systems all capitulate — see [`schema-evolution.md`](schema-evolution.md).
 
-Reports: [`abffcf492c6f3d77d`](../../../../../sweep-2026-08/raw/abffcf492c6f3d77d.md), [`a96d8d0c3161e997c`](../../../../../sweep-2026-08/raw/a96d8d0c3161e997c.md).
+Reports: [`abffcf492c6f3d77d`](../../../sweep-2026-08/raw/abffcf492c6f3d77d.md), [`a96d8d0c3161e997c`](../../../sweep-2026-08/raw/a96d8d0c3161e997c.md).

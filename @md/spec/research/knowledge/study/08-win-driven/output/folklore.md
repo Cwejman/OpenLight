@@ -5,7 +5,7 @@ kind: brief
 
 # The numbers not to cite
 
-These are figures a writer about knowledge is likely to meet, which the sweep traced to nothing, or to something other than what they are cited for. The code's second law is why they matter: an unmarked guess read a year later becomes law, and every one of these did. Each brief names the number, what it is attributed to, what it traces to, and what is measured in its place, so a brief under the code never carries one unmarked. It stands on [the organisational-knowledge report](../../../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), [the citation-verification report](../../../../sweep-2026-08/raw/a3f4c332843acf946.md) and [the software-folklore trace](../../../../sweep-2026-08/raw/aec803bcd71ce9745.md), which hold the primary sources and the exact wording behind every item here.
+These are figures a writer about knowledge is likely to meet, which the sweep traced to nothing, or to something other than what they are cited for. The code's second law is why they matter: an unmarked guess read a year later becomes law, and every one of these did. Each brief names the number, what it is attributed to, what it traces to, and what is measured in its place, so a brief under the code never carries one unmarked. It stands on [the organisational-knowledge report](../../sweep-2026-08/raw/abdf5bfa14a7ddd82.md), [the citation-verification report](../../sweep-2026-08/raw/a3f4c332843acf946.md) and [the software-folklore trace](../../sweep-2026-08/raw/aec803bcd71ce9745.md), which hold the primary sources and the exact wording behind every item here.
 
 ## 1. The cost of late change
 

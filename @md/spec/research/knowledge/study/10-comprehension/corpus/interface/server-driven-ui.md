@@ -69,4 +69,4 @@ Spotify's framework is archived and deprecated. Nubank's two frameworks are *gon
 
 The strongest surviving implementation of "a mount is a call the host resolves" is Shopify's **Remote DOM** — a controller that maps remote components to their native implementations over a message channel, with hosts in JavaScript, Kotlin *and* Swift — at 627,451 monthly downloads and active development.
 
-Report: [`a57740ddd62e39ab6`](../../../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).
+Report: [`a57740ddd62e39ab6`](../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).

@@ -55,4 +55,4 @@ All four have an extensible **instance** schema — you may add types, supertags
 
 The two partial counterexamples — Airtable's block view type and Notion's interactive HTML blocks — are both **user-placed sandboxes, not type-matched mounts**, which is the distinction the whole question turns on.
 
-Reports: [`a2252e73e0215b641`](../../../../../sweep-2026-08/raw/a2252e73e0215b641.md), [`a57740ddd62e39ab6`](../../../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).
+Reports: [`a2252e73e0215b641`](../../../sweep-2026-08/raw/a2252e73e0215b641.md), [`a57740ddd62e39ab6`](../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).

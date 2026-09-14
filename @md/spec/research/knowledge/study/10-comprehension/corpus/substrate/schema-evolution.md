@@ -103,4 +103,4 @@ The measured answer comes from Noria (OSDI 2018). With partial state, new views 
 
 So: invalidate eagerly at constant cost, re-derive lazily on read, backfill in the background — with index rows carrying the contract commit they were derived under, so a read can compare and re-derive on mismatch. The stamp is what makes lazy honest, and it costs almost nothing. In a store where every write is a commit, eager fan-out is worse than in a conventional database, because re-deriving N instances writes N commits carrying no intent — permanent history pollution every future time-travel read must scroll past.
 
-Reports: [`ad341d6da8eaac361`](../../../../../sweep-2026-08/raw/ad341d6da8eaac361.md), [`a498dd38f2322a083`](../../../../../sweep-2026-08/raw/a498dd38f2322a083.md), [`a96d8d0c3161e997c`](../../../../../sweep-2026-08/raw/a96d8d0c3161e997c.md).
+Reports: [`ad341d6da8eaac361`](../../../sweep-2026-08/raw/ad341d6da8eaac361.md), [`a498dd38f2322a083`](../../../sweep-2026-08/raw/a498dd38f2322a083.md), [`a96d8d0c3161e997c`](../../../sweep-2026-08/raw/a96d8d0c3161e997c.md).

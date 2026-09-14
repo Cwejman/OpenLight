@@ -53,4 +53,4 @@ Two artefacts are routinely cited as showing that knowledge naturally forms a sh
 
 No study in this literature identifies an optimal document or section length. Wikipedia's "50 kB" is a starting point with a burden of proof attached, corrected in [`folklore.md`](../folklore.md). Nobody has tested whether allowing a reader to skip a level substitutes for writing two versions of the prose for different readers — the adaptivity literature recommends varying assistance by reader knowledge, and the skip-instead-of-fork alternative is simply untested. The one verdict the sweep carries on the forked half is a practitioner's preference rather than evidence, and it is in [`folklore.md`](../folklore.md) §9.
 
-Reports: [`a3f4c332843acf946`](../../../../../sweep-2026-08/raw/a3f4c332843acf946.md), [`adc8fe8e64ae23f70`](../../../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md), [`a583337921a4f7975`](../../../../../sweep-2026-08/raw/a583337921a4f7975.md).
+Reports: [`a3f4c332843acf946`](../../../sweep-2026-08/raw/a3f4c332843acf946.md), [`adc8fe8e64ae23f70`](../../../sweep-2026-08/raw/adc8fe8e64ae23f70.md), [`a583337921a4f7975`](../../../sweep-2026-08/raw/a583337921a4f7975.md).

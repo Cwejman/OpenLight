@@ -41,4 +41,4 @@ All shipping, all repositioning. **NocoDB** 64.7k stars, releases current, compa
 
 Two security notes worth carrying, because they are what happens when generated applications meet production: an actively exploited account-takeover vulnerability in one platform in January 2026, and an unauthenticated remote-code-execution disclosure in another in April 2026.
 
-Reports: [`ace1709b4a562f194`](../../../../../sweep-2026-08/raw/ace1709b4a562f194.md), [`a6a6eb69ff6791915`](../../../../../sweep-2026-08/raw/a6a6eb69ff6791915.md), [`ae0322198c23f4ec2`](../../../../../sweep-2026-08/raw/ae0322198c23f4ec2.md), [`a57740ddd62e39ab6`](../../../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).
+Reports: [`ace1709b4a562f194`](../../../sweep-2026-08/raw/ace1709b4a562f194.md), [`a6a6eb69ff6791915`](../../../sweep-2026-08/raw/a6a6eb69ff6791915.md), [`ae0322198c23f4ec2`](../../../sweep-2026-08/raw/ae0322198c23f4ec2.md), [`a57740ddd62e39ab6`](../../../sweep-2026-08/raw/a57740ddd62e39ab6.md).

@@ -83,7 +83,7 @@ The file `llms.txt`, proposed as an index a site publishes for crawlers, publish
 
 ## 6. Where this stands
 
-Context rot, compaction, disclosure and the harness are [the context-engineering report](../../../../sweep-2026-08/raw/aafbf4f4a32e619af.md). The null results on context files and the representation study are [does documentation help a coding agent](../../../../sweep-2026-08/raw/af750ce80e754223b.md) and [docs for agents](../../../../sweep-2026-08/raw/ab601f5a0087e7fc8.md). Retrieval structure, the crawler file and vendor traffic are [the AI turn in documentation](../../../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md). Skills, typed instructions and the relay study are [the adversarial stress test](../../../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md). Memory and the platform timeline are [the agent-memory delta](../../../../sweep-2026-08/raw/a187277ed3a006fbc.md).
+Context rot, compaction, disclosure and the harness are [the context-engineering report](../../sweep-2026-08/raw/aafbf4f4a32e619af.md). The null results on context files and the representation study are [does documentation help a coding agent](../../sweep-2026-08/raw/af750ce80e754223b.md) and [docs for agents](../../sweep-2026-08/raw/ab601f5a0087e7fc8.md). Retrieval structure, the crawler file and vendor traffic are [the AI turn in documentation](../../sweep-2026-08/raw/a1c816c1f7cbcfdf9.md). Skills, typed instructions and the relay study are [the adversarial stress test](../../sweep-2026-08/raw/aa5f5baaa66cc8bf1.md). Memory and the platform timeline are [the agent-memory delta](../../sweep-2026-08/raw/a187277ed3a006fbc.md).
 
 ## 7. What could not be established
 

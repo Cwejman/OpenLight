@@ -16,7 +16,7 @@ Every shape is computed from the substrate and none is invented, because a pictu
 
 Every figure has a floor, the smallest cell a pointer can hit and an eye can place, and rather than shrink through it a figure shows less: it merges what it cannot draw into one cell and marks that the cell holds more.
 
-That is the gradient turned on a picture, and it is [the design language's rhythm floor](../../../../design.md#rhythm--depth-derived-never-stated-twice) met in a figure instead of in a layout. A figure that is for the whole body may go beneath the floor, and says so where it is described.
+That is the gradient turned on a picture, and it is [the design language's rhythm floor](https://github.com/Cwejman/OpenLight/blob/main/@md/spec/design.md#rhythm--depth-derived-never-stated-twice) met in a figure instead of in a layout. A figure that is for the whole body may go beneath the floor, and says so where it is described.
 
 *Reasoned, 2026-09-13.*
 
@@ -40,7 +40,7 @@ Every widget draws the same briefs from the same sizes, so the brief highlighted
 
 ### 1.5 Ink is spent only where a reader has asked
 
-No widget repeats what is in view, and a mark is spent in proportion to how live the fact behind it is, which is [the design language's measure](../../../../design.md#the-graduated-scale--one-mark-per-live-fact). Colour says only where in the body a thing sits, by the branch it stands under.
+No widget repeats what is in view, and a mark is spent in proportion to how live the fact behind it is, which is [the design language's measure](https://github.com/Cwejman/OpenLight/blob/main/@md/spec/design.md#the-graduated-scale--one-mark-per-live-fact). Colour says only where in the body a thing sits, by the branch it stands under.
 
 *Reasoned, 2026-09-13.*
 

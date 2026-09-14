@@ -1,6 +1,6 @@
 # Method: how this directory came about
 
-*Research register. The chain of custody for the sweep that produced [`raw/`](raw/) (2026-08-26→27), recovered forensically from the session transcript on 2026-08-29 (session `7c9850eb-615c-4ccb-9977-a87825ae42e1`, in the local Claude Code project directory; line numbers below refer to it); one recovered brief was verified byte-for-byte against the transcript. The corpus's two readings are labs in the study, and each carries its own record beside its output (moved there 2026-08-30): [`01-categorical/`](../knowledge/study/01-categorical/method.md) (2026-08-28) and [`02-encounters/`](../knowledge/study/02-encounters/prompt.md) (2026-08-29).*
+*Research register. The chain of custody for the sweep that produced [`raw/`](raw/) (2026-08-26→27), recovered forensically from the session transcript on 2026-08-29 (session `7c9850eb-615c-4ccb-9977-a87825ae42e1`, in the local Claude Code project directory; line numbers below refer to it); one recovered brief was verified byte-for-byte against the transcript. The corpus's two readings are labs in the study, and each carries its own record beside its output (moved there 2026-08-30): [`01-categorical/`](../01-categorical/method.md) (2026-08-28) and [`02-encounters/`](../02-encounters/prompt.md) (2026-08-29).*
 
 ---
 

@@ -65,4 +65,4 @@ Nobody has built a general one *as a shipped product*. The pattern exists and wo
 
 Watch where the pressure is coming from: the interface extension to MCP has a mode where the host registers a component set the server may address by name — a runtime host-side registry whose contract is a name agreement rather than a typed capability description. That is where the need is now surfacing.
 
-Report: [`a458ace67969949f3`](../../../../../sweep-2026-08/raw/a458ace67969949f3.md).
+Report: [`a458ace67969949f3`](../../../sweep-2026-08/raw/a458ace67969949f3.md).
