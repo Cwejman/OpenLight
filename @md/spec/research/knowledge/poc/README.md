@@ -28,3 +28,11 @@ The surface is the interface those two are missing. It reads a body in one lane 
 It is the human side, as the skill is the harness side. Its first reading model was built, used and refused in a day, and its second, specified before it was built, is the one in use.
 
 [the level beneath](surface/README.md)
+
+## 4. Its own repository
+
+The proof of concept is no longer used by one project. OpenLight holds it, Hjulverkstan is taking it up, and a closed-source client began with it the week of 2026-09-07 from a copy of the code, which is the drift the code warns of: two copies quietly become two codes.
+
+So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done, and it waits on one more piece, a skill for sketching.
+
+[the level beneath](repository.md)
