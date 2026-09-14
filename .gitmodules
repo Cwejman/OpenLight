@@ -1,0 +1,3 @@
+[submodule "@md/spec/research/knowledge"]
+	path = @md/spec/research/knowledge
+	url = https://github.com/Cwejman/the-rule.git
