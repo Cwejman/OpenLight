@@ -1,6 +1,7 @@
 ---
 under: the code
 kind: brief
+ratified: the author
 ---
 
 # The code
