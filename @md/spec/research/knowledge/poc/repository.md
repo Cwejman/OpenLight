@@ -20,9 +20,9 @@ Two things tie the arc to OpenLight today, and both are cut here first, so the m
 
 Three of the surface's briefs link to OpenLight's design language, above the arc. The few rules they use are either carried into the surface's own briefs or linked at OpenLight's published address.
 
-The surface's one dependency, marked, is resolved from OpenLight's workspace. The arc carries a package file of its own, naming marked alone, so the surface runs wherever the repository is checked out.
+The surface's dependency, marked, was resolved from OpenLight's workspace. The arc now carries a package file of its own, naming marked and the renderer sketching looks with, so both run wherever the repository is checked out. That tie is cut.
 
-*Seen, by tracing the links that leave the arc, the study aside, and the dependency the surface imports, 2026-09-14.*
+*Seen, by tracing the links that leave the arc, the study aside, and the dependency the surface imports, 2026-09-14; the package file was added the same day, for sketching.*
 
 ## 3. The steps, in order
 
@@ -33,7 +33,7 @@ The order is a claim like any other: each step stands on the ones before it.
 3. Take it back into OpenLight as a submodule at the same path, and read the arc with the surface from there to see nothing broke.
 4. Take it into Hjulverkstan and the closed-source client, where the copy of `code.md` is replaced by the submodule.
 
-*In force, 2026-09-14; images in the surface are done, and the move waits on one more piece, a skill for sketching, taken up first so it is made where the surface it matches is.*
+*In force, 2026-09-14; images in the surface and sketching are taken up, and the move is next.*
 
 ## 4. What is not answered
 

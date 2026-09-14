@@ -29,10 +29,18 @@ It is the human side, as the skill is the harness side. Its first reading model 
 
 [the level beneath](surface/README.md)
 
-## 4. Its own repository
+## 4. Sketching
+
+Prose alone does not show how things connect, and a model asked to draw what it wrote draws badly where it has to measure. Sketching is how a session draws a structure or a flow a brief states, as an SVG in `.img` beside the brief, in the surface's own language.
+
+What is drawn, and how, is prose in a skill; a thin file of code keeps the geometry exact and lets the session look at what it drew. A sketch colours by the surface's roles, so set into the surface it follows the reader's theme and the branch it stands under, and shown anywhere else it is a light image of its own.
+
+[the level beneath](sketching/README.md)
+
+## 5. Its own repository
 
 The proof of concept is no longer used by one project. OpenLight holds it, Hjulverkstan is taking it up, and a closed-source client began with it the week of 2026-09-07 from a copy of the code, which is the drift the code warns of: two copies quietly become two codes.
 
-So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done, and it waits on one more piece, a skill for sketching.
+So the arc leaves OpenLight for a repository of its own, and each project takes it in as a git submodule, pinned and read in place. It is planned and not yet done, and it comes next, now that sketching is taken up.
 
 [the level beneath](repository.md)

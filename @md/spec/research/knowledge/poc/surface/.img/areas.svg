@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="sketch" viewBox="0 0 600 168" width="600" height="168">
+<style id="sketch">
+svg.sketch { font-family: var(--sans, "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif); font-size: 13px; }
+svg.sketch text { fill: var(--ink, #141414); font-weight: calc(400 - var(--thin, 0)); }
+svg.sketch .note { font-size: 11px; }
+svg.sketch .strong { font-weight: calc(600 - var(--thin, 0)); }
+svg.sketch .ground { fill: var(--ground, #ffffff); }
+svg.sketch .stroke-ground { stroke: var(--ground, #ffffff); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-ink { stroke: var(--ink, #141414); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-muted { stroke: var(--muted, #6b6b6b); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-faint { stroke: var(--faint, #a8a8a8); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-wash { stroke: var(--wash, rgb(0 0 0 / .035)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-veil { stroke: var(--veil, rgb(0 0 0 / .05)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-track { stroke: var(--track, rgb(0 0 0 / .08)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-meter { stroke: var(--meter, oklch(62% 0.19 28)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-rim { stroke: var(--rim, rgb(0 0 0 / .08)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-rest { stroke: var(--rest, oklch(88% 0.045 var(--h, 60))); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-door { stroke: var(--door, oklch(74% 0.085 var(--h, 60))); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-on { stroke: var(--on, oklch(42% 0.072 var(--h, 60))); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-lit { stroke: var(--lit, oklch(60% 0.12 var(--h, 60))); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-glow { stroke: var(--glow, oklch(80% 0.08 var(--h, 60))); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-grey { stroke: var(--grey, oklch(90% 0 0)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .stroke-hub { stroke: var(--hub, oklch(92% 0.01 60)); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+svg.sketch .fill-ground { fill: var(--ground, #ffffff); }
+svg.sketch .fill-ink { fill: var(--ink, #141414); }
+svg.sketch .fill-muted { fill: var(--muted, #6b6b6b); }
+svg.sketch .fill-faint { fill: var(--faint, #a8a8a8); }
+svg.sketch .fill-wash { fill: var(--wash, rgb(0 0 0 / .035)); }
+svg.sketch .fill-veil { fill: var(--veil, rgb(0 0 0 / .05)); }
+svg.sketch .fill-track { fill: var(--track, rgb(0 0 0 / .08)); }
+svg.sketch .fill-meter { fill: var(--meter, oklch(62% 0.19 28)); }
+svg.sketch .fill-rim { fill: var(--rim, rgb(0 0 0 / .08)); }
+svg.sketch .fill-rest { fill: var(--rest, oklch(88% 0.045 var(--h, 60))); }
+svg.sketch .fill-door { fill: var(--door, oklch(74% 0.085 var(--h, 60))); }
+svg.sketch .fill-on { fill: var(--on, oklch(42% 0.072 var(--h, 60))); }
+svg.sketch .fill-lit { fill: var(--lit, oklch(60% 0.12 var(--h, 60))); }
+svg.sketch .fill-glow { fill: var(--glow, oklch(80% 0.08 var(--h, 60))); }
+svg.sketch .fill-grey { fill: var(--grey, oklch(90% 0 0)); }
+svg.sketch .fill-hub { fill: var(--hub, oklch(92% 0.01 60)); }
+</style>
+<rect class="ground" width="600" height="168" rx="10"/>
+
+<!-- the left wing: the shape, the lane drawn small, with the viewport over it -->
+<g transform="translate(30 26)">
+  <rect class="fill-veil" x="0" y="20" width="56" height="46" rx="4"/>
+  <rect class="fill-door" x="4" y="2" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="4" y="8" width="38" height="10" rx="1"/>
+  <rect class="fill-door" x="10" y="24" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="10" y="30" width="38" height="8" rx="1"/>
+  <rect class="fill-door" x="10" y="44" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="10" y="50" width="38" height="12" rx="1"/>
+  <rect class="fill-door" x="4" y="72" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="4" y="78" width="38" height="8" rx="1"/>
+  <rect class="fill-grey" x="45" y="78" width="7" height="8" rx="1"/>
+</g>
+
+<!-- the lane: prose in one column, a link in the third line -->
+<g transform="translate(190 26)">
+  <rect class="fill-faint" x="0" y="0" width="112" height="7" rx="2"/>
+  <rect class="fill-track" x="0" y="18" width="220" height="4" rx="2"/>
+  <rect class="fill-track" x="0" y="28" width="220" height="4" rx="2"/>
+  <rect class="fill-track" x="0" y="38" width="58" height="4" rx="2"/>
+  <rect class="fill-door" x="62" y="38" width="54" height="4" rx="2"/>
+  <rect class="fill-track" x="120" y="38" width="100" height="4" rx="2"/>
+  <rect class="fill-track" x="0" y="48" width="146" height="4" rx="2"/>
+  <rect class="fill-faint" x="0" y="66" width="84" height="6" rx="2"/>
+  <rect class="fill-track" x="0" y="82" width="220" height="4" rx="2"/>
+  <rect class="fill-track" x="0" y="92" width="178" height="4" rx="2"/>
+</g>
+
+<!-- the right gutter: beside the link, on its own line, what it leads to -->
+<g transform="translate(420 26)">
+  <line class="stroke-rest" x1="0.5" y1="37" x2="0.5" y2="50"/>
+  <rect class="fill-faint" x="6" y="38" width="56" height="4" rx="2"/>
+  <rect class="fill-track" x="6" y="46" width="70" height="3" rx="1.5"/>
+</g>
+
+<!-- the right wing: the ahead, what the highlighted brief hides -->
+<g transform="translate(514 44)">
+  <rect class="fill-door" x="4" y="0" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="4" y="6" width="38" height="8" rx="1"/>
+  <rect class="fill-door" x="10" y="20" width="22" height="3" rx="1"/>
+  <rect class="stroke-door" x="10.5" y="26.5" width="27" height="17" rx="1.5"/>
+  <rect class="fill-door" x="10" y="50" width="22" height="3" rx="1"/>
+  <rect class="fill-rest" x="10" y="56" width="38" height="6" rx="1"/>
+</g>
+
+<!-- each area's extent, and its name -->
+<g class="fill-track">
+  <rect x="30" y="130" width="56" height="1.5" rx="0.75"/>
+  <rect x="100" y="130" width="80" height="1.5" rx="0.75"/>
+  <rect x="190" y="130" width="220" height="1.5" rx="0.75"/>
+  <rect x="420" y="130" width="80" height="1.5" rx="0.75"/>
+  <rect x="514" y="130" width="56" height="1.5" rx="0.75"/>
+</g>
+<g class="note fill-muted" text-anchor="middle">
+  <text x="58" y="150">wing</text>
+  <text x="140" y="150">gutter</text>
+  <text x="300" y="150" class="strong fill-ink">lane</text>
+  <text x="460" y="150">gutter</text>
+  <text x="542" y="150">wing</text>
+</g>
+</svg>

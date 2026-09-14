@@ -111,6 +111,8 @@ function escapeHtml(s: string): string {
 async function serve(rootArg: string, port: number): Promise<void> {
   const rootDir = dirname(rootFileOf(rootArg));
   const script = await clientScript();
+  // the page a process serves, named, so a page left open across a restart with new code knows to load it
+  const version = `version ${Bun.hash(script).toString(36)}`;
   const listeners = new Set<(s: string) => void>();
   let timer: ReturnType<typeof setTimeout> | undefined;
   // a change to the markdown or to an image the body may hold is a change to the body
@@ -127,6 +129,7 @@ async function serve(rootArg: string, port: number): Promise<void> {
         send = (s) => controller.enqueue(`data: ${s}\n\n`);
         listeners.add(send);
         controller.enqueue(": open\n\n");
+        send(version);
       },
       cancel() {
         listeners.delete(send);
@@ -175,7 +178,7 @@ async function build(rootArg: string, out: string): Promise<void> {
   // every image the body holds as a file is carried inside, as a data address, so the page stays one file; a remote
   // image stays remote, since it may change after the build
   const rootDir = dirname(rootFileOf(rootArg));
-  const images = body.briefs.flatMap((b) => b.body).filter((t) => t.type === "image" && t.asset);
+  const images = body.briefs.flatMap((b) => b.body).filter((t) => t.type === "image" && t.asset && !t.svg);
   images.forEach((t) => (t.src = `data:${imageType(t.asset!)};base64,${readFileSync(join(rootDir, t.asset!)).toString("base64")}`));
   const carried = images.reduce((n, t) => n + t.src!.length, 0);
   writeFileSync(out, page(body, await clientScript()));
@@ -228,6 +231,8 @@ type Tok = {
   caption?: Tok[];
   /** set by the cut on an image block whose text beneath follows a plain line break rather than a backslash */
   soft?: boolean;
+  /** set by the trace on a sketch: its markup, cleaned of anything that could run, to be set into the page */
+  svg?: string;
 };
 
 /** One brief: its place, its face and its own prose. */
@@ -570,7 +575,9 @@ async function trace(rootArg: string): Promise<Body> {
     const size = imageSize(head(abs));
     if (!size) warn(`${said} does not say its size; the page measures it when it loads`);
     const asset = relative(rootDir, abs).split(sep).join("/");
-    return { asset, src: `/asset/${asset.split("/").map(encodeURIComponent).join("/")}?v=${Math.round(statSync(abs).mtimeMs)}`, ...size };
+    // a sketch is set into the page rather than shown as an image, so the page's own palette and type reach it
+    const svg = imageType(abs) === "image/svg+xml" && isSketch(head(abs)) ? cleanSketch(readFileSync(abs, "utf8")) : undefined;
+    return { asset, src: `/asset/${asset.split("/").map(encodeURIComponent).join("/")}?v=${Math.round(statSync(abs).mtimeMs)}`, ...size, ...(svg ? { svg } : {}) };
   };
   await Promise.all(images.map(async ({ tok, file }) => Object.assign(tok, await resolveImage(tok, file))));
 
@@ -694,6 +701,39 @@ function imageSize(b: Uint8Array): Size | null {
   const attr = (name: string) => Number(new RegExp(`\\s${name}\\s*=\\s*["']\\s*([\\d.]+)(px)?\\s*["']`, "i").exec(svg)?.[1] ?? NaN);
   const box = /\sviewBox\s*=\s*["']\s*[-\d.e]+[\s,]+[-\d.e]+[\s,]+([\d.e]+)[\s,]+([\d.e]+)/i.exec(svg);
   return attr("width") > 0 && attr("height") > 0 ? size(attr("width"), attr("height")) : box ? size(Number(box[1]), Number(box[2])) : null;
+}
+
+/** Whether an SVG is a sketch: its root carries the class, which is what the sketching skill writes. */
+const isSketch = (b: Uint8Array): boolean => /<svg\b[^>]*\sclass\s*=\s*["'][^"']*\bsketch\b/i.test(new TextDecoder().decode(b.subarray(0, 8192)));
+
+/** The elements a sketch may hold when it is set into the page: drawing, text and their definitions, and nothing that runs or reaches out. */
+export const SKETCH_ELEMENTS = new Set("svg g defs style title desc rect circle ellipse line polyline polygon path text tspan marker lineargradient radialgradient stop clippath mask pattern use symbol".split(" "));
+
+/**
+ * A sketch's markup, cleaned for the page: only the elements above, no event attributes, no reference that leaves the
+ * file, and no style that fetches. A sketch is written by a session, but its markup is set into the page, so it is
+ * cleaned as though it were not.
+ */
+function cleanSketch(src: string): string {
+  const at = src.search(/<svg\b/i);
+  const external = /url\(\s*(?!["']?#)[^)]*\)|@import[^;]*;?/gi;
+  return new HTMLRewriter()
+    .on("*", {
+      element(el) {
+        if (!SKETCH_ELEMENTS.has(el.tagName)) return void el.remove();
+        for (const [name, value] of el.attributes) {
+          if (/^on/i.test(name) || (/href$/i.test(name) && !value.startsWith("#"))) el.removeAttribute(name);
+          else if (name === "style" && value.replace(external, "none") !== value) el.setAttribute(name, value.replace(external, "none"));
+        }
+      },
+    })
+    .on("style", {
+      text(t) {
+        const kept = t.text.replace(external, "");
+        if (kept !== t.text) t.replace(kept, { html: false });
+      },
+    })
+    .transform(at < 0 ? "" : src.slice(at).replace(/<!--[\s\S]*?-->/g, ""));
 }
 
 /** Every image the body holds as a file, by its path from the root's directory. */
@@ -927,6 +967,8 @@ const BLOCK: Record<string, (t: Tok) => string> = {
     const alt = esc(textOf(t.tokens) || t.text || "");
     const sized = t.width && t.height ? ` width="${t.width}" height="${t.height}" loading="lazy"` : "";
     const caption = t.caption?.length ? `<figcaption class="chrome">${inline(t.caption)}</figcaption>` : "";
+    // a sketch is set into the page, cleaned by the trace, so it reads the page's palette, theme and type
+    if (t.svg) return `<figure class="image sketch">${t.svg.replace(/^<svg\b/i, `<svg role="img" aria-label="${alt}"`)}${caption}</figure>`;
     return t.src
       ? `<figure class="image" data-alt="${alt}"><img src="${esc(t.src)}" alt="${alt}"${sized} decoding="async">${caption}</figure>`
       : `<figure class="image missing"><p class="stray">${alt || "an image"}</p>${caption}</figure>`;
@@ -1383,7 +1425,7 @@ function laidBlocks(): { a: string; top: number; height: number; blocks: { top: 
         return { top: xr.top - c, height: xr.height, kind, width };
       };
       if (b.tagName !== "FIGURE") return [at(b, b.tagName === "H1" || b.tagName === "H2" ? "head" : "para")];
-      const img = b.querySelector("img");
+      const img = b.querySelector("img, svg");
       const caption = b.querySelector("figcaption");
       return [img ? at(img, "image", Math.min(1, img.getBoundingClientRect().width / r.width) || 1) : at(b.firstElementChild ?? b, "para"), ...(caption ? [at(caption, "para")] : [])];
     });
@@ -2666,7 +2708,16 @@ async function start(): Promise<void> {
     drawAdjuncts();
     drawWings();
   });
-  if (inlined === null) new EventSource("/changes").onmessage = async () => setBody(await load());
+  if (inlined === null) {
+    // the first word from a process names the page it serves; a process started again with a different page reloads this
+    // one, and the lane is laid again as it was left, so a page left open never runs code older than its body
+    let version: string | null = null;
+    new EventSource("/changes").onmessage = async (e) => {
+      if (!String(e.data).startsWith("version ")) return setBody(await load());
+      if (version !== null && version !== e.data) location.reload();
+      version = e.data;
+    };
+  }
 }
 
 if (typeof document !== "undefined") start();
@@ -2680,6 +2731,37 @@ if (typeof document !== "undefined") start();
 // the bottom edges. The page is white, or a warm near-black when the theme is
 // dark, one palette with both sides. This part stays with the server, which
 // writes it into the page's head.
+
+/**
+ * The palette: every colour's role once, with its light value and its dark value side by side. A role whose value takes
+ * the branch hue reads it from --h, so it is set on every element and follows the branch the element stands under. A
+ * sketch imports this and falls back to the light side where no page supplies the roles.
+ */
+export const PALETTE: Record<string, [light: string, dark: string]> = {
+  ground: ["#ffffff", "oklch(18.5% 0.005 60)"],
+  ink: ["#141414", "oklch(92% 0.005 60)"],
+  muted: ["#6b6b6b", "oklch(74% 0.005 60)"],
+  faint: ["#a8a8a8", "oklch(55% 0.005 60)"],
+  wash: ["rgb(0 0 0 / .035)", "rgb(255 255 255 / .05)"],
+  veil: ["rgb(0 0 0 / .05)", "rgb(255 255 255 / .07)"],
+  track: ["rgb(0 0 0 / .08)", "rgb(255 255 255 / .13)"],
+  meter: ["oklch(62% 0.19 28)", "oklch(70% 0.14 28)"],
+  rim: ["rgb(0 0 0 / .08)", "rgb(255 255 255 / .1)"],
+  rest: ["oklch(88% 0.045 var(--h))", "oklch(35% 0.04 var(--h))"],
+  door: ["oklch(74% 0.085 var(--h))", "oklch(54% 0.07 var(--h))"],
+  on: ["oklch(42% 0.072 var(--h))", "oklch(84% 0.055 var(--h))"],
+  lit: ["oklch(60% 0.12 var(--h))", "oklch(74% 0.1 var(--h))"],
+  glow: ["oklch(80% 0.08 var(--h))", "oklch(47% 0.06 var(--h))"],
+  grey: ["oklch(90% 0 0)", "oklch(32% 0 0)"],
+  hub: ["oklch(92% 0.01 60)", "oklch(27% 0.01 60)"],
+};
+
+/** The palette as declarations: the roles without a hue, or the roles that take one. */
+const paletteCss = (hued: boolean): string =>
+  Object.entries(PALETTE)
+    .filter(([, [light]]) => light.includes("var(--h)") === hued)
+    .map(([role, [light, dark]]) => `--${role}: light-dark(${light}, ${dark});`)
+    .join("\n  ");
 
 const CSS = `
 /*
@@ -2695,15 +2777,7 @@ const CSS = `
  */
 :root {
   color-scheme: light dark;
-  --ground: light-dark(#ffffff, oklch(18.5% 0.005 60));
-  --ink: light-dark(#141414, oklch(92% 0.005 60));
-  --muted: light-dark(#6b6b6b, oklch(74% 0.005 60));
-  --faint: light-dark(#a8a8a8, oklch(55% 0.005 60));
-  --wash: light-dark(rgb(0 0 0 / .035), rgb(255 255 255 / .05));
-  --veil: light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .07));
-  --track: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .13));
-  --meter: light-dark(oklch(62% 0.19 28), oklch(70% 0.14 28));
-  --rim: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .1));
+  ${paletteCss(false)}
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
@@ -2718,13 +2792,7 @@ const CSS = `
 :root[data-theme="dark"] { color-scheme: dark; --thin: 30; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --thin: 30; } }
 *, ::before, ::after {
-  --rest: light-dark(oklch(88% 0.045 var(--h)), oklch(35% 0.04 var(--h)));
-  --door: light-dark(oklch(74% 0.085 var(--h)), oklch(54% 0.07 var(--h)));
-  --on: light-dark(oklch(42% 0.072 var(--h)), oklch(84% 0.055 var(--h)));
-  --lit: light-dark(oklch(60% 0.12 var(--h)), oklch(74% 0.1 var(--h)));
-  --glow: light-dark(oklch(80% 0.08 var(--h)), oklch(47% 0.06 var(--h)));
-  --grey: light-dark(oklch(90% 0 0), oklch(32% 0 0));
-  --hub: light-dark(oklch(92% 0.01 60), oklch(27% 0.01 60));
+  ${paletteCss(true)}
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -2815,12 +2883,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .brief code { font-family: var(--mono); font-size: .92em; }
 /* an image is rounded and carries a faint rim drawn inside its edge, over its own pixels, so a light image keeps an
    edge on a light ground; an inset shadow would lie beneath the pixels and never show */
-.brief figure.image { margin: 0 0 12px; }
+/* an image or a sketch stands a little further from the prose than paragraphs stand from each other */
+.brief figure.image { margin: 22px 0; }
 .brief figure.image img { display: block; max-width: 100%; height: auto; border-radius: 10px; outline: 1px solid var(--rim); outline-offset: -1px; background: var(--wash); }
 .brief figure.image.broken img { display: none; }
 .brief figure.image.broken::before { content: attr(data-alt); color: var(--muted); }
 /* the text beneath an image is set as the chrome is, quieter than the prose, since it belongs to the image */
 .brief figure.image figcaption { margin-top: 8px; }
+/* a sketch is drawn on the page's own ground, rounded and rimmed as an image is, at its width or the lane's */
+.brief figure.image.sketch svg { display: block; max-width: 100%; height: auto; overflow: visible; border-radius: 10px; outline: 1px solid var(--rim); outline-offset: -1px; }
+.brief figure.image.sketch svg .ground { fill: transparent; }
 .brief figure.image.missing p { margin: 0; }
 .brief .table { overflow-x: auto; margin: 0 0 12px; }
 .brief table { border-collapse: collapse; font-family: var(--sans); font-size: var(--small); line-height: 1.4; }
