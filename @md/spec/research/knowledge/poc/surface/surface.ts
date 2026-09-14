@@ -26,8 +26,8 @@
 // coherent, declarative over imperative, data over logic, pure functions with
 // their side effects kept apart, flat data with one source of truth.
 
-import { readFileSync, existsSync, statSync, writeFileSync, watch } from "node:fs";
-import { resolve, dirname, relative, join, sep } from "node:path";
+import { readFileSync, existsSync, statSync, writeFileSync, watch, openSync, readSync, closeSync } from "node:fs";
+import { resolve, dirname, relative, join, sep, basename } from "node:path";
 import { marked } from "marked";
 
 const PORT = 4141;
@@ -43,7 +43,7 @@ async function run(): Promise<void> {
     process.exit(2);
   }
   if (flag("--check") >= 0) {
-    const body = trace(root);
+    const body = await trace(root);
     console.log(`${body.briefs.length} briefs traced from ${body.root}`);
     body.warnings.forEach((w) => console.log("  " + w));
     return;
@@ -104,17 +104,18 @@ function escapeHtml(s: string): string {
 
 // ## 1.3 Live
 //
-// One process answers three requests: the page, the body as JSON, and a stream
-// that says when a file under the root changed. The body is assembled again
-// whole on any change, which a body this size allows.
+// One process answers four requests: the page, the body as JSON, a stream that
+// says when a file under the root changed, and the images the body holds. The
+// body is assembled again whole on any change, which a body this size allows.
 
 async function serve(rootArg: string, port: number): Promise<void> {
   const rootDir = dirname(rootFileOf(rootArg));
   const script = await clientScript();
   const listeners = new Set<(s: string) => void>();
   let timer: ReturnType<typeof setTimeout> | undefined;
+  // a change to the markdown or to an image the body may hold is a change to the body
   watch(rootDir, { recursive: true }, (_event, name) => {
-    if (name && !String(name).endsWith(".md")) return;
+    if (name && !/\.md$/i.test(String(name)) && !imageType(String(name))) return;
     clearTimeout(timer);
     timer = setTimeout(() => listeners.forEach((send) => send("change")), 120);
   });
@@ -134,17 +135,30 @@ async function serve(rootArg: string, port: number): Promise<void> {
     return new Response(stream, { headers: { "content-type": "text/event-stream", "cache-control": "no-cache" } });
   };
 
-  const body = () => {
-    const b = trace(rootArg);
+  // an image is served only when the last trace reached it, so nothing else under the root is handed out
+  let held = new Set<string>();
+  const retrace = async (): Promise<Body> => {
+    const b = await trace(rootArg);
     b.warnings.forEach((w) => console.warn("  " + w));
-    return Response.json(b);
+    held = new Set(assetsOf(b));
+    return b;
+  };
+  const body = async () => Response.json(await retrace());
+  const asset = (path: string) => {
+    const file = decodeURIComponent(path.slice("/asset/".length));
+    return held.has(file) ? new Response(Bun.file(join(rootDir, file)), { headers: { "cache-control": "no-cache" } }) : new Response("not an image the body holds", { status: 404 });
   };
 
-  const routes: Record<string, () => Response> = { "/body": body, "/changes": changes };
+  await retrace();
+  const routes: Record<string, () => Response | Promise<Response>> = { "/body": body, "/changes": changes };
   Bun.serve({
     port,
     idleTimeout: 0, // the change stream stays open as long as the page does
-    fetch: (req) => (routes[new URL(req.url).pathname] ?? (() => new Response(page(null, script), { headers: { "content-type": "text/html; charset=utf-8" } })))(),
+    fetch: (req) => {
+      const path = new URL(req.url).pathname;
+      if (path.startsWith("/asset/")) return asset(path);
+      return (routes[path] ?? (() => new Response(page(null, script), { headers: { "content-type": "text/html; charset=utf-8" } })))();
+    },
   });
   console.log(`the surface reads ${rootDir}\n  http://localhost:${port}/`);
 }
@@ -156,10 +170,16 @@ async function serve(rootArg: string, port: number): Promise<void> {
 // as \u003c, so a brief containing the closing tag cannot end it early.
 
 async function build(rootArg: string, out: string): Promise<void> {
-  const body = trace(rootArg);
+  const body = await trace(rootArg);
   body.warnings.forEach((w) => console.warn("  " + w));
+  // every image the body holds as a file is carried inside, as a data address, so the page stays one file; a remote
+  // image stays remote, since it may change after the build
+  const rootDir = dirname(rootFileOf(rootArg));
+  const images = body.briefs.flatMap((b) => b.body).filter((t) => t.type === "image" && t.asset);
+  images.forEach((t) => (t.src = `data:${imageType(t.asset!)};base64,${readFileSync(join(rootDir, t.asset!)).toString("base64")}`));
+  const carried = images.reduce((n, t) => n + t.src!.length, 0);
   writeFileSync(out, page(body, await clientScript()));
-  console.log(`${body.briefs.length} briefs from ${body.root} → ${out}`);
+  console.log(`${body.briefs.length} briefs from ${body.root} → ${out}${images.length ? `, ${images.length} images carried inside (${Math.round(carried / 1024)} kB)` : ""}`);
 }
 
 // # 2. How the body is assembled
@@ -197,6 +217,17 @@ type Tok = {
   to?: string;
   /** set by the trace on a link that leaves it: the web, a file outside the body, or a brief not yet written */
   out?: "web" | "outside" | "owed";
+  /** set by the trace on an image it reached: where the page loads it from */
+  src?: string;
+  /** set by the trace on an image that is a file in the body: its path from the root's directory */
+  asset?: string;
+  /** set by the trace on an image whose size it could read: its own size, in pixels */
+  width?: number;
+  height?: number;
+  /** set by the cut on an image block: the text written beneath it in its paragraph */
+  caption?: Tok[];
+  /** set by the cut on an image block whose text beneath follows a plain line break rather than a backslash */
+  soft?: boolean;
 };
 
 /** One brief: its place, its face and its own prose. */
@@ -235,11 +266,13 @@ const slug = (s: string): string =>
     .replace(/[^\p{L}\p{N} _-]/gu, "")
     .replace(/ /g, "-");
 
-/** The text a reader sees in a run of tokens: no syntax, no link targets. */
+/** The text a reader sees in a run of tokens: no syntax, no link targets, and of an image only the text beneath it, since an image is not text. */
 const textOf = (toks: Tok[] = []): string =>
   toks
     .map((t) =>
-      t.type === "space" || t.type === "hr"
+      t.type === "image"
+        ? textOf(t.caption)
+        : t.type === "space" || t.type === "hr"
         ? ""
         : t.type === "table"
           ? textOf(t.header) + (t.rows ?? []).map((r) => textOf(r)).join("")
@@ -270,15 +303,22 @@ const prefixesOf = (address: string): string[] =>
 /** The blocks of a brief's prose: every token that is not spacing. */
 const blocksOf = (b: Brief): Tok[] => b.body.filter((t) => t.type !== "space");
 
-/** Every link token in a run, however deep. */
-const linksIn = (toks: Tok[] = []): Tok[] =>
+/** Every token of a kind in a run, however deep. */
+const tokensIn = (type: string, toks: Tok[] = []): Tok[] =>
   toks.flatMap((t) => [
-    ...(t.type === "link" ? [t] : []),
-    ...linksIn(t.tokens),
-    ...linksIn(t.items),
-    ...linksIn(Array.isArray(t.header) ? t.header : []),
-    ...(t.rows ?? []).flatMap((r) => linksIn(r)),
+    ...(t.type === type ? [t] : []),
+    ...tokensIn(type, t.tokens),
+    ...tokensIn(type, t.caption),
+    ...tokensIn(type, t.items),
+    ...tokensIn(type, Array.isArray(t.header) ? t.header : []),
+    ...(t.rows ?? []).flatMap((r) => tokensIn(type, r)),
   ]);
+
+/** Every link token in a run, however deep. */
+const linksIn = (toks: Tok[] = []): Tok[] => tokensIn("link", toks);
+
+/** A paragraph's inline tokens without the blank text between them. */
+const bare = (t: Tok | undefined): Tok[] => (t?.tokens ?? []).filter((x) => !(x.type === "text" && (x.text ?? "").trim() === ""));
 
 /** Whether a link's target is a web address: only the schemes a page may safely follow. */
 const isWeb = (href: string): boolean => /^(https?:|mailto:)/i.test(href);
@@ -332,10 +372,34 @@ function cut(toks: Tok[]): Cut {
   return out;
 }
 
+/**
+ * An image block: a paragraph that opens with an image, and holds nothing else or the text beneath it on the next line,
+ * stands as the image with that text as its caption, so the page is handed a block of its own kind rather than a
+ * paragraph to look inside. The text beneath follows a backslash, which every renderer breaks the line on; a plain line
+ * break is taken too and marked, since a document renderer runs the text on beside a narrow image. An image anywhere
+ * else stays where it is written.
+ */
+const imageBlocks = (toks: Tok[]): Tok[] =>
+  toks.map((t) => {
+    const inline = t.tokens ?? [];
+    const blank = (x: Tok) => x.type === "text" && (x.text ?? "").trim() === "";
+    const at = inline.findIndex((x) => !blank(x));
+    if (t.type !== "paragraph" || inline[at]?.type !== "image") return t;
+    const after = inline.slice(at + 1);
+    if (after.every(blank)) return inline[at];
+    const hard = after[0].type === "br";
+    const soft = after[0].type === "text" && /^[ \t]*\n/.test(after[0].text ?? "");
+    // text on the image's own line is running text, which the practice forbids, and the paragraph stays as written
+    if (!hard && !soft) return t;
+    const lead = hard ? [] : [{ ...after[0], text: (after[0].text ?? "").replace(/^\s+/, "") }].filter((x) => x.text !== "");
+    const caption = [...lead, ...after.slice(1)];
+    return { ...inline[at], ...(caption.length ? { caption } : {}), ...(soft ? { soft: true } : {}) };
+  });
+
 /** A mount: a paragraph that is nothing but one link, standing last in a brief. */
 function mountOf(body: Tok[]): Tok | null {
   const last = body.findLast((t) => t.type !== "space");
-  const inline = (last?.tokens ?? []).filter((t) => !(t.type === "text" && (t.text ?? "").trim() === ""));
+  const inline = bare(last);
   const link = last?.type === "paragraph" && inline.length === 1 && inline[0].type === "link" ? inline[0] : null;
   return link && link.href && !/^[a-z]+:/i.test(link.href) ? link : null;
 }
@@ -352,7 +416,7 @@ const withoutMount = (body: Tok[]): Tok[] => body.slice(0, body.findLastIndex((t
 // gathers on the way, the briefs, the warnings and the table of addresses,
 // lives in this one function; everything it calls is pure.
 
-function trace(rootArg: string): Body {
+async function trace(rootArg: string): Promise<Body> {
   const rootFile = rootFileOf(rootArg);
   const rootDir = dirname(rootFile);
   const briefs: Brief[] = [];
@@ -361,6 +425,7 @@ function trace(rootArg: string): Body {
   const seen = new Set<string>();
   const addresses = new Set<string>();
   const links: { tok: Tok; file: string }[] = [];
+  const images: { tok: Tok; file: string }[] = [];
   const rel = (abs: string) => relative(rootDir, abs) || "README.md";
   const within = (abs: string) => abs === rootDir || abs.startsWith(rootDir + sep);
   const warn = (s: string) => void warnings.push(s);
@@ -371,7 +436,7 @@ function trace(rootArg: string): Body {
     seen.add(abs);
     if (!existsSync(abs) || statSync(abs).isDirectory()) return { fault: "missing; the mount is skipped" };
     const st = stamped(readFileSync(abs, "utf8"));
-    return st ? { kind: st.front["kind"] ?? "brief", cut: cut(lean(marked.lexer(st.rest) as unknown as Tok[])) } : { fault: "not under the code; the mount is skipped" };
+    return st ? { kind: st.front["kind"] ?? "brief", cut: cut(imageBlocks(lean(marked.lexer(st.rest) as unknown as Tok[]))) } : { fault: "not under the code; the mount is skipped" };
   };
 
   /** A free address for a title under a parent: the slug, suffixed when a sibling already took it. */
@@ -380,6 +445,18 @@ function trace(rootArg: string): Body {
     const free = [base, ...Array.from({ length: 99 }, (_, k) => `${base}-${k + 2}`)].find((a) => !addresses.has(a))!;
     addresses.add(free);
     return free;
+  };
+
+  /**
+   * Gathers a brief's prose for the rewriting after the trace, and says where it breaks the practice's rules for
+   * images: a face is prose, so a brief never opens with an image, and an image stands as a block of its own.
+   */
+  const gather = (body: Tok[], abs: string, file: string, title: string): void => {
+    links.push(...linksIn(body).map((tok) => ({ tok, file: abs })));
+    images.push(...body.filter((t) => t.type === "image").map((tok) => ({ tok, file: abs })));
+    if (body.find((t) => t.type !== "space")?.type === "image") warn(`${file}: "${title}" opens with an image; a face is prose`);
+    if (tokensIn("image", body.filter((t) => t.type !== "image")).length) warn(`${file}: "${title}" holds an image inside running text; an image opens a paragraph of its own, so only its alt text is drawn`);
+    if (body.some((t) => t.type === "image" && t.soft)) warn(`${file}: "${title}" has text beneath an image after a plain line break; end the image's line with a backslash, or a document renderer runs the text on beside the image`);
   };
 
   /** Traces one file's sections under `owner`, in reading order, following each mount as it is met. */
@@ -394,7 +471,7 @@ function trace(rootArg: string): Body {
       const brief: Brief = { address, title, number, written, file, kind, body: s.body, door: s.children.length > 0 };
       briefs.push(brief);
       table.set(`${abs}#${slug(s.heading)}`, address);
-      links.push(...linksIn(s.body).map((tok) => ({ tok, file: abs })));
+      gather(s.body, abs, file, title);
       traceLevel(s.children, brief, abs, file, kind);
       traceMount(brief, s.children.length > 0, abs, file);
     });
@@ -433,7 +510,7 @@ function trace(rootArg: string): Body {
   table.set(rootFile, "");
   table.set(`${rootFile}#${slug(root.title)}`, "");
   r.cut.strays.forEach((s) => warn(`${root.file}: a second title "${s}"; read as prose`));
-  links.push(...linksIn(root.body).map((tok) => ({ tok, file: rootFile })));
+  gather(root.body, rootFile, root.file, root.title);
   traceLevel(r.cut.sections, root, rootFile, root.file, r.kind);
   traceMount(root, r.cut.sections.length > 0, rootFile, root.file);
 
@@ -464,8 +541,163 @@ function trace(rootArg: string): Body {
   };
   links.forEach(({ tok, file }) => Object.assign(tok, resolveLink(tok.href ?? "", file)));
 
+  // ## 2.6 Images are measured
+  //
+  // Every image is given where the page loads it from and, where it can be read,
+  // its own size, so the page lays an image at its size before it has loaded. A
+  // file in the body is read for its header and served by its path. A remote
+  // image is asked for its first bytes, and a size that cannot be had is left to
+  // the page, which measures it when it loads. A file that is missing, or is not
+  // an image, leaves only its alt text.
+  const resolveImage = async (tok: Tok, file: string): Promise<Partial<Tok>> => {
+    const href = tok.href ?? "";
+    const said = `${rel(file)}: the image ${href || "with no source"}`;
+    if (/^https?:/i.test(href)) {
+      const size = await remoteSize(href);
+      if (!size) warn(`${said} could not be measured; the page measures it when it loads`);
+      return { src: href, ...size };
+    }
+    const abs = href && !/^[a-z][a-z0-9+.-]*:/i.test(href) ? resolve(dirname(file), decoded(href)) : "";
+    const fault = !abs || !within(abs) || !existsSync(abs) || statSync(abs).isDirectory() ? "is not a file in the body" : !imageType(abs) ? "is not an image the surface draws" : "";
+    if (fault) {
+      warn(`${said} ${fault}; its alt text stands`);
+      return {};
+    }
+    // the practice keeps an image in a .img folder beside the file that shows it, or beside a folder above it that
+    // covers every file showing it
+    const home = dirname(dirname(abs));
+    if (basename(dirname(abs)) !== ".img" || !(dirname(file) === home || dirname(file).startsWith(home + sep))) warn(`${said} does not stand in a .img folder beside the file or above it`);
+    const size = imageSize(head(abs));
+    if (!size) warn(`${said} does not say its size; the page measures it when it loads`);
+    const asset = relative(rootDir, abs).split(sep).join("/");
+    return { asset, src: `/asset/${asset.split("/").map(encodeURIComponent).join("/")}?v=${Math.round(statSync(abs).mtimeMs)}`, ...size };
+  };
+  await Promise.all(images.map(async ({ tok, file }) => Object.assign(tok, await resolveImage(tok, file))));
+
   return { title: root.title, root: root.file, briefs, warnings, traced: new Date().toISOString() };
 }
+
+// ## 2.7 What an image says of its size
+//
+// An image's size is in its first bytes, and reading it there is a few lines per
+// format, so no library is brought in. These are pure but for reading a file's
+// head and asking a remote image for its own.
+
+type Size = { width: number; height: number };
+
+/** The image formats the page draws, by extension, with the type each is served and carried as. */
+const IMAGE_TYPES: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml", avif: "image/avif" };
+const imageType = (path: string): string | undefined => IMAGE_TYPES[/\.([a-z0-9]+)$/i.exec(path)?.[1].toLowerCase() ?? ""];
+
+const decoded = (href: string): string => {
+  try {
+    return decodeURI(href);
+  } catch {
+    return href;
+  }
+};
+
+/** How far into an image its size is looked for. */
+const HEAD = 512 * 1024;
+
+/** The first bytes of a file, which is where an image says its size. */
+function head(abs: string): Uint8Array {
+  const fd = openSync(abs, "r");
+  try {
+    const bytes = new Uint8Array(Math.min(HEAD, statSync(abs).size));
+    readSync(fd, bytes, 0, bytes.length, 0);
+    return bytes;
+  } finally {
+    closeSync(fd);
+  }
+}
+
+/** Remote sizes, kept a few minutes, since a remote image may change and a live trace runs on every save. */
+const remoteSizes = new Map<string, { at: number; size: Promise<Size | null> }>();
+
+/** A remote image's size, read from as few of its first bytes as it takes; null when it cannot be had. */
+function remoteSize(url: string): Promise<Size | null> {
+  const kept = remoteSizes.get(url);
+  if (kept && Date.now() - kept.at < 5 * 60_000) return kept.size;
+  const size = (async (): Promise<Size | null> => {
+    try {
+      const res = await fetch(url, { headers: { range: `bytes=0-${HEAD - 1}` }, signal: AbortSignal.timeout(5000) });
+      if (!res.ok || !res.body) return null;
+      const reader = res.body.getReader();
+      let bytes = new Uint8Array(0);
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (value) {
+          const next = new Uint8Array(bytes.length + value.length);
+          next.set(bytes);
+          next.set(value, bytes.length);
+          bytes = next;
+        }
+        const found = imageSize(bytes);
+        if (found || done || bytes.length >= HEAD) {
+          reader.cancel().catch(() => {});
+          return found;
+        }
+      }
+    } catch {
+      return null;
+    }
+  })();
+  remoteSizes.set(url, { at: Date.now(), size });
+  return size;
+}
+
+/** An image's size as its own header gives it: PNG, GIF, WebP, JPEG turned as its EXIF says, or SVG; null otherwise. */
+function imageSize(b: Uint8Array): Size | null {
+  const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+  const has = (n: number) => b.length >= n;
+  const ascii = (at: number, s: string) => has(at + s.length) && Array.from(s).every((c, i) => b[at + i] === c.charCodeAt(0));
+  const size = (width: number, height: number): Size | null => (width > 0 && height > 0 ? { width, height } : null);
+  if (ascii(1, "PNG") && has(24)) return size(dv.getUint32(16), dv.getUint32(20));
+  if (ascii(0, "GIF8") && has(10)) return size(dv.getUint16(6, true), dv.getUint16(8, true));
+  if (ascii(0, "RIFF") && ascii(8, "WEBP")) {
+    if (ascii(12, "VP8 ") && has(30)) return size(dv.getUint16(26, true) & 0x3fff, dv.getUint16(28, true) & 0x3fff);
+    if (ascii(12, "VP8L") && has(25)) return size(1 + (((b[22] & 0x3f) << 8) | b[21]), 1 + (((b[24] & 0x0f) << 10) | (b[23] << 2) | ((b[22] & 0xc0) >> 6)));
+    if (ascii(12, "VP8X") && has(30)) return size(1 + (b[24] | (b[25] << 8) | (b[26] << 16)), 1 + (b[27] | (b[28] << 8) | (b[29] << 16)));
+    return null;
+  }
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    // segments follow one another to the frame header; an EXIF orientation of 5 to 8 turns the image a quarter
+    let turned = false;
+    for (let i = 2; has(i + 9) && b[i] === 0xff; ) {
+      const marker = b[i + 1];
+      if (marker === 0xff) {
+        i++;
+        continue;
+      }
+      const len = dv.getUint16(i + 2);
+      if (marker === 0xe1 && ascii(i + 4, "Exif")) {
+        const t = i + 10;
+        const le = ascii(t, "II");
+        const ifd = has(t + 8) ? t + dv.getUint32(t + 4, le) : -1;
+        const count = ifd > 0 && has(ifd + 2) ? dv.getUint16(ifd, le) : 0;
+        for (let e = 0; e < count && has(ifd + 2 + 12 * (e + 1)); e++) {
+          const at = ifd + 2 + 12 * e;
+          if (dv.getUint16(at, le) === 0x0112) turned = dv.getUint16(at + 8, le) >= 5;
+        }
+      }
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        const [w, h] = [dv.getUint16(i + 7), dv.getUint16(i + 5)];
+        return turned ? size(h, w) : size(w, h);
+      }
+      i += 2 + len;
+    }
+    return null;
+  }
+  const svg = /<svg\b[^>]*>/i.exec(new TextDecoder().decode(b.subarray(0, 8192)))?.[0];
+  if (!svg) return null;
+  const attr = (name: string) => Number(new RegExp(`\\s${name}\\s*=\\s*["']\\s*([\\d.]+)(px)?\\s*["']`, "i").exec(svg)?.[1] ?? NaN);
+  const box = /\sviewBox\s*=\s*["']\s*[-\d.e]+[\s,]+[-\d.e]+[\s,]+([\d.e]+)[\s,]+([\d.e]+)/i.exec(svg);
+  return attr("width") > 0 && attr("height") > 0 ? size(attr("width"), attr("height")) : box ? size(Number(box[1]), Number(box[2])) : null;
+}
+
+/** Every image the body holds as a file, by its path from the root's directory. */
+const assetsOf = (body: Body): string[] => body.briefs.flatMap((b) => b.body.flatMap((t) => (t.type === "image" && t.asset ? [t.asset] : [])));
 
 // # 3. How it is drawn
 //
@@ -523,6 +755,8 @@ type Settings = {
   leading: number;
   /** where the reading line stands: always at the middle, or easing onto the opening and the last brief at the ends */
   line: "middle" | "ends";
+  /** what a brief weighs in the figures that weigh: the cost of its text alone, or the experience of it, its images counted as the room they take */
+  weight: "cost" | "experience";
   flick: number;
   /** light, dark, or whichever the system is set to */
   theme: Theme;
@@ -542,6 +776,7 @@ const DEFAULTS: Settings = {
   fade: 8,
   leading: 1.6,
   line: "ends",
+  weight: "cost",
   flick: 1,
   theme: "system",
   headings: "serif",
@@ -566,10 +801,25 @@ const state = {
   scope: "",
 };
 
-/** Everything derived from the body, computed once per body. */
+/** Characters to a line of the lane at the default measure, which is the unit the figures size prose in. */
+const LINE_CHARS = 72;
+
+/** How many of the lane's lines an image stands as at a measure and a line height: its own width, never past the measure, and its own shape; an image of unknown size is taken as wide as the measure and nine sixteenths as tall. */
+const imageLines = (t: Tok, measure: number, leading: number): number => {
+  const w = t.width ?? 16;
+  const h = t.height ?? 9;
+  return ((t.width ? Math.min(w, measure) : measure) * (h / w)) / leading;
+};
+
+/** What a brief's own prose weighs: its text, and with the weight set to experience its images too, as the text that would fill their room at the default measure. */
+const weightOf = (b: Brief): number =>
+  textOf(b.body).length +
+  (state.settings.weight === "experience" ? b.body.reduce((n, t) => n + (t.type === "image" ? imageLines(t, DEFAULTS.measure, 17 * DEFAULTS.leading) * LINE_CHARS : 0), 0) : 0);
+
+/** Everything derived from the body and the weight, computed again when either changes. */
 function indexBody(body: Body): Index {
   const by = new Map(body.briefs.map((b) => [b.address, b]));
-  const own = new Map(body.briefs.map((b) => [b.address, textOf(b.body).length]));
+  const own = new Map(body.briefs.map((b) => [b.address, weightOf(b)]));
   const children = Map.groupBy(
     body.briefs.filter((b) => b.address !== ""),
     (b) => parentOf(b.address),
@@ -671,6 +921,16 @@ const BLOCK: Record<string, (t: Tok) => string> = {
     return `<${tag}${start}>${(t.items ?? []).map((i) => `<li>${blocks(i.tokens)}</li>`).join("")}</${tag}>`;
   },
   code: (t) => `<pre><code>${esc(t.text ?? "")}</code></pre>`,
+  // an image stands at its own size, which the trace read, so the lane is laid before it loads, with the text written
+  // beneath it as its caption; one the trace could not reach leaves its alt text, and its caption still stands
+  image: (t) => {
+    const alt = esc(textOf(t.tokens) || t.text || "");
+    const sized = t.width && t.height ? ` width="${t.width}" height="${t.height}" loading="lazy"` : "";
+    const caption = t.caption?.length ? `<figcaption class="chrome">${inline(t.caption)}</figcaption>` : "";
+    return t.src
+      ? `<figure class="image" data-alt="${alt}"><img src="${esc(t.src)}" alt="${alt}"${sized} decoding="async">${caption}</figure>`
+      : `<figure class="image missing"><p class="stray">${alt || "an image"}</p>${caption}</figure>`;
+  },
   blockquote: (t) => `<blockquote>${blocks(t.tokens)}</blockquote>`,
   hr: () => "<hr>",
   html: (t) => `<p>${esc(t.text ?? "")}</p>`,
@@ -740,11 +1000,12 @@ function articleHtml(b: Brief, g: Grade, after: number): string {
   const [first, ...rest] = blocksOf(b);
   const on = prefixesOf(state.focus).includes(b.address);
   const beneath = beneathCount(b.address);
-  // a folded brief says beneath its face that it opens: a bar per paragraph it hides, and how many briefs lie beneath
+  // a folded brief says beneath its face that it opens: a bar per paragraph it hides, a frame per image, and how many
+  // briefs lie beneath
   const more =
     g === "face" && (rest.length > 0 || beneath > 0)
       ? `<div class="act more chrome" data-fold="${esc(b.address)}">${CHEVRON}<span>open</span>` +
-        (rest.length ? `<span class="bars">${rest.slice(0, 12).map(() => `<i></i>`).join("")}${rest.length > 12 ? `<b>+${rest.length - 12}</b>` : ""}</span>` : "") +
+        (rest.length ? `<span class="bars">${rest.slice(0, 12).map((t) => (t.type === "image" ? `<i class="image"></i>` : `<i></i>`)).join("")}${rest.length > 12 ? `<b>+${rest.length - 12}</b>` : ""}</span>` : "") +
         (beneath ? `<span class="beneath">${beneath} beneath</span>` : "") +
         `</div>`
       : "";
@@ -906,10 +1167,20 @@ function aheadTarget(): string | null {
   return aheadRoot;
 }
 
-/** A block's height in lines of the lane, from its text: a heading, or a paragraph of `n` characters. */
-const linesOf = (n: number): number => (n < 0 ? 1.5 : 0.6 + n / 72);
+/** A block as the ahead draws it: its kind, its height in lines of the lane, and its width as a share of the measure. */
+type ABlock = { kind: "head" | "para" | "image"; lines: number; width: number };
+const HEAD_BLOCK: ABlock = { kind: "head", lines: 1.5, width: 0.6 };
 
-type ARow = { a: string; depth: number; blocks: number[]; hidden: number };
+/** A block of prose as the lane would present it: text sized from its characters, an image at its own size at the lane's measure and its caption beneath as text. */
+function aheadBlocks(t: Tok): ABlock[] {
+  const text = (n: number): ABlock => ({ kind: "para", lines: 0.6 + n / LINE_CHARS, width: 1 });
+  if (t.type !== "image") return [text(textOf([t]).length)];
+  const s = state.settings;
+  const image: ABlock = { kind: "image", lines: 0.6 + imageLines(t, s.measure, 17 * s.zoom * s.leading), width: t.width ? Math.min(1, t.width / s.measure) : 1 };
+  return t.caption?.length ? [image, text(textOf(t.caption).length)] : [image];
+}
+
+type ARow = { a: string; depth: number; blocks: ABlock[]; hidden: number };
 
 function aheadSvg(W: number, H: number): string {
   const target = aheadTarget();
@@ -917,21 +1188,20 @@ function aheadSvg(W: number, H: number): string {
   const ix = state.index!;
   const t = brief(target)!;
   // the rows: the brief itself with the paragraphs its face hides, then everything beneath it, in reading order
-  const own = blocksOf(t).slice(1).map((tok) => textOf([tok]).length);
-  const rows: ARow[] = [{ a: target, depth: 0, blocks: [-1, ...own], hidden: 0 }];
+  const rows: ARow[] = [{ a: target, depth: 0, blocks: [HEAD_BLOCK, ...blocksOf(t).slice(1).flatMap(aheadBlocks)], hidden: 0 }];
   const walk = (parent: string, d: number): void =>
     level(parent).forEach((k) => {
-      rows.push({ a: k.address, depth: d, blocks: [-1, ...blocksOf(k).map((tok) => textOf([tok]).length)], hidden: 0 });
+      rows.push({ a: k.address, depth: d, blocks: [HEAD_BLOCK, ...blocksOf(k).flatMap(aheadBlocks)], hidden: 0 });
       walk(k.address, d + 1);
     });
   walk(target, 1);
   const GAP = { block: 0.35, brief: 1.2 };
-  const totalOf = (rs: ARow[]) => rs.reduce((sum, r) => sum + r.blocks.reduce((x, n) => x + linesOf(n) + GAP.block, 0) + GAP.brief, 0);
+  const totalOf = (rs: ARow[]) => rs.reduce((sum, r) => sum + r.blocks.reduce((x, blk) => x + blk.lines + GAP.block, 0) + GAP.brief, 0);
   // a line of the lane is a couple of pixels here, as in the shape, and the whole must fit the wing
   const scale = (rs: ARow[]) => Math.min(2.4, (H - 8) / Math.max(1, totalOf(rs)));
-  // the ladder keeps the structure: paragraphs while legible, else one block per brief, else the deepest level dropped
-  // and its weight shown as a tail on the brief that holds it, until what is left fits
-  const asBrief = (r: ARow): ARow => ({ ...r, blocks: [-1, r.blocks.slice(1).reduce((x, n) => x + n, 0)] });
+  // the ladder keeps the structure: blocks while legible, else one block per brief as tall as its blocks, else the
+  // deepest level dropped and its weight shown as a tail on the brief that holds it, until what is left fits
+  const asBrief = (r: ARow): ARow => ({ ...r, blocks: [HEAD_BLOCK, { kind: "para", width: 1, lines: r.blocks.slice(1).reduce((x, blk) => x + blk.lines, 0) }] });
   const deepest = Math.max(0, ...rows.map((r) => r.depth));
   const toDepth = (d: number): ARow[] =>
     rows
@@ -958,12 +1228,12 @@ function aheadSvg(W: number, H: number): string {
     let lastY = y;
     let lastH = 1;
     const bars = r.blocks
-      .map((n) => {
-        const bh = Math.max(1.2, linesOf(n) * k - 0.6);
-        const rect = `<rect class="${n < 0 ? "head" : "para"}" x="${x}" y="${y.toFixed(1)}" width="${n < 0 ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${bh.toFixed(1)}" rx="1"/>`;
+      .map((blk) => {
+        const bh = Math.max(1.2, blk.lines * k - 0.6);
+        const rect = blockRect(blk.kind, x, y, Math.max(4, Math.round(SHAPE.bar * blk.width)), bh);
         lastY = y;
         lastH = bh;
-        y += linesOf(n) * k + GAP.block * k;
+        y += blk.lines * k + GAP.block * k;
         return rect;
       })
       .join("");
@@ -1039,12 +1309,13 @@ function settingsHtml(): string {
 }
 
 /** The switches beneath the meters: a setting with a few named values, a row apiece. */
-type Switch = { key: "flick" | "theme" | "headings" | "prose" | "line"; name: string; values: (string | number)[]; labels?: string[] };
+type Switch = { key: "flick" | "theme" | "headings" | "prose" | "line" | "weight"; name: string; values: (string | number)[]; labels?: string[] };
 const SWITCHES: Switch[] = [
   { key: "theme", name: "theme", values: THEMES },
   { key: "headings", name: "headings", values: FACES },
   { key: "prose", name: "prose", values: FACES },
   { key: "line", name: "reading line", values: ["middle", "ends"] },
+  { key: "weight", name: "weight", values: ["cost", "experience"] },
   { key: "flick", name: "flick", values: [1, 0], labels: ["on", "off"] },
 ];
 
@@ -1077,6 +1348,7 @@ function loadSettings(): void {
   if (!FACES.includes(state.settings.headings)) state.settings.headings = DEFAULTS.headings;
   if (!FACES.includes(state.settings.prose)) state.settings.prose = DEFAULTS.prose;
   if (state.settings.line !== "middle" && state.settings.line !== "ends") state.settings.line = DEFAULTS.line;
+  if (state.settings.weight !== "cost" && state.settings.weight !== "experience") state.settings.weight = DEFAULTS.weight;
 }
 const saveSettings = (): void => void localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
 
@@ -1093,14 +1365,27 @@ const shapeWidth = (): number => SHAPE.pad * 2 + 4 + (state.index?.depth ?? 0) *
 /** The width the ahead stands in: its deepest possible row with its tail. */
 const aheadWidth = (): number => SHAPE.pad * 2 + (state.index?.depth ?? 0) * SHAPE.indent + SHAPE.bar + 4 + SHAPE.tail;
 
-/** The lane's briefs and their blocks as laid, in the scroll box's own coordinates. */
-function laidBlocks(): { a: string; top: number; height: number; blocks: { top: number; height: number; head: boolean }[] }[] {
+/** One block drawn small: a heading a short bar, a paragraph a filled block, an image a frame, so no figure passes an image off as prose. */
+const blockRect = (kind: ABlock["kind"], x: number, y: number, w: number, h: number): string =>
+  kind === "image"
+    ? `<rect class="image" x="${(x + 0.5).toFixed(1)}" y="${(y + 0.5).toFixed(1)}" width="${Math.max(1, w - 1)}" height="${Math.max(1, h - 1).toFixed(1)}" rx="1.5"/>`
+    : `<rect class="${kind}" x="${x}" y="${y.toFixed(1)}" width="${w}" height="${h.toFixed(1)}" rx="1"/>`;
+
+/** The lane's briefs and their blocks as laid, in the scroll box's own coordinates; an image's width is its share of the lane's. */
+function laidBlocks(): { a: string; top: number; height: number; blocks: { top: number; height: number; kind: ABlock["kind"]; width: number }[] }[] {
   const c = ui.content.getBoundingClientRect().top;
   return all<HTMLElement>(".brief", ui.lane).map((el) => {
     const r = el.getBoundingClientRect();
-    const blocks = all<HTMLElement>(":scope > *:not(.surface):not(.act), :scope > .surface > *:not(.act)", el).map((b) => {
-      const br = b.getBoundingClientRect();
-      return { top: br.top - c, height: br.height, head: b.tagName === "H1" || b.tagName === "H2" };
+    // a figure is two blocks, the image as a frame at its own width and the caption beneath it as text
+    const blocks = all<HTMLElement>(":scope > *:not(.surface):not(.act), :scope > .surface > *:not(.act)", el).flatMap((b) => {
+      const at = (x: Element, kind: ABlock["kind"], width = 1) => {
+        const xr = x.getBoundingClientRect();
+        return { top: xr.top - c, height: xr.height, kind, width };
+      };
+      if (b.tagName !== "FIGURE") return [at(b, b.tagName === "H1" || b.tagName === "H2" ? "head" : "para")];
+      const img = b.querySelector("img");
+      const caption = b.querySelector("figcaption");
+      return [img ? at(img, "image", Math.min(1, img.getBoundingClientRect().width / r.width) || 1) : at(b.firstElementChild ?? b, "para"), ...(caption ? [at(caption, "para")] : [])];
     });
     return { a: el.dataset.a!, top: r.top - c, height: r.height, blocks };
   });
@@ -1120,20 +1405,35 @@ function shapeSvg(W: number, H: number): string {
   const cells = laid.map((l) => {
     const x = SHAPE.pad + L + depthIn(l.a) * SHAPE.indent;
     const bars = l.blocks
-      .map((b) => `<rect class="${b.head ? "head" : "para"}" x="${x}" y="${(4 + b.top * k).toFixed(1)}" width="${b.head ? Math.round(SHAPE.bar * 0.6) : SHAPE.bar}" height="${Math.max(1.2, b.height * k - 1).toFixed(1)}" rx="1"/>`)
+      .map((b) => blockRect(b.kind, x, 4 + b.top * k, b.kind === "head" ? Math.round(SHAPE.bar * 0.6) : Math.max(4, Math.round(SHAPE.bar * b.width)), Math.max(1.2, b.height * k - 1)))
       .join("");
-    // beside the face a brief tells what it hides, or would hide: a tick per paragraph, then a grey tail as long as the
-    // levels beneath are heavy; drawn when folded, and as a ghost that shows under the pointer when open
+    // beside the face a brief tells what it hides, or would hide: a tick per paragraph and a small frame per image, then
+    // a grey tail as long as the levels beneath are heavy; drawn when folded, and as a ghost under the pointer when open
     const b = brief(l.a);
     const folded = b !== undefined && gradeOf(l.a) === "face";
     const ghost = folded ? "" : " ghost";
-    const paras = b ? Math.max(0, blocksOf(b).length - 1) : 0;
+    const beyond = b ? blocksOf(b).slice(1) : [];
+    const paras = beyond.length;
     const hidden = b && level(l.a).length > 0 ? ix.branch.get(l.a)! - ix.own.get(l.a)! : 0;
     const face = l.blocks[1] ?? l.blocks[0];
     const y = face ? (4 + face.top * k).toFixed(1) : "0";
     const h = face ? Math.max(1.2, face.height * k - 1).toFixed(1) : "1";
-    const ticks = face && b ? Array.from({ length: Math.min(paras, 8) }, (_, i) => `<rect class="tick${ghost}" x="${x + SHAPE.bar + 4 + i * 3}" y="${y}" width="1.6" height="${h}"/>`).join("") : "";
-    const tx = x + SHAPE.bar + 4 + Math.min(paras, 8) * 3 + (paras ? 2 : 0);
+    // the marks keep to the room the shape declares for them, so a brief of many images stops where eight ticks would
+    const t0 = x + SHAPE.bar + 4;
+    let tx = t0;
+    const ticks =
+      face && b
+        ? beyond
+            .map((t) => {
+              const image = t.type === "image";
+              if (tx - t0 + (image ? 5 : 2) > 24) return "";
+              const tick = image ? `<rect class="tick image${ghost}" x="${tx + 0.5}" y="${y}" width="4" height="${h}" rx="1"/>` : `<rect class="tick${ghost}" x="${tx}" y="${y}" width="1.6" height="${h}"/>`;
+              tx += image ? 7 : 3;
+              return tick;
+            })
+            .join("")
+        : "";
+    tx += paras ? 2 : 0;
     const tailW = hidden > 0 ? clamp(3 + Math.sqrt(hidden) / 4, 3, SHAPE.tail) : 0;
     const tail = hidden > 0 && face ? `<rect class="hidden${ghost}" x="${tx}" y="${y}" width="${tailW.toFixed(1)}" height="${h}" rx="1"/>` : "";
     const marksEnd = tx + tailW + (paras || hidden ? 8 : 0);
@@ -1545,7 +1845,8 @@ function drawAdjuncts(): void {
     const widget = widgetOf(area);
     col.innerHTML = "";
     if (!on[area] || widget.kind !== "adjunct") return;
-    const top0 = ui.content.getBoundingClientRect().top;
+    // measured from the column itself, which starts below the room the reading line sets above the lane
+    const top0 = col.getBoundingClientRect().top;
     let floor = 0;
     all<HTMLElement>("article.brief", ui.lane).forEach((article) => {
       const b = brief(article.dataset.a!);
@@ -2106,6 +2407,8 @@ function wire(): void {
       const v = set.dataset.value!;
       const key = set.dataset.set as keyof Settings;
       (state.settings as unknown as Record<string, unknown>)[key] = typeof DEFAULTS[key] === "number" ? Number(v) : v;
+      // what a brief weighs is in the index, so a change of weight indexes the body again
+      if (key === "weight" && state.body) state.index = indexBody(state.body);
       saveSettings();
       return void drawAll();
     }
@@ -2245,6 +2548,40 @@ function wire(): void {
     else if (e.key === "Escape") undo();
   });
 
+  // an image whose size the trace could not read, or a remote one whose shape changed since, takes its own size once it
+  // has loaded, and what stands beside the lane is laid again; one that fails to load leaves its alt text. Only the
+  // shape is compared, since a vector sized by its view box loads at a size the browser picks for it
+  let relaying = 0;
+  const relay = () => {
+    cancelAnimationFrame(relaying);
+    relaying = requestAnimationFrame(() => (alignEnds(), drawAdjuncts(), drawWings()));
+  };
+  ui.lane.addEventListener(
+    "load",
+    (e) => {
+      const img = e.target as HTMLImageElement;
+      if (img.tagName !== "IMG" || !state.body || !img.naturalWidth) return;
+      const size = { width: img.naturalWidth, height: img.naturalHeight };
+      const toks = state.body.briefs.flatMap((b) => b.body).filter((t) => t.type === "image" && t.src === img.getAttribute("src"));
+      if (toks.every((t) => t.width && t.height && Math.abs(t.width / t.height / (size.width / size.height) - 1) < 0.01)) return;
+      toks.forEach((t) => Object.assign(t, size));
+      if (img.hasAttribute("width")) Object.assign(img, size);
+      state.index = indexBody(state.body);
+      relay();
+    },
+    true,
+  );
+  ui.lane.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target as HTMLElement;
+      if (img.tagName !== "IMG") return;
+      img.closest("figure")?.classList.add("broken");
+      relay();
+    },
+    true,
+  );
+
   ui.scroll.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
   // the browser's back and forward, or an address typed, arrive as a change the reader made
   window.addEventListener("hashchange", () => {
@@ -2366,6 +2703,7 @@ const CSS = `
   --veil: light-dark(rgb(0 0 0 / .05), rgb(255 255 255 / .07));
   --track: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .13));
   --meter: light-dark(oklch(62% 0.19 28), oklch(70% 0.14 28));
+  --rim: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .1));
   --serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
   --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
@@ -2449,6 +2787,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .act.less svg { transform: rotate(-90deg); }
 .act .bars { display: inline-flex; gap: 3px; align-items: center; }
 .act .bars i { display: block; width: 9px; height: 3px; border-radius: 1.5px; background: var(--rest); }
+.act .bars i.image { width: 9px; height: 7px; border-radius: 2px; background: none; box-shadow: inset 0 0 0 1.2px var(--rest); }
 .act .bars b { font-weight: calc(500 - var(--thin)); margin-left: 2px; }
 .act.less { margin-top: -6px; }
 .pointing .brief.here:not(.lit):not(.keep) { opacity: calc(1 - var(--dim)); }
@@ -2474,6 +2813,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .brief blockquote { margin: 0 0 12px; padding-left: 16px; border-left: 2px solid var(--rest); color: var(--muted); }
 .brief pre { font-family: var(--mono); font-size: var(--small); line-height: 1.5; background: var(--wash); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 0 0 12px; }
 .brief code { font-family: var(--mono); font-size: .92em; }
+/* an image is rounded and carries a faint rim drawn inside its edge, over its own pixels, so a light image keeps an
+   edge on a light ground; an inset shadow would lie beneath the pixels and never show */
+.brief figure.image { margin: 0 0 12px; }
+.brief figure.image img { display: block; max-width: 100%; height: auto; border-radius: 10px; outline: 1px solid var(--rim); outline-offset: -1px; background: var(--wash); }
+.brief figure.image.broken img { display: none; }
+.brief figure.image.broken::before { content: attr(data-alt); color: var(--muted); }
+/* the text beneath an image is set as the chrome is, quieter than the prose, since it belongs to the image */
+.brief figure.image figcaption { margin-top: 8px; }
+.brief figure.image.missing p { margin: 0; }
 .brief .table { overflow-x: auto; margin: 0 0 12px; }
 .brief table { border-collapse: collapse; font-family: var(--sans); font-size: var(--small); line-height: 1.4; }
 .brief th { text-align: left; font-weight: calc(600 - var(--thin)); padding: 4px 12px 4px 0; border-bottom: 1px solid var(--rest); }
@@ -2515,6 +2863,10 @@ svg.ahead .para { fill: var(--rest); }
 svg.ahead .head { fill: var(--door); }
 svg.ahead .hidden { fill: var(--grey); }
 svg.ahead .cell.lit .para, svg.ahead .cell.lit .head { fill: var(--lit); }
+/* an image is a frame wherever a figure draws it, never a filled block that reads as prose */
+svg.fig .image { fill: none; stroke: var(--door); stroke-width: 1; }
+svg.fig .cell.here .image { stroke: var(--on); }
+svg.fig .cell.lit .image { stroke: var(--lit); }
 .ahead-name { min-height: 1.2em; text-align: center; color: var(--ink); }
 
 svg.shape .hit { fill: transparent; }
@@ -2526,7 +2878,7 @@ svg.shape .cell.lit .para, svg.shape .cell.lit .head { fill: var(--lit); }
 svg.shape .above .head { fill: var(--grey); }
 svg.shape .above.lit .head, svg.shape .above:hover .head { fill: var(--lit); }
 /* only the two regions take the pointer; the marks drawn over them never do */
-svg.shape .head, svg.shape .para, svg.shape .tick, svg.shape .hidden { pointer-events: none; }
+svg.shape .head, svg.shape .para, svg.shape .image, svg.shape .tick, svg.shape .hidden { pointer-events: none; }
 svg.shape .ghost { opacity: 0; transition: opacity .12s; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .ghost { opacity: 1; }
 svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick:not(.ghost), svg.shape .cell:has(.hit[data-press="fold"]:hover) .hidden:not(.ghost) { fill: var(--lit); }
@@ -2538,6 +2890,10 @@ svg.shape .cell.here:has(.hit[data-press="fold"]:hover) .para { fill: var(--door
 svg.shape .cell.here:has(.hit[data-press="fold"]:hover) .head { fill: var(--on); }
 svg.shape .hit[data-press="fold"] { cursor: pointer; }
 svg.shape .tick { fill: var(--grey); }
+svg.shape .tick.image { fill: none; stroke: var(--grey); stroke-width: 1; }
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .tick.image:not(.ghost) { fill: none; stroke: var(--lit); }
+svg.shape .cell:has(.hit[data-press="fold"]:hover) .image { stroke: var(--door); }
+svg.shape .cell.here:has(.hit[data-press="fold"]:hover) .image { stroke: var(--on); }
 svg.shape .hidden { fill: var(--grey); }
 svg.shape .cell.lit .hidden { fill: var(--glow); }
 svg.shape .cursor { fill: var(--veil); pointer-events: none; }

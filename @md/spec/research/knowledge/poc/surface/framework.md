@@ -46,7 +46,7 @@ A row offers only what can stand. An icon whose press would leave its area witho
 
 ## 5. Settings are data, and a figure edits them
 
-The settings are one object of values: the zoom on the prose, the ratio by which each heading register grows over the body, the height of the prose's lines, the lane's measure, the gap between areas, the dim on every brief but the highlighted one, the fade at the edges, the flick, the theme, the face of the headings and the face of the prose, where the reading line stands, and the widget of each area. They apply as style variables and layout facts, and they live in the browser's own storage, never in the address.
+The settings are one object of values: the zoom on the prose, the ratio by which each heading register grows over the body, the height of the prose's lines, the lane's measure, the gap between areas, the dim on every brief but the highlighted one, the fade at the edges, the flick, the theme, the face of the headings and the face of the prose, where the reading line stands, the weight, and the widget of each area. They apply as style variables and layout facts, and they live in the browser's own storage, never in the address.
 
 The settings figure is meters in two rows with switches beneath: each meter a 270 degree arc with rounded ends, the value drawn in a warm red over a faint track, its icon in the middle, and its name and value told on pointing. Dragging up or down turns one, and the wheel steps it. It is a wing widget like any other.
 

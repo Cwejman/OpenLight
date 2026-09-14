@@ -62,7 +62,7 @@ A web address is left as it is, and any other scheme is not followed and is warn
 
 `marked` parses every file, one dependency in the workspace, so none of markdown's grammar is written here. Its tokens are what each brief carries, not HTML, because the drawings need the prose as it is: each paragraph with its own size.
 
-The page renders those tokens with its own small functions, the same ones that give the prose its style. The arc uses few kinds: paragraphs, lists, code, tables, and text with emphasis, code and links inside them.
+The page renders those tokens with its own small functions, the same ones that give the prose its style. The arc uses few kinds: paragraphs, lists, code, tables, images, and text with emphasis, code and links inside them. A paragraph that opens with an image is handed over as an image block, with the text written beneath the image in that paragraph as its caption, so the page meets a kind of its own and never looks inside a paragraph to find one.
 
 *In force, the author's decision, 2026-09-12. That marked carries no dependencies of its own was checked on 2026-09-13, at version 18.*
 
@@ -72,7 +72,19 @@ Every size the page counts or draws is characters of the text a reader sees: no 
 
 The page counts it by walking a brief's tokens and adding up the text they hold, a few lines of its own, so it needs nothing from marked in the browser. A brief's own size is its prose; its branch is that with everything beneath it. Where a session's cost matters, a count of model tokens is shown as the characters divided by four and marked as an estimate.
 
-*In force, the author's decision, 2026-09-12. That marked offers no plain-text rendering of its own is from memory and not checked.*
+An image is not text, so it adds nothing to that count, and the caption beneath it counts as the prose it is. What a figure draws as presented, it draws at the image's own size; what a figure weighs, it weighs by [the weight setting](widgets.md#5-settings), which counts either the cost of the text alone or the room the images take as well.
+
+*In force, the author's decision, 2026-09-12. That marked offers no plain-text rendering of its own is from memory and not checked. Images and the weight setting, the author's, 2026-09-14.*
+
+### 3.6 An image is measured
+
+The trace hands every image block over with where the page loads it from and, where it can be read, its own width and height. So the page lays an image at its size before it has loaded, and nothing beneath it moves when it arrives.
+
+A file in the body is read for its size from its first bytes: PNG, GIF, WebP and JPEG from their headers, a JPEG turned a quarter where its EXIF orientation says so, since a browser draws it turned, and SVG from its width and height or its view box. That is a few lines per format, and no library is brought in. A remote image is asked for its first bytes the same way, and its size is kept a few minutes in a live process, since a trace runs on every save.
+
+A size that cannot be had is left to the page, which takes the image's shape once it has loaded, and so does a remote image whose shape has changed since the trace. Only the shape is compared, since a vector sized by its view box loads at whatever size the browser picks. An image that is missing, lies above the root, or is not a format the page draws leaves its alt text and a warning. The trace also warns where [the practice's rules for images](../practice.md#6-visuals) are broken: a brief that opens with an image, an image inside running text, which is drawn as its alt text alone, text beneath an image after a plain line break rather than a backslash, which is still drawn as the caption, and a file that does not stand in a `.img` folder beside the file showing it or above it. It cannot tell whether a shared image stands in the nearest folder covering every file that shows it, and does not try.
+
+*In force, 2026-09-14, as built; the formats and the EXIF turn were checked against files made for the purpose, and the remote read against one live address.*
 
 ## 4. The address sits after a hash
 
@@ -90,7 +102,7 @@ The address says where a reader stands and not how the lane is laid. Arriving at
 
 ## 5. Live and published differ only in where the body comes from
 
-Live, a process runs against a path in a working tree and answers three requests. The page itself, the body as JSON, and a stream that says when a file under the path has changed, so the client asks for the body again and draws it. The body is assembled again whole on any change, which a body this size allows.
+Live, a process runs against a path in a working tree and answers four requests. The page itself, the body as JSON, a stream that says when a file under the path has changed, so the client asks for the body again and draws it, and the images the body holds. The body is assembled again whole on any change to its markdown or to an image, which a body this size allows. The process reads its own file once, when it starts, so a change to `surface.ts` reaches the page only when the process is started again. An image is served only when the last trace reached it, so the process hands out nothing else under the path, and its address carries the file's modification time, so a changed image is fetched again rather than kept from before.
 
 Published, the same process runs once and writes the page with the body inside it, in a script tag that holds data rather than code:
 
@@ -99,6 +111,8 @@ Published, the same process runs once and writes the page with the body inside i
 ```
 
 The browser never runs that tag, so nothing in a brief can become code. Every `<` in the JSON is written as `\u003c`, since a brief containing the closing tag would otherwise end it early. On start the client reads the tag if it is there, and asks the process for the body if it is not.
+
+Every image the body holds as a file is carried inside the published page as a data address, so the page stays one file. A remote image stays remote, since it may change after the build, and the page takes its new shape if it has.
 
 So the pipeline's whole job is to run the build on each commit and put the one page where it is served.
 
@@ -113,6 +127,8 @@ The page draws from a small shared state and nothing else: the address in focus,
 ### 6.1 The lane is HTML in one scroll box, with its gutters inside
 
 The lane, the gutter on either side of it and the prose between are one scroll box, so the gutters scroll with the text for free. The prose is a column of articles in reading order, each drawn at its grade, and the gutters are columns beside it in which each adjunct is placed at the height of the line it belongs to, pushed down where two would overlap. Folding draws the lane again whole and then scrolls so that the heading of the brief acted on stands where it stood. The way down to the scope stands over the scroll box rather than in it, and the prose's fade clears beneath it.
+
+An image stands at its own width, never wider than the measure, with its caption beneath in the chrome's quieter face, rounded as the code blocks are, with a faint rim drawn just inside its edge so a light image keeps an edge on a light ground. The rim is an outline pulled inward, since it is painted over the image's pixels, where an inset shadow would lie beneath them and never show.
 
 The focus is found on every scroll: the article under the reading line, or the nearest above it. The line stands at the middle of the viewport, or, easing to the ends, on the opening at the top and on the last brief at the foot, each end eased to the middle over a third of a screen of scrolling. A move to a brief finds the scroll that brings the brief to the line by halving, since the line moves with the scroll. When the line eases to the ends, the room above and below the lane is set each time the lane is laid, so the opening's heading and the last block stand level with the shape's first and last cells; the shape's scale depends on that room, so it is settled in a few steps. When it changes, the page's address is replaced without entering the history, and the widgets that depend on the focus draw again.
 
@@ -176,6 +192,6 @@ Git belongs where the surface needs history rather than files: resolving a link 
 
 ## 10. What is not settled yet
 
-Whether a file's status travels with its briefs, which waits until a widget needs it; its kind already does, since a record's level says so. Where the published page stands beside the wiki the repository already publishes. And the trials the lane still names: the flick, and which gesture folds best. The fade, the floor of the ahead and the meters were settled in use, each where it is described.
+Whether a file's status travels with its briefs, which waits until a widget needs it; its kind already does, since a record's level says so. Where the published page stands beside the wiki the repository already publishes. Whether an image may stand inside a sentence, which the practice forbids until it is answered. How large the published page may grow with its images carried inside, since nothing yet warns of it. And the trials the lane still names: the flick, and which gesture folds best. The fade, the floor of the ahead and the meters were settled in use, each where it is described.
 
 *Open, 2026-09-13; the trials brought up to date on 2026-09-14.*

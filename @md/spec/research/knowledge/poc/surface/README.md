@@ -20,7 +20,7 @@ Both of those are bought by refusing more. This builds no new substrate and no n
 
 The surface is given a path in a working tree and never reads above it, so a repository, a folder inside one, or a single file are all valid roots and the root is the body.
 
-It digests only what [the stamp](../practice.md#9-a-file-says-it-is-under-the-code) declares to be knowledge, which is what lets a directory be onboarded a file at a time. So the surface needs no knowledge of harnesses at all: whatever wants to be read writes itself into the substrate first.
+It digests only what [the stamp](../practice.md#9-a-file-says-it-is-under-the-code) declares to be knowledge, which is what lets a directory be onboarded a file at a time. So the surface needs no knowledge of harnesses at all: whatever wants to be read writes itself into the substrate first. An image is not stamped, and needs no stamp: it is drawn because a stamped brief shows it, and a file no brief shows is never read.
 
 What it finds there it does not interpret. What counts as a brief, and what nests beneath it, is [the practice's answer](../practice.md#1-the-medium): a brief is a file or a section in one, a folder is a holon whose brief is its entry, and a level is what stands beneath one brief.
 

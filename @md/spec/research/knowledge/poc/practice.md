@@ -23,7 +23,7 @@ Headings are numbered, and the numbers nest with the headings: 1, then 1.1 and 1
 
 ## 3. The surface is declared by position
 
-The heading and the first paragraph after it are the face of a brief, and nothing marks them: no italics, no bold, no blockquote. Position is the mark, so a renderer can style the surface without the author annotating it, and one fact is not written in two homes. The price is that position must be reliable: a brief never opens with a list, a table or a quote. The first thing after a heading is always the prose that carries the understanding, and a bullet list follows the paragraph that needs it. Reasoned.
+The heading and the first paragraph after it are the face of a brief, and nothing marks them: no italics, no bold, no blockquote. Position is the mark, so a renderer can style the surface without the author annotating it, and one fact is not written in two homes. The price is that position must be reliable: a brief never opens with a list, a table, a quote or an image. The first thing after a heading is always the prose that carries the understanding, and a bullet list follows the paragraph that needs it. Reasoned.
 
 Bulleted and numbered lists carry a blank line between items, so they read as raw markdown. Whether a long bullet may open in bold is open: bold is the only up-signal markdown has and it fails at scale, and it would put the surface in a second home beside position.
 
@@ -49,9 +49,20 @@ What may be removed is what nothing living stands on, and the test reads from th
 
 ## 6. Visuals
 
-Prose alone does not show how things connect, and a page of it gives the eye no rest, so the practice uses visuals in two ways, neither yet built. The first is visualization: a drawing of a structure or a flow, generated from what the text says. For now it is drawn in characters inside a code block, the least effort that still shows a shape. The hypothesis for the real thing is one JavaScript file that is itself a skill: it holds a few reusable components in one coherent style, and a session composes an SVG from them, through JSX or through plain functions, which of the two is underexplored. Mermaid is not the answer: its syntax is nodes and edges, and its output is neither broad enough nor pleasing enough to live beside prose. Reasoned, a hypothesis.
+Prose alone does not show how things connect, and a page of it gives the eye no rest, so the practice uses visuals in two ways, the first not yet built. The first is visualization: a drawing of a structure or a flow, generated from what the text says. For now it is drawn in characters inside a code block, the least effort that still shows a shape. The hypothesis for the real thing is one JavaScript file that is itself a skill: it holds a few reusable components in one coherent style, and a session composes an SVG from them, through JSX or through plain functions, which of the two is underexplored. Mermaid is not the answer: its syntax is nodes and edges, and its output is neither broad enough nor pleasing enough to live beside prose. Reasoned, a hypothesis.
 
 The second use is the image in an artful sense, as a blog post uses one: breathing space, an art direction held across a body of writing, a painting placed where the text carries the meaning it shows, so the eye gets a visual aid and the page gets air. Not in the code, which is a manifesto and stays unlittered, but in the knowledge written under it, as projects take it up. Preferred.
+
+An image opens a paragraph of its own and is never inside a sentence, so a reader and a program both meet it as a block beside the prose rather than as a word in it. It never opens a brief, since the face is prose. *Preferred, the author's, 2026-09-14; whether an image may stand inside a sentence is open, and forbidden until it is answered.*
+
+The text an image needs is written beneath it, in the same paragraph: the image's line ends with a backslash, and the next line is a sentence or two saying what the image is. Position is the mark, as it is for the face, so nothing styles it. The backslash is what makes every renderer break the line, where a plain line break runs the text on beside a narrow image in a document renderer such as GitHub's. The text belongs to the image and not to the prose, so the prose around it reads whole without the image, as a brief reads whole without a link it offers. Where the image is not the writer's, that text says whose it is and links its source's page, as any source is [cited](#4-links-and-citations), and names the licence where the licence asks to be named. The alt text describes the image for a reader who cannot see it, and the title is left empty, since no reader reliably sees it. *Preferred, the author's, 2026-09-14; the line breaks were checked in GitHub's renderer the same day. Prose before the image introducing it was tried first and refused, since it leaned on the image being there.*
+
+```markdown
+![Two women bend over a small child between them, holding its hands](.img/rembrandt-two-women-teaching-a-child-to-walk.jpg)\
+Rembrandt, [two women teaching a child to walk](https://commons.wikimedia.org/wiki/File:Rembrandt_-_Benesch_0421.jpg), in red chalk.
+```
+
+An image is hosted where it is shown or linked where it lives. One the writer keeps is committed in a `.img` folder beside the file that shows it and linked relatively, so it moves with its brief and stays out of the listing of the briefs themselves; it is part of the tree, never a build's output. One shown from files in several folders is kept in the `.img` of the folder that covers them all and never above it, as a brief many stand on is kept [by the same rule](#5-files). A remote image is linked at its address, knowing it may change after the brief that shows it was written, and a writer who needs it to hold still hosts a copy instead. *Preferred, the author's, 2026-09-14, from the repository's own header and footer, kept in `.img` beside the root entry.*
 
 ## 7. Reading and moving by script
 
