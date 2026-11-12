@@ -1,5 +1,15 @@
 # OpenLight
 
+> **OpenLight has ended, and the work goes on in [glass](https://github.com/Cwejman/glass).** What is here is still valuable, and glass carries much of it, but it no longer holds authority.
+
+OpenLight was begun at the start of 2026, after a small repository of questions about how inference works. Engineering intuition and principle said that the way harnesses and inference are done today is not right. Its purpose was real but not yet concrete: to lay a new kind of foundation, from a vision of what can be built on the right primitives. The vision was strong, but the brickwork of that foundation stayed abstract. OpenLight was built bottom up and never written top down, and the question was always where organic effort was best spent. There came a degree of exhaustion, and the work moved on.
+
+[The rule](https://github.com/Cwejman/the-rule) came next, as a process philosophy. It opened ontology as a central topic: of systems, and of how they integrate with language models. It began to uncover the core: the philosophy of why things are as they are behind the primitives, and how they meet the process when ontological understanding stands at the centre. With it came the holon and the holarchy. The rule is a deliberate compromise to bring held capability to existing workflows in the authors workplace.
+
+[Glass](https://github.com/Cwejman/glass) is not so much about the knowledge the rule wrote. It is simply starting on the foundation from the right angle, grounded in the experience OpenLight and the rule gave. It has much to learn in the specifics, but holds much of the vision clearly, and the vision is that much can be built on it, quite fast. OpenLight and glass are project names; where the work finally lives is not yet decided.
+
+---
+
 ![header](.img/header.png)
 
 > Image from the first pilot (archived)
